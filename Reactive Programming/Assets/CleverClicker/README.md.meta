@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e4b73bff4e016cd4ea612cd70c9d5686
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 345670
+  packageName: Clever Clicker
+  packageVersion: 1.1.0
+  assetPath: Assets/CleverClicker/README.md
+  uploadId: 862250
