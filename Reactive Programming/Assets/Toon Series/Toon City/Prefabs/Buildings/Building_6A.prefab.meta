@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 87f7dbd41407940beb3351113ce27522
+labels:
+- Building
+- Market
+- Shop
+timeCreated: 1498489104
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_6A.prefab
+  uploadId: 920136

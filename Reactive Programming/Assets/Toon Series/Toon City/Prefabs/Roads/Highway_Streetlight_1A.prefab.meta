@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d0a8b8c8fdb8d4d0694ad8df28c99360
+labels:
+- Highway
+- road
+timeCreated: 1499260237
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Highway_Streetlight_1A.prefab
+  uploadId: 920136

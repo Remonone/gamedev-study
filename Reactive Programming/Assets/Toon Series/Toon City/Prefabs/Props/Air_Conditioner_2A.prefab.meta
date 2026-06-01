@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: ea548b9f060e44007926db867bc1ca55
+labels:
+- object
+- prop
+- ventilation
+timeCreated: 1499209785
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Air_Conditioner_2A.prefab
+  uploadId: 920136

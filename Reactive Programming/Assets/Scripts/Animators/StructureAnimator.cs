@@ -10,26 +10,29 @@ using UnityEngine;
 
 namespace Animators {
     public class StructureAnimator : MonoBehaviour {
-        [SerializeField] private GameObject[] _structures;
 
-        private Dictionary<StructureType, GameObject> _structuresByType;
+        private Dictionary<StructureType, StructureConfig> _structuresByType;
         
         private Vector3 _scale = new Vector3(1f, 0.8f, 1f);
+
+        readonly struct StructureConfig {
+            public readonly GameObject Reference;
+            public readonly Vector3 Scale;
+            
+            public StructureConfig(GameObject reference, Vector3 scale) {
+                Reference = reference;
+                Scale = scale;
+            }
+        }
         
         private void Awake() {
-            _structuresByType = new Dictionary<StructureType, GameObject>();
+            _structuresByType = new Dictionary<StructureType, StructureConfig>();
 
-            foreach (var structure in _structures) {
-                if(ReferenceEquals(structure, null) || !structure.TryGetComponent<IStructure>(out _)) {
-                    continue;
-                }
-                
+            foreach (var structure in FindObjectsByType<Structure>(FindObjectsSortMode.InstanceID)) {
                 if(!structure.TryGetComponent<IStructure>(out var structureType)) {
                     continue;
                 }
-
-                Debug.Log("Adding a structure: " + structureType.Type + " to the dictionary");
-                _structuresByType.Add(structureType.Type, structure);
+                _structuresByType.Add(structureType.Type, new StructureConfig(structure.gameObject, structure.transform.localScale));
             }
         }
 
@@ -39,13 +42,12 @@ namespace Animators {
             service.StructureInteraction
                 .Where(interaction => _structuresByType.ContainsKey(interaction.Structure))
                 .Select(interaction => _structuresByType[interaction.Structure])
-                .Where(structure => structure != null)
-                .Subscribe(HandleClick);
+                .Subscribe(HandleClick).AddTo(this);
         }
         
-        private void HandleClick(GameObject structure) {
-            var initialScale = structure.transform.localScale;
-            structure.transform.DOScale(Vector3.Scale(initialScale, _scale), 0.1f).SetEase(Ease.OutQuad).OnComplete(() => structure.transform.DOScale(initialScale, 0.1f).SetEase(Ease.InQuad));
+        private void HandleClick(StructureConfig structure) {
+            var reference = structure.Reference;
+            reference.transform.DOScale(Vector3.Scale(structure.Scale, _scale), 0.1f).SetEase(Ease.OutQuad).OnComplete(() => reference.transform.DOScale(structure.Scale, 0.1f).SetEase(Ease.InQuad));
         }
     }
 }

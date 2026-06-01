@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f6651d93ff63a4f15884fcef98e57254
+labels:
+- object
+- prop
+timeCreated: 1499213395
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Cable_Pole_1A.prefab
+  uploadId: 920136

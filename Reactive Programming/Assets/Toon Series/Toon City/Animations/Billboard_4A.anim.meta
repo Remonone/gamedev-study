@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: ff2ee3fe3788f4943b47303b71916235
+timeCreated: 1523400566
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Animations/Billboard_4A.anim
+  uploadId: 920136

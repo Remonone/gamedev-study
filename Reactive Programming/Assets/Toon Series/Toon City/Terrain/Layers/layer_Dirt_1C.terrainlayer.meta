@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 00df0f9f488c1804c8287db54d1ed2c3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8574412962073106934
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Terrain/Layers/layer_Dirt_1C.terrainlayer
+  uploadId: 920136

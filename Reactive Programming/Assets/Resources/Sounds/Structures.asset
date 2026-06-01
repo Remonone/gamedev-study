@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 022770d39d6943e4a8dd3440655fc0f1, type: 3}
+  m_Name: Structures
+  m_EditorClassIdentifier: Assembly-CSharp::Bases.Objects.StructureSoundConfig
+  Clips:
+  - Type: 0
+    Cue:
+      Clip: {fileID: 8300000, guid: 47e5694b66ad2e645a6421ad75d18ae0, type: 3}
+  - Type: 1
+    Cue:
+      Clip: {fileID: 8300000, guid: bf4950668859ea040b6fed4a52150b5c, type: 3}
+  - Type: 2
+    Cue:
+      Clip: {fileID: 8300000, guid: 304c80f6ecbca6740aa0ce4775ff5a6a, type: 3}
+  - Type: 4
+    Cue:
+      Clip: {fileID: 8300000, guid: 6e94e7e1c82149e40845db58cd48e700, type: 3}
+  - Type: 3
+    Cue:
+      Clip: {fileID: 8300000, guid: b2c4d33e34afd2f4b9d9f000a6a4b848, type: 3}
+  - Type: 5
+    Cue:
+      Clip: {fileID: 8300000, guid: df39c98f57e664a4ea49a7ac4f52fd78, type: 3}

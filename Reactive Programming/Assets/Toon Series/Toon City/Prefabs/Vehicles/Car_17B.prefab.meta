@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 702194060871045d89182e1354365af4
+labels:
+- bus
+- car
+- coach
+timeCreated: 1499301721
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_17B.prefab
+  uploadId: 920136

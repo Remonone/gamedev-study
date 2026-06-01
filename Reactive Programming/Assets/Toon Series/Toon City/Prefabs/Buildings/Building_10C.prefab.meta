@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 17a9492f2758945b1a3535b4bc0ac2cf
+labels:
+- Building
+- Hotel
+timeCreated: 1499684953
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_10C.prefab
+  uploadId: 920136

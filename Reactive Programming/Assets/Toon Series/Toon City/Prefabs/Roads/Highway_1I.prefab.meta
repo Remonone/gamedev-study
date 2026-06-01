@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: dd958696ee40d49209992b270b51100e
+labels:
+- Highway
+- Road
+timeCreated: 1524148077
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Highway_1I.prefab
+  uploadId: 920136

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 9ee169e630ea647f9ac6794dad1d089a
+labels:
+- car
+- sedan
+- vehicle
+timeCreated: 1499301694
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_14D.prefab
+  uploadId: 920136

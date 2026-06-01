@@ -26,13 +26,11 @@ namespace Views {
         }
 
         private void Start() {
-            _controls.DocumentsCount.Subscribe(count => documentsLabel.text = $"Documents: {count}").AddTo(this);
-            _controls.CasesCount.Subscribe(count => casesLabel.text = $"Cases: {count}").AddTo(this);
-            _controls.FiresCount.Subscribe(count => firesLabel.text = $"Fires: {count}").AddTo(this);
-            _controls.ProtectionsCount.Subscribe(count => protectionsLabel.text = $"Protections: {count}").AddTo(this);
-            _controls.CuresCount
-            .Subscribe(count => curesLabel.text = $"Cures: {count}")
-            .AddTo(this);
+            _controls.DocumentsCount.Subscribe(count => documentsLabel.text = $"{count}").AddTo(this);
+            _controls.CasesCount.Subscribe(count => casesLabel.text = $"{count}").AddTo(this);
+            _controls.FiresCount.Subscribe(count => firesLabel.text = $"{count}").AddTo(this);
+            _controls.ProtectionsCount.Subscribe(count => protectionsLabel.text = $"{count}").AddTo(this);
+            _controls.CuresCount.Subscribe(count => curesLabel.text = $"{count}").AddTo(this);
         }
      }
 }

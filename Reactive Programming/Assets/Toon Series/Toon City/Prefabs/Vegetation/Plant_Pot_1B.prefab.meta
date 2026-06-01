@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: dd74169d7a4e449d88f2da66a12bdfc2
+labels:
+- pot
+- vegetation
+timeCreated: 1499270504
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vegetation/Plant_Pot_1B.prefab
+  uploadId: 920136

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8743ea7aee9c2644cba65b33b4555925
+timeCreated: 1572030342
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Pavement/Modern_Arch_1B.prefab
+  uploadId: 920136

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 05b3138a0279146268d71858ad9d187c
+labels:
+- Brownstone
+- Building
+timeCreated: 1498468065
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_2A.prefab
+  uploadId: 920136

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 7e174beeef7db4a4985fe7970aaa02b0
+labels:
+- object
+- prop
+- stairs
+timeCreated: 1499215088
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Emergency_Staircase_1A.prefab
+  uploadId: 920136

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a5cbb3f1c453043d68aa31ba6d3d2ad5
+labels:
+- road
+timeCreated: 1499343842
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Parking_1B.prefab
+  uploadId: 920136

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: d57aa083c610b43d2ba03ec01bc9f856
+labels:
+- road
+timeCreated: 1499289573
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Traffic_Cone_2B.prefab
+  uploadId: 920136

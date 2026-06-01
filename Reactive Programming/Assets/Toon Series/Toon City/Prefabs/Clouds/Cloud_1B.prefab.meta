@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 852644751e3db4cbbb5ccf5312f3f774
+labels:
+- clouds
+timeCreated: 1491426891
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Clouds/Cloud_1B.prefab
+  uploadId: 920136

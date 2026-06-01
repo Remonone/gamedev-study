@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 35bd74207b17e4c818cda826e2001286
+labels:
+- object
+- prop
+timeCreated: 1499261371
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Mailbox_2A.prefab
+  uploadId: 920136

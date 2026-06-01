@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e82aa448dc8537f43863bd1f48c239d1
+timeCreated: 1571851229
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Advertising/Wall_Pannel_1B.prefab
+  uploadId: 920136

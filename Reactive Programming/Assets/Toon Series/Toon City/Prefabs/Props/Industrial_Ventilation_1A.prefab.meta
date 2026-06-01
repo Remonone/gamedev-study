@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bebb23bce6e08483ba133bbcee3b01bd
+labels:
+- object
+- prop
+timeCreated: 1499261156
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Industrial_Ventilation_1A.prefab
+  uploadId: 920136

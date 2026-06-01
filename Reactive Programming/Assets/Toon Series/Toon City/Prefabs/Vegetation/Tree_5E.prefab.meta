@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: b11d4455dc7ed4840b5741ebbfc90db3
+labels:
+- tree
+- vegetation
+timeCreated: 1524151954
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vegetation/Tree_5E.prefab
+  uploadId: 920136

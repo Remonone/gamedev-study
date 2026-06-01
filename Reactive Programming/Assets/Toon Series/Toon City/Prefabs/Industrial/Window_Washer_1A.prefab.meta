@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6bb04a9d5f71a4f8fb0002074a28d63b
+labels:
+- object
+- prop
+timeCreated: 1499293038
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Window_Washer_1A.prefab
+  uploadId: 920136

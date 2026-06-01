@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: d2a4f46a3cb4e4572b0e6bc830f1bcd0
+labels:
+- object
+- prop
+- scaffolding
+timeCreated: 1499272272
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Scaffolding_1B.prefab
+  uploadId: 920136

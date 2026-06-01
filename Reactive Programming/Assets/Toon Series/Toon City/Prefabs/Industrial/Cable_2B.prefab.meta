@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a248be25738ae47feb9bd4a3b1e43da7
+labels:
+- object
+- prop
+timeCreated: 1499213323
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Cable_2B.prefab
+  uploadId: 920136

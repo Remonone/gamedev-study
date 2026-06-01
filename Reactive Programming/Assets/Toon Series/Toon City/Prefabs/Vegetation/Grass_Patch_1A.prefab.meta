@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e5203c7b31e354ee6983ea4814113714
+labels:
+- vegetation
+timeCreated: 1499259746
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vegetation/Grass_Patch_1A.prefab
+  uploadId: 920136

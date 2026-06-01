@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 4c17f7301944b41049b429ceada18e0f
+labels:
+- antenna
+- object
+- prop
+timeCreated: 1499210206
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Antenna_1B.prefab
+  uploadId: 920136

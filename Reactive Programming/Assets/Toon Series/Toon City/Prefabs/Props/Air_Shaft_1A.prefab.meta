@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 6ae53fb7a7b9e4dfeab6c078ecb4896b
+labels:
+- object
+- prop
+- ventilation
+timeCreated: 1499802473
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Air_Shaft_1A.prefab
+  uploadId: 920136

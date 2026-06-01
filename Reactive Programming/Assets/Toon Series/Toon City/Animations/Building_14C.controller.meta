@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 609296daedf52455f875c273886e22bf
+timeCreated: 1494877693
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Animations/Building_14C.controller
+  uploadId: 920136

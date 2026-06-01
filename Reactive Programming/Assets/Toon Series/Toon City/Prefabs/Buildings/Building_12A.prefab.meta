@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: f7d66ac0862674ccab811de6e702546f
+labels:
+- Building
+- Modern
+- Tower
+timeCreated: 1498497523
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_12A.prefab
+  uploadId: 920136

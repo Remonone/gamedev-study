@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 02f5eb7c98cd14644a96bbc0b8ced1b5
+labels:
+- road
+timeCreated: 1499289395
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Toll_Booth_1A.prefab
+  uploadId: 920136

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f2823004ba6e1487d9155d17c5de0ece
+labels:
+- road
+- sign
+timeCreated: 1499285517
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Streetsign_1A.prefab
+  uploadId: 920136

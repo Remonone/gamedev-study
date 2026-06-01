@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 6cfc315d32286254d962d05d1647b87e
+timeCreated: 1571783335
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Pavement/Pavement_1S_4x4.prefab
+  uploadId: 920136

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: df3ee02bc1acc4455ae0b72eaba1f498
+labels:
+- bush
+- vegetation
+timeCreated: 1499214332
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vegetation/Bush_2D.prefab
+  uploadId: 920136

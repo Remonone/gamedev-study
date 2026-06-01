@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: f6bf466eaf2af4fd2837e778be38f8dc
+labels:
+- concrete
+- mixer
+- transport
+- truck
+- vehicle
+timeCreated: 1495791432
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_4D.prefab
+  uploadId: 920136

@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: e9110a221dbd8499094f5f8442a45d13
+labels:
+- car
+- compact
+- coupe
+- hatchback
+- tuning
+- vehicle
+timeCreated: 1499301663
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_7E.prefab
+  uploadId: 920136

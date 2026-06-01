@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 80b72f9a8fe124418b0006b07d199c7a
+labels:
+- flower
+- vegetation
+timeCreated: 1499215566
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vegetation/Flower_2D.prefab
+  uploadId: 920136

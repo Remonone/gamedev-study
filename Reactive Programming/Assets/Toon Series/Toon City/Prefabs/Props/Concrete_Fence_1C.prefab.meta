@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 34290ad4c24e9446cbd4a39e1d94593c
+labels:
+- object
+- prop
+timeCreated: 1499214747
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Concrete_Fence_1C.prefab
+  uploadId: 920136

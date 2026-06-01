@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 75ea4ee1b6b8b4ae1a3e83a9442e32e7
+labels:
+- barrel
+- object
+- prop
+timeCreated: 1499210940
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Barrel_1B.prefab
+  uploadId: 920136

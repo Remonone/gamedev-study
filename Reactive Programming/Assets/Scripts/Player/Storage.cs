@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Components;
 using Components.Instances;
@@ -5,7 +6,10 @@ using R3;
 using Types;
 
 namespace Player {
-    public class Storage : IService {
+    public class Storage : IService, IDisposable {
+        
+        private CompositeDisposable _disposable { get; } = new();
+        
         private Dictionary<StructureType, ReactiveProperty<long>> _structureMoney = new();
 
         public ReactiveProperty<long> this[StructureType type] {
@@ -15,7 +19,7 @@ namespace Player {
         public Storage() {
             InitStructures();
             var structureClick = ServiceLocator.Instance.GetService<StructureClickService>();
-            structureClick.StructureInteraction.Subscribe(interaction => AddMoney(interaction.Structure, interaction.InteractionResult));
+            structureClick.StructureInteraction.Subscribe(interaction => AddMoney(interaction.Structure, interaction.InteractionResult)).AddTo(_disposable);
         }
 
         private void InitStructures() {
@@ -26,6 +30,10 @@ namespace Player {
 
         public void AddMoney(StructureType type, long amount){
             _structureMoney[type].Value += amount;
+        }
+
+        public void Dispose() {
+            _disposable.Dispose();
         }
     }
 }

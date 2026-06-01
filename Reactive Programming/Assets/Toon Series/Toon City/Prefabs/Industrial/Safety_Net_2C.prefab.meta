@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 08d4ebb54ffe44c7fae11e1e654321a7
+labels:
+- net
+- object
+- prop
+timeCreated: 1499271439
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Safety_Net_2C.prefab
+  uploadId: 920136

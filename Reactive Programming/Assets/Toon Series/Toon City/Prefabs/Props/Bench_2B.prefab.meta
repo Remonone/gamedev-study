@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 914e97c1ab6c24cbcbaaf4edc52b5a65
+labels:
+- object
+- prop
+timeCreated: 1499213936
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Bench_2B.prefab
+  uploadId: 920136

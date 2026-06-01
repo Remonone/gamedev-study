@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 259bd4f7f3d594011a619a260483d917
+timeCreated: 1492563082
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Animations/Air_Vent_1A.controller
+  uploadId: 920136

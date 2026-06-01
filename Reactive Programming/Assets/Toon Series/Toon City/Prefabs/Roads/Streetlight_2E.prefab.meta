@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 5f74c1a4339b14f3dbb3480c655c7c75
+labels:
+- light
+- road
+timeCreated: 1499273300
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Streetlight_2E.prefab
+  uploadId: 920136

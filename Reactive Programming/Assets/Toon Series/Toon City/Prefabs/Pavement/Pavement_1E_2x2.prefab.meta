@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d9185476de41c4bd1a5686c8033756ab
+labels:
+- floor
+- pavement
+timeCreated: 1499263084
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Pavement/Pavement_1E_2x2.prefab
+  uploadId: 920136

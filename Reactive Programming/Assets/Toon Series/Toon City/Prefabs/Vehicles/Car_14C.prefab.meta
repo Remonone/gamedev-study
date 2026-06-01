@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 2f36652a93ba44cc1a5e79b7809b2662
+labels:
+- cab
+- car
+- taxi
+- vehicle
+timeCreated: 1499301689
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_14C.prefab
+  uploadId: 920136

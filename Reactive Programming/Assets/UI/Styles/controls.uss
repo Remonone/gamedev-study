@@ -1,0 +1,17 @@
+:root {
+}
+
+#StorageContent #Storage_Item {
+    padding-right: 5px;
+}
+
+#StorageContent Label {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}

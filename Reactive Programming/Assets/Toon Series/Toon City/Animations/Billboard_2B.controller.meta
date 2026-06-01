@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f77c8895b63cd450188d8c40b25b146c
+timeCreated: 1495454006
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Animations/Billboard_2B.controller
+  uploadId: 920136

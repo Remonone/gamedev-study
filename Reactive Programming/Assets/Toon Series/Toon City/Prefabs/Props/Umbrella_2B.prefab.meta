@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 21d7fe106205a483f9aa8c3988724a41
+labels:
+- object
+- prop
+- umbrella
+timeCreated: 1499292052
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Umbrella_2B.prefab
+  uploadId: 920136

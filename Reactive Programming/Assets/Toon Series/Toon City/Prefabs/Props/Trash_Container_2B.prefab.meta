@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 71f3babc179974efa8a31b828f088a12
+labels:
+- object
+- prop
+- trash
+timeCreated: 1499290471
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Trash_Container_2B.prefab
+  uploadId: 920136

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: a30bb3f1634154428824acbdbc6e7503
+labels:
+- garbage
+- truck
+- vehicle
+timeCreated: 1499294218
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_4E.prefab
+  uploadId: 920136

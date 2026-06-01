@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8d6ebcfe3b6e48246bb11afbd667a135
+timeCreated: 1572293116
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Rock_Cluster_2C.prefab
+  uploadId: 920136

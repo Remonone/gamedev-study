@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 734d9118011a24d4ebdc1ed338cd9247
+labels:
+- icecream
+- truck
+- vehicle
+timeCreated: 1495751540
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_10D.prefab
+  uploadId: 920136

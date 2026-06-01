@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 90f9e85dabbe34f17b67379c0955203e
+labels:
+- Art
+- Statue
+timeCreated: 1524151924
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Statue_1B.prefab
+  uploadId: 920136

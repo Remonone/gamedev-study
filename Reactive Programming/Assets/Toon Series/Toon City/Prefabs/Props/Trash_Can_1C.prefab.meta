@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 159d62efe3cca480b8d261500f34fbbf
+labels:
+- object
+- prop
+- trash
+timeCreated: 1499290106
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Trash_Can_1C.prefab
+  uploadId: 920136

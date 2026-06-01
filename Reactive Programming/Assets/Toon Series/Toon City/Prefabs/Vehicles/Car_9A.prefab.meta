@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 9c89b8165b9d54e90a47b1663eefb92f
+labels:
+- ambulance
+- car
+- vehicle
+timeCreated: 1487772522
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Car_9A.prefab
+  uploadId: 920136

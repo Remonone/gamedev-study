@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: f528e13f59dca444d8b99a66597661c5
+labels:
+- object
+- pipe
+- prop
+timeCreated: 1499270145
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Industrial/Pipe_2D.prefab
+  uploadId: 920136

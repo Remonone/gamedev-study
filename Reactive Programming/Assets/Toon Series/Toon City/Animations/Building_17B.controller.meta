@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ba857a02fbd8a49949a9bc354f23aa70
+timeCreated: 1497995800
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Animations/Building_17B.controller
+  uploadId: 920136

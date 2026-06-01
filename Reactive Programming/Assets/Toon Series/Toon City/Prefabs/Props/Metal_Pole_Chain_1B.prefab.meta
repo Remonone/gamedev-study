@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 73c308f59e2ff43ee83660aa05e27ba5
+labels:
+- fence
+- object
+- prop
+timeCreated: 1499261807
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Metal_Pole_Chain_1B.prefab
+  uploadId: 920136

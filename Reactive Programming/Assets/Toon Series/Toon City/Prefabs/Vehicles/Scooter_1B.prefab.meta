@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 08d1123ddce16435f8ab6b93b2bd9dad
+labels:
+- moped
+- scooter
+- vehicle
+timeCreated: 1524151872
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Vehicles/Scooter_1B.prefab
+  uploadId: 920136

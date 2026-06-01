@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c44656ec4de3c4b0fb8de986c266cf0b
+timeCreated: 1498467255
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Particles/Smoke_Grey.prefab
+  uploadId: 920136

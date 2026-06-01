@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 8f9b7a79db969409faf748e8f20f8ab1
+labels:
+- Advert
+- Billboard
+- Pannel
+timeCreated: 1499211106
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Advertising/Billboard_1B.prefab
+  uploadId: 920136

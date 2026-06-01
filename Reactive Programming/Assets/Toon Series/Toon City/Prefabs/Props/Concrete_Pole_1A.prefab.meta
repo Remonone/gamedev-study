@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 77d16563d7d2840ddbf37ae9a06a2691
+labels:
+- object
+- prop
+timeCreated: 1499214735
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Concrete_Pole_1A.prefab
+  uploadId: 920136

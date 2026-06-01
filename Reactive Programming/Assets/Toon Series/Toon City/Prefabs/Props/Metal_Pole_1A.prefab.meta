@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 27a8fc54dbdf845d78d8bb1acd9907c6
+labels:
+- fence
+- object
+- prop
+timeCreated: 1499261811
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Metal_Pole_1A.prefab
+  uploadId: 920136

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: cdce91fecec434846a978fdc2c5390b3
+labels:
+- road
+timeCreated: 1499260813
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Impact_Barrel_1A.prefab
+  uploadId: 920136

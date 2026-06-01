@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a460f005b41e0488d8d782eec01227c6
+labels:
+- floor
+- pavement
+timeCreated: 1499263052
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Pavement/Pavement_1B_4x4.prefab
+  uploadId: 920136

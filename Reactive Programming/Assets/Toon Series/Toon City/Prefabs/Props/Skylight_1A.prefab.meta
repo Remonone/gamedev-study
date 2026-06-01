@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9cc92a678d3d5428a8bc239e15e62751
+labels:
+- object
+- prop
+timeCreated: 1499271949
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Skylight_1A.prefab
+  uploadId: 920136

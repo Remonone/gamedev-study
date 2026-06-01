@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b9e6b782fd1cc0d4ebcd9c19daea4397
+timeCreated: 1571780168
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_22A.prefab
+  uploadId: 920136

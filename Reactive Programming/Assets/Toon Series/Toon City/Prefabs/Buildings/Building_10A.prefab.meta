@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0632814996e2d4cd2a96f7c5a1bb3633
+labels:
+- Building
+- Shop
+timeCreated: 1498491693
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_10A.prefab
+  uploadId: 920136

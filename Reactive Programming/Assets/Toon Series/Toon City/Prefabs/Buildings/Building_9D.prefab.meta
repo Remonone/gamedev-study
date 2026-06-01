@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8acbc098937824a5aa0822a361b24023
+labels:
+- Building
+- Shop
+timeCreated: 1499539486
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Buildings/Building_9D.prefab
+  uploadId: 920136

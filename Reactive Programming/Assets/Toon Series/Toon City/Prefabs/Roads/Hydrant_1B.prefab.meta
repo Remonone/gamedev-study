@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ada154bfaab1e4eb1a42a5be20a95302
+labels:
+- road
+timeCreated: 1499260732
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Hydrant_1B.prefab
+  uploadId: 920136

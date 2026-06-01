@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6973ed0f1d82f406495f46761f00c00a
+labels:
+- Highway
+- road
+timeCreated: 1499260486
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Roads/Highway_Streetsign_1C.prefab
+  uploadId: 920136

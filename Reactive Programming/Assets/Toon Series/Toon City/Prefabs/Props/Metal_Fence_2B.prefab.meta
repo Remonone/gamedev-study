@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 227c3f09670ee4171a8df2bf4547cc1a
+labels:
+- fence
+- object
+- prop
+timeCreated: 1499261731
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Props/Metal_Fence_2B.prefab
+  uploadId: 920136

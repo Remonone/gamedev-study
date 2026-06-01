@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1b66b7e47a4a24b5ab5d2fd2cf855c06
+labels:
+- Lettering
+- Pannel
+timeCreated: 1500677175
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 88379
+  packageName: Toon City
+  packageVersion: 1.4.6
+  assetPath: Assets/Toon Series/Toon City/Prefabs/Advertising/Title_2B.prefab
+  uploadId: 920136
