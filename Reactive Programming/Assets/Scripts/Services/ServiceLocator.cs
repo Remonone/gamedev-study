@@ -30,17 +30,13 @@ namespace Components {
         public void RegisterService(IService service) {
             if(service == null) throw new ArgumentNullException(nameof(service));
             var key = service.GetType();
-            if (_services.ContainsKey(key)) {
+            if (!_services.TryAdd(key, service)) {
                 throw new ArgumentException($"Service of type {key.Name} is already registered.");
             }
-            _services[key] = service;
         }
 
         public void UnregisterService<T>() where T : IService {
             var key = typeof(T);
-            if (!_services.ContainsKey(key)) {
-                return;
-            }
             _services.Remove(key);
         }
     }
