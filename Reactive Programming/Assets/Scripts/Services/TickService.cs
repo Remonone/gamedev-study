@@ -1,10 +1,12 @@
 using System;
+using Newtonsoft.Json;
 using Player;
 using R3;
+using Save;
 using UnityEngine;
 
 namespace Services {
-    public class TickService : IService, IDisposable {
+    public class TickService : IService, IDisposable, ISaveable {
         private readonly CompositeDisposable _disposable = new();
 
         private readonly EconomyService _economyService;
@@ -40,6 +42,19 @@ namespace Services {
 
         public void Dispose() {
             _disposable?.Dispose();
+        }
+        
+        private long CurrentTime => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        public string SaveKey => "Ticks";
+        public string Save() {
+            return JsonConvert.SerializeObject(CurrentTime);
+        }
+
+        public void Load(object data) {
+            long lastSave = JsonConvert.DeserializeObject<long>((string)data);
+            long currentTime = CurrentTime;
+            Tick(currentTime - lastSave);
         }
     }
 }

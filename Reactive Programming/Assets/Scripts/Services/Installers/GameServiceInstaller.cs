@@ -31,33 +31,34 @@ namespace Components {
 
             var buildingDefinitions = FetchBuildingDefinitions();
             
-            ServiceLocator.Instance.RegisterService(storage);
-            ServiceLocator.Instance.RegisterService(new StructureClickService(storage));
-            ServiceLocator.Instance.RegisterService(new StructureSoundResolver(_structureSoundConfig));
+            RegisterService(storage);
+            RegisterService(new StructureClickService(storage));
+            RegisterService(new StructureSoundResolver(_structureSoundConfig));
             
             _buildingWatcherService = new BuildingWatcherService(buildingDefinitions);
-            ServiceLocator.Instance.RegisterService(_buildingWatcherService);
+            RegisterService(_buildingWatcherService);
             
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
-            ServiceLocator.Instance.RegisterService(invalidationService);
+            RegisterService(invalidationService);
             
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
-            ServiceLocator.Instance.RegisterService(buildingUpgradeService);
+            RegisterService(buildingUpgradeService);
 
             _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService);
-            ServiceLocator.Instance.RegisterService(_economyService);
+            RegisterService(_economyService);
             
             var tickService = new TickService(_economyService, _buildingWatcherService, storage);
-            ServiceLocator.Instance.RegisterService(tickService);
-            
-            InitViews();
+            RegisterService(tickService);
+
+            var saveService = new SaveService(SaveManager);
+            RegisterService(saveService);
         }
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {
             return Resources.LoadAll<BuildingDefinition>("Buildings").ToList();
         }
 
-        private void InitViews() {
+        protected override void AfterInstallation() {
             var areaClickerViewModel = new AreaClickerViewModel();
             _areaWatcherView.Init(areaClickerViewModel);
             

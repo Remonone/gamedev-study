@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using R3;
+using Save;
 using Types;
 
 namespace Player {
-    public class Storage : IService {
+    public class Storage : IService, ISaveable {
         
         
         private Dictionary<StructureType, ReactiveProperty<long>> _structureMoney = new();
@@ -26,5 +28,22 @@ namespace Player {
             _structureMoney[type].Value += amount;
         }
 
+        public string SaveKey => "Storage";
+        public string Save() {
+            var data = new Dictionary<string, long>();
+            foreach (var structure in _structureMoney) {
+                data.Add(structure.Key.ToString(), structure.Value.CurrentValue);
+            }
+            return JsonConvert.SerializeObject(data);
+        }
+
+        public void Load(object data) {
+            if (data == null) return;
+            
+            var json = JsonConvert.DeserializeObject<Dictionary<string, long>>((string)data);
+            foreach (var structure in _structureMoney) {
+                structure.Value.Value = json[structure.Key.ToString()];
+            }
+        }
     }
 }
