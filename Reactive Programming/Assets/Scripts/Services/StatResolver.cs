@@ -6,7 +6,7 @@ using Types.Economy;
 using UnityEngine;
 
 namespace Economy {
-    public class StatResolver : IService {
+    public class StatResolver {
         public ComputedStats Resolve(BuildingState building, List<StatModifier> modifiers) {
             var result = new ComputedStats {
                 Income = ResolveOne(building.GetLevelBasedValue(StatType.Income), StatType.Income, modifiers),

@@ -15,3 +15,50 @@
     padding-bottom: 0;
     padding-left: 0;
 }
+
+TabView #unity-tab-view__content-container {
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+Tab ScrollView {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    flex-grow: 1;
+    min-height: 100%;
+}
+
+Tab #unity-tab__content-container {
+}
+
+TabView #unity-tab-view__header-container {
+    flex-grow: 1;
+}
+
+TabView #unity-tab__header {
+    flex-grow: 1;
+    background-color: rgb(216, 216, 246);
+    -unity-text-align: upper-left;
+    -unity-font-style: normal;
+}
+
+Tab #unity-tab__content-container {
+    flex-shrink: 0;
+    min-height: 100%;
+}
+
+VisualElement > #VisualElement > VisualElement > #BuildingList > .unity-tab > .unity-scroll-view--vertical > #unity-content-and-vertical-scroll-container {
+    flex-shrink: 0;
+}
+
+VisualElement > #VisualElement > VisualElement > #BuildingList > .unity-tab > .unity-scroll-view--vertical > #unity-content-and-vertical-scroll-container > #unity-content-viewport {
+    flex-shrink: 0;
+}
+
+Tab {
+    min-height: 100%;
+}

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Bases.Buildings;
 using Economy.Conditions;
@@ -10,6 +11,8 @@ namespace Economy.Rules {
         [SerializeField] private string ruleId;
         [SerializeField] private ConditionAsset[] conditions;
         [SerializeField] private ModifierDefinition[] modifiers;
+        
+        public IReadOnlyList<ModifierDefinition> Modifiers => modifiers;
 
         public bool IsActive(SessionContext context, BuildingState building) {
             if (conditions == null || conditions.Length == 0) return true;
@@ -32,7 +35,7 @@ namespace Economy.Rules {
                 Operation = def.Operation,
                 Value = def.Value,
                 Priority = def.Priority,
-                SourceId = ruleId,
+                ModifierId = ruleId,
                 Target = def.Target
             });
         }

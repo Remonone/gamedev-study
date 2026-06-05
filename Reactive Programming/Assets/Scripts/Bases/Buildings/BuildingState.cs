@@ -1,5 +1,5 @@
 using Types.Economy;
-using Utils.Properties;
+using UnityEngine;
 
 namespace Bases.Buildings {
     public sealed class BuildingState {
@@ -7,12 +7,15 @@ namespace Bases.Buildings {
         public int Level;
         public ComputedStats Cache;
         public bool IsDirty;
+        public double LastTimeActivated;
         
         public BuildingState(BuildingDefinition definition, int level) {
             Definition = definition;
             Level = level;
             IsDirty = true;
+            LastTimeActivated = Time.timeAsDouble;
         }
+        
 
         public float GetLevelBasedValue(StatType statType) {
             switch (statType) {

@@ -996,7 +996,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Components.GameServiceInstaller
   _areaWatcherView: {fileID: 49401509}
+  _document: {fileID: 1509096125}
   _structureSoundConfig: {fileID: 11400000, guid: 6f61fe8c889bbba7e943a4e7b5fbdd09, type: 2}
+  _buildingItemView: {fileID: 6267371284000321228, guid: 9c0529bd2aa9713f3a568a0ba1c890a8, type: 3}
+  _controlsView: {fileID: 1509096126}
 --- !u!1 &1005688104
 GameObject:
   m_ObjectHideFlags: 0
@@ -1439,7 +1442,6 @@ GameObject:
   - component: {fileID: 1509096127}
   - component: {fileID: 1509096126}
   - component: {fileID: 1509096125}
-  - component: {fileID: 1509096124}
   m_Layer: 0
   m_Name: Controls
   m_TagString: Untagged
@@ -1447,18 +1449,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1509096124
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1509096123}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bad99669630f4ba28852df1d0b8cbd6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Views.Models.Controls
 --- !u!114 &1509096125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1494,7 +1484,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0509855c9d79fd6188dc24b9e89df221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Views.StatisticsView
-  _controls: {fileID: 1509096124}
   _controlsDocument: {fileID: 1509096125}
 --- !u!4 &1509096127
 Transform:

@@ -7,7 +7,8 @@ namespace Components.Instances {
         
         private readonly Storage _storage;
         
-        public Subject<StructureInteraction> StructureInteraction { get; } = new();
+        private readonly Subject<StructureInteraction> _structureInteraction = new();
+        public Observable<StructureInteraction> StructureInteraction => _structureInteraction;
         
         
         public StructureClickService(Storage storage) {
@@ -16,7 +17,7 @@ namespace Components.Instances {
         
         public void HandleStructureInteraction(StructureType structure) {
             _storage.AddMoney(structure, 1);
-            StructureInteraction.OnNext(new StructureInteraction { Structure = structure, InteractionResult = 1 });
+            _structureInteraction.OnNext(new StructureInteraction { Structure = structure, InteractionResult = 1 });
         }
     }
 }

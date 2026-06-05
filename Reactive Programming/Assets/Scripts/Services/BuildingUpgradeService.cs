@@ -1,4 +1,4 @@
-using Bases.Buildings;
+using UnityEngine;
 
 namespace Services {
     public class BuildingUpgradeService : IService {
@@ -15,6 +15,7 @@ namespace Services {
             var building = _buildingWatcherService.GetBuildingState(name);
             if (building == null) return;
             building.Level += levels;
+            building.LastTimeActivated = Time.timeAsDouble;
             _invalidationService.InvalidateBuilding(name);
         }
     }

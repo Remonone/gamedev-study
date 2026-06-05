@@ -5,7 +5,7 @@ namespace Types.Economy {
         public ModifierOp Operation;
         public float Value;
         public int Priority;
-        public string SourceId;
+        public string ModifierId;
         public ModifierTarget Target;
     }
 }
