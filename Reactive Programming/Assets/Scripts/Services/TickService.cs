@@ -1,5 +1,5 @@
 using System;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Player;
 using R3;
 using Save;
@@ -47,14 +47,19 @@ namespace Services {
         private long CurrentTime => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         public string SaveKey => "Ticks";
-        public string Save() {
-            return JsonConvert.SerializeObject(CurrentTime);
+        public int Priority => -100;
+
+        public JToken Save() {
+            return new JObject(new JProperty("LastTick", CurrentTime));
         }
 
-        public void Load(object data) {
-            long lastSave = JsonConvert.DeserializeObject<long>((string)data);
+        public void Load(JToken data) {
+            long lastSave = data.Value<long>("LastTick");
             long currentTime = CurrentTime;
             Tick(currentTime - lastSave);
+            foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
+                building.LastTimeActivated = Time.timeAsDouble;
+            }
         }
     }
 }

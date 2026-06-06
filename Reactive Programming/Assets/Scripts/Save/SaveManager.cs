@@ -2,15 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
+using Utils;
 
 namespace Save {
     public class SaveManager {
-        private readonly List<ISaveable> _saveables;
+        private readonly SortedList<ISaveable> _saveables;
         private readonly string _path = Path.Combine(Application.persistentDataPath, "save.json");
         
         public SaveManager() {
-            _saveables = new List<ISaveable>();
+            _saveables = new SortedList<ISaveable>(new SaveablesComparer());
         }
         
         public void Register(ISaveable saveable) => _saveables.Add(saveable);
@@ -38,11 +40,20 @@ namespace Save {
             var root = JsonConvert.DeserializeObject<SaveData>(json);
             
             foreach(var saveable in _saveables) {
-                if (root.Payload.TryGetValue(saveable.SaveKey, out var data)) 
-                    saveable.Load(data);
+                if (root.Payload.TryGetValue(saveable.SaveKey, out var data) && data is JObject reference) 
+                    saveable.Load(reference);
             }
             
             Debug.Log("Load process finished.");
+        }
+        
+        private class SaveablesComparer : IComparer<ISaveable> {
+
+            public int Compare(ISaveable x, ISaveable y) {
+                if (x == null) return -1;
+                if (y == null) return 1;
+                return y.Priority.CompareTo(x.Priority);
+            } 
         }
     }
 }

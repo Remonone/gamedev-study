@@ -1,7 +1,10 @@
+using Newtonsoft.Json.Linq;
+
 namespace Save {
     public interface ISaveable {
         public string SaveKey { get; }
-        public string Save();
-        public void Load(object data);
+        public int Priority { get; }
+        public JToken Save();
+        public void Load(JToken data);
     }
 }

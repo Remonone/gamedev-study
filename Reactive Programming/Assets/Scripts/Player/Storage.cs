@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using R3;
 using Save;
 using Types;
+using UnityEngine;
 
 namespace Player {
     public class Storage : IService, ISaveable {
@@ -29,20 +33,27 @@ namespace Player {
         }
 
         public string SaveKey => "Storage";
-        public string Save() {
-            var data = new Dictionary<string, long>();
-            foreach (var structure in _structureMoney) {
-                data.Add(structure.Key.ToString(), structure.Value.CurrentValue);
-            }
-            return JsonConvert.SerializeObject(data);
+        public int Priority => 99;
+        
+        public JToken Save() {
+            var storageInfo = new JObject(
+                new JProperty("Money", new JArray(
+                            from structure in _structureMoney
+                            select new JObject(
+                                    new JProperty("type", structure.Key.ToString()),
+                                    new JProperty("amount", structure.Value.Value)
+                                )
+                        )
+                )
+            );
+            return storageInfo;
         }
 
-        public void Load(object data) {
+        public void Load(JToken data) {
             if (data == null) return;
-            
-            var json = JsonConvert.DeserializeObject<Dictionary<string, long>>((string)data);
-            foreach (var structure in _structureMoney) {
-                structure.Value.Value = json[structure.Key.ToString()];
+            foreach (var token in (JArray)data["Money"]) {
+                var structureType = (StructureType)Enum.Parse(typeof(StructureType), (string)token["type"] ?? string.Empty);
+                _structureMoney[structureType].Value = token["amount"]?.Value<long>() ?? 0;
             }
         }
     }

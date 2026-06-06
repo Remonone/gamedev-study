@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using Bases.Buildings;
+using Newtonsoft.Json.Linq;
+using Save;
 using UnityEngine;
 
 namespace Services {
-    public class BuildingWatcherService : IService {
+    public class BuildingWatcherService : IService, ISaveable {
         private readonly Dictionary<string, BuildingState> _buildingsByName;
         
         public IReadOnlyDictionary<string, BuildingState> BuildingsByName => _buildingsByName;
@@ -42,5 +45,31 @@ namespace Services {
             Debug.Log($"Registered {buildings.Length} buildings");
         }
 
+        public string SaveKey => "Buildings";
+        public int Priority => 100;
+        
+        public JToken Save() {
+            return new JObject(
+                    new JProperty("buildings", new JArray(
+                        from building in _buildingsByName
+                        select new JObject(
+                            new JProperty("name", building.Key),
+                            new JProperty("level", building.Value.Level)
+                        )
+                    )
+                    )
+                );
+        }
+
+        public void Load(JToken data) {
+            foreach (var building in data["buildings"]) {
+                var key = building.Value<string>("name");
+                var level = building.Value<int>("level");
+                if (_buildingsByName.TryGetValue(key, out var buildingState)) {
+                    buildingState.Level = level;
+                    buildingState.IsDirty = true;
+                }
+            }
+        }
     }
 }

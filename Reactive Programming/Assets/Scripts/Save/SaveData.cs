@@ -6,7 +6,7 @@ namespace Save {
     public class SaveData {
         public int Version = 1;
         public long SavedAtUnix;
-        public Dictionary<string, string> Payload;
+        public Dictionary<string, object> Payload;
 
         public SaveData() {
             Payload = new();

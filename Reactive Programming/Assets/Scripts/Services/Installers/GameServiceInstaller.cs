@@ -52,13 +52,15 @@ namespace Components {
 
             var saveService = new SaveService(SaveManager);
             RegisterService(saveService);
+            
+            InitViews();
         }
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {
             return Resources.LoadAll<BuildingDefinition>("Buildings").ToList();
         }
 
-        protected override void AfterInstallation() {
+        private void InitViews() {
             var areaClickerViewModel = new AreaClickerViewModel();
             _areaWatcherView.Init(areaClickerViewModel);
             
@@ -73,5 +75,7 @@ namespace Components {
                 _economyService.ComputeStatsForBuilding(building);
             }
         }
+
+        protected override void AfterInstallation() { }
     }
 }
