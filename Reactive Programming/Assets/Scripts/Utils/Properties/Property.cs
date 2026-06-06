@@ -16,4 +16,5 @@ namespace Utils.Properties {
 
         public abstract float GetValue(int level);
     }
+    
 }

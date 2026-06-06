@@ -17,16 +17,16 @@ namespace Bases.Buildings {
         }
         
 
-        public float GetLevelBasedValue(StatType statType) {
+        public decimal GetLevelBasedValue(StatType statType) {
             switch (statType) {
-                case StatType.Income: return Definition.Income.GetValue(Level);
-                case StatType.Cost: return Definition.Cost.GetValue(Level);
-                case StatType.Frequency: return Definition.Frequency.GetValue(Level);
-                case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.GetValue(Level);
-                case StatType.StabilityModifier: return Definition.StabilityModifier.GetValue(Level);
-                case StatType.StabilityModifierMultiplier: return Definition.StabilityModifierMultiplier.GetValue(Level);
-                case StatType.CriticalChance: return Definition.CriticalChance.GetValue(Level);
-                case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.GetValue(Level);
+                case StatType.Income: return Definition.Income.Evaluate(Level);
+                case StatType.Cost: return Definition.Cost.Evaluate(Level);
+                case StatType.Frequency: return Definition.Frequency.Evaluate(Level);
+                case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.Evaluate(Level);
+                case StatType.StabilityModifier: return Definition.StabilityModifier.Evaluate(Level);
+                case StatType.StabilityModifierMultiplier: return Definition.StabilityModifierMultiplier.Evaluate(Level);
+                case StatType.CriticalChance: return Definition.CriticalChance.Evaluate(Level);
+                case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.Evaluate(Level);
                 default: return 0;
             }
         }
