@@ -5,7 +5,7 @@ using System.Reflection;
 using Types.Economy.Cost.Formula;
 using UnityEditor;
 
-namespace GameEditor.FormulaSerialization.UIElements {
+namespace FormulaSerialization.UIElements {
     internal static class FormulaTypeProvider {
         private static List<Type> _formulaTypes;
 

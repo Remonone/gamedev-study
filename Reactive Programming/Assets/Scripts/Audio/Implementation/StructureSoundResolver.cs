@@ -1,20 +1,19 @@
 using System;
 using System.Linq;
 using Bases.Objects;
-using Bus;
 using Components;
 using Components.Instances;
 using R3;
 using Types;
-using Types.Events;
 
 namespace Audio.Implementation {
-    public class StructureSoundResolver : IService, IDisposable {
+    public class StructureSoundResolver : IAudioDistributor, IDisposable {
         
         private CompositeDisposable _disposable { get; } = new();
 
         private StructureSoundConfig _config;
-        
+        private Subject<AudioCue> _cueRequest = new();
+
         public StructureSoundResolver(StructureSoundConfig config) {
             _config = config;
             
@@ -31,13 +30,13 @@ namespace Audio.Implementation {
             if (cue.Clip == null) {
                 return;
             }
-
-            AudioCueRequestEvent e = new AudioCueRequestEvent(cue);
-            EventBus<AudioCueRequestEvent>.Raise(e);
+            _cueRequest.OnNext(cue);
         }
 
         public void Dispose() {
             _disposable.Dispose();
         }
+
+        public Observable<AudioCue> CueRequest => _cueRequest;
     }
 }

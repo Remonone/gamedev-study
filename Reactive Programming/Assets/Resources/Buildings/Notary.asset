@@ -14,35 +14,56 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Bases.Buildings.BaseBuilding
   Name: Notary
   Cost:
-    Operation: 1
-    Argument: 50
-    Value: 100
+    rid: 7490907998412603478
   Type: 0
   Income:
-    Operation: 1
-    Argument: 1
-    Value: 0
+    rid: 7490907998412603480
   Frequency:
-    Operation: 2
-    Argument: 0
-    Value: 1
+    rid: 7490907998412603481
   StabilityModifier:
-    Operation: 2
-    Argument: 0
-    Value: 1
+    rid: 7490907998412603482
   StabilityModifierMultiplier:
-    Operation: 2
-    Argument: 0
-    Value: 1
+    rid: 7490907998412603483
   MultiplierCoefficient:
-    Operation: 2
-    Argument: 0
-    Value: 1
+    rid: 7490907998412603484
   CriticalChance:
-    Operation: 2
-    Argument: 0
-    Value: 0.01
+    rid: 7490907998412603485
   CriticalMultiplier:
-    Operation: 2
-    Argument: 0
-    Value: 1.5
+    rid: 7490907998412603486
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490907998412603478
+      type: {class: ExponentialFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 100
+        Rate: 1.2
+    - rid: 7490907998412603480
+      type: {class: ExponentialFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+        Rate: 1.2
+    - rid: 7490907998412603481
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490907998412603482
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490907998412603483
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490907998412603484
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490907998412603485
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 0.01
+    - rid: 7490907998412603486
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1.5

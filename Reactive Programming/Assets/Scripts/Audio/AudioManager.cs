@@ -1,20 +1,20 @@
-using Bus;
-using Types.Events;
+using Components;
+using R3;
 using UnityEngine;
 
 namespace Audio {
     public class AudioManager : MonoBehaviour {
         [SerializeField] private AudioSource _audioSource;
-        
-        private Listener<AudioCueRequestEvent> _audioCueRequestListener;
 
-        private void Awake() {
-            _audioCueRequestListener = new Listener<AudioCueRequestEvent>(OnRequest);
-            EventBus<AudioCueRequestEvent>.Register(_audioCueRequestListener, this);
+        private void Start() {
+            var distributors = ServiceLocator.Instance.GetServices<IAudioDistributor>();
+            foreach (var distributor in distributors) {
+                distributor.CueRequest.Subscribe(OnCueRequest).AddTo(this);
+            }
         }
 
-        private void OnRequest(AudioCueRequestEvent e) {
-            _audioSource.PlayOneShot(e.Cue.Clip);
+        private void OnCueRequest(AudioCue cue) {
+            _audioSource.PlayOneShot(cue.Clip);
         }
     }
 }

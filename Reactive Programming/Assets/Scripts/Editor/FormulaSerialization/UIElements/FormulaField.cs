@@ -5,7 +5,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GameEditor.FormulaSerialization.UIElements {
+namespace FormulaSerialization.UIElements {
     public sealed class FormulaField : VisualElement {
         private readonly SerializedProperty _property;
         private readonly ToolbarMenu _selector;

@@ -8,6 +8,7 @@ using Player;
 using Services;
 using Types.Economy;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Views;
 using Views.Models;
@@ -15,7 +16,7 @@ using Views.Models;
 namespace Components {
     public class GameServiceInstaller : ServiceInstaller {
         
-        [SerializeField] private AreaWatcherView _areaWatcherView;
+        [FormerlySerializedAs("_areaWatcherView")] [SerializeField] private WorldCastService _worldCastService;
         [SerializeField] private UIDocument _document;
         [SerializeField] private StructureSoundConfig _structureSoundConfig;
         [SerializeField] private BuildingItemView _buildingItemView;
@@ -32,7 +33,8 @@ namespace Components {
             var buildingDefinitions = FetchBuildingDefinitions();
             
             RegisterService(storage);
-            RegisterService(new StructureClickService(storage));
+            RegisterService(_worldCastService);
+            RegisterService(new StructureClickService(storage, _worldCastService));
             RegisterService(new StructureSoundResolver(_structureSoundConfig));
             
             _buildingWatcherService = new BuildingWatcherService(buildingDefinitions);
@@ -61,9 +63,6 @@ namespace Components {
         }
 
         private void InitViews() {
-            var areaClickerViewModel = new AreaClickerViewModel();
-            _areaWatcherView.Init(areaClickerViewModel);
-            
             var controls = new Controls();
             _controlsView.Bind(controls);
             

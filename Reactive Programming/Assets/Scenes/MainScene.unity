@@ -995,7 +995,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 510a1cb2b7fc49108deb3e112f3b7e06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Components.GameServiceInstaller
-  _areaWatcherView: {fileID: 49401509}
+  _worldCastService: {fileID: 1358894594}
   _document: {fileID: 1509096125}
   _structureSoundConfig: {fileID: 11400000, guid: 6f61fe8c889bbba7e943a4e7b5fbdd09, type: 2}
   _buildingItemView: {fileID: 6267371284000321228, guid: 9c0529bd2aa9713f3a568a0ba1c890a8, type: 3}

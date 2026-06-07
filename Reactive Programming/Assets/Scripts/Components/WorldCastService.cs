@@ -1,18 +1,21 @@
-using Bus;
+using Bases;
 using R3;
-using Types.Events;
+using Types;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Components {
-    public class WorldCastService : ServiceBase {
+    public class WorldCastService : MonoBehaviour, IService {
 
         [SerializeField] private Camera _camera;
         [SerializeField] private LayerMask _clickableLayer;
 
         private Ray _lastRay;
+        private Subject<StructureType> _structureTypeSubject = new();
         
         private RaycastHit[] _hitBuffer = new RaycastHit[2];
+        
+        public Observable<StructureType> StructureClicked => _structureTypeSubject;
 
         private void Start() {
             Observable.EveryUpdate()
@@ -25,7 +28,9 @@ namespace Components {
                 return hitCount > 0 ? _hitBuffer[0].collider.gameObject : null;
             })
             .Where(clickedObject => clickedObject != null)
-            .Subscribe(clickedObject => EventBus<ClickEvent>.Raise(new ClickEvent(clickedObject)))
+            .Select(clickedObject => clickedObject.GetComponent<Structure>())
+            .Where(structure => structure != null)
+            .Subscribe(clickedObject => _structureTypeSubject.OnNext(clickedObject.Type))
             .AddTo(this);
         }
 
