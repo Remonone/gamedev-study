@@ -21,27 +21,27 @@ namespace Views.Models {
         public Controls() {
             _storage = ServiceLocator.Instance.GetService<Storage>();
 
-            _storage[StructureType.MayorOffice]
+            _storage.ObserveByType(StructureType.MayorOffice)
                 .Subscribe(update => DocumentsCount.Value = update)
                 .AddTo(_disposable);
             
-            _storage[StructureType.Court]
+            _storage.ObserveByType(StructureType.Court)
                 .Subscribe(update => CasesCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage[StructureType.FireFighterStation]
+            _storage.ObserveByType(StructureType.FireFighterStation)
                 .Subscribe(update => FiresCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage[StructureType.PoliceStation]
+            _storage.ObserveByType(StructureType.PoliceStation)
                 .Subscribe(update => ProtectionsCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage[StructureType.Hospital]
+            _storage.ObserveByType(StructureType.Hospital)
                 .Subscribe(update => CuresCount.Value = update)
                 .AddTo(_disposable);
             
-            _storage[StructureType.Archive]
+            _storage.ObserveByType(StructureType.Archive)
                 .Subscribe(update => ArchivesCount.Value = update)
                 .AddTo(_disposable);
         }

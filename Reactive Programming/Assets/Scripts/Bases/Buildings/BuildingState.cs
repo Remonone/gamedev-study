@@ -1,4 +1,5 @@
 using Types.Economy;
+using Types.Economy.Cost;
 using UnityEngine;
 
 namespace Bases.Buildings {
@@ -20,7 +21,6 @@ namespace Bases.Buildings {
         public decimal GetLevelBasedValue(StatType statType) {
             switch (statType) {
                 case StatType.Income: return Definition.Income.Evaluate(Level);
-                case StatType.Cost: return Definition.Cost.Evaluate(Level);
                 case StatType.Frequency: return Definition.Frequency.Evaluate(Level);
                 case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.Evaluate(Level);
                 case StatType.StabilityModifier: return Definition.StabilityModifier.Evaluate(Level);
@@ -29,6 +29,10 @@ namespace Bases.Buildings {
                 case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.Evaluate(Level);
                 default: return 0;
             }
+        }
+
+        public Price GetPrice() {
+            return Definition.Cost.Evaluate(Level);
         }
     }
 }

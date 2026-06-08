@@ -1,10 +1,11 @@
 using System;
+using UnityEngine;
 
 namespace Types.Economy.Cost.Formula {
     [Serializable]
     public class AccumulationFormula : IFormula {
         
-        public IFormula[] Formulas;
+        [SerializeReference] public IFormula[] Formulas;
         
         public decimal Evaluate(decimal input) {
             decimal value = 0;

@@ -6,6 +6,7 @@ using R3;
 using Services;
 using Types;
 using Types.Economy;
+using Types.Economy.Cost;
 
 namespace Views.Models {
     public class BuildingItemViewModel : IDisposable {
@@ -13,20 +14,21 @@ namespace Views.Models {
         private string _name;
         private StructureType _type;
         private CompositeDisposable _disposable = new();
-
-        private float _amount;
         
         private EconomyService _economyService;
         
         public ReactiveProperty<float> Income = new();
         public ReactiveProperty<float> Frequency = new();
-        public ReactiveProperty<float> Cost = new();
+        public ReactiveProperty<Price> Cost = new();
         public ReactiveProperty<float> Stability = new();
         public ReactiveProperty<float> StabilityMultiplier = new();
         public ReactiveProperty<float> Multiplier = new();
         public ReactiveProperty<float> CriticalChance = new();
         public ReactiveProperty<float> CriticalMultiplier = new();
         public ReactiveProperty<bool> CanPurchase = new();
+
+        private Storage _storage;
+        private ComputedStats _lastStats;
         
         public StructureType Type => _type;
         public string Name => _name;
@@ -36,17 +38,18 @@ namespace Views.Models {
             _type = definition.Type;
             
             _economyService = ServiceLocator.Instance.GetService<EconomyService>();
-            var storage = ServiceLocator.Instance.GetService<Storage>();
+            _storage = ServiceLocator.Instance.GetService<Storage>();
+            
+            
             
             _economyService.BuildingUpdate
                 .Where(update => update.Building.Definition.Equals(definition))
                 .Select(update => update.Stats)
                 .Subscribe(OnValuesUpdated)
                 .AddTo(_disposable);
-            storage[_type].Subscribe(amount => {
-                _amount = amount;
-                CanPurchase.Value = amount >= Cost.Value;
-            });
+            _storage.StructureMoney.Subscribe(_ => {
+                CanPurchase.Value = CanBePurchased(_lastStats.Cost);
+            }).AddTo(_disposable);
         }
 
         private void OnValuesUpdated(ComputedStats stats) {
@@ -58,7 +61,12 @@ namespace Views.Models {
             Multiplier.Value = stats.MultiplierCoefficient;
             CriticalChance.Value = stats.CriticalChance;
             CriticalMultiplier.Value = stats.CriticalMultiplier;
-            CanPurchase.Value = _amount >= Cost.Value;
+            CanPurchase.Value = CanBePurchased(stats.Cost);
+            _lastStats = stats;
+        }
+
+        private bool CanBePurchased(Price cost) {
+            return _storage.CanAfford(cost);
         }
 
         public void Upgrade() {

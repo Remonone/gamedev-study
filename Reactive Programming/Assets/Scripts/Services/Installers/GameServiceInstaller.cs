@@ -16,7 +16,7 @@ using Views.Models;
 namespace Components {
     public class GameServiceInstaller : ServiceInstaller {
         
-        [FormerlySerializedAs("_areaWatcherView")] [SerializeField] private WorldCastService _worldCastService;
+        [SerializeField] private WorldCastService _worldCastService;
         [SerializeField] private UIDocument _document;
         [SerializeField] private StructureSoundConfig _structureSoundConfig;
         [SerializeField] private BuildingItemView _buildingItemView;

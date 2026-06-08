@@ -5,7 +5,6 @@ using Economy;
 using Player;
 using R3;
 using Types.Economy;
-using UnityEngine;
 
 namespace Services {
     public class EconomyService : IService {
@@ -42,14 +41,13 @@ namespace Services {
         public void PurchaseBuilding(string name) {
             var building = _buildingWatcherService.GetBuildingState(name);
             if (!ValidateCost(building)) return;
-            _storage.AddMoney(building.Definition.Type, -Mathf.CeilToInt(building.Cache.Cost));
+            _storage.Spend(building.Cache.Cost);
             _buildingUpgradeService.UpgradeBuilding(name, 1);
         }
 
         private bool ValidateCost(BuildingState building) {
-            
             if (building == null) return false;
-            return building.Cache.Cost <= _storage[building.Definition.Type].CurrentValue;
+            return _storage.CanAfford(building.Cache.Cost);
         }
 
         private void VerifyName(string name) {

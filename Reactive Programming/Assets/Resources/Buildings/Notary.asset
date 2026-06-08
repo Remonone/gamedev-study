@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Bases.Buildings.BaseBuilding
   Name: Notary
   Cost:
-    rid: 7490907998412603478
+    _costItems:
+    - Condition:
+        rid: 7490908038854606917
+      Formula:
+        rid: 7490908038854606918
+      Type: 0
   Type: 0
   Income:
     rid: 7490907998412603480
@@ -33,11 +38,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 7490907998412603478
-      type: {class: ExponentialFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 100
-        Rate: 1.2
     - rid: 7490907998412603480
       type: {class: ExponentialFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
       data:
@@ -67,3 +67,22 @@ MonoBehaviour:
       type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1.5
+    - rid: 7490908038854606917
+      type: {class: ConstCondition, ns: Types.Economy.Cost.Condition, asm: Assembly-CSharp}
+      data:
+        _constant: 1
+    - rid: 7490908038854606918
+      type: {class: AccumulationFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        Formulas:
+        - rid: 7490908038854606919
+        - rid: 7490908038854606921
+    - rid: 7490908038854606919
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 100
+    - rid: 7490908038854606921
+      type: {class: PowerFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 3
+        Power: 4

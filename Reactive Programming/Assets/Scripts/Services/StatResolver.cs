@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bases.Buildings;
 using Types.Economy;
+using Types.Economy.Cost;
 using UnityEngine;
 
 namespace Economy {
@@ -11,7 +12,7 @@ namespace Economy {
             var result = new ComputedStats {
                 Income = ResolveOne((float)building.GetLevelBasedValue(StatType.Income), StatType.Income, modifiers),
                 Frequency = ResolveOne((float)building.GetLevelBasedValue(StatType.Frequency), StatType.Frequency, modifiers),
-                Cost = ResolveOne((float)building.GetLevelBasedValue(StatType.Cost), StatType.Cost, modifiers),
+                Cost = ResolvePrice(building.GetPrice(), modifiers),
                 StabilityModifier = ResolveOne((float)building.GetLevelBasedValue(StatType.StabilityModifier), StatType.StabilityModifier, modifiers),
                 StabilityModifierMultiplier = ResolveOne((float)building.GetLevelBasedValue(StatType.StabilityModifierMultiplier), StatType.StabilityModifierMultiplier, modifiers),
                 MultiplierCoefficient = ResolveOne((float)building.GetLevelBasedValue(StatType.MultiplierCoefficient), StatType.MultiplierCoefficient, modifiers),
@@ -22,6 +23,34 @@ namespace Economy {
             result.Frequency = Mathf.Max(0.01f, result.Frequency);
             result.CriticalChance = Mathf.Clamp01(result.CriticalChance);
             return result;
+        }
+
+        private Price ResolvePrice(Price price, List<StatModifier> modifiers) {
+            decimal flat = 0m;
+            decimal percent = 0m;
+            decimal mul = 1m;
+            
+            foreach (var modifier in modifiers.Where(modifier => modifier.Stat == StatType.Cost)) {
+                switch (modifier.Operation) {
+                    case ModifierOp.AddFlat:
+                        flat += (decimal)modifier.Value;
+                        break;
+                    case ModifierOp.AddPercent:
+                        percent += (decimal)modifier.Value;
+                        break;
+                    case ModifierOp.Multiply:
+                        mul *= (decimal)modifier.Value;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            for (int i = 0; i < price.Entries.Length; i++) {
+                price.Entries[i].Price = ((price.Entries[i].Price - flat) / (1m + percent)) / mul;
+            }
+
+            return price;
         }
 
         private float ResolveOne(float baseValue, StatType stat, List<StatModifier> modifiers) {

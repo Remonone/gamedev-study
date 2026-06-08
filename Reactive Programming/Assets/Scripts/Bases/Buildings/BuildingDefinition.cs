@@ -1,4 +1,5 @@
 using Types;
+using Types.Economy.Cost;
 using Types.Economy.Cost.Formula;
 using UnityEngine;
 using Utils.Properties;
@@ -7,7 +8,7 @@ namespace Bases.Buildings {
     [CreateAssetMenu(fileName = "Building", menuName = "Clicker/Building", order = 0)]
     public class BuildingDefinition : ScriptableObject {
         public string Name;
-		[SerializeReference] public IFormula Cost;
+		[SerializeField] public CostResolver Cost;
         public StructureType Type;
         [SerializeReference] public IFormula Income;
         [SerializeReference] public IFormula Frequency;
