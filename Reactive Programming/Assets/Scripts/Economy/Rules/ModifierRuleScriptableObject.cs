@@ -25,7 +25,7 @@ namespace Economy.Rules {
             return true;
         }
 
-        public void AppendModifiers(BuildingState building, System.Collections.Generic.List<StatModifier> output) {
+        public void AppendModifiers(BuildingState building, List<StatModifier> output) {
             if (modifiers == null) return;
 
             output.AddRange(from def in modifiers
