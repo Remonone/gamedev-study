@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Types.Economy.Cost;
+using Types.Upgrades.Effects;
 using UnityEngine;
 
 namespace Types.Upgrades {

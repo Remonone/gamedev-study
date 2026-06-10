@@ -1,4 +1,4 @@
-using Bases.Buildings;
+using Types.Buildings;
 
 namespace Types.Economy {
     public readonly struct BuildingUpdate {

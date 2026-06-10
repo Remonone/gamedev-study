@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Audio.Implementation;
-using Bases.Buildings;
-using Bases.Objects;
+using Types.Buildings;
+using Types.Objects;
 using Components.Instances;
-using Player;
+using Services.Player;
 using Services;
 using Types.Economy;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Views;
 using Views.Models;
@@ -33,6 +32,7 @@ namespace Components {
             var buildingDefinitions = FetchBuildingDefinitions();
             
             RegisterService(storage);
+            RegisterService(new UpgradeService(storage, sessionContext));
             RegisterService(_worldCastService);
             RegisterService(new StructureClickService(storage, _worldCastService));
             RegisterService(new StructureSoundResolver(_structureSoundConfig));

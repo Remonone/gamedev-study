@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="AchievementRoot" class="achievement-item">
+        <ui:VisualElement class="achievement-item__header">
+            <ui:VisualElement name="Icon" class="achievement-item__icon"/>
+            <ui:VisualElement class="achievement-item__text">
+                <ui:Label text="Achievement Name" name="Name" class="achievement-item__name"/>
+                <ui:Label text="Achievement Description" name="Description" class="achievement-item__description"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label text="Reward" name="Reward" class="achievement-item__reward"/>
+    </ui:VisualElement>
+</ui:UXML>

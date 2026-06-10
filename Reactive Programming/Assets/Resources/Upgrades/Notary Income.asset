@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Notary Income
+  m_EditorClassIdentifier: Assembly-CSharp::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 0}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 7490908088347394180
+      Formula:
+        rid: 7490908088347394181
+      Type: 0
+  MaxLevel: 4
+  Position: {x: 150, y: 150}
+  Id: notary_income
+  Name: Notary Income
+  Icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  Description: Test 2
+  NodeCategory: 0
+  ChildIds: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908088347394180
+      type: {class: ConstCondition, ns: Types.Economy.Cost.Condition, asm: Assembly-CSharp}
+      data:
+        _constant: 1
+    - rid: 7490908088347394181
+      type: {class: AccumulationFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        Formulas:
+        - rid: 7490908088347394182
+        - rid: 7490908088347394184
+    - rid: 7490908088347394182
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 50000
+    - rid: 7490908088347394184
+      type: {class: PowerFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 10000
+        Power: 2

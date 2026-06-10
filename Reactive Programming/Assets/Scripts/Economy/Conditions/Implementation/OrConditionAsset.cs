@@ -1,4 +1,4 @@
-using Bases.Buildings;
+using Types.Buildings;
 using JetBrains.Annotations;
 using Types.Economy;
 using UnityEngine;

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using Bases.Buildings;
+using Types.Buildings;
 using Types;
 using Types.Economy;
+using Types.Economy.Modifiers.Target;
 
 namespace Services {
     public class InvalidationService : IService {
@@ -36,9 +37,9 @@ namespace Services {
             }
         }
 
-        public void MarkDirtyByTarget(ModifierTarget target) {
+        public void MarkDirtyByTarget(ModifierTarget targetDeprecated) {
             foreach (var building in _buildings.Values) {
-                if (target.Matches(building)) {
+                if (targetDeprecated.Matches(building)) {
                     building.IsDirty = true;
                 }
             }

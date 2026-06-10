@@ -1,12 +1,13 @@
 using System;
-using Bases.Buildings;
+using Types.Buildings;
 using Components;
-using Player;
+using Services.Player;
 using R3;
 using Services;
 using Types;
 using Types.Economy;
 using Types.Economy.Cost;
+using UnityEngine;
 
 namespace Views.Models {
     public class BuildingItemViewModel : IDisposable {
@@ -26,6 +27,8 @@ namespace Views.Models {
         public ReactiveProperty<float> CriticalChance = new();
         public ReactiveProperty<float> CriticalMultiplier = new();
         public ReactiveProperty<bool> CanPurchase = new();
+        public ReactiveProperty<string> Description = new(string.Empty);
+        public ReactiveProperty<Sprite> Icon = new(null);
 
         private Storage _storage;
         private ComputedStats _lastStats;
@@ -36,6 +39,8 @@ namespace Views.Models {
         public BuildingItemViewModel(BuildingDefinition definition) {
             _name = definition.Name;
             _type = definition.Type;
+            Description.Value = definition.Description;
+            Icon.Value = definition.Icon;
             
             _economyService = ServiceLocator.Instance.GetService<EconomyService>();
             _storage = ServiceLocator.Instance.GetService<Storage>();

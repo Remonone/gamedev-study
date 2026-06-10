@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Bases.Buildings;
+using Types.Buildings;
 using Newtonsoft.Json.Linq;
 using Save;
 using UnityEngine;

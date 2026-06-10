@@ -1,15 +1,19 @@
 using System;
 using Components;
-using Player;
+using Services.Player;
 using R3;
 using Types;
-using UnityEngine;
 
 namespace Views.Models {
   public class Controls : IDisposable {
         private Storage _storage;
         
         private CompositeDisposable _disposable = new();
+
+        public BuildingShopTabViewModel BuildingShopTab = new();
+        public UpgradesTabViewModel UpgradesTab = new();
+        public AchievementsTabViewModel AchievementsTab = new();
+        public ArtifactsTabViewModel ArtifactsTab = new();
 
         public ReactiveProperty<long> DocumentsCount = new ReactiveProperty<long>(0);
         public ReactiveProperty<long> CasesCount = new ReactiveProperty<long>(0);
@@ -49,6 +53,7 @@ namespace Views.Models {
 
         public void Dispose() {
             _disposable.Dispose();
+            UpgradesTab.Dispose();
         }
   }
 }

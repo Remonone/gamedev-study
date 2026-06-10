@@ -2,63 +2,127 @@
     <Style src="project://database/Assets/UI/Styles/controls.uss?fileID=7433441132597879392&amp;guid=9d1e66dac54f56fc8ab0854258844d7c&amp;type=3#controls"/>
     <ui:VisualElement style="flex-grow: 1; flex-direction: row-reverse; flex-shrink: 0;">
         <ui:VisualElement name="Display" style="flex-grow: 1; background-color: rgb(177, 143, 207); flex-shrink: 1; align-content: flex-start; max-width: 50%; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px;">
-            <ui:VisualElement name="StorageContent" style="flex-grow: 0; flex-direction: row; justify-content: space-around; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; background-color: rgb(216, 216, 246); border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px;">
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="D:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="DocumentsCount"/>
+            <ui:VisualElement name="StorageContent">
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="D:" class="storage-key"/>
+                    <ui:Label text="Label" name="DocumentsCount" class="storage-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="F:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="FiresCount"/>
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="F:" class="storage-key"/>
+                    <ui:Label text="Label" name="FiresCount" class="storage-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="P:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="ProtectionsCount"/>
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="P:" class="storage-key"/>
+                    <ui:Label text="Label" name="ProtectionsCount" class="storage-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="H:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="CuresCount"/>
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="H:" class="storage-key"/>
+                    <ui:Label text="Label" name="CuresCount" class="storage-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="C:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="CasesCount"/>
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="C:" class="storage-key"/>
+                    <ui:Label text="Label" name="CasesCount" class="storage-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
-                    <ui:Label text="A:" name="Storage_Item"/>
-                    <ui:Label text="Label" name="ArchivesCount"/>
+                <ui:VisualElement class="storage-item">
+                    <ui:Label text="A:" class="storage-key"/>
+                    <ui:Label text="Label" name="ArchivesCount" class="storage-value"/>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement style="flex-grow: 1; margin-top: 20px;">
-                <ui:TabView name="BuildingList" style="flex-shrink: 0; flex-grow: 1;">
-                    <ui:Tab label="Mayor" name="" style="flex-grow: 1; flex-shrink: 0; min-height: 100%;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="MayorOffice" style="flex-grow: 1; flex-shrink: 0; min-height: auto;"/>
-                        </ui:ScrollView>
+            <ui:VisualElement class="controls-content">
+                <ui:TabView name="MainTabs" class="main-tab-view">
+                    <ui:Tab label="Buildings" class="main-tab">
+                        <ui:VisualElement name="BuildingShopTabRoot" class="tab-surface tab-surface--buildings">
+                            <ui:TabView name="BuildingList" class="category-tab-view">
+                                <ui:Tab label="Mayor" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="MayorOffice" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                                <ui:Tab label="Fire Station" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="FireFighterStation" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                                <ui:Tab label="Police" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="PoliceStation" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                                <ui:Tab label="Hospital" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="Hospital" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                                <ui:Tab label="Court" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="Court" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                                <ui:Tab label="Archive" class="building-category-tab">
+                                    <ui:ScrollView class="category-scroll">
+                                        <ui:VisualElement name="Archive" class="category-content"/>
+                                    </ui:ScrollView>
+                                </ui:Tab>
+                            </ui:TabView>
+                        </ui:VisualElement>
                     </ui:Tab>
-                    <ui:Tab label="Fire Station" name="" style="flex-grow: 1; flex-shrink: 0;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="FireFighterStation" style="flex-grow: 1; flex-shrink: 0;"/>
-                        </ui:ScrollView>
+                    <ui:Tab label="Upgrades" class="main-tab">
+                        <ui:VisualElement name="UpgradesTabRoot" class="tab-surface tab-surface--upgrades">
+                            <ui:VisualElement class="upgrades-layout">
+                                <ui:VisualElement name="UpgradesWorkspace" class="upgrades-workspace">
+                                    <ui:VisualElement name="UpgradeTreeWindow" class="upgrade-tree-window">
+                                        <ui:VisualElement name="UpgradeTreeHeader" class="upgrade-tree-header">
+                                            <ui:Label text="Upgrade Tree" class="upgrade-tree-header-title"/>
+                                            <ui:Label text="Drag to move" class="upgrade-tree-header-hint"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="UpgradeTreeViewport" class="upgrade-tree-viewport">
+                                            <ui:VisualElement name="UpgradeTreeCanvas" class="upgrade-tree-canvas">
+                                                <ui:VisualElement name="UpgradeConnectionsLayer" class="upgrade-connections-layer"/>
+                                                <ui:VisualElement name="UpgradeNodesLayer" class="upgrade-nodes-layer"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="UpgradeNodeDetails" class="upgrade-node-details">
+                                    <ui:VisualElement class="upgrade-node-summary">
+                                        <ui:VisualElement name="SelectedUpgradeIcon" class="upgrade-node-icon"/>
+                                        <ui:VisualElement class="upgrade-node-text">
+                                            <ui:Label text="Select a node" name="SelectedUpgradeName" class="upgrade-node-name"/>
+                                            <ui:Label text="Level: -" name="SelectedUpgradeLevel" class="upgrade-node-level"/>
+                                            <ui:Label text="Price: -" name="SelectedUpgradePrice" class="upgrade-node-price"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:Label text="Choose a node in the tree to inspect details." name="SelectedUpgradeDescription" class="upgrade-node-description"/>
+                                    <ui:Button text="Upgrade" name="UpgradeNodeButton" class="upgrade-node-button"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:Tab>
-                    <ui:Tab label="Police" name="" style="flex-grow: 1; flex-shrink: 0;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="PoliceStation" style="flex-grow: 1; flex-shrink: 0;"/>
-                        </ui:ScrollView>
+                    <ui:Tab label="Achievements" class="main-tab">
+                        <ui:VisualElement name="AchievementsTabRoot" class="tab-surface tab-surface--achievements">
+                            <ui:VisualElement class="achievements-layout">
+                                <ui:ScrollView name="AchievementsList" class="achievements-list"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:Tab>
-                    <ui:Tab label="Hospital" name="" style="flex-grow: 1; flex-shrink: 0;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="Hospital" style="flex-grow: 1; flex-shrink: 0;"/>
-                        </ui:ScrollView>
-                    </ui:Tab>
-                    <ui:Tab label="Court" name="" style="flex-grow: 1; flex-shrink: 0;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="Court" style="flex-grow: 1; flex-shrink: 0;"/>
-                        </ui:ScrollView>
-                    </ui:Tab>
-                    <ui:Tab label="Archive" name="" style="flex-grow: 1; flex-shrink: 0;">
-                        <ui:ScrollView style="flex-shrink: 0;">
-                            <ui:VisualElement name="Archive" style="flex-grow: 1; flex-shrink: 0;"/>
-                        </ui:ScrollView>
+                    <ui:Tab label="Artifacts" class="main-tab">
+                        <ui:VisualElement name="ArtifactsTabRoot" class="tab-surface tab-surface--artifacts">
+                            <ui:VisualElement class="artifacts-layout">
+                                <ui:VisualElement name="ArtifactSelectionPanel" class="artifact-selection-panel">
+                                    <ui:Label text="Selected Artifact" class="artifact-selection-title"/>
+                                    <ui:VisualElement class="artifact-selection-content">
+                                        <ui:VisualElement name="SelectedArtifactIcon" class="artifact-selection-icon"/>
+                                        <ui:VisualElement class="artifact-selection-text">
+                                            <ui:Label text="No artifact selected" name="SelectedArtifactName" class="artifact-selection-name"/>
+                                            <ui:Label text="Select an artifact to see details." name="SelectedArtifactDescription" class="artifact-selection-description"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="ArtifactsList" class="artifacts-placeholder">
+                                    <ui:Label text="Artifacts list will be displayed here." class="artifacts-placeholder-text"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:Tab>
                 </ui:TabView>
             </ui:VisualElement>

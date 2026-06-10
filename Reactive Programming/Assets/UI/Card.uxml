@@ -1,40 +1,50 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 0; flex-direction: row; flex-shrink: 0; min-height: 125px;">
-        <ui:VisualElement style="flex-grow: 4;">
-            <ui:Label text="Label" name="Name"/>
-            <ui:VisualElement style="flex-grow: 1; flex-basis: auto; flex-direction: row; flex-wrap: wrap; flex-shrink: 0;">
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Income: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="Income" style="flex-shrink: 1;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Frequency: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="Frequency" style="flex-shrink: 1; flex-grow: 0;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Stability: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="Stability" style="flex-shrink: 1;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Stability Mul.: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="StabilityMultiplier" style="flex-shrink: 1;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Multiplier: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="Multiplier" style="flex-shrink: 1;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Crit. Chance: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="CriticalChance" style="flex-shrink: 1;"/>
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-grow: 1; flex-direction: row; min-width: 33%;">
-                    <ui:Label text="Crit. Mul: " style="flex-shrink: 1;"/>
-                    <ui:Label text="Label" name="CriticalMultiplier" style="flex-shrink: 1;"/>
+    <ui:VisualElement name="CardRoot" class="building-card">
+        <ui:VisualElement class="building-card__header">
+            <ui:VisualElement name="Icon" class="building-card__icon"/>
+            <ui:VisualElement class="building-card__headline">
+                <ui:Label text="Label" name="Name" class="building-card__name"/>
+                <ui:Label text="Description" name="Description" class="building-card__description"/>
+
+                <ui:VisualElement class="building-card__primary-stats">
+                    <ui:VisualElement class="building-card__primary-stat">
+                        <ui:Label text="Income" class="building-card__primary-stat-key"/>
+                        <ui:Label text="Label" name="Income" class="building-card__primary-stat-value"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="building-card__primary-stat">
+                        <ui:Label text="Frequency" class="building-card__primary-stat-key"/>
+                        <ui:Label text="Label" name="Frequency" class="building-card__primary-stat-value"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
+
+            <ui:VisualElement class="building-card__actions">
+                <ui:Button text="Upgrade" name="UpgradeButton" class="building-card__upgrade-button"/>
+                <ui:Button text="Details" name="ExpandButton" class="building-card__details-button"/>
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 1;">
-            <ui:Button text="Button" name="UpgradeButton"/>
+
+        <ui:VisualElement name="DetailsContainer" class="building-card__details">
+            <ui:VisualElement class="building-card__detail-row">
+                <ui:Label text="Stability" class="building-card__detail-key"/>
+                <ui:Label text="Label" name="Stability" class="building-card__detail-value"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="building-card__detail-row">
+                <ui:Label text="Stability Mul." class="building-card__detail-key"/>
+                <ui:Label text="Label" name="StabilityMultiplier" class="building-card__detail-value"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="building-card__detail-row">
+                <ui:Label text="Multiplier" class="building-card__detail-key"/>
+                <ui:Label text="Label" name="Multiplier" class="building-card__detail-value"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="building-card__detail-row">
+                <ui:Label text="Crit. Chance" class="building-card__detail-key"/>
+                <ui:Label text="Label" name="CriticalChance" class="building-card__detail-value"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="building-card__detail-row">
+                <ui:Label text="Crit. Mul." class="building-card__detail-key"/>
+                <ui:Label text="Label" name="CriticalMultiplier" class="building-card__detail-value"/>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
