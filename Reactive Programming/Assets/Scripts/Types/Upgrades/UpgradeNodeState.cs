@@ -17,5 +17,11 @@ namespace Types.Upgrades {
             Level = level;
             CurrentState = currentState;
         }
+
+        public UpgradeNodeState(UpgradeNodeState other) {
+            Definition = other.Definition;
+            Level = other.Level;
+            CurrentState = other.CurrentState;
+        }
     }
 }

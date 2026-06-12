@@ -4,6 +4,7 @@ using Audio.Implementation;
 using Types.Buildings;
 using Types.Objects;
 using Components.Instances;
+using Economy.Providers;
 using Services.Player;
 using Services;
 using Types.Economy;
@@ -26,27 +27,30 @@ namespace Components {
         
         protected override void InstallServices() {
             var storage = new Storage();
-
             var sessionContext = new SessionContext();
-
-            var buildingDefinitions = FetchBuildingDefinitions();
+            var providerRegistry = new ProviderRegistryService();
+            UploadProviders(providerRegistry);
+            
             
             RegisterService(storage);
-            RegisterService(new UpgradeService(storage, sessionContext));
             RegisterService(_worldCastService);
+            RegisterService(providerRegistry);
+            
             RegisterService(new StructureClickService(storage, _worldCastService));
             RegisterService(new StructureSoundResolver(_structureSoundConfig));
             
+            var buildingDefinitions = FetchBuildingDefinitions();
             _buildingWatcherService = new BuildingWatcherService(buildingDefinitions);
             RegisterService(_buildingWatcherService);
             
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
             RegisterService(invalidationService);
             
+            RegisterService(new UpgradeService(storage, providerRegistry, invalidationService));
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 
-            _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService);
+            _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService, providerRegistry);
             RegisterService(_economyService);
             
             var tickService = new TickService(_economyService, _buildingWatcherService, storage);
@@ -56,6 +60,10 @@ namespace Components {
             RegisterService(saveService);
             
             InitViews();
+        }
+
+        private void UploadProviders(ProviderRegistryService providerRegistry) {
+            providerRegistry.RegisterProvider(new UpgradeModifierProvider());
         }
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {

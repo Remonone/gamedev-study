@@ -9,8 +9,5 @@ namespace Types.Economy.Modifiers {
         public int Priority;
         public string ModifierId;
 
-        private static StatModifier _default = new();
-
-        public static StatModifier Default => _default;
     }
 }

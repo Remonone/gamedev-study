@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Notary
   m_EditorClassIdentifier: Assembly-CSharp::Bases.Buildings.BaseBuilding
   Name: Notary
+  Description: 
+  Icon: {fileID: 0}
   Cost:
     _costItems:
     - Condition:
@@ -22,7 +24,7 @@ MonoBehaviour:
       Type: 0
   Type: 0
   Income:
-    rid: 7490907998412603480
+    rid: 7490908139259166796
   Frequency:
     rid: 7490907998412603481
   StabilityModifier:
@@ -38,11 +40,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 7490907998412603480
-      type: {class: ExponentialFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1
-        Rate: 1.2
     - rid: 7490907998412603481
       type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
       data:
@@ -84,5 +81,22 @@ MonoBehaviour:
     - rid: 7490908038854606921
       type: {class: PowerFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 3
-        Power: 4
+        BaseValue: 5
+        Power: 2
+    - rid: 7490908139259166796
+      type: {class: AccumulationFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        Formulas:
+        - rid: 7490908139259166797
+        - rid: 7490908139259166798
+    - rid: 7490908139259166797
+      type: {class: StepFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 0
+        StepOn: 3
+        StepOf: 2
+    - rid: 7490908139259166798
+      type: {class: LinearFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+        Multiplier: 1

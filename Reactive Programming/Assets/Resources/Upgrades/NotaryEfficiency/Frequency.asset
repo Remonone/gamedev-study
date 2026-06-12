@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e22915f0065420693c3385ffb94a5fe, type: 3}
+  m_Name: Frequency
+  m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.LevelModifierDefinitionDefinition
+  Target: {fileID: 11400000, guid: cf0982d1e520e280681d579caf216d79, type: 2}
+  Modifier:
+    Stat: 1
+    Operation: 1
+    Value: 1
+    Priority: 1
+    ModifierId: notary_freq
+  CalculationFormula:
+    rid: 7490908139259166791
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908139259166791
+      type: {class: LinearFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1.1
+        Multiplier: 1.5

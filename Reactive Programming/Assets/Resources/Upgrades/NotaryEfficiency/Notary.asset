@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Notary
   m_EditorClassIdentifier: Assembly-CSharp::Types.Upgrades.UpgradeNodeDefinition
   Effects:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 66dd4d349b4d4db5a9ff42e2ec87e4b5, type: 2}
   Price:
     _costItems:
     - Condition:

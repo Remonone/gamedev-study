@@ -13,26 +13,26 @@ namespace Services {
         private readonly BuildingUpgradeService _buildingUpgradeService;
         private readonly BuildingWatcherService _buildingWatcherService;
         private readonly Storage _storage;
-        
-        private readonly Dictionary<string, List<StatModifier>> _statModifiers;
+        private readonly ProviderRegistryService _providerRegistryService;
         
         private Subject<BuildingUpdate> _buildingUpdate = new();
+        
         public Observable<BuildingUpdate> BuildingUpdate => _buildingUpdate;
         
-        public EconomyService(SessionContext sessionContext, Storage storage, BuildingWatcherService watcherService, BuildingUpgradeService buildingUpgradeService) {
+        public EconomyService(SessionContext sessionContext, Storage storage, BuildingWatcherService watcherService, BuildingUpgradeService buildingUpgradeService, ProviderRegistryService providerRegistryService) {
             _sessionContext = sessionContext;
             _buildingWatcherService = watcherService;
             _buildingUpgradeService = buildingUpgradeService;
+            _providerRegistryService = providerRegistryService;
             _storage = storage;
             _statResolver = new StatResolver();
-            _statModifiers = new Dictionary<string, List<StatModifier>>();
         }
 
         public ComputedStats ComputeStatsForBuilding(BuildingState building) {
             if(!building.IsDirty) return building.Cache;
-            var name = building.Definition.Name;
-            VerifyName(name);
-            building.Cache = _statResolver.Resolve(building, _statModifiers[name]);
+            var modifiers = new List<StatModifier>();
+            _providerRegistryService.FetchModifiers(_sessionContext, building, modifiers);
+            building.Cache = _statResolver.Resolve(building, modifiers);
             building.IsDirty = false;
             _buildingUpdate.OnNext(new BuildingUpdate(building, building.Cache));
             return building.Cache;
@@ -48,11 +48,6 @@ namespace Services {
         private bool ValidateCost(BuildingState building) {
             if (building == null) return false;
             return _storage.CanAfford(building.Cache.Cost);
-        }
-
-        private void VerifyName(string name) {
-            _statModifiers.TryAdd(name, new List<StatModifier>());
-            _statModifiers[name].Clear();
         }
     }
 }

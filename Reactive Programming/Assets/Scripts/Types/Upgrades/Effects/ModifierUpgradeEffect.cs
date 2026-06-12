@@ -1,14 +1,11 @@
 using System.Collections.Generic;
-using Economy.Rules;
-using Types.Economy;
+using Types.Modifiers;
+using UnityEngine;
 
 namespace Types.Upgrades.Effects {
     
+    [CreateAssetMenu(fileName = "Modifier Upgrade Effect", menuName = "Clicker/Upgrade Effect/Modifier Upgrade Effect", order = 0)]
     public class ModifierUpgradeEffect : UpgradeEffect {
-
-        public List<ModifierRule> _rules;
-        
-        public override void Apply(SessionContext context) { 
-        }
+        public List<ModifierDefinition> Rules;
     }
 }

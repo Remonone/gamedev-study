@@ -29,7 +29,8 @@ namespace Components {
             .Where(clickedObject => clickedObject != null)
             .Select(clickedObject => clickedObject.GetComponent<Structure>())
             .Where(structure => structure != null)
-            .Subscribe(clickedObject => _structureTypeSubject.OnNext(clickedObject.Type))
+            .Subscribe(clickedObject => 
+                _structureTypeSubject.OnNext(clickedObject.Type))
             .AddTo(this);
         }
 

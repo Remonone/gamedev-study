@@ -1,19 +1,24 @@
-using Types.Economy;
+using System;
+using Types.Buildings;
 using Types.Economy.Modifiers;
 using Types.Economy.Modifiers.Target;
+using Types.Modifiers.Context;
+using UnityEngine;
 
 namespace Types.Modifiers {
-    
-    public interface IContext {}
-    
-    public abstract class ModifierDefinition<T> where T : IContext {
-        public string Id;
-        public StatType Stat;
-        public ModifierOp Operation;
-        public float Value;
-        public int Priority;
-        public ModifierTarget Target;
+    public abstract class ModifierDefinition : ScriptableObject {
         
-        public abstract StatModifier? Resolve(T context);
+        public ModifierTarget Target;
+        public StatModifier Modifier;
+        
+        protected abstract bool CanResolve(IModifierContext context);
+
+        public StatModifier? Resolve(BuildingState state, IModifierContext context) {
+            if (!CanResolve(context))
+                throw new InvalidOperationException(
+                    $"Cannot resolve context: {context.ToString()} for {GetType().Name}");
+            return ResolveInternal(state, context);
+        }
+        protected abstract StatModifier? ResolveInternal(BuildingState state, IModifierContext context);
     }
 }

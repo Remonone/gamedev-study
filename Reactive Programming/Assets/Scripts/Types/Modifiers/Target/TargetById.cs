@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Types.Economy.Modifiers.Target {
     
-    [CreateAssetMenu(fileName = "TypeTarget", menuName = "Clicker/Modifiers/Target By Type", order = 0)]
+    [CreateAssetMenu(fileName = "TypeTarget", menuName = "Clicker/Modifiers/Target/By Id", order = 0)]
     public class TargetById : ModifierTarget {
 
         public string Name;

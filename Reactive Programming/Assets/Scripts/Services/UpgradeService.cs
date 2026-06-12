@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Economy.Providers;
 using Services.Player;
 using R3;
 using Types.Economy;
@@ -14,13 +15,15 @@ namespace Services {
         private readonly Dictionary<string, ReactiveProperty<UpgradeNodeState>> _upgrades;
         private readonly Dictionary<string, List<string>> _parentIdsByChildId;
         private readonly Storage _storage;
-        private readonly SessionContext _sessionContext;
+        private readonly ProviderRegistryService _providerRegistryService;
+        private readonly InvalidationService _invalidationService;
 
         public Observable<Wallet> AffordabilityChanged => _storage.StructureMoney;
 
-        public UpgradeService(Storage storage, SessionContext sessionContext) {
+        public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService) {
             _storage = storage;
-            _sessionContext = sessionContext;
+            _providerRegistryService = providerRegistryService;
+            _invalidationService = invalidationService;
             _upgrades = new Dictionary<string, ReactiveProperty<UpgradeNodeState>>();
             _parentIdsByChildId = new Dictionary<string, List<string>>();
 
@@ -76,23 +79,39 @@ namespace Services {
             }
 
             _storage.Spend(ResolvePrice(state));
-
-            foreach (var effect in state.Definition.Effects ?? Enumerable.Empty<UpgradeEffect>()) {
-                effect?.Apply();
-            }
-
-            var nextLevel = state.Level + 1;
-            var maxLevel = GetMaxLevel(state.Definition);
-            var nextState = nextLevel >= maxLevel
+            
+            var updatedState = new UpgradeNodeState(state);
+            updatedState.Level++;
+            var maxLevel = GetMaxLevel(updatedState.Definition);
+            updatedState.CurrentState = updatedState.Level >= maxLevel
                 ? UpgradeNodeState.State.Completed
                 : UpgradeNodeState.State.InProgress;
 
-            PublishState(id, new UpgradeNodeState(state.Definition, nextLevel, nextState));
+            ApplyUpgrade(updatedState);
+            
+            PublishState(id, updatedState);
 
             RefreshChildAvailability(state.Definition);
             
 
             return true;
+        }
+
+        private void ApplyUpgrade(UpgradeNodeState updatedState) {
+            var provider = _providerRegistryService.GetProvider<UpgradeModifierProvider>();
+            provider.AddOrUpdate(updatedState);
+
+            foreach (var effect in updatedState.Definition.Effects) {
+                if (effect is not ModifierUpgradeEffect modifier) continue;
+
+                var definitions = modifier.Rules
+                    .Where(rule => rule?.Target != null)
+                    .ToList();
+                
+                foreach (var definition in definitions) {
+                    _invalidationService.MarkDirtyByTarget(definition.Target);
+                }
+            }
         }
 
         private void BuildDependencyIndex() {
