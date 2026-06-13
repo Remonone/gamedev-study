@@ -29,14 +29,16 @@ namespace Components {
             var storage = new Storage();
             var sessionContext = new SessionContext();
             var providerRegistry = new ProviderRegistryService();
+            var unlockService = new UnlockService();
             UploadProviders(providerRegistry);
             
             
             RegisterService(storage);
             RegisterService(_worldCastService);
             RegisterService(providerRegistry);
+            RegisterService(unlockService);
             
-            RegisterService(new StructureClickService(storage, _worldCastService));
+            RegisterService(new StructureClickService(storage, _worldCastService, unlockService));
             RegisterService(new StructureSoundResolver(_structureSoundConfig));
             
             var buildingDefinitions = FetchBuildingDefinitions();
@@ -46,7 +48,7 @@ namespace Components {
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
             RegisterService(invalidationService);
             
-            RegisterService(new UpgradeService(storage, providerRegistry, invalidationService));
+            RegisterService(new UpgradeService(storage, providerRegistry, invalidationService, unlockService));
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 

@@ -10,36 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
-  m_Name: Notary
+  m_Name: Upgrade
   m_EditorClassIdentifier: Assembly-CSharp::Types.Upgrades.UpgradeNodeDefinition
   Effects:
-  - {fileID: 11400000, guid: 66dd4d349b4d4db5a9ff42e2ec87e4b5, type: 2}
+  - {fileID: 11400000, guid: eb0a938fbd85daa42bdae05ece5c6a07, type: 2}
   Price:
     _costItems:
     - Condition:
-        rid: 7490908066359803978
+        rid: 7490908157867196490
       Formula:
-        rid: 7490908066359803979
+        rid: 7490908157867196491
       Type: 0
-  MaxLevel: 5
-  Position: {x: 100, y: 100}
-  Id: notary_speed
-  Name: Notary Efficiency
-  Icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  Description: Test
-  NodeCategory: 0
-  ChildIds:
-  - notary_income
-  - firefighter_unlock
+  MaxLevel: 1
+  Position: {x: 150, y: 50}
+  Id: firefighter_unlock
+  Name: Unlock Firefighter Station
+  Icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  Description: This is a firefighter station
+  NodeCategory: 1
+  ChildIds: []
   references:
     version: 2
     RefIds:
-    - rid: 7490908066359803978
+    - rid: 7490908157867196490
       type: {class: ConstCondition, ns: Types.Economy.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
-    - rid: 7490908066359803979
-      type: {class: PowerFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908157867196491
+      type: {class: ConstantFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1000
-        Power: 2
+        BaseValue: 150000

@@ -19,13 +19,16 @@ namespace Services {
         private readonly Storage _storage;
         private readonly ProviderRegistryService _providerRegistryService;
         private readonly InvalidationService _invalidationService;
+        private readonly UnlockService _unlockService;
 
         public Observable<Wallet> AffordabilityChanged => _storage.StructureMoney;
 
-        public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService) {
+        public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService, UnlockService unlockService) {
             _storage = storage;
             _providerRegistryService = providerRegistryService;
             _invalidationService = invalidationService;
+            _unlockService = unlockService;
+            
             _upgrades = new Dictionary<string, ReactiveProperty<UpgradeNodeState>>();
             _parentIdsByChildId = new Dictionary<string, List<string>>();
 
@@ -100,13 +103,32 @@ namespace Services {
         }
 
         private void ApplyUpgrade(UpgradeNodeState updatedState) {
+            if (UpgradeNodeDefinition.Category.Buff.Equals(updatedState.Definition.NodeCategory)) {
+                ApplyModifiers(updatedState);
+            }
+
+            if (UpgradeNodeDefinition.Category.Unlock.Equals(updatedState.Definition.NodeCategory)) {
+                UnlockItem(updatedState);
+            }
+        }
+
+        private void UnlockItem(UpgradeNodeState updatedState) {
+            foreach (var effect in updatedState.Definition.Effects
+                         .Select(effect => effect as UnlockUpgrade)
+                         .Where(effect => effect != null)) {
+                _unlockService.UnlockItem(effect.UnlockId);
+            }
+        }
+
+        private void ApplyModifiers(UpgradeNodeState updatedState) {
             var provider = _providerRegistryService.GetProvider<UpgradeModifierProvider>();
             provider.AddOrUpdate(updatedState);
 
-            foreach (var effect in updatedState.Definition.Effects) {
-                if (effect is not ModifierUpgradeEffect modifier) continue;
+            foreach (var effect in updatedState.Definition.Effects
+                         .Select(effect => effect as ModifierUpgradeEffect)
+                         .Where(effect => effect != null)) {
 
-                var definitions = modifier.Rules
+                var definitions = effect.Rules
                     .Where(rule => rule?.Target != null)
                     .ToList();
                 
