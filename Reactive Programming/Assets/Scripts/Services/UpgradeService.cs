@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Economy.Providers;
+using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
+using Save;
 using Types.Economy;
 using Types.Economy.Cost;
 using Types.Upgrades;
@@ -10,7 +12,7 @@ using Types.Upgrades.Effects;
 using UnityEngine;
 
 namespace Services {
-    public class UpgradeService : IService {
+    public class UpgradeService : IService, ISaveable {
 
         private readonly Dictionary<string, ReactiveProperty<UpgradeNodeState>> _upgrades;
         private readonly Dictionary<string, List<string>> _parentIdsByChildId;
@@ -205,6 +207,42 @@ namespace Services {
 
         private static int GetMaxLevel(UpgradeNodeDefinition definition) {
             return Mathf.Max(1, definition.MaxLevel);
+        }
+
+        public string SaveKey => "Upgrades";
+        public int Priority => 90;
+        public JToken Save() {
+            var upgrades = _upgrades.Values
+                .Select(upgrade => upgrade.Value)
+                .Where(upgrade => upgrade.Level > 0)
+                .ToList();
+
+            return new JObject(
+                new JProperty("activeUpgrades", new JArray(
+                    from upgrade in upgrades
+                    select new JObject(
+                        new JProperty("upgradeId", upgrade.Definition.Id),
+                        new JProperty("level", upgrade.Level)
+                    )
+                ))
+            );
+        }
+
+        public void Load(JToken data) {
+            if (data?["activeUpgrades"] is JArray upgrades) {
+                foreach (var upgradeData in upgrades.OfType<JObject>()) {
+                    if (upgradeData["upgradeId"] == null ||
+                        upgradeData["level"] == null) {
+                        continue;
+                    }
+                    var upgrade = _upgrades[upgradeData["upgradeId"].Value<string>()].Value;
+                    var updatedUpgrade = new UpgradeNodeState(upgrade);
+                    updatedUpgrade.Level = upgradeData["level"].Value<int>();
+                    ApplyUpgrade(upgrade);
+                    PublishState(upgrade.Definition.Id, updatedUpgrade);
+                }
+                
+            }
         }
     }
 }
