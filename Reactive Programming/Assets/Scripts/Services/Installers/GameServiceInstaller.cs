@@ -7,6 +7,7 @@ using Components.Instances;
 using Economy.Providers;
 using Services.Player;
 using Services;
+using Services.Statistics;
 using Types.Economy;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,6 +25,7 @@ namespace Components {
         
         private BuildingWatcherService _buildingWatcherService;
         private EconomyService _economyService;
+        private StatisticsService _statisticsService;
         
         protected override void InstallServices() {
             var storage = new Storage();
@@ -62,6 +64,19 @@ namespace Components {
             RegisterService(saveService);
             
             InitViews();
+            InitStatistics();
+            InitTrackers();
+        }
+
+        private void InitStatistics() {
+            _statisticsService = new StatisticsService();
+            StatisticsRegistry.RegisterStatistics(_statisticsService);
+        }
+
+        private void InitTrackers() {
+            var trackers = TrackersCollector.Collect(_statisticsService);
+            var trackerService = new StatisticsTrackingService(trackers);
+            trackerService.Start();
         }
 
         private void UploadProviders(ProviderRegistryService providerRegistry) {
