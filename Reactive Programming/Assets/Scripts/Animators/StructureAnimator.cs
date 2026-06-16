@@ -4,7 +4,7 @@ using Components;
 using Components.Instances;
 using DG.Tweening;
 using R3;
-using Types;
+using Types.Enums;
 using UnityEngine;
 
 namespace Animators {

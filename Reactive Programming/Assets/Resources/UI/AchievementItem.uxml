@@ -5,6 +5,7 @@
             <ui:VisualElement class="achievement-item__text">
                 <ui:Label text="Achievement Name" name="Name" class="achievement-item__name"/>
                 <ui:Label text="Achievement Description" name="Description" class="achievement-item__description"/>
+                <ui:ProgressBar value="22" title="my-progress" name="Progress"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:Label text="Reward" name="Reward" class="achievement-item__reward"/>

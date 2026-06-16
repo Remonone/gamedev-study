@@ -17,9 +17,9 @@ MonoBehaviour:
   Price:
     _costItems:
     - Condition:
-        rid: 7490908066359803978
+        rid: 7490908207531163746
       Formula:
-        rid: 7490908066359803979
+        rid: 7490908207531163747
       Type: 0
   MaxLevel: 5
   Position: {x: 100, y: 100}
@@ -34,12 +34,23 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 7490908066359803978
-      type: {class: ConstCondition, ns: Types.Economy.Cost.Condition, asm: Assembly-CSharp}
+    - rid: 7490908207531163746
+      type: {class: ConstCondition, ns: Types.Enums.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
-    - rid: 7490908066359803979
-      type: {class: PowerFormula, ns: Types.Economy.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908207531163747
+      type: {class: AccumulationFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        Formulas:
+        - rid: 7490908207531163748
+        - rid: 7490908207531163749
+    - rid: 7490908207531163748
+      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1000
-        Power: 2
+    - rid: 7490908207531163749
+      type: {class: StepFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 0
+        StepOn: 1
+        StepOf: 1500

@@ -1,6 +1,6 @@
-using Types.Economy.Modifiers.Target;
+using Types.Enums.Target;
 
-namespace Types.Economy.Modifiers {
+namespace Types.Enums {
     [System.Serializable]
     public struct StatModifier {
         public StatType Stat;

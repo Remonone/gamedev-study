@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Types.Economy.Cost {
+namespace Types.Enums.Cost {
     public struct Price {
         public Entry[] Entries;
 

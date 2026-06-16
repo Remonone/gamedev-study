@@ -1,7 +1,7 @@
-using Types.Buildings;
+using Types.Enums.Buildings;
 using UnityEngine;
 
-namespace Types.Economy.Modifiers.Target {
+namespace Types.Enums.Target {
     public abstract class ModifierTarget : ScriptableObject {
         public abstract bool Matches(BuildingState building);
     }

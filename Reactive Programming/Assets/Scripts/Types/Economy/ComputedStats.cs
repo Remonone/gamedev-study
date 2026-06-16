@@ -1,6 +1,6 @@
-using Types.Economy.Cost;
+using Types.Enums.Cost;
 
-namespace Types.Economy {
+namespace Types.Enums {
     public struct ComputedStats {
         public float Income;
         public float Frequency;

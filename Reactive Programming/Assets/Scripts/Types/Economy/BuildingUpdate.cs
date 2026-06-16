@@ -1,6 +1,6 @@
-using Types.Buildings;
+using Types.Enums.Buildings;
 
-namespace Types.Economy {
+namespace Types.Enums {
     public readonly struct BuildingUpdate {
         public readonly BuildingState Building;
         public readonly ComputedStats Stats;

@@ -1,3 +1,3 @@
-namespace Types.Modifiers.Context {
+namespace Types.Enums.Context {
     public record LevelCapability(int Level);
 }

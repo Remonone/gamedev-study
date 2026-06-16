@@ -1,14 +1,5 @@
 
-namespace Types {
-     public enum StructureType {
-          MayorOffice,
-          Court,
-          FireFighterStation,
-          PoliceStation,
-          Hospital,
-          Archive,
-     }
-
+namespace Types.Enums {
      public struct StructureInteraction {
           public StructureType Structure;
           public int InteractionResult;

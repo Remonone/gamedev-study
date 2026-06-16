@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Types.Economy.Cost.Formula {
+namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class ComplexFormula : IFormula {
         

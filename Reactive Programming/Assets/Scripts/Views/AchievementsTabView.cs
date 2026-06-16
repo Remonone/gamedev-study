@@ -11,6 +11,7 @@ namespace Views {
         private readonly VisualTreeAsset _itemTemplate;
 
         private CompositeDisposable _disposable = new();
+        private readonly List<AchievementItemView> _itemViews = new();
         private AchievementsTabViewModel _viewModel;
 
         public AchievementsTabView(VisualElement root, VisualTreeAsset itemTemplate) {
@@ -33,10 +34,12 @@ namespace Views {
         }
 
         public void Dispose() {
+            DisposeItemViews();
             _disposable.Dispose();
         }
 
-        private void RenderAchievements(IReadOnlyList<AchievementViewData> achievements) {
+        private void RenderAchievements(IReadOnlyList<AchievementItemViewModel> achievements) {
+            DisposeItemViews();
             _list.Clear();
 
             if (achievements == null || achievements.Count == 0) {
@@ -51,7 +54,15 @@ namespace Views {
                 var itemView = new AchievementItemView(itemRoot);
                 itemView.Bind(achievement, OnAchievementClicked);
                 _list.Add(itemRoot);
+                _itemViews.Add(itemView);
             }
+        }
+
+        private void DisposeItemViews() {
+            foreach (var view in _itemViews) {
+                view.Dispose();
+            }
+            _itemViews.Clear();
         }
 
         private VisualElement CreateAchievementRoot() {
@@ -65,33 +76,30 @@ namespace Views {
             var header = new VisualElement();
             header.AddToClassList("achievement-item__header");
 
-            var icon = new VisualElement();
-            icon.name = "Icon";
+            var icon = new VisualElement { name = "Icon" };
             icon.AddToClassList("achievement-item__icon");
 
             var textWrap = new VisualElement();
             textWrap.AddToClassList("achievement-item__text");
 
-            var name = new Label {
-                name = "Name"
-            };
+            var name = new Label { name = "Name" };
             name.AddToClassList("achievement-item__name");
 
-            var description = new Label {
-                name = "Description"
-            };
+            var description = new Label { name = "Description" };
             description.AddToClassList("achievement-item__description");
 
-            var reward = new Label {
-                name = "Reward"
-            };
+            var reward = new Label { name = "Reward" };
             reward.AddToClassList("achievement-item__reward");
+
+            var progress = new ProgressBar { name = "Progress" };
+            progress.AddToClassList("achievement-item__progress");
 
             textWrap.Add(name);
             textWrap.Add(description);
             header.Add(icon);
             header.Add(textWrap);
             root.Add(header);
+            root.Add(progress);
             root.Add(reward);
 
             return root;

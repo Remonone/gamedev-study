@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Types.Buildings;
-using Types.Economy;
-using Types.Economy.Cost;
-using Types.Economy.Modifiers;
+using Types.Enums.Buildings;
+using Types.Enums;
+using Types.Enums.Cost;
 using UnityEngine;
 
 namespace Economy {

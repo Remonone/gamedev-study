@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Types {
+namespace Types.Enums {
      public class Structure : MonoBehaviour, IStructure {
         [SerializeField] private StructureType _type;
 

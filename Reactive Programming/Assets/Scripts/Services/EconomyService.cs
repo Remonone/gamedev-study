@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Types.Buildings;
+using Types.Enums.Buildings;
 using Economy;
 using Services.Player;
 using R3;
-using Types.Economy;
-using Types.Economy.Modifiers;
+using Types.Enums;
 
 namespace Services {
     public class EconomyService : IService {

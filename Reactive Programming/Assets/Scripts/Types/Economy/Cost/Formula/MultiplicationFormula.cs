@@ -1,6 +1,6 @@
 using System;
 
-namespace Types.Economy.Cost.Formula {
+namespace Types.Enums.Cost.Formula {
     
     [Serializable]
     public class MultiplicationFormula : IFormula {

@@ -1,5 +1,5 @@
 using LevelConditionSerialization.UIElements;
-using Types.Economy.Cost.Condition;
+using Types.Enums.Cost.Condition;
 using UnityEditor;
 using UnityEngine.UIElements;
 

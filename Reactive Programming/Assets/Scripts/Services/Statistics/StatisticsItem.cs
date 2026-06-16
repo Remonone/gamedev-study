@@ -19,9 +19,10 @@ namespace Services.Statistics {
 
         public Observable<T> Changed => _value;
         
-        public StatisticsItem(string id, T initialValue) {
+        public StatisticsItem(string id, T initialValue, bool isPersistent) {
             Id = id;
             _value = new ReactiveProperty<T>(initialValue);
+            IsPersistent = isPersistent;
         }
         
         public void SetValue(T value) {

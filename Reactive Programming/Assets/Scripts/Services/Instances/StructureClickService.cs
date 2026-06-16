@@ -1,7 +1,7 @@
 using Services.Player;
 using R3;
 using Services;
-using Types;
+using Types.Enums;
 
 namespace Components.Instances {
     public class StructureClickService : IService {

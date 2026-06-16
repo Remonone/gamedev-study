@@ -1,11 +1,11 @@
 using System;
-using Types.Buildings;
-using Types.Economy.Modifiers;
-using Types.Economy.Modifiers.Target;
-using Types.Modifiers.Context;
+using Types.Enums.Buildings;
+using Types.Enums.Context;
+using Types.Enums;
+using Types.Enums.Target;
 using UnityEngine;
 
-namespace Types.Modifiers {
+namespace Types.Enums {
     public abstract class ModifierDefinition : ScriptableObject {
         
         public ModifierTarget Target;

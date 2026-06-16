@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using R3;
 using Services;
-using Types.Economy.Cost;
-using Types.Upgrades;
+using Types.Enums.Cost;
+using Types.Enums.Upgrades;
 using UnityEngine;
 
 namespace Views.Models {

@@ -1,9 +1,8 @@
-using Types;
-using Types.Economy.Cost;
-using Types.Economy.Cost.Formula;
+using Types.Enums.Cost;
+using Types.Enums.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Buildings {
+namespace Types.Enums.Buildings {
     [CreateAssetMenu(fileName = "Building", menuName = "Clicker/Building", order = 0)]
     public class BuildingDefinition : ScriptableObject {
         public string Name;

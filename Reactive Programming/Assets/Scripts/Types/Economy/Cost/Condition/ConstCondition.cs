@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Types.Economy.Cost.Condition {
+namespace Types.Enums.Cost.Condition {
     [Serializable]
     public class ConstCondition : ILevelCondition {
         [SerializeField] private bool _constant;

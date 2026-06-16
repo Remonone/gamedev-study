@@ -1,11 +1,10 @@
 using Economy.Conditions;
-using Types.Buildings;
-using Types.Economy;
-using Types.Economy.Modifiers;
-using Types.Modifiers.Context;
+using Types.Enums;
+using Types.Enums.Buildings;
+using Types.Enums.Context;
 using UnityEngine;
 
-namespace Types.Modifiers {
+namespace Types.Enums {
     [CreateAssetMenu(fileName = "RuleModifierDefinition", menuName = "Clicker/Modifiers/Rule Modifier Definition", order = 0)]
     public class RuleModifierDefinition : ModifierDefinition{
         [SerializeReference] public ConditionAsset[] Conditions;

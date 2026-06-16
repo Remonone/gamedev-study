@@ -1,11 +1,9 @@
 using System.Collections.Generic;
-using Types.Buildings;
-using Types.Economy;
-using Types.Economy.Modifiers;
-using Types.Modifiers;
-using Types.Modifiers.Context;
-using Types.Upgrades;
-using Types.Upgrades.Effects;
+using Types.Enums.Buildings;
+using Types.Enums;
+using Types.Enums.Context;
+using Types.Enums.Upgrades;
+using Types.Enums.Upgrades.Effects;
 
 namespace Economy.Providers {
     public class UpgradeModifierProvider : IModifierProvider {

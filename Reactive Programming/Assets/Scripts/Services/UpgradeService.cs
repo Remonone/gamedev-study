@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
 using Save;
-using Types.Economy;
-using Types.Economy.Cost;
-using Types.Upgrades;
-using Types.Upgrades.Effects;
+using Types.Enums;
+using Types.Enums.Cost;
+using Types.Enums.Upgrades;
+using Types.Enums.Upgrades.Effects;
 using UnityEngine;
 
 namespace Services {

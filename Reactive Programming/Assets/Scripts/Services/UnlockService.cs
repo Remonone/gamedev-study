@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Types;
+using Types.Enums;
 using UnityEngine;
 
 namespace Services {

@@ -2,7 +2,8 @@ using System;
 using Components;
 using Services.Player;
 using R3;
-using Types;
+using Services.Achievements;
+using Types.Enums;
 
 namespace Views.Models {
   public class Controls : IDisposable {
@@ -12,7 +13,7 @@ namespace Views.Models {
 
         public BuildingShopTabViewModel BuildingShopTab = new();
         public UpgradesTabViewModel UpgradesTab = new();
-        public AchievementsTabViewModel AchievementsTab = new();
+        public AchievementsTabViewModel AchievementsTab;
         public ArtifactsTabViewModel ArtifactsTab = new();
 
         public ReactiveProperty<long> DocumentsCount = new ReactiveProperty<long>(0);
@@ -24,6 +25,8 @@ namespace Views.Models {
 
         public Controls() {
             _storage = ServiceLocator.Instance.GetService<Storage>();
+
+            AchievementsTab = new AchievementsTabViewModel(ServiceLocator.Instance.GetService<AchievementService>());
 
             _storage.ObserveByType(StructureType.MayorOffice)
                 .Subscribe(update => DocumentsCount.Value = update)

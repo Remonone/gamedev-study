@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Economy.Providers;
-using Types.Buildings;
-using Types.Economy;
-using Types.Economy.Modifiers;
+using Types.Enums.Buildings;
+using Types.Enums;
 
 namespace Services {
     public class ProviderRegistryService : IService {

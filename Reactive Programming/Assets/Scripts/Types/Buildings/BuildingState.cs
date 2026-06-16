@@ -1,8 +1,8 @@
-using Types.Economy;
-using Types.Economy.Cost;
+using Types.Enums;
+using Types.Enums.Cost;
 using UnityEngine;
 
-namespace Types.Buildings {
+namespace Types.Enums.Buildings {
     public sealed class BuildingState {
         public BuildingDefinition Definition;
         public int Level;

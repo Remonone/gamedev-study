@@ -1,5 +1,5 @@
 using R3;
-using Types;
+using Types.Enums;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Views.Models;

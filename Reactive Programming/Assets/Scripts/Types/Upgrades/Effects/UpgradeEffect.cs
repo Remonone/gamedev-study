@@ -1,7 +1,7 @@
-using Types.Economy;
+using Types.Enums;
 using UnityEngine;
 
-namespace Types.Upgrades.Effects {
+namespace Types.Enums.Upgrades.Effects {
     public abstract class UpgradeEffect : ScriptableObject {
     }
 }

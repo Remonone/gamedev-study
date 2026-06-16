@@ -1,4 +1,4 @@
-namespace Types.Economy {
+namespace Types.Enums {
     public struct Wallet {
         public long MayorWallet;
         public long FirefighterWallet;

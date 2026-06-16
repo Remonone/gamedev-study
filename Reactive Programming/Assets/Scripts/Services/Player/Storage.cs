@@ -4,9 +4,8 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using R3;
 using Save;
-using Types;
-using Types.Economy;
-using Types.Economy.Cost;
+using Types.Enums;
+using Types.Enums.Cost;
 
 namespace Services.Player {
     public class Storage : IService, ISaveable {

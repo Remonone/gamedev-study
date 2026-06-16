@@ -1,10 +1,10 @@
-using Types.Buildings;
-using Types.Economy.Cost.Formula;
-using Types.Economy.Modifiers;
-using Types.Modifiers.Context;
+using Types.Enums.Buildings;
+using Types.Enums.Context;
+using Types.Enums.Cost.Formula;
+using Types.Enums;
 using UnityEngine;
 
-namespace Types.Modifiers {
+namespace Types.Enums {
     [CreateAssetMenu(fileName = "LevelModifierDefinition", menuName = "Clicker/Modifiers/Level Modifier Definition", order = 0)]
     public class LevelModifierDefinitionDefinition : ModifierDefinition {
         [SerializeReference] public IFormula CalculationFormula;

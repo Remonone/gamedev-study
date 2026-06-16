@@ -1,4 +1,4 @@
-namespace Types.Economy {
+namespace Types.Enums {
     public enum StatType {
         Income,
         Frequency,

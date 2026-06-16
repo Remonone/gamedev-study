@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Types.Economy.Cost.Condition;
-using Types.Economy.Cost.Formula;
+using Types.Enums.Cost.Condition;
+using Types.Enums.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Economy.Cost {
+namespace Types.Enums.Cost {
     [Serializable]
     public class CostResolver {
         [SerializeField] private List<CostItem> _costItems;

@@ -1,6 +1,5 @@
-using Types.Buildings;
-using Types;
-using Types.Economy;
+using Types.Enums.Buildings;
+using Types.Enums;
 using UnityEngine;
 
 namespace Economy.Conditions.Implementation {

@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Audio.Implementation;
-using Types.Buildings;
-using Types.Objects;
+using Types.Enums.Buildings;
+using Types.Enums.Objects;
 using Components.Instances;
 using Economy.Providers;
 using Services.Player;
 using Services;
+using Services.Achievements;
 using Services.Statistics;
-using Types.Economy;
+using Types.Enums;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Views;
@@ -63,20 +64,30 @@ namespace Components {
             var saveService = new SaveService(SaveManager);
             RegisterService(saveService);
             
-            InitViews();
             InitStatistics();
+            InitAchievements();
             InitTrackers();
+            InitViews();
+        }
+
+        private void InitAchievements() {
+            var achievements = AchievementsCollector.Collect(_statisticsService);
+            var achievementService = new AchievementService(achievements);
+            RegisterService(achievementService);
+            achievementService.Start();
         }
 
         private void InitStatistics() {
             _statisticsService = new StatisticsService();
             StatisticsRegistry.RegisterStatistics(_statisticsService);
+            RegisterService(_statisticsService);
         }
 
         private void InitTrackers() {
             var trackers = TrackersCollector.Collect(_statisticsService);
             var trackerService = new StatisticsTrackingService(trackers);
             trackerService.Start();
+            RegisterService(trackerService);
         }
 
         private void UploadProviders(ProviderRegistryService providerRegistry) {

@@ -9,13 +9,13 @@ namespace Services.Statistics {
         
         private Dictionary<string, IStatisticsItem> _statisticsItems = new();
 
-        public void Register<T>(StatisticKey<T> key, T initialValue = default) {
+        public void Register<T>(StatisticKey<T> key, T initialValue = default, bool isPersistent = true) {
             ValidateKey(key.Id);
             
             if (_statisticsItems.ContainsKey(key.Id)) {
                 throw new ArgumentException($"Statistic '{key.Id}' already registered.");
             }
-            _statisticsItems.Add(key.Id, new StatisticsItem<T>(key.Id, initialValue));
+            _statisticsItems.Add(key.Id, new StatisticsItem<T>(key.Id, initialValue, isPersistent));
         }
 
         public bool IsRegistered<T>(StatisticKey<T> key) {
@@ -103,7 +103,7 @@ namespace Services.Statistics {
             if (values == null)
                 return;
             foreach (var item in values.Properties()) {
-                var id = item.Value<string>("id");
+                var id = item.Name;
                 if (!_statisticsItems.TryGetValue(id, out var statisticItem))
                     continue;
                 if (!statisticItem.IsPersistent) continue;

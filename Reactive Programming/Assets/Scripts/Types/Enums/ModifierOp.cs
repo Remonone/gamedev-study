@@ -1,4 +1,4 @@
-namespace Types.Economy.Modifiers {
+namespace Types.Enums {
     public enum ModifierOp {
         AddFlat,
         AddPercent,

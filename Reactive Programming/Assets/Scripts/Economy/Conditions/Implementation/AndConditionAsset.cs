@@ -1,6 +1,6 @@
-using Types.Buildings;
+using Types.Enums.Buildings;
 using JetBrains.Annotations;
-using Types.Economy;
+using Types.Enums;
 using UnityEngine;
 
 namespace Economy.Conditions.Implementation {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Types.Economy {
+namespace Types.Enums {
     public sealed class SessionContext {
         
     }
