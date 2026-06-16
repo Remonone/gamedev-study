@@ -21,10 +21,10 @@ namespace Components.Instances {
             _unlockService = unlockService;
         }
         
-        private void HandleStructureInteraction(StructureType structure) {
-            if (!_unlockService.IsItemUnlocked(structure.ToString())) return;
-            _storage.AddMoney(structure, 1);
-            _structureInteraction.OnNext(new StructureInteraction { Structure = structure, InteractionResult = 1 });
+        private void HandleStructureInteraction(GovernmentInteractionType governmentInteraction) {
+            if (!_unlockService.IsItemUnlocked(governmentInteraction.ToString())) return;
+            _storage.AddMoney(governmentInteraction, 1);
+            _structureInteraction.OnNext(new StructureInteraction { GovernmentInteraction = governmentInteraction, InteractionResult = 1 });
         }
     }
 }

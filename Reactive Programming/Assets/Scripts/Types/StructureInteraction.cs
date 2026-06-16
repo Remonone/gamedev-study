@@ -1,7 +1,7 @@
 
 namespace Types.Enums {
      public struct StructureInteraction {
-          public StructureType Structure;
+          public GovernmentInteractionType GovernmentInteraction;
           public int InteractionResult;
      }
 }

@@ -10,15 +10,15 @@ namespace Types.Enums.Cost {
 
         public override string ToString() {
             if (Entries == null || Entries.Length == 0) return "0";
-            return string.Join(" + ", Entries.Select(entry => $"{entry.Price} {entry.StructureType}"));
+            return string.Join(" + ", Entries.Select(entry => $"{entry.Price} {entry.GovernmentInteractionType}"));
         }
 
         public struct Entry {
-            public StructureType StructureType;
+            public GovernmentInteractionType GovernmentInteractionType;
             public decimal Price;
 
-            public Entry(StructureType type, decimal price) {
-                StructureType = type;
+            public Entry(GovernmentInteractionType type, decimal price) {
+                GovernmentInteractionType = type;
                 Price = price;
             }
         }

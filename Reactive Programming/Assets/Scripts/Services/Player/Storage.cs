@@ -9,39 +9,39 @@ using Types.Enums.Cost;
 
 namespace Services.Player {
     public class Storage : IService, ISaveable {
-        private static readonly IReadOnlyDictionary<StructureType, WalletAccessor> WalletAccessors =
-            new Dictionary<StructureType, WalletAccessor> {
-                [StructureType.MayorOffice] = new(
+        private static readonly IReadOnlyDictionary<GovernmentInteractionType, WalletAccessor> WalletAccessors =
+            new Dictionary<GovernmentInteractionType, WalletAccessor> {
+                [GovernmentInteractionType.MayorOffice] = new(
                     wallet => wallet.MayorWallet,
                     (wallet, value) => {
                         wallet.MayorWallet = value;
                         return wallet;
                     }),
-                [StructureType.Court] = new(
+                [GovernmentInteractionType.Court] = new(
                     wallet => wallet.CourtWallet,
                     (wallet, value) => {
                         wallet.CourtWallet = value;
                         return wallet;
                     }),
-                [StructureType.FireFighterStation] = new(
+                [GovernmentInteractionType.FireFighterStation] = new(
                     wallet => wallet.FirefighterWallet,
                     (wallet, value) => {
                         wallet.FirefighterWallet = value;
                         return wallet;
                     }),
-                [StructureType.PoliceStation] = new(
+                [GovernmentInteractionType.PoliceStation] = new(
                     wallet => wallet.PoliceWallet,
                     (wallet, value) => {
                         wallet.PoliceWallet = value;
                         return wallet;
                     }),
-                [StructureType.Hospital] = new(
+                [GovernmentInteractionType.Hospital] = new(
                     wallet => wallet.AmbulanceWallet,
                     (wallet, value) => {
                         wallet.AmbulanceWallet = value;
                         return wallet;
                     }),
-                [StructureType.Archive] = new(
+                [GovernmentInteractionType.Archive] = new(
                     wallet => wallet.ArchiveWallet,
                     (wallet, value) => {
                         wallet.ArchiveWallet = value;
@@ -53,30 +53,30 @@ namespace Services.Player {
 
         public Observable<Wallet> StructureMoney => _structureMoney;
 
-        public void AddMoney(StructureType type, long amount){
+        public void AddMoney(GovernmentInteractionType type, long amount){
             SetByType(type, GetByType(type) + amount);
         }
 
-        public long GetByType(StructureType type) => GetByType(_structureMoney.Value, type);
+        public long GetByType(GovernmentInteractionType type) => GetByType(_structureMoney.Value, type);
 
-        public Observable<long> ObserveByType(StructureType type) {
+        public Observable<long> ObserveByType(GovernmentInteractionType type) {
             return _structureMoney.Select(wallet => GetByType(wallet, type));
         }
 
         public bool CanAfford(Price price) {
             return price.Entries == null || price.Entries.All(entry =>
-                GetByType(entry.StructureType) >= NormalizePrice(entry.Price));
+                GetByType(entry.GovernmentInteractionType) >= NormalizePrice(entry.Price));
         }
 
         public void Spend(Price price) {
             if (price.Entries == null) return;
 
             foreach (var entry in price.Entries) {
-                AddMoney(entry.StructureType, -NormalizePrice(entry.Price));
+                AddMoney(entry.GovernmentInteractionType, -NormalizePrice(entry.Price));
             }
         }
 
-        private void SetByType(StructureType type, long amount) {
+        private void SetByType(GovernmentInteractionType type, long amount) {
             var accessor = GetAccessor(type);
             _structureMoney.Value = accessor.Set(_structureMoney.Value, amount);
         }
@@ -106,7 +106,7 @@ namespace Services.Player {
 
             foreach (var token in money.OfType<JObject>()) {
                 var typeName = token.Value<string>("type");
-                if (!Enum.TryParse(typeName, out StructureType structureType)) continue;
+                if (!Enum.TryParse(typeName, out GovernmentInteractionType structureType)) continue;
                 if (!WalletAccessors.ContainsKey(structureType)) continue;
 
                 var accessor = GetAccessor(structureType);
@@ -116,11 +116,11 @@ namespace Services.Player {
             _structureMoney.Value = wallet;
         }
 
-        private static long GetByType(Wallet wallet, StructureType type) {
+        private static long GetByType(Wallet wallet, GovernmentInteractionType type) {
             return GetAccessor(type).Get(wallet);
         }
 
-        private static WalletAccessor GetAccessor(StructureType type) {
+        private static WalletAccessor GetAccessor(GovernmentInteractionType type) {
             if (WalletAccessors.TryGetValue(type, out var accessor)) return accessor;
             throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }

@@ -12,7 +12,7 @@ namespace Views.Models {
     public class BuildingItemViewModel : IDisposable {
 
         private string _name;
-        private StructureType _type;
+        private GovernmentInteractionType _type;
         private CompositeDisposable _disposable = new();
         
         private EconomyService _economyService;
@@ -32,7 +32,7 @@ namespace Views.Models {
         private Storage _storage;
         private ComputedStats _lastStats;
         
-        public StructureType Type => _type;
+        public GovernmentInteractionType Type => _type;
         public string Name => _name;
         
         public BuildingItemViewModel(BuildingDefinition definition) {

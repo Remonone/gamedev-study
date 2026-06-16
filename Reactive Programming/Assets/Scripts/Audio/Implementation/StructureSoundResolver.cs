@@ -19,11 +19,11 @@ namespace Audio.Implementation {
             
             var structureClick = ServiceLocator.Instance.GetService<StructureClickService>();
             
-            structureClick.StructureInteraction.Select(interaction => interaction.Structure)
+            structureClick.StructureInteraction.Select(interaction => interaction.GovernmentInteraction)
                 .Subscribe(OnStructurePerformed).AddTo(_disposable);
         }        
         
-        private void OnStructurePerformed(StructureType interaction) {
+        private void OnStructurePerformed(GovernmentInteractionType interaction) {
             var cue = _config.Clips.Where(clip => clip.Type.Equals(interaction))
                 .Where(clip => clip.Cue.Clip != null)
                 .Select(clip => clip.Cue).FirstOrDefault();

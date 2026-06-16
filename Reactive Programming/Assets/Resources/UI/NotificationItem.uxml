@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="NotificationItem" class="notification notification--opening">
+        <ui:VisualElement name="Icon" class="notification__icon" />
+        <ui:VisualElement class="notification__text">
+            <ui:Label name="Title" class="notification__title" />
+            <ui:Label name="Message" class="notification__message" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

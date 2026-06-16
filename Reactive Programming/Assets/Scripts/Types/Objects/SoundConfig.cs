@@ -13,7 +13,7 @@ namespace Types.Enums.Objects {
 
         [Serializable]
         public struct AudioConfig {
-            public StructureType Type;
+            public GovernmentInteractionType Type;
             public AudioCue Cue;
         }
     }

@@ -10,11 +10,11 @@ namespace Components {
         [SerializeField] private LayerMask _clickableLayer;
 
         private Ray _lastRay;
-        private Subject<StructureType> _structureTypeSubject = new();
+        private Subject<GovernmentInteractionType> _structureTypeSubject = new();
         
         private RaycastHit[] _hitBuffer = new RaycastHit[2];
         
-        public Observable<StructureType> StructureClicked => _structureTypeSubject;
+        public Observable<GovernmentInteractionType> StructureClicked => _structureTypeSubject;
 
         private void Start() {
             Observable.EveryUpdate()

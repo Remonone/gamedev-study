@@ -129,4 +129,6 @@
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1;"/>
     </ui:VisualElement>
+    <ui:VisualElement name="NotificationCenter" class="notification-center"
+                      picking-mode="Ignore" />
 </ui:UXML>

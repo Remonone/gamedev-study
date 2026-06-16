@@ -5,6 +5,7 @@ using Types.Enums.Buildings;
 using Types.Enums.Objects;
 using Components.Instances;
 using Economy.Providers;
+using R3;
 using Services.Player;
 using Services;
 using Services.Achievements;
@@ -27,15 +28,18 @@ namespace Components {
         private BuildingWatcherService _buildingWatcherService;
         private EconomyService _economyService;
         private StatisticsService _statisticsService;
+        private NotificationService _notificationService;
+        private AchievementService _achievementService;
         
         protected override void InstallServices() {
             var storage = new Storage();
             var sessionContext = new SessionContext();
             var providerRegistry = new ProviderRegistryService();
             var unlockService = new UnlockService();
+            _notificationService = new NotificationService();
             UploadProviders(providerRegistry);
             
-            
+            RegisterService(_notificationService);
             RegisterService(storage);
             RegisterService(_worldCastService);
             RegisterService(providerRegistry);
@@ -68,13 +72,23 @@ namespace Components {
             InitAchievements();
             InitTrackers();
             InitViews();
+            BindNotifications();
+        }
+
+        private void BindNotifications() {
+            _achievementService.Unlocked
+                .Subscribe(achievement => _notificationService.Push(new NotificationRequest(
+                    title: "Achievement unlocked!",
+                    message: achievement.Name,
+                    type: NotificationType.Achievement
+                ))).AddTo(this);
         }
 
         private void InitAchievements() {
             var achievements = AchievementsCollector.Collect(_statisticsService);
-            var achievementService = new AchievementService(achievements);
-            RegisterService(achievementService);
-            achievementService.Start();
+            _achievementService = new AchievementService(achievements);
+            RegisterService(_achievementService);
+            _achievementService.Start();
         }
 
         private void InitStatistics() {
@@ -101,6 +115,8 @@ namespace Components {
         private void InitViews() {
             var controls = new Controls();
             _controlsView.Bind(controls);
+
+            BindNotifications(controls);
             
             var container = _document.rootVisualElement.Q<VisualElement>("BuildingList");
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
@@ -109,6 +125,16 @@ namespace Components {
                 buildingItem.Bind(buildingItemViewModel, container);
                 _economyService.ComputeStatsForBuilding(building);
             }
+            
+            
+        }
+
+        private void BindNotifications(Controls controls) {
+            var notificationContainer = _document.rootVisualElement.Q<VisualElement>("NotificationCenter");
+            var notificationTemplate = Resources.Load<VisualTreeAsset>("UI/NotificationItem");
+            var notificationView = new NotificationCenterView(notificationContainer, notificationTemplate);
+            var notificationVm = new NotificationCenterViewModel(_notificationService);
+            notificationView.Bind(notificationVm);
         }
 
         protected override void AfterInstallation() { }

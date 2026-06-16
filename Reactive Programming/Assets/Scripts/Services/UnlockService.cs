@@ -8,7 +8,7 @@ namespace Services {
 
         public UnlockService() {
             UnlockedItems = new();
-            UnlockItem(nameof(StructureType.MayorOffice));
+            UnlockItem(nameof(GovernmentInteractionType.MayorOffice));
         }
         
         public void UnlockItem(string upgradeId) {

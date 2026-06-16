@@ -64,7 +64,7 @@ namespace Views {
             _root.style.width = Length.Percent(100);
         }
 
-        private VisualElement GetCategoryByType(VisualElement container, StructureType type) {
+        private VisualElement GetCategoryByType(VisualElement container, GovernmentInteractionType type) {
             var typeName = type.ToString();
             
             return container.Q<VisualElement>(typeName);

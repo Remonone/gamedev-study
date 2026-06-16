@@ -28,27 +28,27 @@ namespace Views.Models {
 
             AchievementsTab = new AchievementsTabViewModel(ServiceLocator.Instance.GetService<AchievementService>());
 
-            _storage.ObserveByType(StructureType.MayorOffice)
+            _storage.ObserveByType(GovernmentInteractionType.MayorOffice)
                 .Subscribe(update => DocumentsCount.Value = update)
                 .AddTo(_disposable);
             
-            _storage.ObserveByType(StructureType.Court)
+            _storage.ObserveByType(GovernmentInteractionType.Court)
                 .Subscribe(update => CasesCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage.ObserveByType(StructureType.FireFighterStation)
+            _storage.ObserveByType(GovernmentInteractionType.FireFighterStation)
                 .Subscribe(update => FiresCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage.ObserveByType(StructureType.PoliceStation)
+            _storage.ObserveByType(GovernmentInteractionType.PoliceStation)
                 .Subscribe(update => ProtectionsCount.Value = update)
                 .AddTo(_disposable);
 
-            _storage.ObserveByType(StructureType.Hospital)
+            _storage.ObserveByType(GovernmentInteractionType.Hospital)
                 .Subscribe(update => CuresCount.Value = update)
                 .AddTo(_disposable);
             
-            _storage.ObserveByType(StructureType.Archive)
+            _storage.ObserveByType(GovernmentInteractionType.Archive)
                 .Subscribe(update => ArchivesCount.Value = update)
                 .AddTo(_disposable);
         }

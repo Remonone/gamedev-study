@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Animators {
     public class StructureAnimator : MonoBehaviour {
 
-        private Dictionary<StructureType, StructureConfig> _structuresByType;
+        private Dictionary<GovernmentInteractionType, StructureConfig> _structuresByType;
         
         private Vector3 _scale = new Vector3(1f, 0.8f, 1f);
 
@@ -25,7 +25,7 @@ namespace Animators {
         }
         
         private void Awake() {
-            _structuresByType = new Dictionary<StructureType, StructureConfig>();
+            _structuresByType = new Dictionary<GovernmentInteractionType, StructureConfig>();
 
             foreach (var structure in FindObjectsByType<Structure>(FindObjectsSortMode.InstanceID)) {
                 if(!structure.TryGetComponent<IStructure>(out var structureType)) {
@@ -39,8 +39,8 @@ namespace Animators {
             var service = ServiceLocator.Instance.GetService<StructureClickService>();
 
             service.StructureInteraction
-                .Where(interaction => _structuresByType.ContainsKey(interaction.Structure))
-                .Select(interaction => _structuresByType[interaction.Structure])
+                .Where(interaction => _structuresByType.ContainsKey(interaction.GovernmentInteraction))
+                .Select(interaction => _structuresByType[interaction.GovernmentInteraction])
                 .Subscribe(HandleClick).AddTo(this);
         }
         

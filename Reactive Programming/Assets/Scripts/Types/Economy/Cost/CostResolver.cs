@@ -25,7 +25,7 @@ namespace Types.Enums.Cost {
         internal sealed class CostItem {
             [SerializeReference] public ILevelCondition Condition;
             [SerializeReference] public IFormula Formula;
-            public StructureType Type;
+            public GovernmentInteractionType Type;
         }
     }
     

@@ -9,7 +9,7 @@ namespace Types.Enums.Buildings {
         [SerializeField] [TextArea(2, 4)] public string Description;
         [SerializeField] public Sprite Icon;
 		[SerializeField] public CostResolver Cost;
-        public StructureType Type;
+        public GovernmentInteractionType Type;
         [SerializeReference] public IFormula Income;
         [SerializeReference] public IFormula Frequency;
         [SerializeReference] public IFormula StabilityModifier;

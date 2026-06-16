@@ -20,7 +20,7 @@ namespace Services.Statistics.Trackers {
         
         public override void Start() {
             _structureClickService.StructureInteraction
-                .Where(interaction => StructureType.MayorOffice.Equals(interaction.Structure))
+                .Where(interaction => GovernmentInteractionType.MayorOffice.Equals(interaction.GovernmentInteraction))
                 .Subscribe(_ => Increment(StatisticKeys.MayorClicks)).AddTo(_disposable);
         }
         

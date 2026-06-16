@@ -28,7 +28,7 @@ namespace Services {
             }
         }
 
-        public void InvalidateByStructureType(StructureType type) {
+        public void InvalidateByStructureType(GovernmentInteractionType type) {
             foreach (var building in _buildings.Values) {
                 if (building.Definition.Type == type) {
                     building.IsDirty = true;

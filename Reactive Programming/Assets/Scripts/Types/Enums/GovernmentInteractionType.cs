@@ -1,5 +1,5 @@
 namespace Types.Enums {
-    public enum StructureType {
+    public enum GovernmentInteractionType {
         MayorOffice,
         Court,
         FireFighterStation,
