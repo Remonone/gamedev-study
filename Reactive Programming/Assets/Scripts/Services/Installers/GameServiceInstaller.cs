@@ -64,7 +64,7 @@ namespace Components {
             _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService, providerRegistry);
             RegisterService(_economyService);
             
-            var tickService = new TickService(_economyService, _buildingWatcherService, storage);
+            var tickService = new TickService(_economyService, _buildingWatcherService, storage, stateBenefitCalculation);
             RegisterService(tickService);
 
             var saveService = new SaveService(SaveManager);
