@@ -7,7 +7,7 @@ namespace Economy.Conditions.Implementation {
     public sealed class StructureTypeConditionAsset : ConditionAsset {
         [SerializeField] private GovernmentInteractionType _type;
 
-        public override bool Evaluate(SessionContext context, BuildingState building) {
+        public override bool Evaluate(ISessionContext context, BuildingState building) {
             return building.Definition.Type == _type;
         }
     }

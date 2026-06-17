@@ -1,4 +1,5 @@
 using System;
+using Components;
 using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
@@ -12,11 +13,13 @@ namespace Services {
         private readonly EconomyService _economyService;
         private readonly BuildingWatcherService _buildingWatcherService;
         private readonly Storage _storage;
+        private readonly StateBenefitCalculationService _stateCalculationService;
         
         public TickService(EconomyService economyService, BuildingWatcherService buildingWatcherService, Storage storage) {
             _economyService = economyService;
             _buildingWatcherService = buildingWatcherService;
             _storage = storage;
+            _stateCalculationService = ServiceLocator.Instance.GetService<StateBenefitCalculationService>();
             
             Observable.EveryUpdate()
                 .Subscribe(_ => Tick(Time.timeAsDouble))
@@ -36,7 +39,10 @@ namespace Services {
                 if (ticks <= 0) continue;
                 
                 building.LastTimeActivated += ticks * interval;
-                _storage.AddMoney(building.Definition.Type, (long)cache.Income * ticks);
+                for (int tick = 0; tick < ticks; tick++) {
+                    var income = _stateCalculationService.CalculateBenefits(building, cache.Income);
+                    _storage.AddMoney(building.Definition.Type, (long)income);
+                }
             }
         }
 

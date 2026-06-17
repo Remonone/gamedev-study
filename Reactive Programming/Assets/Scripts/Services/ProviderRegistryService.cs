@@ -23,7 +23,7 @@ namespace Services {
             _providers.Add(key, provider);
         }
 
-        public void FetchModifiers(SessionContext context, BuildingState buildingState, List<StatModifier> output) {
+        public void FetchModifiers(ISessionContext context, BuildingState buildingState, List<StatModifier> output) {
             foreach (var provider in _providers.Values) {
                 provider.Collect(context, buildingState, output);
             }

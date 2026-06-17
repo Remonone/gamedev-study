@@ -4,6 +4,6 @@ using UnityEngine;
 
 namespace Economy.Conditions {
     public abstract class ConditionAsset : ScriptableObject {
-        public abstract bool Evaluate(SessionContext context, BuildingState building);
+        public abstract bool Evaluate(ISessionContext context, BuildingState building);
     }
 }

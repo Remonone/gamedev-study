@@ -7,7 +7,7 @@ using Types.Enums;
 
 namespace Services {
     public class EconomyService : IService {
-        private readonly SessionContext _sessionContext;
+        private readonly ISessionContext _sessionContext;
         private readonly StatResolver _statResolver;
         private readonly BuildingUpgradeService _buildingUpgradeService;
         private readonly BuildingWatcherService _buildingWatcherService;
@@ -18,7 +18,7 @@ namespace Services {
         
         public Observable<BuildingUpdate> BuildingUpdate => _buildingUpdate;
         
-        public EconomyService(SessionContext sessionContext, Storage storage, BuildingWatcherService watcherService, BuildingUpgradeService buildingUpgradeService, ProviderRegistryService providerRegistryService) {
+        public EconomyService(ISessionContext sessionContext, Storage storage, BuildingWatcherService watcherService, BuildingUpgradeService buildingUpgradeService, ProviderRegistryService providerRegistryService) {
             _sessionContext = sessionContext;
             _buildingWatcherService = watcherService;
             _buildingUpgradeService = buildingUpgradeService;

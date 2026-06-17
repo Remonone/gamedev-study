@@ -8,7 +8,7 @@ using Types.Enums.Upgrades.Effects;
 namespace Economy.Providers {
     public class UpgradeModifierProvider : IModifierProvider {
         private readonly Dictionary<string, ActiveUpgradeModifiers> _activeUpgradesById = new();
-        public void Collect(SessionContext context, BuildingState building, List<StatModifier> modifiers) {
+        public void Collect(ISessionContext context, BuildingState building, List<StatModifier> modifiers) {
             foreach (var upgrade in _activeUpgradesById.Values) {
                 IModifierContext modifierContext = CollectContext(context, upgrade.Level);
                 foreach (var definition in upgrade.Definitions) {
@@ -39,7 +39,7 @@ namespace Economy.Providers {
             _activeUpgradesById[upgrade.Definition.Id] = new ActiveUpgradeModifiers(upgrade.Definition.Id, upgrade.Level, definitions);
         }
 
-        private IModifierContext CollectContext(SessionContext session, int level) {
+        private IModifierContext CollectContext(ISessionContext session, int level) {
             var context = new ModifierContext();
             context.Add(new SessionCapability(session));
             context.Add(new LevelCapability(level));

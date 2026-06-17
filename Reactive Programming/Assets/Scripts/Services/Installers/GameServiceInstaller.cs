@@ -36,6 +36,7 @@ namespace Components {
             var sessionContext = new SessionContext();
             var providerRegistry = new ProviderRegistryService();
             var unlockService = new UnlockService();
+            var stateBenefitCalculation = new StateBenefitCalculationService(sessionContext);
             _notificationService = new NotificationService();
             UploadProviders(providerRegistry);
             
@@ -44,6 +45,7 @@ namespace Components {
             RegisterService(_worldCastService);
             RegisterService(providerRegistry);
             RegisterService(unlockService);
+            RegisterService(stateBenefitCalculation);
             
             RegisterService(new StructureClickService(storage, _worldCastService, unlockService));
             RegisterService(new StructureSoundResolver(_structureSoundConfig));

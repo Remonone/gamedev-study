@@ -4,6 +4,6 @@ using Types.Enums;
 
 namespace Economy.Providers {
     public interface IModifierProvider {
-        void Collect(SessionContext context, BuildingState building, List<StatModifier> modifiers);
+        void Collect(ISessionContext context, BuildingState building, List<StatModifier> modifiers);
     }
 }

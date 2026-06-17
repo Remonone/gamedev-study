@@ -15,7 +15,7 @@ namespace Economy.Providers {
             _practices.Add(practice);
         }
         
-        public void Collect(SessionContext context, BuildingState building, List<StatModifier> modifiers) {
+        public void Collect(ISessionContext context, BuildingState building, List<StatModifier> modifiers) {
             foreach (var practice in _practices) {
             }
         }
