@@ -1,10 +1,13 @@
 using System;
 using Types.Enums.Values;
+using UnityEngine;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class PowerFormula : IFormula {
+        [Tooltip("Coefficient multiplied by input raised to the configured power.")]
         public double BaseValue;
+        [Tooltip("Exponent applied to the input value.")]
         public double Power;
         
         public Value Evaluate(double input) {

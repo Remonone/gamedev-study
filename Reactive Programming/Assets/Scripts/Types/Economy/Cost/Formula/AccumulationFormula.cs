@@ -6,7 +6,8 @@ namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class AccumulationFormula : IFormula {
         
-        [SerializeReference] public IFormula[] Formulas;
+        [SerializeReference, Tooltip("Nested formulas evaluated with the same input and added together.")]
+        public IFormula[] Formulas;
         
         public Value Evaluate(double input) {
             var value = Value.Zero;

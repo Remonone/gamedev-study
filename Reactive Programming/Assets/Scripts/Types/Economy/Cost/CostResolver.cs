@@ -7,7 +7,8 @@ using UnityEngine;
 namespace Types.Enums.Cost {
     [Serializable]
     public class CostResolver {
-        [SerializeField] private List<CostItem> _costItems;
+        [SerializeField, Tooltip("Cost rows evaluated for the requested level; every passing row contributes one price entry.")]
+        private List<CostItem> _costItems;
 
         public Price Evaluate(int level) {
             Price price = new Price();
@@ -23,8 +24,11 @@ namespace Types.Enums.Cost {
 
         [Serializable]
         internal sealed class CostItem {
-            [SerializeReference] public ILevelCondition Condition;
-            [SerializeReference] public IFormula Formula;
+            [SerializeReference, Tooltip("Level condition that decides whether this cost row is used.")]
+            public ILevelCondition Condition;
+            [SerializeReference, Tooltip("Formula evaluated with the current level to produce the cost amount.")]
+            public IFormula Formula;
+            [Tooltip("Resource category paid by this cost row.")]
             public GovernmentInteractionType Type;
         }
     }

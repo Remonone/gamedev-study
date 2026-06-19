@@ -1,12 +1,16 @@
 using System;
 using Types.Enums.Values;
+using UnityEngine;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class StepFormula : IFormula {
         
+        [Tooltip("Starting value before step scaling is applied.")]
         public double BaseValue;
+        [Tooltip("Input interval used for one step. Values below 1 are treated as 1.")]
         public double StepOn;
+        [Tooltip("Amount added for each StepOn units of input.")]
         public double StepOf;
         
         public Value Evaluate(double input) {

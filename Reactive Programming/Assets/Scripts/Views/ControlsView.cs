@@ -6,8 +6,10 @@ using Views.Models;
 namespace Views {
      public class ControlsView : MonoBehaviour {
         private Controls _controls;
-        [SerializeField] private UIDocument _controlsDocument;
-        [SerializeField] private VisualTreeAsset _achievementItemTemplate;
+        [SerializeField, Tooltip("Root UI document that contains counters, tabs and notification containers.")]
+        private UIDocument _controlsDocument;
+        [SerializeField, Tooltip("Optional achievement item template. Falls back to Resources/UI/AchievementItem when empty.")]
+        private VisualTreeAsset _achievementItemTemplate;
 
         private Label _documentsLabel;
         private Label _casesLabel;

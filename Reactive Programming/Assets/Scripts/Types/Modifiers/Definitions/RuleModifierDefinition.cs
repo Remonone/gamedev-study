@@ -7,7 +7,8 @@ using UnityEngine;
 namespace Types.Enums {
     [CreateAssetMenu(fileName = "RuleModifierDefinition", menuName = "Clicker/Modifiers/Rule Modifier Definition", order = 0)]
     public class RuleModifierDefinition : ModifierDefinition{
-        [SerializeReference] public ConditionAsset[] Conditions;
+        [SerializeReference, Tooltip("All conditions that must pass before this modifier is applied. Empty list means always applies.")]
+        public ConditionAsset[] Conditions;
 
         private bool VerifyConditions(SessionCapability capability, BuildingState state) {
             if (Conditions == null) return true;

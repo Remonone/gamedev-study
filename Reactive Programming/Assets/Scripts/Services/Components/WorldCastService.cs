@@ -7,8 +7,10 @@ using UnityEngine.InputSystem;
 namespace Services.Components {
     public class WorldCastService : MonoBehaviour, IService {
 
-        [SerializeField] private Camera _camera;
-        [SerializeField] private LayerMask _clickableLayer;
+        [SerializeField, Tooltip("Camera used to cast mouse clicks into the world.")]
+        private Camera _camera;
+        [SerializeField, Tooltip("Physics layers that can be clicked as structures.")]
+        private LayerMask _clickableLayer;
 
         private Ray _lastRay;
         private Subject<BuildingState> _structureTypeSubject = new();

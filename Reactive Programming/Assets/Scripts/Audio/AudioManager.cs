@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Audio {
     public class AudioManager : MonoBehaviour {
-        [SerializeField] private AudioSource _audioSource;
+        [SerializeField, Tooltip("Audio source used to play one-shot cues requested by audio distributors.")]
+        private AudioSource _audioSource;
 
         private void Start() {
             var distributors = ServiceLocator.Instance.GetServices<IAudioDistributor>();

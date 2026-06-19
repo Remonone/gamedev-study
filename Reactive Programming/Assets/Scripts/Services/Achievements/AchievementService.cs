@@ -12,7 +12,7 @@ namespace Services.Achievements {
 
         private readonly IStatisticsReader _statistics;
         private readonly IReadOnlyList<IAchievement> _achievements;
-        private readonly Dictionary<string, IAchievement> _achievementsById = new();
+        private readonly Dictionary<string, IAchievement> _achievementsById;
         private readonly Subject<IAchievement> _unlocked = new();
         private readonly CompositeDisposable _disposable = new();
 
@@ -32,9 +32,11 @@ namespace Services.Achievements {
             foreach(var achievement in _achievements) {
                 if (_restoredCompleted.Contains(achievement.Id)) {
                     achievement.RestoreCompleted();
+                    continue;
                 }
                 
                 achievement.IsCompleted.Where(completed => completed)
+                    .Where(_ => !achievement.IsLoadedAsCompleted)
                     .Take(1)
                     .Subscribe(_ => _unlocked.OnNext(achievement))
                     .AddTo(_disposable);
@@ -55,7 +57,7 @@ namespace Services.Achievements {
         }
 
         public string SaveKey => "Achievements";
-        public int Priority => 40;
+        public int Priority => 80;
 
         public JToken Save() {
             var completed = _achievements

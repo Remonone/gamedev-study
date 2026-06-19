@@ -4,8 +4,10 @@ using UnityEngine;
 
 namespace Types.Enums {
      public class Structure : MonoBehaviour, IStructure {
-        [SerializeField] private GovernmentInteractionType _type;
-        [SerializeField] private BuildingDefinition _definition;
+        [SerializeField, Tooltip("Scene label for this structure. Runtime interaction type comes from Definition.Type.")]
+        private GovernmentInteractionType _type;
+        [SerializeField, Tooltip("Building definition used to create runtime state for this structure.")]
+        private BuildingDefinition _definition;
 
         private BuildingState _state;
         

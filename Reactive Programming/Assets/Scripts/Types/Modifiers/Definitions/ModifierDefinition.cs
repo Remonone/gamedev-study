@@ -8,7 +8,9 @@ using UnityEngine;
 namespace Types.Enums {
     public abstract class ModifierDefinition : ScriptableObject {
         
+        [Tooltip("Buildings that can receive this modifier.")]
         public ModifierTarget Target;
+        [Tooltip("Stat operation applied to matching buildings.")]
         public StatModifier Modifier;
         
         protected abstract bool CanResolve(IModifierContext context);

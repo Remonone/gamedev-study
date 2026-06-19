@@ -8,8 +8,10 @@ using UnityEngine;
 namespace Types.Enums {
     [CreateAssetMenu(fileName = "RuleValueModifierDefinition", menuName = "Clicker/Modifiers/Rule Value Modifier Definition", order = 0)]
     public class RuleValueModifierDefinitionDefinition : ModifierDefinition {
-        [SerializeReference] public ConditionAsset[] Conditions;
-        [SerializeReference] public IFormula CalculationFormula;
+        [SerializeReference, Tooltip("All conditions that must pass before this modifier is applied. Empty list means always applies.")]
+        public ConditionAsset[] Conditions;
+        [SerializeReference, Tooltip("Formula evaluated with the upgrade level; result multiplies Modifier.Value.")]
+        public IFormula CalculationFormula;
         
         private bool VerifyConditions(SessionCapability capability, BuildingState state) {
             if (Conditions == null) return true;

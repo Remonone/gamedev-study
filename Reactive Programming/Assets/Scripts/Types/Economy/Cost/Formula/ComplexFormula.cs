@@ -6,7 +6,7 @@ namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class ComplexFormula : IFormula {
         
-        [SerializeReference]
+        [SerializeReference, Tooltip("Formulas evaluated in order; each result becomes the next formula input, starting from zero.")]
         public IFormula[] Formulas = Array.Empty<IFormula>();
         
         public Value Evaluate(double input) {

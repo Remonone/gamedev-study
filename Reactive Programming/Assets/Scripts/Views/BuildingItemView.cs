@@ -8,7 +8,8 @@ namespace Views {
     public class BuildingItemView : MonoBehaviour {
         private const string CardStylePath = "UI/Styles/card";
 
-        [SerializeField] private UIDocument _item;
+        [SerializeField, Tooltip("UIDocument instance used as the building card template root.")]
+        private UIDocument _item;
         private static StyleSheet _cardStyleSheet;
         
         private VisualElement _root;

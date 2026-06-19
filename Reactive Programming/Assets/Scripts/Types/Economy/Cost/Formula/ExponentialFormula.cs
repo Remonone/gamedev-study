@@ -1,10 +1,13 @@
 using System;
 using Types.Enums.Values;
+using UnityEngine;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
     public class ExponentialFormula : IFormula {
+        [Tooltip("Starting value before exponential growth is applied.")]
         public double BaseValue;
+        [Tooltip("Growth multiplier applied once per input step.")]
         public double Rate;
         
         public Value Evaluate(double input) {

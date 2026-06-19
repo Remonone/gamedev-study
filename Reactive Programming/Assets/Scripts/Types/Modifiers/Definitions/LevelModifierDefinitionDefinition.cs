@@ -7,7 +7,8 @@ using UnityEngine;
 namespace Types.Enums {
     [CreateAssetMenu(fileName = "LevelModifierDefinition", menuName = "Clicker/Modifiers/Level Modifier Definition", order = 0)]
     public class LevelModifierDefinitionDefinition : ModifierDefinition {
-        [SerializeReference] public IFormula CalculationFormula;
+        [SerializeReference, Tooltip("Formula evaluated with the upgrade level; result multiplies Modifier.Value.")]
+        public IFormula CalculationFormula;
 
         protected override bool CanResolve(IModifierContext context) {
             return context.TryGet<LevelCapability>(out _);

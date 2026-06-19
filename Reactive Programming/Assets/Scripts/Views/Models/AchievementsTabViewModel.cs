@@ -18,6 +18,7 @@ namespace Views.Models {
 
         public void RequestInitialState() {
             var items = _achievementService.Achievements
+                .Where(a => !a.IsLoadedAsCompleted)
                 .Select(a => new AchievementItemViewModel(a))
                 .ToList();
             Achievements.Value = items;

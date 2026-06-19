@@ -34,6 +34,7 @@ namespace FormulaSerialization.UIElements {
             };
 
             var label = new Label(_property.displayName) {
+                tooltip = _property.tooltip,
                 style = {
                     minWidth = EditorGUIUtility.labelWidth - 15,
                     unityTextAlign = TextAnchor.MiddleLeft
@@ -41,6 +42,7 @@ namespace FormulaSerialization.UIElements {
             };
 
             _selector = new ToolbarMenu {
+                tooltip = _property.tooltip,
                 style = {
                     flexGrow = 1,
                     minWidth = 120

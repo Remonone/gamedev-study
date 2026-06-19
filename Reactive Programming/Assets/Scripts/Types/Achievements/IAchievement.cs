@@ -8,7 +8,8 @@ namespace Types.Enums.Achievements {
         string Description { get; }
         
         ReadOnlyReactiveProperty<bool> IsCompleted { get; }
-
+        bool IsLoadedAsCompleted { get; }
+        
         Observable<float> Progress { get; }
         Observable<string> ProgressText { get; }
         

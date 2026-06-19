@@ -15,10 +15,13 @@ namespace Types.Enums.Achievements {
     
     protected readonly AchievementService _achievementService;
 
+    private bool _isLoadedAsCompleted;
+
     public abstract string Id { get; }
     public abstract string Name { get; }
     public abstract string Description { get; }
     public ReadOnlyReactiveProperty<bool> IsCompleted => _isCompleted;
+    public bool IsLoadedAsCompleted => _isLoadedAsCompleted; 
 
     public Observable<float> Progress => _progress;
     public Observable<string> ProgressText => _progressText;
@@ -33,6 +36,7 @@ namespace Types.Enums.Achievements {
     }
 
     public void RestoreCompleted() {
+        _isLoadedAsCompleted = true;
         _isCompleted.Value = true;
         _progress.Value = 1f;
         _progressText.Value = "Completed";

@@ -19,11 +19,16 @@ using Views.Models;
 namespace Services.Components {
     public class GameServiceInstaller : ServiceInstaller {
         
-        [SerializeField] private WorldCastService _worldCastService;
-        [SerializeField] private UIDocument _document;
-        [SerializeField] private StructureSoundConfig _structureSoundConfig;
-        [SerializeField] private BuildingItemView _buildingItemView;
-        [SerializeField] private ControlsView _controlsView;
+        [SerializeField, Tooltip("Scene service that converts player clicks into structure selections.")]
+        private WorldCastService _worldCastService;
+        [SerializeField, Tooltip("Main UI document containing the building list and notification center.")]
+        private UIDocument _document;
+        [SerializeField, Tooltip("Sound mapping used by structure click audio.")]
+        private StructureSoundConfig _structureSoundConfig;
+        [SerializeField, Tooltip("Building card prefab instantiated for each building definition.")]
+        private BuildingItemView _buildingItemView;
+        [SerializeField, Tooltip("Controls view bound to the main UI model.")]
+        private ControlsView _controlsView;
         
         private BuildingWatcherService _buildingWatcherService;
         private EconomyService _economyService;
@@ -91,7 +96,7 @@ namespace Services.Components {
             var achievements = AchievementsCollector.Collect(_statisticsService);
             _achievementService = new AchievementService(achievements);
             RegisterService(_achievementService);
-            _achievementService.Start();
+            
         }
 
         private void InitStatistics() {
@@ -140,6 +145,8 @@ namespace Services.Components {
             notificationView.Bind(notificationVm);
         }
 
-        protected override void AfterInstallation() { }
+        protected override void AfterInstallation() {
+            _achievementService.Start();
+        }
     }
 }

@@ -260,8 +260,12 @@ namespace Services {
                     var upgrade = _upgrades[upgradeData["upgradeId"].Value<string>()].Value;
                     var updatedUpgrade = new UpgradeNodeState(upgrade);
                     updatedUpgrade.Level = upgradeData["level"].Value<int>();
-                    ApplyUpgrade(upgrade);
+                    updatedUpgrade.CurrentState = updatedUpgrade.Level >= updatedUpgrade.Definition.MaxLevel
+                        ? UpgradeNodeState.State.Completed
+                        : UpgradeNodeState.State.InProgress;
+                    ApplyUpgrade(updatedUpgrade);
                     PublishState(upgrade.Definition.Id, updatedUpgrade);
+                    RefreshChildAvailability(upgrade.Definition);
                 }
                 
             }

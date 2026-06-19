@@ -12,10 +12,10 @@ namespace Types.Enums.Values {
         public static readonly Value Zero = new(0d);
         public static readonly Value One = new(1d);
 
-        [SerializeField, JsonProperty("stored")]
+        [SerializeField, JsonProperty("stored"), Tooltip("Mantissa stored in the current thousand-based degree.")]
         private double _stored;
 
-        [SerializeField, JsonProperty("base")]
+        [SerializeField, JsonProperty("base"), Tooltip("Thousand-based magnitude bucket used with Stored.")]
         private Base _base;
 
         public double Stored => _stored;
