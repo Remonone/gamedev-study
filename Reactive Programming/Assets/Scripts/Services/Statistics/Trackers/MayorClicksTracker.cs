@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Components;
-using Components.Instances;
+using Services.Components;
+using Services.Components.Instances;
 using R3;
 using Types.Enums;
 

@@ -10,6 +10,7 @@ namespace Economy {
     public class StatResolver {
         public ComputedStats Resolve(BuildingState building, List<StatModifier> modifiers) {
             var result = new ComputedStats {
+                ClickIncome = ResolveOne((float)building.GetLevelBasedValue(StatType.ClickIncome), StatType.ClickIncome, modifiers),
                 Income = ResolveOne((float)building.GetLevelBasedValue(StatType.Income), StatType.Income, modifiers),
                 Frequency = ResolveOne((float)building.GetLevelBasedValue(StatType.Frequency), StatType.Frequency, modifiers),
                 Cost = ResolvePrice(building.GetPrice(), modifiers),

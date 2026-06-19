@@ -1,7 +1,7 @@
 using Save;
 using UnityEngine;
 
-namespace Components {
+namespace Services.Components {
     public abstract class ServiceInstaller : MonoBehaviour {
 
         private SaveManager _saveManager;

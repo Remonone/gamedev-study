@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using Types.Enums.Objects;
-using Components;
-using Components.Instances;
+using Services.Components;
+using Services.Components.Instances;
 using R3;
 using Types.Enums;
 
@@ -14,10 +14,10 @@ namespace Audio.Implementation {
         private StructureSoundConfig _config;
         private Subject<AudioCue> _cueRequest = new();
 
-        public StructureSoundResolver(StructureSoundConfig config) {
+        public StructureSoundResolver(StructureClickService clickService, StructureSoundConfig config) {
             _config = config;
             
-            var structureClick = ServiceLocator.Instance.GetService<StructureClickService>();
+            var structureClick = clickService;
             
             structureClick.StructureInteraction.Select(interaction => interaction.GovernmentInteraction)
                 .Subscribe(OnStructurePerformed).AddTo(_disposable);

@@ -20,6 +20,7 @@ namespace Types.Enums.Buildings {
 
         public decimal GetLevelBasedValue(StatType statType) {
             switch (statType) {
+                case StatType.ClickIncome: return Definition.ClickIncome.Evaluate(Level);
                 case StatType.Income: return Definition.Income.Evaluate(Level);
                 case StatType.Frequency: return Definition.Frequency.Evaluate(Level);
                 case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.Evaluate(Level);

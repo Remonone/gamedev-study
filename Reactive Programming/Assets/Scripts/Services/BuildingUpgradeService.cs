@@ -1,3 +1,5 @@
+using R3;
+using Types.Enums;
 using UnityEngine;
 
 namespace Services {
@@ -5,6 +7,10 @@ namespace Services {
         
         private readonly InvalidationService _invalidationService;
         private readonly BuildingWatcherService _buildingWatcherService;
+        
+        private Subject<BuildingUpgrade> _onBuildingUpgrade = new();
+        
+        public Observable<BuildingUpgrade> OnBuildingUpgrade => _onBuildingUpgrade;
         
         public BuildingUpgradeService(InvalidationService invalidationService, BuildingWatcherService buildingWatcherService) {
             _invalidationService = invalidationService;
@@ -16,7 +22,8 @@ namespace Services {
             if (building == null) return;
             building.Level += levels;
             building.LastTimeActivated = Time.timeAsDouble;
-            _invalidationService.InvalidateBuilding(name);
+            _onBuildingUpgrade.OnNext(new BuildingUpgrade { Building = building, Levels = levels });
+            _invalidationService.InvalidateAll();
         }
     }
 }

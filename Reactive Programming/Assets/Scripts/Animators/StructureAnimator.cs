@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Components;
-using Components.Instances;
+using Services.Components;
+using Services.Components.Instances;
 using DG.Tweening;
 using R3;
 using Types.Enums;
@@ -23,19 +23,9 @@ namespace Animators {
                 Scale = scale;
             }
         }
-        
-        private void Awake() {
-            _structuresByType = new Dictionary<GovernmentInteractionType, StructureConfig>();
-
-            foreach (var structure in FindObjectsByType<Structure>(FindObjectsSortMode.InstanceID)) {
-                if(!structure.TryGetComponent<IStructure>(out var structureType)) {
-                    continue;
-                }
-                _structuresByType.Add(structureType.Type, new StructureConfig(structure.gameObject, structure.transform.localScale));
-            }
-        }
 
         private void Start() {
+            Init();
             var service = ServiceLocator.Instance.GetService<StructureClickService>();
 
             service.StructureInteraction
@@ -43,7 +33,18 @@ namespace Animators {
                 .Select(interaction => _structuresByType[interaction.GovernmentInteraction])
                 .Subscribe(HandleClick).AddTo(this);
         }
-        
+
+        private void Init() {
+            _structuresByType = new Dictionary<GovernmentInteractionType, StructureConfig>();
+
+            foreach (var structure in FindObjectsByType<Structure>(FindObjectsSortMode.InstanceID)) {
+                if(!structure.TryGetComponent<IStructure>(out var structureType)) {
+                    continue;
+                }
+                _structuresByType.Add(structureType.State.Definition.Type, new StructureConfig(structure.gameObject, structure.transform.localScale));
+            }
+        }
+
         private void HandleClick(StructureConfig structure) {
             var reference = structure.Reference;
             reference.transform.DOScale(Vector3.Scale(structure.Scale, _scale), 0.1f).SetEase(Ease.OutQuad).OnComplete(() => reference.transform.DOScale(structure.Scale, 0.1f).SetEase(Ease.InQuad));

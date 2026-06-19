@@ -10,6 +10,7 @@ namespace Types.Enums.Buildings {
         [SerializeField] public Sprite Icon;
 		[SerializeField] public CostResolver Cost;
         public GovernmentInteractionType Type;
+        [SerializeReference] public IFormula ClickIncome;
         [SerializeReference] public IFormula Income;
         [SerializeReference] public IFormula Frequency;
         [SerializeReference] public IFormula StabilityModifier;
@@ -17,5 +18,6 @@ namespace Types.Enums.Buildings {
         [SerializeReference] public IFormula MultiplierCoefficient;
         [SerializeReference] public IFormula CriticalChance;
         [SerializeReference] public IFormula CriticalMultiplier;
+        [SerializeField] public bool IsUpgradeable = true;
     }
 }

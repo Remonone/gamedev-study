@@ -2,6 +2,7 @@ using Types.Enums.Cost;
 
 namespace Types.Enums {
     public struct ComputedStats {
+        public float ClickIncome;
         public float Income;
         public float Frequency;
         public Price Cost;

@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 49401510}
-  - component: {fileID: 49401509}
+  - component: {fileID: 49401511}
   m_Layer: 0
   m_Name: AreaWatcher
   m_TagString: Untagged
@@ -136,18 +136,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &49401509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 49401507}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a0197c52d740bf0d86255b935005c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Views.AreaWatcherView
 --- !u!4 &49401510
 Transform:
   m_ObjectHideFlags: 0
@@ -163,6 +151,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1005688106}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &49401511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49401507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1de04eb9284875226bcb89a6444c9ceb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Components.WorldCastService
+  _camera: {fileID: 330585545}
+  _clickableLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &320784687 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1000011436525376, guid: d59f53b768c7f4b24bb65742cd9d5e8d, type: 3}
@@ -181,6 +185,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 3
+  _definition: {fileID: 11400000, guid: 53309403ae72b205183cdf1e920db08d, type: 2}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1519,6 +1524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 0
+  _definition: {fileID: 11400000, guid: 6effab8799f561534bffe4387b118bf7, type: 2}
 --- !u!1 &1684090556 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1000010516444846, guid: 34bee9728c87448459c528fe106bda47, type: 3}
@@ -1537,6 +1543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 5
+  _definition: {fileID: 11400000, guid: b39da1696b6c48ab9b91bad047eddc01, type: 2}
 --- !u!1 &1725514373 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1000010015382236, guid: 1f9c790d1faed46e1936fd1a3e684e2e, type: 3}
@@ -1555,6 +1562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 2
+  _definition: {fileID: 11400000, guid: af77ade388a2fa8ffb26a6b805be9e02, type: 2}
 --- !u!1 &1956950284 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1000013087377280, guid: fbd2ac8a51cf4427caaa61a61855f088, type: 3}
@@ -1573,6 +1581,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 4
+  _definition: {fileID: 11400000, guid: 6af25ab74d8f2adfb9fc3059d3681813, type: 2}
 --- !u!1 &2018093925 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1000011545521882, guid: 43f2b39a1ea97405e9e9663a6df30a18, type: 3}
@@ -1591,6 +1600,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Types.Structure
   _type: 1
+  _definition: {fileID: 11400000, guid: 1dd576aed393ce1c2b1a7d240701635d, type: 2}
 --- !u!1001 &2026054116
 PrefabInstance:
   m_ObjectHideFlags: 0

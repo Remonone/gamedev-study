@@ -1,20 +1,21 @@
 using R3;
 using Types.Enums;
+using Types.Enums.Buildings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Components {
+namespace Services.Components {
     public class WorldCastService : MonoBehaviour, IService {
 
         [SerializeField] private Camera _camera;
         [SerializeField] private LayerMask _clickableLayer;
 
         private Ray _lastRay;
-        private Subject<GovernmentInteractionType> _structureTypeSubject = new();
+        private Subject<BuildingState> _structureTypeSubject = new();
         
         private RaycastHit[] _hitBuffer = new RaycastHit[2];
         
-        public Observable<GovernmentInteractionType> StructureClicked => _structureTypeSubject;
+        public Observable<BuildingState> StructureClicked => _structureTypeSubject;
 
         private void Start() {
             Observable.EveryUpdate()
@@ -30,7 +31,7 @@ namespace Components {
             .Select(clickedObject => clickedObject.GetComponent<Structure>())
             .Where(structure => structure != null)
             .Subscribe(clickedObject => 
-                _structureTypeSubject.OnNext(clickedObject.Type))
+                _structureTypeSubject.OnNext(clickedObject.State))
             .AddTo(this);
         }
 

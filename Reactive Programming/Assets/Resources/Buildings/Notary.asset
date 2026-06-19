@@ -23,6 +23,8 @@ MonoBehaviour:
         rid: 7490908207531163653
       Type: 0
   Type: 0
+  ClickIncome:
+    rid: 7490908289081016519
   Income:
     rid: 7490908207531163657
   Frequency:
@@ -37,6 +39,7 @@ MonoBehaviour:
     rid: 7490908207531163664
   CriticalMultiplier:
     rid: 7490908207531163665
+  IsUpgradeable: 1
   references:
     version: 2
     RefIds:
@@ -99,3 +102,7 @@ MonoBehaviour:
       type: {class: ConstCondition, ns: Types.Enums.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
+    - rid: 7490908289081016519
+      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 0

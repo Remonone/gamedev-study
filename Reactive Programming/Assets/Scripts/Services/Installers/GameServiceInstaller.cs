@@ -3,12 +3,12 @@ using System.Linq;
 using Audio.Implementation;
 using Types.Enums.Buildings;
 using Types.Enums.Objects;
-using Components.Instances;
 using Economy.Providers;
 using R3;
 using Services.Player;
 using Services;
 using Services.Achievements;
+using Services.Components.Instances;
 using Services.Statistics;
 using Types.Enums;
 using UnityEngine;
@@ -16,7 +16,7 @@ using UnityEngine.UIElements;
 using Views;
 using Views.Models;
 
-namespace Components {
+namespace Services.Components {
     public class GameServiceInstaller : ServiceInstaller {
         
         [SerializeField] private WorldCastService _worldCastService;
@@ -47,9 +47,6 @@ namespace Components {
             RegisterService(unlockService);
             RegisterService(stateBenefitCalculation);
             
-            RegisterService(new StructureClickService(storage, _worldCastService, unlockService));
-            RegisterService(new StructureSoundResolver(_structureSoundConfig));
-            
             var buildingDefinitions = FetchBuildingDefinitions();
             _buildingWatcherService = new BuildingWatcherService(buildingDefinitions);
             RegisterService(_buildingWatcherService);
@@ -63,6 +60,10 @@ namespace Components {
 
             _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService, providerRegistry);
             RegisterService(_economyService);
+            
+            var structureClickService = new StructureClickService(storage, _worldCastService, unlockService, _economyService, stateBenefitCalculation);
+            RegisterService(structureClickService);
+            RegisterService(new StructureSoundResolver(structureClickService, _structureSoundConfig));
             
             var tickService = new TickService(_economyService, _buildingWatcherService, storage, stateBenefitCalculation);
             RegisterService(tickService);

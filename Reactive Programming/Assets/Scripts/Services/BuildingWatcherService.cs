@@ -18,6 +18,8 @@ namespace Services {
                     Debug.LogError($"Duplicate building name: {definition.Name}");
                     continue;
                 }
+
+                if (!definition.IsUpgradeable) continue;
                 var buildingState = new BuildingState(definition, 0);
                 _buildingsByName.Add(definition.Name, buildingState);
             }

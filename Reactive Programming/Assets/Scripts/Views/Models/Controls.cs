@@ -1,5 +1,5 @@
 using System;
-using Components;
+using Services.Components;
 using Services.Player;
 using R3;
 using Services.Achievements;

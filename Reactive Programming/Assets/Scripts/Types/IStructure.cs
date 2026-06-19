@@ -1,5 +1,7 @@
+using Types.Enums.Buildings;
+
 namespace Types.Enums {
      public interface IStructure {
-          GovernmentInteractionType Type { get; }
+          BuildingState State { get; }
      }
 }
