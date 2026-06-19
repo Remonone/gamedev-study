@@ -1,9 +1,10 @@
 using Types.Enums.Cost;
+using Types.Enums.Values;
 
 namespace Types.Enums {
     public struct ComputedStats {
-        public float ClickIncome;
-        public float Income;
+        public Value ClickIncome;
+        public Value Income;
         public float Frequency;
         public Price Cost;
         public float StabilityModifier;

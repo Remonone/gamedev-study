@@ -1,6 +1,7 @@
 using System;
 using Types.Enums;
 using Types.Enums.Buildings;
+using Types.Enums.Values;
 
 namespace Services {
     public class StateBenefitCalculationService : IService {
@@ -13,14 +14,13 @@ namespace Services {
 			_random = new Random(_context.Seed);
 		}
 		
-		public float CalculateBenefits(BuildingState state, float value) {
+		public void CalculateBenefits(BuildingState state, ref Value value) {
 			value *= state.Cache.MultiplierCoefficient;
-			CalculateCritChance(state, ref value);
+			
 			CalculateStability(ref value);
-			return value;
 		}
 
-		private void CalculateStability(ref float value) {
+		private void CalculateStability(ref Value value) {
 			var stablility = CalculateStabilityValue();
 			value *= stablility;
 		}
@@ -37,8 +37,7 @@ namespace Services {
 			return (float)(capitalDecreasal * policeEffect);
 		}
 
-		private void CalculateCritChance(BuildingState state, ref float value) {
-			
+		public void CalculateCritChance(BuildingState state, ref Value value) {
 			if (_random.NextDouble() < state.Cache.CriticalChance) {
 				value *= state.Cache.CriticalMultiplier;
 			}

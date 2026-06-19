@@ -1,4 +1,5 @@
 using System;
+using Types.Enums.Values;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
@@ -6,8 +7,8 @@ namespace Types.Enums.Cost.Formula {
 
         public double BaseValue;
         
-        public decimal Evaluate(decimal input) {
-            return (decimal)BaseValue;
+        public Value Evaluate(double input) {
+            return new Value(BaseValue);
         }
     }
 }

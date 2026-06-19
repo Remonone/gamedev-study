@@ -1,4 +1,5 @@
 using System;
+using Types.Enums.Values;
 using UnityEngine;
 
 namespace Types.Enums.Cost.Formula {
@@ -8,8 +9,8 @@ namespace Types.Enums.Cost.Formula {
         public double BaseValue;
         public AnimationCurve Curve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
         
-        public decimal Evaluate(decimal input) {
-            return (decimal)BaseValue * (decimal)Curve.Evaluate((float)input);
+        public Value Evaluate(double input) {
+            return new Value(BaseValue) * Curve.Evaluate((float)input);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Types.Enums {
             return new StatModifier {
                 Stat = Modifier.Stat,
                 Operation = Modifier.Operation,
-                Value = Modifier.Value * (float)CalculationFormula.Evaluate(levelCapability.Level),
+                Value = Modifier.Value * CalculationFormula.Evaluate(levelCapability.Level).ToSingle(),
                 Priority = Modifier.Priority,
                 ModifierId = Modifier.ModifierId
             };

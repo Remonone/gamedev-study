@@ -1,4 +1,5 @@
 using System;
+using Types.Enums.Values;
 
 namespace Types.Enums.Cost.Formula {
     
@@ -7,8 +8,8 @@ namespace Types.Enums.Cost.Formula {
         
         public IFormula[] Formulas;
         
-        public decimal Evaluate(decimal input) {
-            decimal value = 1;
+        public Value Evaluate(double input) {
+            var value = Value.One;
             foreach (var formula in Formulas) {
                 value *= formula.Evaluate(input);
             }

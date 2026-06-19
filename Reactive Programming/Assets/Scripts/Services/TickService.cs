@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
 using Save;
+using Types.Enums.Values;
 using UnityEngine;
 
 namespace Services {
@@ -26,7 +27,7 @@ namespace Services {
                 .AddTo(_disposable);
         }
 
-        private void Tick(double time) {
+        private void Tick(double time, bool shouldCalculateCrit = true) {
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
                 if(building.Level <= 0) continue;
                 var cache = _economyService.ComputeStatsForBuilding(building);
@@ -39,12 +40,16 @@ namespace Services {
                 if (ticks <= 0) continue;
                 
                 building.LastTimeActivated += ticks * interval;
-                var income = 0f;
+                var income = Value.Zero;
                 for (int tick = 0; tick < ticks; tick++) {
-                    income += _stateCalculationService.CalculateBenefits(building, cache.Income);
-                    
+                    var benefit = cache.Income;
+                    _stateCalculationService.CalculateBenefits(building, ref benefit);
+                    if (shouldCalculateCrit) {
+                        _stateCalculationService.CalculateCritChance(building, ref benefit);
+                    }
+                    income += benefit;
                 }
-                _storage.AddMoney(building.Definition.Type, (long)income);
+                _storage.AddMoney(building.Definition.Type, income);
             }
         }
 
@@ -64,7 +69,7 @@ namespace Services {
         public void Load(JToken data) {
             long lastSave = data.Value<long>("LastTick");
             long currentTime = CurrentTime;
-            Tick(currentTime - lastSave);
+            Tick(currentTime - lastSave, false);
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
                 building.LastTimeActivated = Time.timeAsDouble;
             }

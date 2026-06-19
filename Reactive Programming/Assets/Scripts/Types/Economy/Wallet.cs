@@ -1,10 +1,12 @@
+using Types.Enums.Values;
+
 namespace Types.Enums {
     public struct Wallet {
-        public long MayorWallet;
-        public long FirefighterWallet;
-        public long PoliceWallet;
-        public long AmbulanceWallet;
-        public long CourtWallet;
-        public long ArchiveWallet;
+        public Value MayorWallet;
+        public Value FirefighterWallet;
+        public Value PoliceWallet;
+        public Value AmbulanceWallet;
+        public Value CourtWallet;
+        public Value ArchiveWallet;
     }
 }

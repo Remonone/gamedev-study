@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.LevelModifierDefinitionDefinition
   Target: {fileID: 11400000, guid: cf0982d1e520e280681d579caf216d79, type: 2}
   Modifier:
-    Stat: 1
+    Stat: 2
     Operation: 1
     Value: 1
     Priority: 1

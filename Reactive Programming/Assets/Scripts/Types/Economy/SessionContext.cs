@@ -18,6 +18,7 @@ namespace Types.Enums {
         public int Seed => _seed;
 
         public SessionContext() {
+            _seed = UnityEngine.Random.Range(0, int.MaxValue);
         }
         
         public SessionContext(int mayorInfluence, int firefighterInfluence, int policeInfluence, int ambulanceInfluence, int courtInfluence, int archiveInfluence) {

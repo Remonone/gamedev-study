@@ -4,6 +4,7 @@ using Services.Player;
 using R3;
 using Services.Achievements;
 using Types.Enums;
+using Types.Enums.Values;
 
 namespace Views.Models {
   public class Controls : IDisposable {
@@ -16,12 +17,12 @@ namespace Views.Models {
         public AchievementsTabViewModel AchievementsTab;
         public ArtifactsTabViewModel ArtifactsTab = new();
 
-        public ReactiveProperty<long> DocumentsCount = new ReactiveProperty<long>(0);
-        public ReactiveProperty<long> CasesCount = new ReactiveProperty<long>(0);
-        public ReactiveProperty<long> FiresCount = new ReactiveProperty<long>(0);
-        public ReactiveProperty<long> ProtectionsCount = new ReactiveProperty<long>(0);
-        public ReactiveProperty<long> CuresCount = new ReactiveProperty<long>(0);
-        public ReactiveProperty<long> ArchivesCount = new ReactiveProperty<long>(0);
+        public ReactiveProperty<Value> DocumentsCount = new(Value.Zero);
+        public ReactiveProperty<Value> CasesCount = new(Value.Zero);
+        public ReactiveProperty<Value> FiresCount = new(Value.Zero);
+        public ReactiveProperty<Value> ProtectionsCount = new(Value.Zero);
+        public ReactiveProperty<Value> CuresCount = new(Value.Zero);
+        public ReactiveProperty<Value> ArchivesCount = new(Value.Zero);
 
         public Controls() {
             _storage = ServiceLocator.Instance.GetService<Storage>();

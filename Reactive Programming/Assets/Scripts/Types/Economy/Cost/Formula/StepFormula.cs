@@ -1,4 +1,5 @@
 using System;
+using Types.Enums.Values;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
@@ -8,8 +9,8 @@ namespace Types.Enums.Cost.Formula {
         public double StepOn;
         public double StepOf;
         
-        public decimal Evaluate(decimal input) {
-            return (decimal)BaseValue + (input / (decimal)Math.Max(1d, StepOn)) * (decimal)StepOf;
+        public Value Evaluate(double input) {
+            return new Value(BaseValue) + new Value(input / Math.Max(1d, StepOn) * StepOf);
         }
     }
 }

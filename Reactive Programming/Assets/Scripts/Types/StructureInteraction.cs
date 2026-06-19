@@ -1,7 +1,9 @@
 
+using Types.Enums.Values;
+
 namespace Types.Enums {
      public struct StructureInteraction {
           public GovernmentInteractionType GovernmentInteraction;
-          public long InteractionResult;
+          public Value InteractionResult;
      }
 }

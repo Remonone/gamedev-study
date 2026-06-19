@@ -6,6 +6,7 @@ using R3;
 using Services;
 using Types.Enums;
 using Types.Enums.Cost;
+using Types.Enums.Values;
 using UnityEngine;
 
 namespace Views.Models {
@@ -17,7 +18,7 @@ namespace Views.Models {
         
         private EconomyService _economyService;
         
-        public ReactiveProperty<float> Income = new();
+        public ReactiveProperty<Value> Income = new(Value.Zero);
         public ReactiveProperty<float> Frequency = new();
         public ReactiveProperty<Price> Cost = new();
         public ReactiveProperty<float> Stability = new();

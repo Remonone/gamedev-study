@@ -62,18 +62,7 @@ MonoBehaviour:
       type: {class: AccumulationFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
         Formulas:
-        - rid: 7490908207531163658
-        - rid: 7490908207531163659
-    - rid: 7490908207531163658
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1
-    - rid: 7490908207531163659
-      type: {class: StepFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 0
-        StepOn: 3
-        StepOf: 1
+        - rid: 7490908289081016523
     - rid: 7490908207531163660
       type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
@@ -106,3 +95,8 @@ MonoBehaviour:
       type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 0
+    - rid: 7490908289081016523
+      type: {class: LinearFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+        Multiplier: 1

@@ -1,5 +1,6 @@
 using Types.Enums;
 using Types.Enums.Cost;
+using Types.Enums.Values;
 using UnityEngine;
 
 namespace Types.Enums.Buildings {
@@ -18,7 +19,7 @@ namespace Types.Enums.Buildings {
         }
         
 
-        public decimal GetLevelBasedValue(StatType statType) {
+        public Value GetLevelBasedValue(StatType statType) {
             switch (statType) {
                 case StatType.ClickIncome: return Definition.ClickIncome.Evaluate(Level);
                 case StatType.Income: return Definition.Income.Evaluate(Level);
@@ -28,7 +29,7 @@ namespace Types.Enums.Buildings {
                 case StatType.StabilityModifierMultiplier: return Definition.StabilityModifierMultiplier.Evaluate(Level);
                 case StatType.CriticalChance: return Definition.CriticalChance.Evaluate(Level);
                 case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.Evaluate(Level);
-                default: return 0;
+                default: return Value.Zero;
             }
         }
 

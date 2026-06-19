@@ -69,4 +69,4 @@ MonoBehaviour:
     - rid: 7490908289081016517
       type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1.5
+        BaseValue: 2

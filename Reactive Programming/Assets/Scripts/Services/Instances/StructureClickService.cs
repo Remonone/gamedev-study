@@ -1,6 +1,5 @@
 using Services.Player;
 using R3;
-using Services;
 using Types.Enums;
 using Types.Enums.Buildings;
 
@@ -30,7 +29,10 @@ namespace Services.Components.Instances {
             if (!_unlockService.IsItemUnlocked(state.Definition.Type.ToString())) return;
             var type = state.Definition.Type;
             var computedStats = _economyService.ComputeStatsForBuilding(state);
-            var benefitedValue = (long)_calculationService.CalculateBenefits(state, computedStats.ClickIncome);
+            var benefitedValue = computedStats.ClickIncome;
+            
+            _calculationService.CalculateBenefits(state, ref benefitedValue);
+            _calculationService.CalculateCritChance(state, ref benefitedValue);
             _storage.AddMoney(type, benefitedValue);
             _structureInteraction.OnNext(new StructureInteraction { GovernmentInteraction = type, InteractionResult = benefitedValue });
         }

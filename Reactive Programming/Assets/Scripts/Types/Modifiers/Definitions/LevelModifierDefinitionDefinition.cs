@@ -18,7 +18,7 @@ namespace Types.Enums {
             return new StatModifier {
                 ModifierId = Modifier.ModifierId,
                 Operation = Modifier.Operation,
-                Value = Modifier.Value * (float)CalculationFormula.Evaluate(levelCapability.Level),
+                Value = Modifier.Value * CalculationFormula.Evaluate(levelCapability.Level).ToSingle(),
                 Stat = Modifier.Stat,
                 Priority = Modifier.Priority
             };

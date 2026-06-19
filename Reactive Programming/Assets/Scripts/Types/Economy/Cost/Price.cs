@@ -1,4 +1,5 @@
 using System.Linq;
+using Types.Enums.Values;
 
 namespace Types.Enums.Cost {
     public struct Price {
@@ -15,9 +16,9 @@ namespace Types.Enums.Cost {
 
         public struct Entry {
             public GovernmentInteractionType GovernmentInteractionType;
-            public decimal Price;
+            public Value Price;
 
-            public Entry(GovernmentInteractionType type, decimal price) {
+            public Entry(GovernmentInteractionType type, Value price) {
                 GovernmentInteractionType = type;
                 Price = price;
             }

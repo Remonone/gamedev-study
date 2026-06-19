@@ -1,4 +1,5 @@
 using System;
+using Types.Enums.Values;
 
 namespace Types.Enums.Cost.Formula {
     [Serializable]
@@ -6,8 +7,11 @@ namespace Types.Enums.Cost.Formula {
         public double BaseValue;
         public double Rate;
         
-        public decimal Evaluate(decimal input) {
-            return (decimal)BaseValue * (decimal)Math.Pow(Rate, (double)input);
+        public Value Evaluate(double input) {
+            if (BaseValue <= 0d) return Value.Zero;
+            if (Rate <= 0d) return input <= 0d ? new Value(BaseValue) : Value.Zero;
+
+            return Value.FromLog10(Math.Log10(BaseValue) + input * Math.Log10(Rate));
         }
     }
 }

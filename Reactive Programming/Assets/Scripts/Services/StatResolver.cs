@@ -4,21 +4,22 @@ using System.Linq;
 using Types.Enums.Buildings;
 using Types.Enums;
 using Types.Enums.Cost;
+using Types.Enums.Values;
 using UnityEngine;
 
 namespace Economy {
     public class StatResolver {
         public ComputedStats Resolve(BuildingState building, List<StatModifier> modifiers) {
             var result = new ComputedStats {
-                ClickIncome = ResolveOne((float)building.GetLevelBasedValue(StatType.ClickIncome), StatType.ClickIncome, modifiers),
-                Income = ResolveOne((float)building.GetLevelBasedValue(StatType.Income), StatType.Income, modifiers),
-                Frequency = ResolveOne((float)building.GetLevelBasedValue(StatType.Frequency), StatType.Frequency, modifiers),
+                ClickIncome = ResolveValue(building.GetLevelBasedValue(StatType.ClickIncome), StatType.ClickIncome, modifiers),
+                Income = ResolveValue(building.GetLevelBasedValue(StatType.Income), StatType.Income, modifiers),
+                Frequency = ResolveFloat(building.GetLevelBasedValue(StatType.Frequency).ToSingle(), StatType.Frequency, modifiers),
                 Cost = ResolvePrice(building.GetPrice(), modifiers),
-                StabilityModifier = ResolveOne((float)building.GetLevelBasedValue(StatType.StabilityModifier), StatType.StabilityModifier, modifiers),
-                StabilityModifierMultiplier = ResolveOne((float)building.GetLevelBasedValue(StatType.StabilityModifierMultiplier), StatType.StabilityModifierMultiplier, modifiers),
-                MultiplierCoefficient = ResolveOne((float)building.GetLevelBasedValue(StatType.MultiplierCoefficient), StatType.MultiplierCoefficient, modifiers),
-                CriticalChance = ResolveOne((float)building.GetLevelBasedValue(StatType.CriticalChance), StatType.CriticalChance, modifiers),
-                CriticalMultiplier = ResolveOne((float)building.GetLevelBasedValue(StatType.CriticalMultiplier), StatType.CriticalMultiplier, modifiers)
+                StabilityModifier = ResolveFloat(building.GetLevelBasedValue(StatType.StabilityModifier).ToSingle(), StatType.StabilityModifier, modifiers),
+                StabilityModifierMultiplier = ResolveFloat(building.GetLevelBasedValue(StatType.StabilityModifierMultiplier).ToSingle(), StatType.StabilityModifierMultiplier, modifiers),
+                MultiplierCoefficient = ResolveFloat(building.GetLevelBasedValue(StatType.MultiplierCoefficient).ToSingle(), StatType.MultiplierCoefficient, modifiers),
+                CriticalChance = ResolveFloat(building.GetLevelBasedValue(StatType.CriticalChance).ToSingle(), StatType.CriticalChance, modifiers),
+                CriticalMultiplier = ResolveFloat(building.GetLevelBasedValue(StatType.CriticalMultiplier).ToSingle(), StatType.CriticalMultiplier, modifiers)
             };
 
             result.Frequency = Mathf.Max(0.01f, result.Frequency);
@@ -27,20 +28,20 @@ namespace Economy {
         }
 
         private Price ResolvePrice(Price price, List<StatModifier> modifiers) {
-            decimal flat = 0m;
-            decimal percent = 0m;
-            decimal mul = 1m;
+            var flat = Value.Zero;
+            var percent = 0d;
+            var mul = 1d;
             
             foreach (var modifier in modifiers.Where(modifier => modifier.Stat == StatType.Cost)) {
                 switch (modifier.Operation) {
                     case ModifierOp.AddFlat:
-                        flat += (decimal)modifier.Value;
+                        flat += new Value(modifier.Value);
                         break;
                     case ModifierOp.AddPercent:
-                        percent += (decimal)modifier.Value;
+                        percent += modifier.Value;
                         break;
                     case ModifierOp.Multiply:
-                        mul *= (decimal)modifier.Value;
+                        mul *= modifier.Value;
                         break;
                     default:
                         break;
@@ -48,13 +49,55 @@ namespace Economy {
             }
 
             for (int i = 0; i < price.Entries.Length; i++) {
-                price.Entries[i].Price = ((price.Entries[i].Price - flat) / (1m + percent)) / mul;
+                var withoutFlat = price.Entries[i].Price - flat;
+                var divisor = (1d + percent) * mul;
+                price.Entries[i].Price = ScaleNonNegative(withoutFlat ?? Value.Zero, divisor <= 0d ? 0d : 1d / divisor);
             }
 
             return price;
         }
 
-        private float ResolveOne(float baseValue, StatType stat, List<StatModifier> modifiers) {
+        private Value ResolveValue(Value baseValue, StatType stat, List<StatModifier> modifiers) {
+            var flat = Value.Zero;
+            var percent = 0d;
+            var mul = 1d;
+
+            bool hasOverride = false;
+            int overridePriority = int.MinValue;
+            var overrideValue = baseValue;
+
+            foreach (var modifier in modifiers.Where(modifier => modifier.Stat == stat)) {
+                switch (modifier.Operation) {
+                    case ModifierOp.AddFlat:
+                        flat += new Value(modifier.Value);
+                        break;
+                    case ModifierOp.AddPercent:
+                        percent += modifier.Value;
+                        break;
+                    case ModifierOp.Multiply:
+                        mul *= modifier.Value;
+                        break;
+                    case ModifierOp.Override:
+                        if (!hasOverride || modifier.Priority > overridePriority) {
+                            hasOverride = true;
+                            overridePriority = modifier.Priority;
+                            overrideValue = new Value(modifier.Value);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            if (hasOverride) return overrideValue;
+            return ScaleNonNegative(baseValue + flat, (1d + percent) * mul);
+        }
+
+        private static Value ScaleNonNegative(Value value, double multiplier) {
+            return multiplier <= 0d ? Value.Zero : value * multiplier;
+        }
+
+        private float ResolveFloat(float baseValue, StatType stat, List<StatModifier> modifiers) {
             float flat = 0f;
             float percent = 0f;
             float mul = 1f;
