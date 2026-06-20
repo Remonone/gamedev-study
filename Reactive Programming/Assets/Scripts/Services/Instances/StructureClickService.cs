@@ -1,16 +1,19 @@
+using System;
 using Services.Player;
 using R3;
-using Types.Enums;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Buildings;
 
 namespace Services.Components.Instances {
-    public class StructureClickService : IService {
+    public class StructureClickService : IService, IDisposable {
         
         private readonly Storage _storage;
         private readonly WorldCastService _worldCastService;
         private readonly UnlockService _unlockService;
         private readonly EconomyService _economyService;
         private readonly StateBenefitCalculationService _calculationService;
+        
+        private readonly CompositeDisposable _disposable = new();
         
         private readonly Subject<StructureInteraction> _structureInteraction = new();
         public Observable<StructureInteraction> StructureInteraction => _structureInteraction;
@@ -19,7 +22,7 @@ namespace Services.Components.Instances {
         public StructureClickService(Storage storage, WorldCastService worldCastService, UnlockService unlockService, EconomyService economyService, StateBenefitCalculationService calculationService) {
             _storage = storage;
             _worldCastService = worldCastService;
-            _worldCastService.StructureClicked.Subscribe(HandleStructureInteraction);
+            _worldCastService.StructureClicked.Subscribe(HandleStructureInteraction).AddTo(_disposable);
             _unlockService = unlockService;
             _economyService = economyService;
             _calculationService = calculationService;
@@ -35,6 +38,10 @@ namespace Services.Components.Instances {
             _calculationService.CalculateCritChance(state, ref benefitedValue);
             _storage.AddMoney(type, benefitedValue);
             _structureInteraction.OnNext(new StructureInteraction { GovernmentInteraction = type, InteractionResult = benefitedValue });
+        }
+
+        public void Dispose() {
+            _disposable.Dispose();
         }
     }
 }

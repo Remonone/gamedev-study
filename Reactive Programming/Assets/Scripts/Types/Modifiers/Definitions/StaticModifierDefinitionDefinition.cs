@@ -1,11 +1,8 @@
-using System;
-using Types.Enums.Target;
-using Types.Enums.Buildings;
-using Types.Enums.Context;
-using Types.Enums;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Context;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     
     [CreateAssetMenu(fileName = "StaticModifierDefinition", menuName = "Clicker/Modifiers/Static Modifier Definition", order = 0)]
     public class StaticModifierDefinitionDefinition : ModifierDefinition {

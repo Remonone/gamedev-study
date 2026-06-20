@@ -1,8 +1,10 @@
 using System;
-using Types.Enums.Buildings;
+using Services;
+using Services.Components;
+using Types.Modifiers.Definitions.Buildings;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
      public class Structure : MonoBehaviour, IStructure {
         [SerializeField, Tooltip("Scene label for this structure. Runtime interaction type comes from Definition.Type.")]
         private GovernmentInteractionType _type;
@@ -13,8 +15,9 @@ namespace Types.Enums {
         
         public BuildingState State => _state;
 
-        private void Awake() {
-            _state = new BuildingState(_definition, 1);
+        private void Start() {
+            _state = ServiceLocator.Instance.GetService<BuildingWatcherService>().GetBuildingState(_definition.Name);
+            _state.IsDirty = true;
         }
      }
 }

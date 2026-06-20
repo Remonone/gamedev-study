@@ -1,6 +1,6 @@
 using System;
 using R3;
-using Types.Enums;
+using Types.Modifiers.Definitions;
 
 namespace Services {
     public class NotificationService : IService, IDisposable {

@@ -1,5 +1,5 @@
 using System;
-using Types.Enums.Cost.Condition;
+using Types.Modifiers.Definitions.Cost.Condition;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public interface ISessionContext {
         public int MayorInfluence { get; }
         public int FirefighterInfluence { get; }

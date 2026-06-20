@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Audio.Implementation;
-using Types.Enums.Buildings;
-using Types.Enums.Objects;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Objects;
 using Economy.Providers;
 using R3;
 using Services.Player;
@@ -10,7 +10,8 @@ using Services;
 using Services.Achievements;
 using Services.Components.Instances;
 using Services.Statistics;
-using Types.Enums;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Achievements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Views;
@@ -63,14 +64,25 @@ namespace Services.Components {
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 
-            _economyService = new EconomyService(sessionContext, storage, _buildingWatcherService, buildingUpgradeService, providerRegistry);
+            _economyService = new EconomyService(sessionContext, 
+                                                storage, 
+                                                _buildingWatcherService, 
+                                                buildingUpgradeService, 
+                                                providerRegistry);
             RegisterService(_economyService);
             
-            var structureClickService = new StructureClickService(storage, _worldCastService, unlockService, _economyService, stateBenefitCalculation);
+            var structureClickService = new StructureClickService(storage, 
+                                                                _worldCastService, 
+                                                                unlockService, 
+                                                                _economyService, 
+                                                                stateBenefitCalculation);
             RegisterService(structureClickService);
             RegisterService(new StructureSoundResolver(structureClickService, _structureSoundConfig));
             
-            var tickService = new TickService(_economyService, _buildingWatcherService, storage, stateBenefitCalculation);
+            var tickService = new TickService(_economyService, 
+                                            _buildingWatcherService, 
+                                            storage, 
+                                            stateBenefitCalculation);
             RegisterService(tickService);
 
             var saveService = new SaveService(SaveManager);
@@ -81,6 +93,14 @@ namespace Services.Components {
             InitTrackers();
             InitViews();
             BindNotifications();
+            
+            var achievements = Resources.LoadAll<AchievementModifier>("Achievements");
+            var achievementStorage = new AchievementStorageService(achievements);
+            RegisterService(achievementStorage);
+            RegisterService(new AchievementTrackerService(_achievementService, 
+                                                            achievementStorage, 
+                                                            providerRegistry, 
+                                                            invalidationService));
         }
 
         private void BindNotifications() {
@@ -114,6 +134,7 @@ namespace Services.Components {
 
         private void UploadProviders(ProviderRegistryService providerRegistry) {
             providerRegistry.RegisterProvider(new UpgradeModifierProvider());
+            providerRegistry.RegisterProvider(new AchievementModifierProvider());
         }
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {
@@ -128,6 +149,7 @@ namespace Services.Components {
             
             var container = _document.rootVisualElement.Q<VisualElement>("BuildingList");
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
+                if (!building.Definition.IsUpgradeable) continue;
                 var buildingItem = Instantiate(_buildingItemView);
                 var buildingItemViewModel = new BuildingItemViewModel(building.Definition);
                 buildingItem.Bind(buildingItemViewModel, container);

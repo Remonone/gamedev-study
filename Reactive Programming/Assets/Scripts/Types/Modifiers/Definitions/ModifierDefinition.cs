@@ -1,11 +1,10 @@
 using System;
-using Types.Enums.Buildings;
-using Types.Enums.Context;
-using Types.Enums;
-using Types.Enums.Target;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Context;
+using Types.Modifiers.Definitions.Target;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public abstract class ModifierDefinition : ScriptableObject {
         
         [Tooltip("Buildings that can receive this modifier.")]

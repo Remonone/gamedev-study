@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 using Newtonsoft.Json.Linq;
 using Save;
 using UnityEngine;
@@ -18,8 +18,6 @@ namespace Services {
                     Debug.LogError($"Duplicate building name: {definition.Name}");
                     continue;
                 }
-
-                if (!definition.IsUpgradeable) continue;
                 var buildingState = new BuildingState(definition, 0);
                 _buildingsByName.Add(definition.Name, buildingState);
             }

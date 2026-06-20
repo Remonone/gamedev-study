@@ -1,5 +1,5 @@
 using R3;
-using Types.Enums.Achievements;
+using Types.Modifiers.Definitions.Achievements;
 using UnityEngine;
 
 namespace Views.Models {

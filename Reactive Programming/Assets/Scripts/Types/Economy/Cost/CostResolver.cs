@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Types.Enums.Cost.Condition;
-using Types.Enums.Cost.Formula;
+using Types.Modifiers.Definitions.Cost.Condition;
+using Types.Modifiers.Definitions.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Enums.Cost {
+namespace Types.Modifiers.Definitions.Cost {
     [Serializable]
     public class CostResolver {
         [SerializeField, Tooltip("Cost rows evaluated for the requested level; every passing row contributes one price entry.")]

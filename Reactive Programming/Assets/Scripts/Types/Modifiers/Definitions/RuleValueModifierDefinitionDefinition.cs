@@ -1,11 +1,10 @@
 using Economy.Conditions;
-using Types.Enums.Buildings;
-using Types.Enums.Context;
-using Types.Enums.Cost.Formula;
-using Types.Enums;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Context;
+using Types.Modifiers.Definitions.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     [CreateAssetMenu(fileName = "RuleValueModifierDefinition", menuName = "Clicker/Modifiers/Rule Value Modifier Definition", order = 0)]
     public class RuleValueModifierDefinitionDefinition : ModifierDefinition {
         [SerializeReference, Tooltip("All conditions that must pass before this modifier is applied. Empty list means always applies.")]

@@ -1,7 +1,6 @@
+using Types.Modifiers.Definitions.Values;
 
-using Types.Enums.Values;
-
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
      public struct StructureInteraction {
           public GovernmentInteractionType GovernmentInteraction;
           public Value InteractionResult;

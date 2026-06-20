@@ -1,13 +1,13 @@
 using System;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Values;
 using UnityEngine;
 
-namespace Types.Enums.Cost.Formula {
+namespace Types.Modifiers.Definitions.Cost.Formula {
     
     [Serializable]
     public class MultiplicationFormula : IFormula {
         
-        [Tooltip("Nested formulas evaluated with the same input and multiplied together.")]
+        [SerializeReference, Tooltip("Nested formulas evaluated with the same input and multiplied together.")]
         public IFormula[] Formulas;
         
         public Value Evaluate(double input) {

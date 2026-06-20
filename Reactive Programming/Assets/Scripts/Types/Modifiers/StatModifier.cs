@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     [System.Serializable]
     public struct StatModifier {
         [Tooltip("Stat affected by this modifier.")]

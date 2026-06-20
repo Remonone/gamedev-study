@@ -1,6 +1,6 @@
 using R3;
-using Types.Enums;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Buildings;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

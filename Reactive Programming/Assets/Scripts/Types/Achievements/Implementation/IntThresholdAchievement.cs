@@ -1,7 +1,7 @@
 using R3;
 using Services.Statistics;
 
-namespace Types.Enums.Achievements.Implementation {
+namespace Types.Modifiers.Definitions.Achievements.Implementation {
     public abstract class IntThresholdAchievement : AchievementItem {
         
         protected abstract int Target { get; }

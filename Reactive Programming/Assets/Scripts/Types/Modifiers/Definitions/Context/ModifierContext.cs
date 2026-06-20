@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Types.Enums.Context {
+namespace Types.Modifiers.Definitions.Context {
     
     public sealed class ModifierContext : IModifierContext {
         private Dictionary<Type, object> _capabilities { get; } = new();

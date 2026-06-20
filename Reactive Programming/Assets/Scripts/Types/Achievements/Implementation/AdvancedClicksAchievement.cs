@@ -1,6 +1,6 @@
 using Services.Statistics;
 
-namespace Types.Enums.Achievements.Implementation {
+namespace Types.Modifiers.Definitions.Achievements.Implementation {
     public class AdvancedClicksAchievement : IntThresholdAchievement {
         public AdvancedClicksAchievement(IStatisticsReader reader) : base(reader) {
         }

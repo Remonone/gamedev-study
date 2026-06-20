@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using R3;
 using Save;
 using Services.Statistics;
-using Types.Enums.Achievements;
+using Types.Modifiers.Definitions.Achievements;
 
 namespace Services.Achievements {
     public class AchievementService : IService, ISaveable, IDisposable {

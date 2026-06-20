@@ -1,8 +1,8 @@
 using System;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Values;
 using UnityEngine;
 
-namespace Types.Enums.Cost.Formula {
+namespace Types.Modifiers.Definitions.Cost.Formula {
     [Serializable]
     public class StepFormula : IFormula {
         

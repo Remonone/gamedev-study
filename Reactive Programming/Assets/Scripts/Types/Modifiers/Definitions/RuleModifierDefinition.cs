@@ -1,10 +1,9 @@
 using Economy.Conditions;
-using Types.Enums;
-using Types.Enums.Buildings;
-using Types.Enums.Context;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Context;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     [CreateAssetMenu(fileName = "RuleModifierDefinition", menuName = "Clicker/Modifiers/Rule Modifier Definition", order = 0)]
     public class RuleModifierDefinition : ModifierDefinition{
         [SerializeReference, Tooltip("All conditions that must pass before this modifier is applied. Empty list means always applies.")]

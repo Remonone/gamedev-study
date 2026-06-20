@@ -1,6 +1,6 @@
 using Services.Statistics;
 
-namespace Types.Enums.Achievements.Implementation {
+namespace Types.Modifiers.Definitions.Achievements.Implementation {
     public class TotalClicksAchievement : IntThresholdAchievement {
         private const int TARGET = 1000;
 

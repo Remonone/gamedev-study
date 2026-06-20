@@ -1,7 +1,7 @@
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 using UnityEngine;
 
-namespace Types.Enums.Target {
+namespace Types.Modifiers.Definitions.Target {
     [CreateAssetMenu(fileName = "TypeTarget", menuName = "Clicker/Modifiers/Target/By Type", order = 0)]
     public class TargetByType : ModifierTarget {
         

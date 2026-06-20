@@ -3,7 +3,7 @@ using System.Globalization;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Types.Enums.Values {
+namespace Types.Modifiers.Definitions.Values {
     [Serializable]
     public struct Value : IComparable<Value>, IEquatable<Value> {
         private const double BaseStep = 1000d;

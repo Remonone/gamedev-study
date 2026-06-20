@@ -1,6 +1,6 @@
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public struct BuildingUpgrade {
         public BuildingState Building;
         public int Levels;

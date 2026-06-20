@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using Types.Enums.Objects;
+using Types.Modifiers.Definitions.Objects;
 using Services.Components;
 using Services.Components.Instances;
 using R3;
-using Types.Enums;
+using Types.Modifiers.Definitions;
 
 namespace Audio.Implementation {
     public class StructureSoundResolver : IAudioDistributor, IDisposable {

@@ -1,10 +1,9 @@
-using Types.Enums.Buildings;
-using Types.Enums.Context;
-using Types.Enums.Cost.Formula;
-using Types.Enums;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Context;
+using Types.Modifiers.Definitions.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     [CreateAssetMenu(fileName = "LevelModifierDefinition", menuName = "Clicker/Modifiers/Level Modifier Definition", order = 0)]
     public class LevelModifierDefinitionDefinition : ModifierDefinition {
         [SerializeReference, Tooltip("Formula evaluated with the upgrade level; result multiplies Modifier.Value.")]

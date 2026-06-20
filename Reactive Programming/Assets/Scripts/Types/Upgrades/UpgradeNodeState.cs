@@ -1,4 +1,4 @@
-namespace Types.Enums.Upgrades {
+namespace Types.Modifiers.Definitions.Upgrades {
     public class UpgradeNodeState {
         public enum State {Locked, Available, InProgress, Completed}
 

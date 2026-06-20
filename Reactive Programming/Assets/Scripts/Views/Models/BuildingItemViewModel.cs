@@ -1,12 +1,12 @@
 using System;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 using Services.Components;
 using Services.Player;
 using R3;
 using Services;
-using Types.Enums;
-using Types.Enums.Cost;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Cost;
+using Types.Modifiers.Definitions.Values;
 using UnityEngine;
 
 namespace Views.Models {

@@ -1,6 +1,6 @@
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public readonly struct BuildingUpdate {
         public readonly BuildingState Building;
         public readonly ComputedStats Stats;

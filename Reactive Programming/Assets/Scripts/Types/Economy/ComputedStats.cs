@@ -1,7 +1,7 @@
-using Types.Enums.Cost;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Cost;
+using Types.Modifiers.Definitions.Values;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public struct ComputedStats {
         public Value ClickIncome;
         public Value Income;

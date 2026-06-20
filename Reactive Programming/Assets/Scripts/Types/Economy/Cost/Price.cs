@@ -1,7 +1,7 @@
 using System.Linq;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Values;
 
-namespace Types.Enums.Cost {
+namespace Types.Modifiers.Definitions.Cost {
     public struct Price {
         public Entry[] Entries;
 

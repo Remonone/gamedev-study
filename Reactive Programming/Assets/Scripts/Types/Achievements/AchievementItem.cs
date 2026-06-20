@@ -3,7 +3,7 @@ using R3;
 using Services.Achievements;
 using Services.Statistics;
 
-namespace Types.Enums.Achievements {
+namespace Types.Modifiers.Definitions.Achievements {
     public abstract class AchievementItem : IAchievement {
 
     protected readonly IStatisticsReader _statistics;

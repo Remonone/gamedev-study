@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public readonly struct NotificationRequest {
         public readonly string Title;
         public readonly string Message;

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using R3;
 using Services;
-using Types.Enums;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Buildings;
 
 namespace Economy.Providers {
     public class StateModifierProvider : IModifierProvider, IDisposable {

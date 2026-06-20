@@ -12,17 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e22915f0065420693c3385ffb94a5fe, type: 3}
   m_Name: IncomeEffect
   m_EditorClassIdentifier: Assembly-CSharp::Types.Enums.LevelModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: cf0982d1e520e280681d579caf216d79, type: 2}
   Modifier:
-    Stat: 0
-    Operation: 0
-    Value: 0
-    Priority: 0
-    ModifierId: 
+    Stat: 1
+    Operation: 2
+    Value: 2
+    Priority: 1
+    ModifierId: notary_income
   CalculationFormula:
-    rid: -2
+    rid: 7490908294528368714
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 7490908294528368714
+      type: {class: LinearFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+        Multiplier: 2

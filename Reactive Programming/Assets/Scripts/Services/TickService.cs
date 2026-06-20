@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
 using Save;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Values;
 using UnityEngine;
 
 namespace Services {

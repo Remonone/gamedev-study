@@ -1,6 +1,6 @@
-using Types.Enums.Values;
+using Types.Modifiers.Definitions.Values;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public struct Wallet {
         public Value MayorWallet;
         public Value FirefighterWallet;

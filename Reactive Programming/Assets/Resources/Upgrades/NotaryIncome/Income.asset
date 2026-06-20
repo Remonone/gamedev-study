@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06aa1a8fb70148e181079484aeaf99c2, type: 3}
   m_Name: Income
   m_EditorClassIdentifier: Assembly-CSharp::Types.Enums.Upgrades.Effects.ModifierUpgradeEffect
-  Rules: []
+  Rules:
+  - {fileID: 11400000, guid: 6e52ee2194742b9d2aedb2bd04221190, type: 2}

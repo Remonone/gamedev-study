@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Notary Income
   m_EditorClassIdentifier: Assembly-CSharp::Types.Upgrades.UpgradeNodeDefinition
   Effects:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: ecae1aa88ac7de5a4914d4bdefab301f, type: 2}
   Price:
     _costItems:
     - Condition:
         rid: 7490908207531163751
       Formula:
-        rid: 7490908207531163752
+        rid: 7490908294528368716
       Type: 0
   MaxLevel: 4
   Position: {x: 150, y: 150}
@@ -36,7 +36,18 @@ MonoBehaviour:
       type: {class: ConstCondition, ns: Types.Enums.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
-    - rid: 7490908207531163752
+    - rid: 7490908294528368716
+      type: {class: AccumulationFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        Formulas:
+        - rid: 7490908294528368717
+        - rid: 7490908294528368718
+    - rid: 7490908294528368717
       type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1500
+    - rid: 7490908294528368718
+      type: {class: PowerFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 20
+        Power: 5

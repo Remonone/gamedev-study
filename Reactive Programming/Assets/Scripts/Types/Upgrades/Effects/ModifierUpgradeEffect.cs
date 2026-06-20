@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Types.Enums;
+using Types.Modifiers.Definitions;
 using UnityEngine;
 
-namespace Types.Enums.Upgrades.Effects {
+namespace Types.Modifiers.Definitions.Upgrades.Effects {
     
     [CreateAssetMenu(fileName = "Modifier Upgrade Effect", menuName = "Clicker/Upgrade Effect/Modifier Upgrade Effect", order = 0)]
     public class ModifierUpgradeEffect : UpgradeEffect {

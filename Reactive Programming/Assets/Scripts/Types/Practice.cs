@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Types.Enums.Buildings;
+using Types.Modifiers.Definitions.Buildings;
 using UnityEngine;
 
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     [CreateAssetMenu(fileName = "Artifact", menuName = "Clicker/Artifact", order = 0)]
     public class Practice : ScriptableObject {
         

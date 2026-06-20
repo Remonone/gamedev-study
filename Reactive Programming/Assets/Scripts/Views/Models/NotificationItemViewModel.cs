@@ -1,5 +1,5 @@
 using R3;
-using Types.Enums;
+using Types.Modifiers.Definitions;
 using UnityEngine;
 
 namespace Views.Models {

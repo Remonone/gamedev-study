@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using R3;
 using Services;
-using Types.Enums;
+using Types.Modifiers.Definitions;
 
 namespace Views.Models {
     public class NotificationCenterViewModel : IDisposable {

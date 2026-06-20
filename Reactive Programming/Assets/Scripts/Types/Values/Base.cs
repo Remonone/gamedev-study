@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Types.Enums.Values {
+namespace Types.Modifiers.Definitions.Values {
     [Serializable]
     public struct Base {
         [Tooltip("Power of 1000 used to scale a Value.")]

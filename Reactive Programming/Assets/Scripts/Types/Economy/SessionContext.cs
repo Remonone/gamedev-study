@@ -1,4 +1,4 @@
-namespace Types.Enums {
+namespace Types.Modifiers.Definitions {
     public class SessionContext : ISessionContext {
         
         private int _mayorInfluence;

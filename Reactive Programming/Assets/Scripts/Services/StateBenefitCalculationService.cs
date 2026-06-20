@@ -1,7 +1,7 @@
 using System;
-using Types.Enums;
-using Types.Enums.Buildings;
-using Types.Enums.Values;
+using Types.Modifiers.Definitions;
+using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers.Definitions.Values;
 
 namespace Services {
     public class StateBenefitCalculationService : IService {
