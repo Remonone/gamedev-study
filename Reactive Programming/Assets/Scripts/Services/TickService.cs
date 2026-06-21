@@ -7,7 +7,7 @@ using Types.Modifiers.Definitions.Values;
 using UnityEngine;
 
 namespace Services {
-    public class TickService : IService, IDisposable, ISaveable {
+    public class TickService : IService, IDisposable, ISaveable, IStartable {
         private readonly CompositeDisposable _disposable = new();
 
         private readonly EconomyService _economyService;
@@ -21,10 +21,6 @@ namespace Services {
             _buildingWatcherService = buildingWatcherService;
             _storage = storage;
             _stateCalculationService = stateCalculationService;
-            
-            Observable.EveryUpdate()
-                .Subscribe(_ => Tick(Time.timeAsDouble))
-                .AddTo(_disposable);
         }
 
         private void Tick(double time, bool shouldCalculateCrit = true) {
@@ -73,6 +69,12 @@ namespace Services {
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
                 building.LastTimeActivated = Time.timeAsDouble;
             }
+        }
+
+        public void StartService() {
+            Observable.EveryUpdate()
+                .Subscribe(_ => Tick(Time.timeAsDouble))
+                .AddTo(_disposable);
         }
     }
 }

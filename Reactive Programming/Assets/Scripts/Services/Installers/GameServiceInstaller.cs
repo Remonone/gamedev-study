@@ -105,6 +105,7 @@ namespace Services.Components {
 
         private void BindNotifications() {
             _achievementService.Unlocked
+                .Where(achievement => !achievement.IsLoadedAsCompleted)
                 .Subscribe(achievement => _notificationService.Push(new NotificationRequest(
                     title: "Achievement unlocked!",
                     message: achievement.Name,
@@ -167,8 +168,6 @@ namespace Services.Components {
             notificationView.Bind(notificationVm);
         }
 
-        protected override void AfterInstallation() {
-            _achievementService.Start();
-        }
+        protected override void AfterInstallation() { }
     }
 }

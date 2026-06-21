@@ -14,6 +14,7 @@ namespace Types.Modifiers.Definitions {
         private BuildingState _state;
         
         public BuildingState State => _state;
+        public BuildingDefinition Definition => _definition;
 
         private void Start() {
             _state = ServiceLocator.Instance.GetService<BuildingWatcherService>().GetBuildingState(_definition.Name);

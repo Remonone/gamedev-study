@@ -1,11 +1,10 @@
 using System;
 using Economy.Providers;
 using R3;
-using Services.Achievements;
 using Types.Modifiers.Definitions.Achievements;
 
-namespace Services {
-    public class AchievementTrackerService : IService, IDisposable {
+namespace Services.Achievements {
+    public class AchievementTrackerService : IService, IDisposable, IStartable {
         
         private readonly AchievementService _achievementService;
         private readonly AchievementStorageService _achievementStorageService;
@@ -24,10 +23,6 @@ namespace Services {
             _achievementModifierProvider = providerRegistryService.GetProvider<AchievementModifierProvider>();
             
             _disposable = new CompositeDisposable();
-            
-            _achievementService.Unlocked
-                .Subscribe(OnUnlocked).AddTo(_disposable);
-            
             _invalidationService = invalidationService;
         }
 
@@ -43,6 +38,11 @@ namespace Services {
 
         public void Dispose() {
             _disposable?.Dispose();
+        }
+
+        public void StartService() {
+            _achievementService.Unlocked
+                .Subscribe(OnUnlocked).AddTo(_disposable);
         }
     }
 }

@@ -19,54 +19,54 @@ MonoBehaviour:
     _costItems: []
   Type: 0
   ClickIncome:
-    rid: 7490908289081016510
+    rid: 7490908315923775635
   Income:
-    rid: 7490908289081016511
+    rid: 7490908315923775636
   Frequency:
-    rid: 7490908289081016512
+    rid: 7490908315923775637
   StabilityModifier:
-    rid: 7490908289081016513
+    rid: 7490908315923775642
   StabilityModifierMultiplier:
-    rid: 7490908289081016514
+    rid: 7490908315923775641
   MultiplierCoefficient:
-    rid: 7490908289081016515
+    rid: 7490908315923775640
   CriticalChance:
-    rid: 7490908289081016516
+    rid: 7490908315923775639
   CriticalMultiplier:
-    rid: 7490908289081016517
+    rid: 7490908315923775638
   IsUpgradeable: 0
   references:
     version: 2
     RefIds:
-    - rid: 7490908289081016510
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775635
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
-    - rid: 7490908289081016511
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775636
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 0
-    - rid: 7490908289081016512
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775637
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 0
-    - rid: 7490908289081016513
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1
-    - rid: 7490908289081016514
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1
-    - rid: 7490908289081016515
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1
-    - rid: 7490908289081016516
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 0.01
-    - rid: 7490908289081016517
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775638
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 2
+    - rid: 7490908315923775639
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 0.01
+    - rid: 7490908315923775640
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490908315923775641
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1
+    - rid: 7490908315923775642
+      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      data:
+        BaseValue: 1

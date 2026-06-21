@@ -17,9 +17,9 @@ MonoBehaviour:
   Price:
     _costItems:
     - Condition:
-        rid: 7490908207531163751
+        rid: 7490908315923775566
       Formula:
-        rid: 7490908294528368716
+        rid: 7490908315923775567
       Type: 0
   MaxLevel: 4
   Position: {x: 150, y: 150}
@@ -32,22 +32,12 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 7490908207531163751
-      type: {class: ConstCondition, ns: Types.Enums.Cost.Condition, asm: Assembly-CSharp}
+    - rid: 7490908315923775566
+      type: {class: ConstCondition, ns: Types.Modifiers.Definitions.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
-    - rid: 7490908294528368716
-      type: {class: AccumulationFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775567
+      type: {class: LinearFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
-        Formulas:
-        - rid: 7490908294528368717
-        - rid: 7490908294528368718
-    - rid: 7490908294528368717
-      type: {class: ConstantFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 1500
-    - rid: 7490908294528368718
-      type: {class: PowerFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
-      data:
-        BaseValue: 20
-        Power: 5
+        BaseValue: 5000
+        Multiplier: 5500

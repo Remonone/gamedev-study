@@ -8,17 +8,17 @@ using Services.Statistics;
 using Types.Modifiers.Definitions.Achievements;
 
 namespace Services.Achievements {
-    public class AchievementService : IService, ISaveable, IDisposable {
+    public class AchievementService : IService, ISaveable, IDisposable, IStartable {
 
         private readonly IStatisticsReader _statistics;
         private readonly IReadOnlyList<IAchievement> _achievements;
         private readonly Dictionary<string, IAchievement> _achievementsById;
-        private readonly Subject<IAchievement> _unlocked = new();
+        private readonly ReplaySubject<IAchievement> _unlocked = new();
         private readonly CompositeDisposable _disposable = new();
 
         private HashSet<string> _restoredCompleted = new();
         
-        public Observable<IAchievement> Unlocked => _unlocked;
+        public ReplaySubject<IAchievement> Unlocked => _unlocked;
         public IReadOnlyList<IAchievement> Achievements => _achievements;
         
         public AchievementService(IReadOnlyList<IAchievement> achievements) {
@@ -28,10 +28,11 @@ namespace Services.Achievements {
             ValidateUniqueIds();
         }
 
-        public void Start() {
+        public void StartService() {
             foreach(var achievement in _achievements) {
                 if (_restoredCompleted.Contains(achievement.Id)) {
                     achievement.RestoreCompleted();
+                    _unlocked.OnNext(achievement);
                     continue;
                 }
                 

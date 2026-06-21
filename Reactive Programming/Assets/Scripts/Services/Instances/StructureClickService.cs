@@ -5,7 +5,7 @@ using Types.Modifiers.Definitions;
 using Types.Modifiers.Definitions.Buildings;
 
 namespace Services.Components.Instances {
-    public class StructureClickService : IService, IDisposable {
+    public class StructureClickService : IService, IDisposable, IStartable {
         
         private readonly Storage _storage;
         private readonly WorldCastService _worldCastService;
@@ -22,7 +22,6 @@ namespace Services.Components.Instances {
         public StructureClickService(Storage storage, WorldCastService worldCastService, UnlockService unlockService, EconomyService economyService, StateBenefitCalculationService calculationService) {
             _storage = storage;
             _worldCastService = worldCastService;
-            _worldCastService.StructureClicked.Subscribe(HandleStructureInteraction).AddTo(_disposable);
             _unlockService = unlockService;
             _economyService = economyService;
             _calculationService = calculationService;
@@ -42,6 +41,10 @@ namespace Services.Components.Instances {
 
         public void Dispose() {
             _disposable.Dispose();
+        }
+
+        public void StartService() {
+            _worldCastService.StructureClicked.Subscribe(HandleStructureInteraction).AddTo(_disposable);
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Services.Components;
 using Services.Components.Instances;
@@ -38,10 +37,7 @@ namespace Animators {
             _structuresByType = new Dictionary<GovernmentInteractionType, StructureConfig>();
 
             foreach (var structure in FindObjectsByType<Structure>(FindObjectsSortMode.InstanceID)) {
-                if(!structure.TryGetComponent<IStructure>(out var structureType)) {
-                    continue;
-                }
-                _structuresByType.Add(structureType.State.Definition.Type, new StructureConfig(structure.gameObject, structure.transform.localScale));
+                _structuresByType.Add(structure.Definition.Type, new StructureConfig(structure.gameObject, structure.transform.localScale));
             }
         }
 

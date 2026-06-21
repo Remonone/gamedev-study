@@ -20,12 +20,12 @@ MonoBehaviour:
     Priority: 1
     ModifierId: notary_freq
   CalculationFormula:
-    rid: 7490908207531163750
+    rid: 7490908315923775562
   references:
     version: 2
     RefIds:
-    - rid: 7490908207531163750
-      type: {class: LinearFormula, ns: Types.Enums.Cost.Formula, asm: Assembly-CSharp}
+    - rid: 7490908315923775562
+      type: {class: LinearFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
         Multiplier: 1.3

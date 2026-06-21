@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Types.Modifiers.Definitions.Achievements;
 
-namespace Services {
+namespace Services.Achievements {
     public class AchievementStorageService : IService {
         private Dictionary<string, AchievementModifier> _achievementModifiers;
 
