@@ -1,20 +1,20 @@
+using System.Collections.Generic;
+using R3;
+
 namespace Types.Modifiers.Definitions {
     public class SessionContext : ISessionContext {
+       
+        private readonly int _seed;
         
-        private int _mayorInfluence;
-        private int _firefighterInfluence;
-        private int _policeInfluence;
-        private int _ambulanceInfluence;
-        private int _courtInfluence;
-        private int _archiveInfluence;
-        private int _seed;
+        private Dictionary<GovernmentInteractionType, Influence> _governmentInfluence = new Dictionary<GovernmentInteractionType, Influence> {
+            [GovernmentInteractionType.MayorOffice] = new(0),
+            [GovernmentInteractionType.FireFighterStation] = new(0),
+            [GovernmentInteractionType.PoliceStation] = new(0),
+            [GovernmentInteractionType.Hospital] = new(0),
+            [GovernmentInteractionType.Court] = new(0),
+            [GovernmentInteractionType.Archive] = new(0),
+        };
         
-        public int MayorInfluence => _mayorInfluence;
-        public int FirefighterInfluence => _firefighterInfluence;
-        public int PoliceInfluence => _policeInfluence;
-        public int AmbulanceInfluence => _ambulanceInfluence;
-        public int CourtInfluence => _courtInfluence;
-        public int ArchiveInfluence => _archiveInfluence;
         public int Seed => _seed;
 
         public SessionContext() {
@@ -22,41 +22,44 @@ namespace Types.Modifiers.Definitions {
         }
         
         public SessionContext(int mayorInfluence, int firefighterInfluence, int policeInfluence, int ambulanceInfluence, int courtInfluence, int archiveInfluence) {
-            _mayorInfluence = mayorInfluence;
-            _firefighterInfluence = firefighterInfluence;
-            _policeInfluence = policeInfluence;
-            _ambulanceInfluence = ambulanceInfluence;
-            _courtInfluence = courtInfluence;
-            _archiveInfluence = archiveInfluence;
+            _governmentInfluence[GovernmentInteractionType.MayorOffice].ValueInternal = mayorInfluence;
+            _governmentInfluence[GovernmentInteractionType.FireFighterStation].ValueInternal = firefighterInfluence;
+            _governmentInfluence[GovernmentInteractionType.PoliceStation].ValueInternal = policeInfluence;
+            _governmentInfluence[GovernmentInteractionType.Hospital].ValueInternal = ambulanceInfluence;
+            _governmentInfluence[GovernmentInteractionType.Court].ValueInternal = courtInfluence;
+            _governmentInfluence[GovernmentInteractionType.Archive].ValueInternal = archiveInfluence;
             _seed = UnityEngine.Random.Range(0, int.MaxValue);
         }
         
         public override string ToString() {
-            return $"Mayor: {_mayorInfluence}, Firefighter: {_firefighterInfluence}, Police: {_policeInfluence}, Ambulance: {_ambulanceInfluence}, Court: {_courtInfluence}, Archive: {_archiveInfluence}";
+            return $"Mayor: {GetInfluenceInternalValue(GovernmentInteractionType.MayorOffice)}, Firefighter: {GetInfluenceInternalValue(GovernmentInteractionType.FireFighterStation)}, Police: {GetInfluenceInternalValue(GovernmentInteractionType.PoliceStation)}, Ambulance: {GetInfluenceInternalValue(GovernmentInteractionType.Hospital)}, Court: {GetInfluenceInternalValue(GovernmentInteractionType.Court)}, Archive: {GetInfluenceInternalValue(GovernmentInteractionType.Archive)}";
+        }
+
+        public void SetInfluence(GovernmentInteractionType type, int value) {
+            _governmentInfluence[type].ValueInternal = value;
+        }
+
+        public int GetInfluenceInternalValue(GovernmentInteractionType type) {
+            return _governmentInfluence[type].ValueInternal;
         }
         
-        public void SetMayorInfluence(int influence) {
-            _mayorInfluence = influence;
+        public int GetInfluenceValue(GovernmentInteractionType type) {
+            return _governmentInfluence[type].ValueExternal;
         }
-        
-        public void SetFirefighterInfluence(int influence) {
-            _firefighterInfluence = influence;
+
+        public void UpdateInfluence(GovernmentInteractionType type) {
+            var influence = _governmentInfluence[type];
+            influence.ValueExternal = influence.ValueInternal;
         }
-        
-        public void SetPoliceInfluence(int influence) {
-            _policeInfluence = influence;
-        }
-        
-        public void SetAmbulanceInfluence(int influence) {
-            _ambulanceInfluence = influence;
-        }
-        
-        public void SetCourtInfluence(int influence) {
-            _courtInfluence = influence;
-        }
-        
-        public void SetArchiveInfluence(int influence) {
-            _archiveInfluence = influence;
+
+        private class Influence {
+            public int ValueInternal;
+            public int ValueExternal;
+            
+            public Influence(int value) {
+                ValueInternal = value;
+                ValueExternal = value;
+            }
         }
     }
 }

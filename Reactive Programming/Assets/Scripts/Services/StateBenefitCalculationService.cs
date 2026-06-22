@@ -15,31 +15,31 @@ namespace Services {
 		}
 		
 		public void CalculateBenefits(BuildingState state, ref Value value) {
-			value *= state.Cache.MultiplierCoefficient;
-			
-			CalculateStability(ref value);
+			var stability = CalculateStabilityValue();
+			var multiplier = Math.Max(1f, state.Cache.MultiplierCoefficient * stability);
+			value *= multiplier;
 		}
 
-		private void CalculateStability(ref Value value) {
-			var stablility = CalculateStabilityValue();
-			value *= stablility;
-		}
 
 		private float CalculateStabilityValue() {
-			var capital = _context.MayorInfluence + _context.ArchiveInfluence + _context.AmbulanceInfluence +
-			              _context.FirefighterInfluence + _context.CourtInfluence;
-			if (capital < 1) return 1f;
+			var capital = _context.GetInfluenceValue(GovernmentInteractionType.MayorOffice) 
+			              + _context.GetInfluenceValue(GovernmentInteractionType.Archive) + _context.GetInfluenceValue(GovernmentInteractionType.Hospital) +
+			              _context.GetInfluenceValue(GovernmentInteractionType.FireFighterStation) + _context.GetInfluenceValue(GovernmentInteractionType.Court);
+			if (capital <= 1) return 1f;
 			var capitalDecreasal = 1 / Math.Log10(capital);
-			if (_context.PoliceInfluence < 1) {
-				return (float)capitalDecreasal;
+			var police = _context.GetInfluenceValue(GovernmentInteractionType.PoliceStation);
+			var court = _context.GetInfluenceValue(GovernmentInteractionType.Court);
+			if (police <= 1) {
+				return (float)Math.Max(0, Math.Min(1f, capitalDecreasal));
 			}
-			var policeEffect = Math.Log10(3*_context.PoliceInfluence);
-			return (float)(capitalDecreasal * policeEffect);
+			var policeEffect = Math.Log10(court+police);
+			return (float)Math.Max(0, Math.Min(1f, capitalDecreasal * policeEffect));
 		}
 
 		public void CalculateCritChance(BuildingState state, ref Value value) {
 			if (_random.NextDouble() < state.Cache.CriticalChance) {
-				value *= state.Cache.CriticalMultiplier;
+				var multiplier = Math.Max(1f, state.Cache.CriticalMultiplier * CalculateStabilityValue());
+				value *= multiplier;
 			}
 		}
     }

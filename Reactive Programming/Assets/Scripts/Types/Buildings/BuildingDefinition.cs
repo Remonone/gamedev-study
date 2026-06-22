@@ -33,5 +33,7 @@ namespace Types.Modifiers.Definitions.Buildings {
         public IFormula CriticalMultiplier;
         [SerializeField, Tooltip("Whether this building can be upgraded from the shop UI.")]
         public bool IsUpgradeable = true;
+        [SerializeField, Tooltip("Amount of influence the building produces on the economy.")]
+        public int Influence;
     }
 }

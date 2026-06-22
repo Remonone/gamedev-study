@@ -24,8 +24,8 @@ namespace Views.Models {
         public ReactiveProperty<Value> CuresCount = new(Value.Zero);
         public ReactiveProperty<Value> ArchivesCount = new(Value.Zero);
 
-        public Controls() {
-            _storage = ServiceLocator.Instance.GetService<Storage>();
+        public Controls(Storage storage) {
+            _storage = storage;
 
             AchievementsTab = new AchievementsTabViewModel(ServiceLocator.Instance.GetService<AchievementService>());
 

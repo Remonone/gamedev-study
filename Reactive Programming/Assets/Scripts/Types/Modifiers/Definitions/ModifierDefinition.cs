@@ -5,14 +5,14 @@ using Types.Modifiers.Definitions.Target;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {
-    public abstract class ModifierDefinition : ScriptableObject {
+    public abstract class ModifierDefinition : ScriptableObject, IModifier {
         
         [Tooltip("Buildings that can receive this modifier.")]
         public ModifierTarget Target;
         [Tooltip("Stat operation applied to matching buildings.")]
         public StatModifier Modifier;
         
-        protected abstract bool CanResolve(IModifierContext context);
+        public abstract bool CanResolve(IModifierContext context);
 
         public StatModifier? Resolve(BuildingState state, IModifierContext context) {
             if (!CanResolve(context))

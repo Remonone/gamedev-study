@@ -9,7 +9,7 @@ namespace Types.Modifiers.Definitions {
         [SerializeReference, Tooltip("Formula evaluated with the upgrade level; result multiplies Modifier.Value.")]
         public IFormula CalculationFormula;
 
-        protected override bool CanResolve(IModifierContext context) {
+        public override bool CanResolve(IModifierContext context) {
             return context.TryGet<LevelCapability>(out _);
         }
 

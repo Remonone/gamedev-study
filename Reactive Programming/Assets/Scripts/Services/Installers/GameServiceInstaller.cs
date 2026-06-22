@@ -6,7 +6,6 @@ using Types.Modifiers.Definitions.Objects;
 using Economy.Providers;
 using R3;
 using Services.Player;
-using Services;
 using Services.Achievements;
 using Services.Components.Instances;
 using Services.Statistics;
@@ -36,9 +35,11 @@ namespace Services.Components {
         private StatisticsService _statisticsService;
         private NotificationService _notificationService;
         private AchievementService _achievementService;
+
+        private Storage _storage;
         
         protected override void InstallServices() {
-            var storage = new Storage();
+            _storage = new Storage();
             var sessionContext = new SessionContext();
             var providerRegistry = new ProviderRegistryService();
             var unlockService = new UnlockService();
@@ -47,7 +48,7 @@ namespace Services.Components {
             UploadProviders(providerRegistry);
             
             RegisterService(_notificationService);
-            RegisterService(storage);
+            RegisterService(_storage);
             RegisterService(_worldCastService);
             RegisterService(providerRegistry);
             RegisterService(unlockService);
@@ -60,29 +61,33 @@ namespace Services.Components {
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
             RegisterService(invalidationService);
             
-            RegisterService(new UpgradeService(storage, providerRegistry, invalidationService, unlockService));
+            RegisterService(new UpgradeService(_storage, 
+                providerRegistry, 
+                invalidationService, 
+                unlockService));
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 
             _economyService = new EconomyService(sessionContext, 
-                                                storage, 
-                                                _buildingWatcherService, 
-                                                buildingUpgradeService, 
-                                                providerRegistry);
+                _storage, 
+                _buildingWatcherService, 
+                buildingUpgradeService, 
+                providerRegistry);
             RegisterService(_economyService);
             
-            var structureClickService = new StructureClickService(storage, 
-                                                                _worldCastService, 
-                                                                unlockService, 
-                                                                _economyService, 
-                                                                stateBenefitCalculation);
+            var structureClickService = new StructureClickService(_storage, 
+                _worldCastService, 
+                unlockService, 
+                _economyService, 
+                stateBenefitCalculation);
             RegisterService(structureClickService);
             RegisterService(new StructureSoundResolver(structureClickService, _structureSoundConfig));
+            RegisterService(new PlayerEffectService(sessionContext, buildingUpgradeService, invalidationService));
             
             var tickService = new TickService(_economyService, 
-                                            _buildingWatcherService, 
-                                            storage, 
-                                            stateBenefitCalculation);
+                _buildingWatcherService, 
+                _storage, 
+                stateBenefitCalculation);
             RegisterService(tickService);
 
             var saveService = new SaveService(SaveManager);
@@ -91,8 +96,6 @@ namespace Services.Components {
             InitStatistics();
             InitAchievements();
             InitTrackers();
-            InitViews();
-            BindNotifications();
             
             var achievements = Resources.LoadAll<AchievementModifier>("Achievements");
             var achievementStorage = new AchievementStorageService(achievements);
@@ -101,23 +104,14 @@ namespace Services.Components {
                                                             achievementStorage, 
                                                             providerRegistry, 
                                                             invalidationService));
-        }
-
-        private void BindNotifications() {
-            _achievementService.Unlocked
-                .Where(achievement => !achievement.IsLoadedAsCompleted)
-                .Subscribe(achievement => _notificationService.Push(new NotificationRequest(
-                    title: "Achievement unlocked!",
-                    message: achievement.Name,
-                    type: NotificationType.Achievement
-                ))).AddTo(this);
+            
+            InitViews();
         }
 
         private void InitAchievements() {
             var achievements = AchievementsCollector.Collect(_statisticsService);
             _achievementService = new AchievementService(achievements);
             RegisterService(_achievementService);
-            
         }
 
         private void InitStatistics() {
@@ -136,6 +130,7 @@ namespace Services.Components {
         private void UploadProviders(ProviderRegistryService providerRegistry) {
             providerRegistry.RegisterProvider(new UpgradeModifierProvider());
             providerRegistry.RegisterProvider(new AchievementModifierProvider());
+            providerRegistry.RegisterProvider(new StateModifierProvider());
         }
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {
@@ -143,10 +138,10 @@ namespace Services.Components {
         }
 
         private void InitViews() {
-            var controls = new Controls();
+            var controls = new Controls(_storage);
             _controlsView.Bind(controls);
 
-            BindNotifications(controls);
+            BindNotifications();
             
             var container = _document.rootVisualElement.Q<VisualElement>("BuildingList");
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
@@ -159,8 +154,7 @@ namespace Services.Components {
             
             
         }
-
-        private void BindNotifications(Controls controls) {
+        private void BindNotifications() {
             var notificationContainer = _document.rootVisualElement.Q<VisualElement>("NotificationCenter");
             var notificationTemplate = Resources.Load<VisualTreeAsset>("UI/NotificationItem");
             var notificationView = new NotificationCenterView(notificationContainer, notificationTemplate);
@@ -168,6 +162,14 @@ namespace Services.Components {
             notificationView.Bind(notificationVm);
         }
 
-        protected override void AfterInstallation() { }
+        protected override void AfterInstallation() {
+            _achievementService.Unlocked
+                .Where(achievement => !achievement.IsLoadedAsCompleted)
+                .Subscribe(achievement => _notificationService.Push(new NotificationRequest(
+                    title: "Achievement unlocked!",
+                    message: achievement.Name,
+                    type: NotificationType.Achievement
+                ))).AddTo(this);
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace Types.Modifiers.Definitions {
     [CreateAssetMenu(fileName = "StaticModifierDefinition", menuName = "Clicker/Modifiers/Static Modifier Definition", order = 0)]
     public class StaticModifierDefinitionDefinition : ModifierDefinition {
         
-        protected override bool CanResolve(IModifierContext context) {
+        public override bool CanResolve(IModifierContext context) {
             return true;
         }
 

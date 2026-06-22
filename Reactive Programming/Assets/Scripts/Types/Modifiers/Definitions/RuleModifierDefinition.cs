@@ -17,7 +17,7 @@ namespace Types.Modifiers.Definitions {
             return true;
         }
 
-        protected override bool CanResolve(IModifierContext context) {
+        public override bool CanResolve(IModifierContext context) {
             return context.TryGet<SessionCapability>(out _);
         }
 
