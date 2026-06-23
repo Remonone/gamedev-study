@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Views.Models {
     public class BuildingItemViewModel : IDisposable {
+        private const int DefaultPurchaseLevels = 1;
 
         private string _name;
         private GovernmentInteractionType _type;
@@ -27,11 +28,11 @@ namespace Views.Models {
         public ReactiveProperty<float> CriticalChance = new();
         public ReactiveProperty<float> CriticalMultiplier = new();
         public ReactiveProperty<bool> CanPurchase = new();
+        public ReactiveProperty<int> PurchaseLevels = new(DefaultPurchaseLevels);
         public ReactiveProperty<string> Description = new(string.Empty);
         public ReactiveProperty<Sprite> Icon = new(null);
 
         private Storage _storage;
-        private ComputedStats _lastStats;
         
         public GovernmentInteractionType Type => _type;
         public string Name => _name;
@@ -52,30 +53,42 @@ namespace Views.Models {
                 .Select(update => update.Stats)
                 .Subscribe(OnValuesUpdated)
                 .AddTo(_disposable);
-            _storage.StructureMoney.Subscribe(_ => {
-                CanPurchase.Value = CanBePurchased(_lastStats.Cost);
-            }).AddTo(_disposable);
+            _storage.StructureMoney.Subscribe(_ => RefreshPurchaseState()).AddTo(_disposable);
+            PurchaseLevels.Subscribe(_ => RefreshPurchaseState()).AddTo(_disposable);
         }
 
         private void OnValuesUpdated(ComputedStats stats) {
             Income.Value = stats.Income;
             Frequency.Value = stats.Frequency;
-            Cost.Value = stats.Cost;
             Stability.Value = stats.StabilityModifier;
             StabilityMultiplier.Value = stats.StabilityModifierMultiplier;
             Multiplier.Value = stats.MultiplierCoefficient;
             CriticalChance.Value = stats.CriticalChance;
             CriticalMultiplier.Value = stats.CriticalMultiplier;
-            CanPurchase.Value = CanBePurchased(stats.Cost);
-            _lastStats = stats;
+            RefreshPurchaseState();
         }
 
-        private bool CanBePurchased(Price cost) {
-            return _storage.CanAfford(cost);
+        private void RefreshPurchaseState() {
+            var levels = PurchaseLevels.Value;
+            Cost.Value = _economyService.GetBuildingPurchasePrice(_name, levels);
+            CanPurchase.Value = _economyService.CanPurchaseBuilding(_name, levels);
+        }
+
+        public void SetPurchaseLevels(int levels) {
+            if (levels <= 0) {
+                levels = DefaultPurchaseLevels;
+            }
+
+            if (PurchaseLevels.Value == levels) {
+                return;
+            }
+
+            PurchaseLevels.Value = levels;
         }
 
         public void Upgrade() {
-            _economyService.PurchaseBuilding(_name);
+            _economyService.PurchaseBuilding(_name, PurchaseLevels.Value);
+            RefreshPurchaseState();
         }
 
         public void Dispose() {

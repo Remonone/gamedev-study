@@ -1,11 +1,12 @@
 using System;
+using Newtonsoft.Json.Linq;
 using R3;
+using Save;
 using Types.Modifiers.Definitions;
 using Types.Modifiers.Definitions.Buildings;
-using UnityEngine;
 
 namespace Services.Player {
-    public class PlayerEffectService : IService, IStartable, IDisposable {
+    public class PlayerEffectService : IService, IStartable, IDisposable, ISaveable {
         private readonly SessionContext _context;
         private readonly BuildingUpgradeService _buildingUpgradeService;
         private readonly InvalidationService _invalidationService;
@@ -55,15 +56,45 @@ namespace Services.Player {
                 _context.UpdateInfluence(type);
                 return;
             }
-            var ratio = (float) Math.Log10(externalValue) / Math.Log10(internalValue);
-            if (ratio < 0.95) {
-                _context.UpdateInfluence(type);
-                Invalidate();
-            }
+            var ratio = (internalValue - externalValue) / externalValue;
+            if (ratio < 0.05) return;
+            _context.UpdateInfluence(type);
+            Invalidate();
         }
 
         public void Dispose() {
             _disposable.Dispose();
+        }
+
+        public string SaveKey => "Influence";
+        public int Priority => 93;
+        public JToken Save() {
+            var values = new JObject();
+            var property = new JProperty("Influence", values);
+            foreach (var influenceType in (GovernmentInteractionType[])Enum.GetValues(typeof(GovernmentInteractionType))) {
+                values.Add(new JProperty(influenceType.ToString(), new JObject(
+                    new JProperty("Internal", _context.GetInfluenceInternalValue(influenceType)),
+                    new JProperty("External", _context.GetInfluenceValue(influenceType))
+                    )
+                ));
+            }
+            return new JObject(property);
+        }
+
+        public void Load(JToken data) {
+            if (data["Influence"] is not JObject values) {
+                return;
+            }
+            foreach (var value in values) {
+                if (!Enum.TryParse(value.Key, out GovernmentInteractionType influenceType)) {
+                    continue;
+                }
+                var internalValue = value.Value?["Internal"]?.ToObject<int>() ?? 0;
+                var externalValue = value.Value?["External"]?.ToObject<int>() ?? 0;
+                _context.SetInfluence(influenceType, externalValue);
+                _context.UpdateInfluence(influenceType);
+                _context.SetInfluence(influenceType, internalValue);
+            }
         }
     }
 }

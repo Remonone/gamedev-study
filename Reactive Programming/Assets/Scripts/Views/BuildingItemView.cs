@@ -2,11 +2,15 @@ using R3;
 using Types.Modifiers.Definitions;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Utils;
 using Views.Models;
 
 namespace Views {
     public class BuildingItemView : MonoBehaviour {
         private const string CardStylePath = "UI/Styles/card";
+        private const int DefaultPurchaseLevels = 1;
+        private const int ShiftPurchaseLevels = 10;
+        private const int ControlPurchaseLevels = 100;
 
         [SerializeField, Tooltip("UIDocument instance used as the building card template root.")]
         private UIDocument _item;
@@ -30,6 +34,7 @@ namespace Views {
         private Label _criticalChanceLabel;
         private Label _criticalMultiplierLabel;
         private bool _isExpanded;
+        private bool _modifiedUpgradePressStarted;
 
         public void Bind(BuildingItemViewModel viewModel, VisualElement container) {
             _root = _item.rootVisualElement;
@@ -96,13 +101,60 @@ namespace Views {
             _criticalChanceLabel = _root.Q<Label>("CriticalChance");
             _criticalMultiplierLabel = _root.Q<Label>("CriticalMultiplier");
             
-            _upgradeButton.clicked += () => _viewModel.Upgrade();
+            _upgradeButton.RegisterCallback<PointerDownEvent>(OnUpgradePointerDown, TrickleDown.TrickleDown);
+            _upgradeButton.RegisterCallback<PointerUpEvent>(OnUpgradePointerUp, TrickleDown.TrickleDown);
+            _upgradeButton.clicked += OnUpgradeClicked;
             _expandButton.clicked += ToggleDetails;
             
             _name.text = _viewModel.Name;
             _description.text = _viewModel.Description.Value;
             SetIcon(_viewModel.Icon.Value);
             SetExpanded(false);
+        }
+
+        private void Update() {
+            if (_viewModel == null) {
+                return;
+            }
+
+            _viewModel.SetPurchaseLevels(GetPurchaseLevelsFromModifiers());
+        }
+
+        private static int GetPurchaseLevelsFromModifiers() {
+            if (ModifierKeyInput.IsControlPressed) {
+                return ControlPurchaseLevels;
+            }
+
+            if (ModifierKeyInput.IsShiftPressed) {
+                return ShiftPurchaseLevels;
+            }
+
+            return DefaultPurchaseLevels;
+        }
+
+        private void OnUpgradeClicked() {
+            _viewModel.SetPurchaseLevels(GetPurchaseLevelsFromModifiers());
+            _viewModel.Upgrade();
+        }
+
+        private void OnUpgradePointerDown(PointerDownEvent evt) {
+            if (evt.button != 0) {
+                _modifiedUpgradePressStarted = false;
+                return;
+            }
+
+            _modifiedUpgradePressStarted = ModifierKeyInput.IsShiftPressed || ModifierKeyInput.IsControlPressed;
+        }
+
+        private void OnUpgradePointerUp(PointerUpEvent evt) {
+            if (evt.button != 0 || !_modifiedUpgradePressStarted || !(ModifierKeyInput.IsShiftPressed || ModifierKeyInput.IsControlPressed)) {
+                _modifiedUpgradePressStarted = false;
+                return;
+            }
+
+            _modifiedUpgradePressStarted = false;
+            OnUpgradeClicked();
+            evt.StopImmediatePropagation();
         }
 
         private void ToggleDetails() {

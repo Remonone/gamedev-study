@@ -5,9 +5,7 @@ using Types.Modifiers.Definitions.Buildings;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {
-     public class Structure : MonoBehaviour, IStructure {
-        [SerializeField, Tooltip("Scene label for this structure. Runtime interaction type comes from Definition.Type.")]
-        private GovernmentInteractionType _type;
+     public class Structure : MonoBehaviour {
         [SerializeField, Tooltip("Building definition used to create runtime state for this structure.")]
         private BuildingDefinition _definition;
 

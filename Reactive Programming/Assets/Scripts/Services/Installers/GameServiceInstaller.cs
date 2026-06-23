@@ -149,7 +149,6 @@ namespace Services.Components {
                 var buildingItem = Instantiate(_buildingItemView);
                 var buildingItemViewModel = new BuildingItemViewModel(building.Definition);
                 buildingItem.Bind(buildingItemViewModel, container);
-                _economyService.ComputeStatsForBuilding(building);
             }
             
             

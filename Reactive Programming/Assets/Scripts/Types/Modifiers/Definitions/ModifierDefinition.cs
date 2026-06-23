@@ -18,6 +18,7 @@ namespace Types.Modifiers.Definitions {
             if (!CanResolve(context))
                 throw new InvalidOperationException(
                     $"Cannot resolve context: {context.ToString()} for {GetType().Name}");
+            if (!Target.Matches(state)) return null;
             return ResolveInternal(state, context);
         }
         protected abstract StatModifier? ResolveInternal(BuildingState state, IModifierContext context);
