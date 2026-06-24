@@ -1,5 +1,5 @@
 using FormulaSerialization.UIElements;
-using Types.Modifiers.Definitions.Cost.Formula;
+using Types.Modifiers.Cost.Formula;
 using UnityEditor;
 using UnityEngine.UIElements;
 

@@ -1,4 +1,4 @@
-namespace Types.Modifiers.Definitions {
+namespace Types.Enums {
     public enum GovernmentInteractionType {
         MayorOffice,
         Court,

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Achievements;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Modifiers;
+using Types.Achievements;
+using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
 using UnityEngine;
 

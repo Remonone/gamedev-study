@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Types.Modifiers.Definitions.Buildings;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Values;
+using Types.Buildings;
+using Types.Enums;
+using Types.Modifiers;
+using Types.Modifiers.Cost;
+using Types.Values;
 using UnityEngine;
 
 namespace Economy {
@@ -42,8 +43,6 @@ namespace Economy {
                         break;
                     case ModifierOp.Multiply:
                         mul *= modifier.Value;
-                        break;
-                    default:
                         break;
                 }
             }

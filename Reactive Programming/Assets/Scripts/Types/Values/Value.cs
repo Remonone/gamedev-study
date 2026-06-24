@@ -3,11 +3,11 @@ using System.Globalization;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Values {
+namespace Types.Values {
     [Serializable]
     public struct Value : IComparable<Value>, IEquatable<Value> {
-        private const double BaseStep = 1000d;
-        private const double Log10BaseStep = 3d;
+        private const double _BaseStep = 1000d;
+        private const double _Log10BaseStep = 3d;
 
         public static readonly Value Zero = new(0d);
         public static readonly Value One = new(1d);
@@ -43,14 +43,14 @@ namespace Types.Modifiers.Definitions.Values {
                 return;
             }
 
-            if (value < BaseStep) {
+            if (value < _BaseStep) {
                 _stored = value;
                 _base = new Base { Degree = 0 };
                 return;
             }
 
-            var degree = (int)Math.Floor(Math.Log10(value) / Log10BaseStep);
-            _stored = value / Math.Pow(BaseStep, degree);
+            var degree = (int)Math.Floor(Math.Log10(value) / _Log10BaseStep);
+            _stored = value / Math.Pow(_BaseStep, degree);
             _base = new Base { Degree = degree };
             Normalize();
         }
@@ -72,8 +72,8 @@ namespace Types.Modifiers.Definitions.Values {
                 return new Value(Math.Pow(10d, log10Value));
             }
 
-            var degree = (int)Math.Floor(log10Value / Log10BaseStep);
-            var stored = Math.Pow(10d, log10Value - degree * Log10BaseStep);
+            var degree = (int)Math.Floor(log10Value / _Log10BaseStep);
+            var stored = Math.Pow(10d, log10Value - degree * _Log10BaseStep);
             return new Value(stored, new Base { Degree = degree });
         }
 
@@ -196,7 +196,7 @@ namespace Types.Modifiers.Definitions.Values {
                 return double.PositiveInfinity;
             }
 
-            return _stored * Math.Pow(BaseStep, _base.Degree);
+            return _stored * Math.Pow(_BaseStep, _base.Degree);
         }
 
         public float ToSingle() {
@@ -217,11 +217,11 @@ namespace Types.Modifiers.Definitions.Values {
         }
 
         private double ScaleToDegree(int targetDegree) {
-            return _stored * Math.Pow(BaseStep, _base.Degree - targetDegree);
+            return _stored * Math.Pow(_BaseStep, _base.Degree - targetDegree);
         }
 
         private double Log10Value() {
-            return _base.Degree * Log10BaseStep + Math.Log10(_stored);
+            return _base.Degree * _Log10BaseStep + Math.Log10(_stored);
         }
 
         private void Normalize() {
@@ -231,14 +231,14 @@ namespace Types.Modifiers.Definitions.Values {
                 return;
             }
 
-            if (_stored >= BaseStep) {
-                var shift = (int)Math.Floor(Math.Log10(_stored) / Log10BaseStep);
-                _stored /= Math.Pow(BaseStep, shift);
+            if (_stored >= _BaseStep) {
+                var shift = (int)Math.Floor(Math.Log10(_stored) / _Log10BaseStep);
+                _stored /= Math.Pow(_BaseStep, shift);
                 _base.Degree += shift;
             }
 
             while (_stored < 1d && _base.Degree > 0) {
-                _stored *= BaseStep;
+                _stored *= _BaseStep;
                 _base.Degree--;
             }
         }

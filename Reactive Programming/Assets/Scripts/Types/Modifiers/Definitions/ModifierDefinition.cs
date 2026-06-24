@@ -1,7 +1,7 @@
 using System;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
-using Types.Modifiers.Definitions.Target;
+using Types.Modifiers.Target;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {
@@ -17,7 +17,7 @@ namespace Types.Modifiers.Definitions {
         public StatModifier? Resolve(BuildingState state, IModifierContext context) {
             if (!CanResolve(context))
                 throw new InvalidOperationException(
-                    $"Cannot resolve context: {context.ToString()} for {GetType().Name}");
+                    $"Cannot resolve context: {context} for {GetType().Name}");
             if (!Target.Matches(state)) return null;
             return ResolveInternal(state, context);
         }

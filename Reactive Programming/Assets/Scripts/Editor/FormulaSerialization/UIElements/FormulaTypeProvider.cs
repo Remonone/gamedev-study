@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Types.Modifiers.Definitions.Cost.Formula;
+using Types.Modifiers.Cost.Formula;
 using UnityEditor;
 
 namespace FormulaSerialization.UIElements {

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Types.Modifiers;
+using Types.Buildings;
+using Types.Enums;
 using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Buildings;
 using Types.Modifiers.Definitions.Context;
 using Types.Modifiers.Definitions.Custom;
 

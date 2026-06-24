@@ -1,8 +1,9 @@
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Cost.Formula;
+using Types.Enums;
+using Types.Modifiers.Cost;
+using Types.Modifiers.Cost.Formula;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Buildings {
+namespace Types.Buildings {
     [CreateAssetMenu(fileName = "Building", menuName = "Clicker/Building", order = 0)]
     public class BuildingDefinition : ScriptableObject {
         [Tooltip("Display name used in UI and as the building lookup key.")]

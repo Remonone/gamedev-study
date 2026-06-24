@@ -1,10 +1,9 @@
-using System;
 using Services;
 using Services.Components;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions {
+namespace Types {
      public class Structure : MonoBehaviour {
         [SerializeField, Tooltip("Building definition used to create runtime state for this structure.")]
         private BuildingDefinition _definition;

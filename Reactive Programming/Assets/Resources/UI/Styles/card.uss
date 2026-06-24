@@ -1,59 +1,72 @@
+/* ============================================================
+   Building card
+   Loaded at runtime by BuildingItemView onto the card root.
+   Design tokens are redeclared here so the sheet is self-contained.
+   ============================================================ */
+
+:root {
+    --c-surface-2: rgb(28, 34, 43);
+    --c-surface-3: rgb(36, 44, 56);
+    --c-surface-hover: rgb(44, 53, 66);
+    --c-border: rgb(48, 56, 70);
+    --c-border-strong: rgb(66, 78, 95);
+    --c-text: rgb(231, 237, 243);
+    --c-text-2: rgb(156, 169, 182);
+    --c-text-3: rgb(110, 122, 136);
+    --c-accent: rgb(233, 170, 61);
+    --c-accent-hover: rgb(245, 187, 86);
+    --c-accent-press: rgb(208, 148, 44);
+    --c-on-accent: rgb(28, 19, 4);
+    --r-sm: 6px;
+    --r-md: 10px;
+}
+
 .building-card {
     flex-grow: 0;
     flex-shrink: 0;
     align-self: stretch;
     flex-direction: column;
-    min-height: 132px;
     width: 100%;
-    background-color: rgb(229, 239, 248);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(154, 176, 199);
-    border-right-color: rgb(154, 176, 199);
-    border-bottom-color: rgb(154, 176, 199);
-    border-left-color: rgb(154, 176, 199);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    padding-top: 8px;
-    padding-right: 8px;
-    padding-bottom: 8px;
-    padding-left: 8px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    transition: border-color 0.12s, background-color 0.12s;
 }
+
+.building-card:hover {
+    border-color: var(--c-border-strong);
+    background-color: rgb(31, 38, 48);
+}
+
+.building-card--expanded {
+    border-color: var(--c-accent);
+}
+
+/* ---------- Header: icon + name + upgrade ---------- */
 
 .building-card__header {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     flex-shrink: 0;
-    column-gap: 8px;
+    column-gap: 12px;
 }
 
 .building-card__icon {
     flex-grow: 0;
     flex-shrink: 0;
-    width: 56px;
-    height: 56px;
-    background-color: rgb(197, 214, 232);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(125, 147, 170);
-    border-right-color: rgb(125, 147, 170);
-    border-bottom-color: rgb(125, 147, 170);
-    border-left-color: rgb(125, 147, 170);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    width: 52px;
+    height: 52px;
+    background-color: var(--c-surface-3);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .building-card__icon--empty {
-    background-color: rgb(197, 214, 232);
+    background-color: var(--c-surface-3);
 }
 
 .building-card__headline {
@@ -63,146 +76,168 @@
 }
 
 .building-card__name {
-    color: rgb(24, 38, 56);
+    color: var(--c-text);
+    font-size: 15px;
     -unity-font-style: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .building-card__description {
     margin-top: 2px;
-    color: rgb(56, 75, 97);
+    color: var(--c-text-2);
+    font-size: 12px;
     white-space: normal;
-    flex-shrink: 0;
+    flex-shrink: 1;
 }
 
-.building-card__primary-stats {
-    margin-top: 8px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    row-gap: 6px;
-    column-gap: 6px;
-}
-
-.building-card__primary-stat {
-    flex-grow: 1;
-    flex-shrink: 0;
-    min-width: 120px;
-    background-color: rgb(214, 227, 241);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(143, 165, 188);
-    border-right-color: rgb(143, 165, 188);
-    border-bottom-color: rgb(143, 165, 188);
-    border-left-color: rgb(143, 165, 188);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
-    padding-top: 4px;
-    padding-right: 6px;
-    padding-bottom: 4px;
-    padding-left: 6px;
-}
-
-.building-card__primary-stat-key {
-    color: rgb(50, 68, 90);
-}
-
-.building-card__primary-stat-value {
-    color: rgb(20, 33, 50);
-    -unity-font-style: bold;
-}
-
-.building-card__actions {
+.building-card__upgrade-button {
     flex-grow: 0;
     flex-shrink: 0;
-    flex-direction: column;
-    row-gap: 6px;
-    width: 94px;
+    min-width: 92px;
+    max-width: 150px;
+    height: 40px;
+    margin: 0;
+    padding: 0 12px;
+    align-self: center;
+    background-color: var(--c-accent);
+    color: var(--c-on-accent);
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border-width: 0;
+    border-radius: var(--r-sm);
+    transition: background-color 0.12s, scale 0.08s;
 }
 
-.building-card__upgrade-button,
-.building-card__details-button {
-    height: 28px;
-    background-color: rgb(136, 164, 194);
-    color: rgb(255, 255, 255);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(95, 124, 156);
-    border-right-color: rgb(95, 124, 156);
-    border-bottom-color: rgb(95, 124, 156);
-    border-left-color: rgb(95, 124, 156);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+.building-card__upgrade-button:hover {
+    background-color: var(--c-accent-hover);
+}
+
+.building-card__upgrade-button:active {
+    background-color: var(--c-accent-press);
+    scale: 0.97;
 }
 
 .building-card__upgrade-button:disabled {
-    background-color: rgb(175, 188, 202);
-    color: rgb(103, 114, 128);
+    background-color: var(--c-surface-3);
+    color: var(--c-text-3);
+    opacity: 1;
 }
 
+/* ---------- Stats row (Income / Frequency + expand chevron) ---------- */
+
+.building-card__stats {
+    flex-direction: row;
+    align-items: stretch;
+    flex-shrink: 0;
+    margin-top: 10px;
+    column-gap: 6px;
+}
+
+.building-card__stat {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 32px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--c-surface-3);
+    border-width: 0;
+    border-radius: var(--r-sm);
+    padding: 0 10px;
+}
+
+.building-card__stat-key {
+    color: var(--c-text-3);
+    font-size: 11px;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
+.building-card__stat-value {
+    color: var(--c-text);
+    font-size: 13px;
+    -unity-font-style: bold;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.building-card__expand-toggle {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 36px;
+    min-height: 32px;
+    margin: 0;
+    padding: 0;
+    background-color: var(--c-surface-3);
+    color: var(--c-text-2);
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-sm);
+    transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.building-card__expand-toggle:hover {
+    background-color: var(--c-surface-hover);
+    color: var(--c-text);
+}
+
+.building-card--expanded .building-card__expand-toggle {
+    color: var(--c-accent);
+    border-color: var(--c-accent);
+}
+
+/* ---------- Expandable details (compact chips) ---------- */
+
 .building-card__details {
-    margin-top: 8px;
     display: none;
     flex-direction: row;
     flex-wrap: wrap;
     row-gap: 6px;
     column-gap: 6px;
     flex-shrink: 0;
-    padding-top: 8px;
-    border-top-width: 1px;
-    border-top-color: rgb(161, 181, 204);
+    margin-top: 6px;
 }
 
 .building-card--expanded .building-card__details {
     display: flex;
 }
 
-.building-card__detail-row {
+.building-card__detail {
     flex-direction: row;
     flex-grow: 1;
     flex-shrink: 0;
-    min-width: 142px;
-    width: 48%;
+    min-width: 130px;
     justify-content: space-between;
     align-items: center;
-    background-color: rgb(218, 231, 244);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(155, 176, 199);
-    border-right-color: rgb(155, 176, 199);
-    border-bottom-color: rgb(155, 176, 199);
-    border-left-color: rgb(155, 176, 199);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
-    padding-top: 4px;
-    padding-right: 6px;
-    padding-bottom: 4px;
-    padding-left: 6px;
+    background-color: var(--c-surface-3);
+    border-width: 0;
+    border-radius: var(--r-sm);
+    padding: 4px 9px;
 }
 
 .building-card__detail-key {
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
-    color: rgb(56, 75, 97);
-    white-space: normal;
+    color: var(--c-text-3);
+    font-size: 11px;
 }
 
 .building-card__detail-value {
     flex-grow: 0;
     flex-shrink: 0;
-    margin-left: 6px;
-    color: rgb(25, 39, 58);
+    margin-left: 8px;
+    color: var(--c-text);
+    font-size: 11px;
     -unity-font-style: bold;
-    white-space: normal;
 }

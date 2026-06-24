@@ -2,18 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Economy.Providers;
-using Types.Modifiers.Definitions.Buildings;
-using Types.Modifiers.Definitions;
+using Types.Buildings;
+using Types.Modifiers;
 
 namespace Services {
     public class ProviderRegistryService : IService {
         
         private Dictionary<Type, IModifierProvider> _providers = new();
-
-
-        public ProviderRegistryService() {
-            
-        }
 
         public void RegisterProvider(IModifierProvider provider) {
             var key = provider.GetType();

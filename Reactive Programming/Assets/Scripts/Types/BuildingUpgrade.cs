@@ -1,6 +1,6 @@
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 
-namespace Types.Modifiers.Definitions {
+namespace Types {
     public struct BuildingUpgrade {
         public BuildingState Building;
         public int Levels;

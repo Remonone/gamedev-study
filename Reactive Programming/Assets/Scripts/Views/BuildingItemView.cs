@@ -1,5 +1,5 @@
 using R3;
-using Types.Modifiers.Definitions;
+using Types.Enums;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Utils;
@@ -7,10 +7,10 @@ using Views.Models;
 
 namespace Views {
     public class BuildingItemView : MonoBehaviour {
-        private const string CardStylePath = "UI/Styles/card";
-        private const int DefaultPurchaseLevels = 1;
-        private const int ShiftPurchaseLevels = 10;
-        private const int ControlPurchaseLevels = 100;
+        private const string _CardStylePath = "UI/Styles/card";
+        private const int _DefaultPurchaseLevels = 1;
+        private const int _ShiftPurchaseLevels = 10;
+        private const int _ControlPurchaseLevels = 100;
 
         [SerializeField, Tooltip("UIDocument instance used as the building card template root.")]
         private UIDocument _item;
@@ -78,7 +78,7 @@ namespace Views {
 
         private void EnsureStyleSheet() {
             if (_cardStyleSheet == null) {
-                _cardStyleSheet = Resources.Load<StyleSheet>(CardStylePath);
+                _cardStyleSheet = Resources.Load<StyleSheet>(_CardStylePath);
             }
 
             if (_cardStyleSheet != null) {
@@ -122,14 +122,14 @@ namespace Views {
 
         private static int GetPurchaseLevelsFromModifiers() {
             if (ModifierKeyInput.IsControlPressed) {
-                return ControlPurchaseLevels;
+                return _ControlPurchaseLevels;
             }
 
             if (ModifierKeyInput.IsShiftPressed) {
-                return ShiftPurchaseLevels;
+                return _ShiftPurchaseLevels;
             }
 
-            return DefaultPurchaseLevels;
+            return _DefaultPurchaseLevels;
         }
 
         private void OnUpgradeClicked() {
@@ -166,10 +166,10 @@ namespace Views {
 
             if (_isExpanded) {
                 _cardRoot.AddToClassList("building-card--expanded");
-                _expandButton.text = "Hide";
+                _expandButton.text = "▲";
             } else {
                 _cardRoot.RemoveFromClassList("building-card--expanded");
-                _expandButton.text = "Details";
+                _expandButton.text = "▼";
             }
         }
 

@@ -1,5 +1,5 @@
 using LevelConditionSerialization.UIElements;
-using Types.Modifiers.Definitions.Cost.Condition;
+using Types.Modifiers.Cost.Condition;
 using UnityEditor;
 using UnityEngine.UIElements;
 

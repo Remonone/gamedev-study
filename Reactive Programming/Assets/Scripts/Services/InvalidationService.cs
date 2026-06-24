@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Types.Modifiers.Definitions.Buildings;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Target;
+using Types.Buildings;
+using Types.Enums;
+using Types.Modifiers.Target;
 
 namespace Services {
     public class InvalidationService : IService {

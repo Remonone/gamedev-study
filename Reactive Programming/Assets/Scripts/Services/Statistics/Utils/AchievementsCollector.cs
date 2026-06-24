@@ -1,5 +1,5 @@
-using Types.Modifiers.Definitions.Achievements;
-using Types.Modifiers.Definitions.Achievements.Implementation;
+using Types.Achievements;
+using Types.Achievements.Implementation;
 
 namespace Services.Statistics {
     public static class AchievementsCollector {

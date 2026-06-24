@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Cost.Condition {
+namespace Types.Modifiers.Cost.Condition {
     [Serializable]
     public class ConstCondition : ILevelCondition {
         [SerializeField, Tooltip("Fixed result returned by this condition for every level.")]

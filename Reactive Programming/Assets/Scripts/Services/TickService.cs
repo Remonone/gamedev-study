@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using Services.Player;
 using R3;
 using Save;
-using Types.Modifiers.Definitions.Values;
+using Types.Values;
 using UnityEngine;
 
 namespace Services {
@@ -53,18 +53,18 @@ namespace Services {
             _disposable?.Dispose();
         }
         
-        private long CurrentTime => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        private long _currentTime => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         public string SaveKey => "Ticks";
         public int Priority => -100;
 
         public JToken Save() {
-            return new JObject(new JProperty("LastTick", CurrentTime));
+            return new JObject(new JProperty("LastTick", _currentTime));
         }
 
         public void Load(JToken data) {
             long lastSave = data.Value<long>("LastTick");
-            long currentTime = CurrentTime;
+            long currentTime = _currentTime;
             Tick(currentTime - lastSave, false);
             foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
                 building.LastTimeActivated = Time.timeAsDouble;

@@ -2,8 +2,10 @@ using System;
 using Newtonsoft.Json.Linq;
 using R3;
 using Save;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Buildings;
+using Types;
+using Types.Modifiers;
+using Types.Buildings;
+using Types.Enums;
 
 namespace Services.Player {
     public class PlayerEffectService : IService, IStartable, IDisposable, ISaveable {

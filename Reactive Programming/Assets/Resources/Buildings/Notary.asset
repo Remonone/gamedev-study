@@ -45,54 +45,54 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7490908315923775577
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 0
     - rid: 7490908315923775578
-      type: {class: ConstCondition, ns: Types.Modifiers.Definitions.Cost.Condition, asm: Assembly-CSharp}
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
     - rid: 7490908315923775586
-      type: {class: MultiplicationFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         Formulas:
         - rid: 7490908315923775587
         - rid: 7490908315923775588
     - rid: 7490908315923775587
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 100
     - rid: 7490908315923775588
-      type: {class: ExponentialFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
         Rate: 1.2
     - rid: 7490908315923775589
-      type: {class: LinearFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
         Multiplier: 1
     - rid: 7490908315923775590
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
     - rid: 7490908315923775591
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
     - rid: 7490908315923775592
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
     - rid: 7490908315923775593
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
     - rid: 7490908315923775594
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 0.01
     - rid: 7490908315923775595
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 2

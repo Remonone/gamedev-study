@@ -1,19 +1,15 @@
-using System;
 using R3;
-using Services.Achievements;
 using Services.Statistics;
 
-namespace Types.Modifiers.Definitions.Achievements {
+namespace Types.Achievements {
     public abstract class AchievementItem : IAchievement {
 
-    protected readonly IStatisticsReader _statistics;
-    protected readonly CompositeDisposable _disposable = new CompositeDisposable();
+    protected readonly IStatisticsReader Statistics;
+    protected readonly CompositeDisposable Disposable = new CompositeDisposable();
     
     private readonly ReactiveProperty<bool> _isCompleted = new();
     private readonly ReactiveProperty<float> _progress = new(0f);
     private readonly ReactiveProperty<string> _progressText = new(string.Empty);
-    
-    protected readonly AchievementService _achievementService;
 
     private bool _isLoadedAsCompleted;
 
@@ -27,7 +23,7 @@ namespace Types.Modifiers.Definitions.Achievements {
     public Observable<string> ProgressText => _progressText;
 
     public AchievementItem(IStatisticsReader reader) {
-        _statistics = reader;
+        Statistics = reader;
     }
 
     public void Start() {
@@ -52,13 +48,13 @@ namespace Types.Modifiers.Definitions.Achievements {
         _isCompleted.Value = true;
         _progress.Value = 1f;
         _progressText.Value = "Completed";
-        _disposable.Dispose();
+        Disposable.Dispose();
     }
 
     protected abstract void StartTracking();
 
     public virtual void Dispose() {
-        _disposable.Dispose();
+        Disposable.Dispose();
         _isCompleted.Dispose();
         _progress.Dispose();
         _progressText.Dispose();

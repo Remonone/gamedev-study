@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Types.Modifiers.Definitions.Target;
+using Types.Modifiers.Definitions;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Achievements {
+namespace Types.Achievements {
     [CreateAssetMenu(fileName = "Achievement Modifier", menuName = "Modifiers/Achievement Modifier", order = 0)]
     public class AchievementModifier : ScriptableObject, IEquatable<AchievementModifier> {
         public string TrackedAchievement;

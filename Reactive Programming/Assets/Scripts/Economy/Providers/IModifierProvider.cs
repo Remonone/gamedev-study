@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Types.Modifiers.Definitions.Buildings;
-using Types.Modifiers.Definitions;
+using Types.Buildings;
+using Types.Modifiers;
 
 namespace Economy.Providers {
     public interface IModifierProvider {

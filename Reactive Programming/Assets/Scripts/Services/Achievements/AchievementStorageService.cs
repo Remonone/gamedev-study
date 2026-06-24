@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Types.Modifiers.Definitions.Achievements;
+using Types.Achievements;
 
 namespace Services.Achievements {
     public class AchievementStorageService : IService {

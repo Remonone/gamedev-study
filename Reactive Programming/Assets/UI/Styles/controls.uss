@@ -1,56 +1,110 @@
-#StorageContent {
+/* ============================================================
+   Controls — main panel stylesheet
+   Dark "civic dashboard" theme with a warm gold accent.
+   All element names and state classes are kept intact so the
+   existing MVVM (R3) bindings keep working unchanged.
+   ============================================================ */
+
+:root {
+    --c-bg:           rgb(14, 18, 24);
+    --c-surface:      rgb(20, 25, 32);
+    --c-surface-2:    rgb(28, 34, 43);
+    --c-surface-3:    rgb(36, 44, 56);
+    --c-surface-hover:rgb(44, 53, 66);
+    --c-border:       rgb(48, 56, 70);
+    --c-border-strong:rgb(66, 78, 95);
+    --c-text:         rgb(231, 237, 243);
+    --c-text-2:       rgb(156, 169, 182);
+    --c-text-3:       rgb(110, 122, 136);
+    --c-accent:       rgb(233, 170, 61);
+    --c-accent-hover: rgb(245, 187, 86);
+    --c-accent-press: rgb(208, 148, 44);
+    --c-accent-soft:  rgba(233, 170, 61, 0.14);
+    --c-on-accent:    rgb(28, 19, 4);
+    --c-locked:       rgb(92, 102, 116);
+    --c-available:    rgb(86, 184, 122);
+    --c-inprogress:   rgb(96, 165, 235);
+    --c-completed:    rgb(72, 199, 176);
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+}
+
+/* ------------------------------------------------------------
+   This UI never scrolls horizontally. The TabView header is a
+   horizontal ScrollView whose scroller (track + white dragger
+   square + arrow RepeatButtons) shows up by default. USS type
+   selectors match the exact type, so a `Button` rule misses the
+   RepeatButton arrows — but the `--horizontal` modifier on the
+   Scroller catches the whole thing reliably. Hidden globally so
+   no stray horizontal scrollbar appears anywhere.
+   ------------------------------------------------------------ */
+.unity-scroller--horizontal {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.unity-scroller__low-button,
+.unity-scroller__high-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* ------------------------------------------------------------
+   TabView header container is matched by CLASS in Unity 6 (its
+   `name` differs from the uss class), so scope by class here.
+   The horizontal scroll arrows are Button/RepeatButton children
+   of this container. Tab headers are `unity-tab__header`
+   VisualElements (not buttons) and the tab CONTENT (cards, with
+   their own buttons) lives outside the header container, so
+   hiding buttons inside the header container is safe.
+   ------------------------------------------------------------ */
+/* Definitive: TabView horizontal scroll arrows (confirmed via the UI
+   Toolkit Debugger to be RepeatButtons carrying these exact classes,
+   parented next to the header container). Targeting their own classes
+   hides them wherever Unity places them. */
+.unity-tab-view__next-button,
+.unity-tab-view__previous-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.main-tab-view .unity-tab-view__header-container {
     flex-grow: 0;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
-    row-gap: 6px;
-    column-gap: 12px;
-    padding-top: 10px;
-    padding-right: 12px;
+    flex-shrink: 0;
+    min-height: 40px;
+    max-height: none;
     padding-bottom: 10px;
-    padding-left: 12px;
-    background-color: rgb(220, 232, 245);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(169, 188, 209);
-    border-right-color: rgb(169, 188, 209);
-    border-bottom-color: rgb(169, 188, 209);
-    border-left-color: rgb(169, 188, 209);
+    overflow: visible;
 }
 
-.storage-item {
-    flex-direction: row;
-    align-items: center;
-    column-gap: 4px;
+.category-tab-view .unity-tab-view__header-container {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--c-border);
+    row-gap: 5px;
+    column-gap: 5px;
 }
 
-#StorageContent Label {
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
-}
-
-.storage-key {
-    color: rgb(49, 64, 81);
-    -unity-font-style: bold;
-}
-
-.storage-value {
-    color: rgb(18, 34, 54);
-    min-width: 32px;
-}
+/* ---------- Panel shell ---------- */
 
 #Display {
     flex-direction: column;
     min-height: 0;
+    max-width: 50%;
+    background-color: var(--c-surface);
+    border-left-width: 1px;
+    border-left-color: var(--c-border);
+    padding: 16px;
 }
 
 .controls-content {
@@ -58,6 +112,54 @@
     min-height: 0;
     margin-top: 14px;
 }
+
+/* ---------- Storage counters ---------- */
+
+#StorageContent {
+    flex-grow: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    column-gap: 8px;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.storage-item {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    row-gap: 2px;
+    padding: 8px 6px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-sm);
+}
+
+#StorageContent Label {
+    margin: 0;
+}
+
+.storage-key {
+    color: var(--c-text-3);
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.storage-value {
+    color: var(--c-accent);
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ---------- Main tab view ---------- */
 
 .main-tab-view {
     flex-grow: 1;
@@ -72,9 +174,19 @@
 .main-tab-view #unity-tab-view__header-container {
     flex-grow: 0;
     flex-shrink: 0;
-    min-height: 36px;
-    padding-bottom: 8px;
+    min-height: 40px;
+    padding-bottom: 10px;
     overflow: hidden;
+}
+
+/* Hide the TabView horizontal scroll arrows (any Button inside the header
+   container). Tab headers are Tab/`unity-tab__header` elements, not Buttons,
+   so they are never affected. */
+.main-tab-view #unity-tab-view__header-container Button,
+.category-tab-view #unity-tab-view__header-container Button {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 .main-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller,
@@ -106,43 +218,55 @@
     overflow: visible;
 }
 
+.main-tab-view #unity-tab-view__header-container .unity-scroll-view,
+.main-tab-view #unity-tab-view__header-container .unity-scroll-view__content-viewport,
+.main-tab-view #unity-tab-view__header-container #unity-content-viewport {
+    flex-grow: 1;
+    width: 100%;
+    overflow: visible;
+}
+
 .main-tab-view #unity-tab-view__header-container .unity-scroll-view__content-container,
 .main-tab-view #unity-tab-view__header-container #unity-content-container,
 .main-tab-view #unity-tab-view__tabs-container {
+    flex-grow: 1;
+    width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
     row-gap: 6px;
     column-gap: 6px;
 }
 
+.unity-scroll-view__content-container {
+    height: 100%;
+}
+
 .main-tab-view #unity-tab__header {
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 110px;
-    height: 32px;
-    background-color: rgb(193, 210, 231);
-    color: rgb(32, 47, 64);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(141, 160, 182);
-    border-right-color: rgb(141, 160, 182);
-    border-bottom-color: rgb(141, 160, 182);
-    border-left-color: rgb(141, 160, 182);
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--c-text-2);
+    font-size: 13px;
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
     -unity-text-align: middle-center;
+    transition: color 0.12s, border-bottom-color 0.12s;
+}
+
+.main-tab-view #unity-tab__header:hover {
+    color: var(--c-text);
 }
 
 .main-tab-view #unity-tab__header:checked {
-    background-color: rgb(172, 197, 226);
-    border-top-color: rgb(112, 138, 169);
-    border-right-color: rgb(112, 138, 169);
-    border-bottom-color: rgb(112, 138, 169);
-    border-left-color: rgb(112, 138, 169);
+    color: var(--c-accent);
+    -unity-font-style: bold;
+    border-bottom-color: var(--c-accent);
 }
 
 .main-tab-view #unity-tab-view__content-container,
@@ -162,27 +286,19 @@
     align-self: stretch;
 }
 
+/* ---------- Tab surface ---------- */
+
 .tab-surface {
     flex-grow: 1;
     min-height: 0;
-    padding-top: 12px;
-    padding-right: 12px;
-    padding-bottom: 12px;
-    padding-left: 12px;
-    background-color: rgb(240, 246, 252);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(164, 183, 207);
-    border-right-color: rgb(164, 183, 207);
-    border-bottom-color: rgb(164, 183, 207);
-    border-left-color: rgb(164, 183, 207);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    padding: 14px;
+    background-color: var(--c-bg);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
 }
+
+/* ---------- Building category tabs ---------- */
 
 .category-tab-view {
     flex-grow: 1;
@@ -201,11 +317,25 @@
     align-content: flex-start;
     row-gap: 6px;
     column-gap: 6px;
-    max-height: 80px;
-    padding-bottom: 8px;
-    overflow: hidden;
+    max-height: none;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    overflow: visible;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(175, 194, 216);
+    border-bottom-color: var(--c-border);
+}
+
+/* The header is a ScrollView; let its content span the full width so
+   the wrapped tab grid can stretch evenly instead of scrolling. */
+.category-tab-view #unity-tab-view__header-container .unity-scroll-view,
+.category-tab-view #unity-tab-view__header-container .unity-scroll-view__content-viewport,
+.category-tab-view #unity-tab-view__header-container .unity-scroll-view__content-container,
+.category-tab-view #unity-tab-view__header-container #unity-content-viewport,
+.category-tab-view #unity-tab-view__header-container #unity-content-container {
+    flex-grow: 1;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
 }
 
 .category-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller,
@@ -247,34 +377,33 @@
 }
 
 .category-tab-view #unity-tab__header {
-    flex-grow: 0;
-    flex-shrink: 0;
-    min-width: 128px;
-    max-width: 128px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 120px;
+    min-width: 96px;
     height: 30px;
-    background-color: rgb(209, 223, 239);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(145, 166, 190);
-    border-right-color: rgb(145, 166, 190);
-    border-bottom-color: rgb(145, 166, 190);
-    border-left-color: rgb(145, 166, 190);
-    color: rgb(40, 58, 79);
+    min-height: 30px;
+    max-height: 30px;
+    background-color: var(--c-surface-2);
+    color: var(--c-text-2);
+    font-size: 12px;
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: 8px;
     -unity-text-align: middle-center;
+    transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.category-tab-view #unity-tab__header:hover {
+    background-color: var(--c-surface-hover);
+    color: var(--c-text);
 }
 
 .category-tab-view #unity-tab__header:checked {
-    background-color: rgb(182, 206, 232);
-    border-top-color: rgb(110, 137, 168);
-    border-right-color: rgb(110, 137, 168);
-    border-bottom-color: rgb(110, 137, 168);
-    border-left-color: rgb(110, 137, 168);
+    background-color: var(--c-accent-soft);
+    color: var(--c-accent);
+    -unity-font-style: bold;
+    border-color: var(--c-accent);
 }
 
 .category-tab-view #unity-tab-view__content-container,
@@ -316,28 +445,51 @@
 }
 
 .category-content {
+    height: 100%;
     flex-grow: 0;
     flex-shrink: 0;
     align-self: stretch;
     min-height: 1px;
     flex-direction: column;
     row-gap: 10px;
-    padding-top: 6px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    padding-left: 6px;
+    padding: 2px;
 }
+
+/* ---------- Scrollbars (shared) ---------- */
+
+.unity-scroller--vertical {
+    width: 10px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger {
+    background-color: var(--c-border-strong);
+    border-width: 0;
+    border-radius: 999px;
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger:hover {
+    background-color: var(--c-text-3);
+}
+
+.unity-scroller--vertical .unity-scroller__low-button,
+.unity-scroller--vertical .unity-scroller__high-button,
+.unity-scroller--vertical .unity-base-slider__tracker {
+    display: none;
+}
+
+/* ---------- Upgrades tab ---------- */
 
 .upgrades-layout {
     flex-grow: 1;
     min-height: 0;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 12px;
 }
 
 .upgrades-workspace {
     flex-grow: 1;
-    min-height: 210px;
+    min-height: 220px;
     position: relative;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0);
@@ -352,41 +504,34 @@
     min-width: 320px;
     min-height: 220px;
     overflow: hidden;
-    background-color: rgb(233, 241, 250);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(132, 152, 175);
-    border-right-color: rgb(132, 152, 175);
-    border-bottom-color: rgb(132, 152, 175);
-    border-left-color: rgb(132, 152, 175);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    background-color: var(--c-surface);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
 }
 
 .upgrade-tree-header {
-    height: 32px;
+    height: 36px;
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-left: 10px;
-    padding-right: 10px;
-    background-color: rgb(184, 204, 225);
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: var(--c-surface-2);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(125, 146, 170);
+    border-bottom-color: var(--c-border);
 }
 
 .upgrade-tree-header-title {
-    color: rgb(31, 47, 65);
+    color: var(--c-text);
+    font-size: 13px;
     -unity-font-style: bold;
 }
 
 .upgrade-tree-header-hint {
-    color: rgb(62, 82, 104);
+    color: var(--c-text-3);
+    font-size: 11px;
 }
 
 .upgrade-tree-viewport {
@@ -394,7 +539,7 @@
     min-height: 0;
     position: relative;
     overflow: hidden;
-    background-color: rgb(208, 223, 239);
+    background-color: var(--c-bg);
 }
 
 .upgrade-tree-canvas {
@@ -414,139 +559,107 @@
     bottom: 0;
 }
 
+/* Upgrade nodes (built programmatically by UpgradeTile) */
+
 .upgrade-node {
     position: absolute;
-    width: 32px;
-    min-height: 32px;
-    background-color: rgb(236, 244, 252);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
+    width: 40px;
+    min-height: 40px;
+    background-color: var(--c-surface-2);
+    border-width: 2px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
+    transition: scale 0.1s, border-color 0.12s;
+}
+
+.upgrade-node:hover {
+    scale: 1.08;
 }
 
 .upgrade-node--locked {
-    border-top-color: rgb(153, 153, 153);
-    border-right-color: rgb(153, 153, 153);
-    border-bottom-color: rgb(153, 153, 153);
-    border-left-color: rgb(153, 153, 153);
-    background-color: rgb(218, 218, 218);
+    border-color: var(--c-locked);
+    background-color: var(--c-surface);
+    opacity: 0.7;
 }
 
 .upgrade-node--available {
-    border-top-color: rgb(117, 150, 104);
-    border-right-color: rgb(117, 150, 104);
-    border-bottom-color: rgb(117, 150, 104);
-    border-left-color: rgb(117, 150, 104);
+    border-color: var(--c-available);
 }
 
 .upgrade-node--inprogress {
-    border-top-color: rgb(121, 139, 176);
-    border-right-color: rgb(121, 139, 176);
-    border-bottom-color: rgb(121, 139, 176);
-    border-left-color: rgb(121, 139, 176);
+    border-color: var(--c-inprogress);
 }
 
 .upgrade-node--completed {
-    border-top-color: rgb(96, 144, 118);
-    border-right-color: rgb(96, 144, 118);
-    border-bottom-color: rgb(96, 144, 118);
-    border-left-color: rgb(96, 144, 118);
-    background-color: rgb(214, 236, 223);
+    border-color: var(--c-completed);
+    background-color: rgba(72, 199, 176, 0.16);
 }
 
 .upgrade-node--selected {
-    border-top-color: rgb(79, 118, 168);
-    border-right-color: rgb(79, 118, 168);
-    border-bottom-color: rgb(79, 118, 168);
-    border-left-color: rgb(79, 118, 168);
+    border-color: var(--c-accent);
+    scale: 1.12;
 }
 
 .upgrade-node__icon {
     width: 100%;
     height: 100%;
-    background-color: rgb(194, 211, 230);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(126, 146, 170);
-    border-right-color: rgb(126, 146, 170);
-    border-bottom-color: rgb(126, 146, 170);
-    border-left-color: rgb(126, 146, 170);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    background-color: var(--c-surface-3);
+    border-width: 0;
+    border-radius: 3px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .upgrade-node__title {
-    color: rgb(22, 34, 50);
+    color: var(--c-text);
     -unity-font-style: bold;
     white-space: normal;
 }
 
 .upgrade-node__level {
     position: absolute;
-    right: -12px;
-    bottom: -12px;
-    color: rgb(61, 80, 103);
+    right: -8px;
+    bottom: -10px;
+    color: var(--c-text);
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 1px 5px;
+    background-color: var(--c-surface-3);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: 999px;
 }
 
 .upgrade-node__state {
     margin-top: 6px;
-    color: rgb(50, 70, 94);
+    color: var(--c-text-2);
 }
+
+/* Selected node detail panel */
 
 .upgrade-node-details {
     flex-grow: 0;
     flex-shrink: 0;
-    background-color: rgb(223, 235, 248);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(153, 173, 195);
-    border-right-color: rgb(153, 173, 195);
-    border-bottom-color: rgb(153, 173, 195);
-    border-left-color: rgb(153, 173, 195);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    padding-top: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    padding-left: 10px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+    padding: 14px;
 }
 
 .upgrade-node-summary {
     flex-direction: row;
     align-items: center;
-    column-gap: 10px;
+    column-gap: 12px;
 }
 
 .upgrade-node-icon {
-    width: 42px;
-    height: 42px;
-    background-color: rgb(199, 215, 233);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(131, 152, 176);
-    border-right-color: rgb(131, 152, 176);
-    border-bottom-color: rgb(131, 152, 176);
-    border-left-color: rgb(131, 152, 176);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    width: 46px;
+    height: 46px;
+    background-color: var(--c-surface-3);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -556,46 +669,60 @@
 }
 
 .upgrade-node-name {
-    color: rgb(24, 37, 54);
+    color: var(--c-text);
+    font-size: 15px;
     -unity-font-style: bold;
 }
 
 .upgrade-node-state,
 .upgrade-node-level {
-    color: rgb(57, 76, 99);
+    color: var(--c-text-2);
+    font-size: 12px;
+}
+
+.upgrade-node-price {
+    color: var(--c-accent);
+    font-size: 12px;
+    -unity-font-style: bold;
 }
 
 .upgrade-node-description {
-    margin-top: 8px;
+    margin-top: 10px;
     white-space: normal;
-    color: rgb(45, 63, 87);
+    color: var(--c-text-2);
+    font-size: 12px;
 }
 
 .upgrade-node-button {
-    margin-top: 10px;
-    width: 140px;
-    height: 30px;
+    margin-top: 12px;
+    width: 150px;
+    height: 34px;
     align-self: flex-end;
-    background-color: rgb(134, 162, 193);
-    color: rgb(255, 255, 255);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(94, 123, 156);
-    border-right-color: rgb(94, 123, 156);
-    border-bottom-color: rgb(94, 123, 156);
-    border-left-color: rgb(94, 123, 156);
+    background-color: var(--c-accent);
+    color: var(--c-on-accent);
+    font-size: 13px;
+    -unity-font-style: bold;
+    border-width: 0;
+    border-radius: var(--r-sm);
+    transition: background-color 0.12s, scale 0.08s;
+}
+
+.upgrade-node-button:hover {
+    background-color: var(--c-accent-hover);
+}
+
+.upgrade-node-button:active {
+    background-color: var(--c-accent-press);
+    scale: 0.97;
 }
 
 .upgrade-node-button:disabled {
-    background-color: rgb(174, 186, 200);
-    color: rgb(101, 112, 126);
+    background-color: var(--c-surface-3);
+    color: var(--c-text-3);
+    opacity: 1;
 }
+
+/* ---------- Achievements tab ---------- */
 
 .achievements-layout {
     flex-grow: 1;
@@ -614,60 +741,46 @@
 }
 
 .achievements-empty {
-    padding-top: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    padding-left: 10px;
-    color: rgb(74, 92, 115);
+    padding: 14px;
+    color: var(--c-text-3);
+    -unity-text-align: middle-center;
 }
 
 .achievement-item {
     flex-direction: column;
-    background-color: rgb(230, 239, 248);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(159, 177, 199);
-    border-right-color: rgb(159, 177, 199);
-    border-bottom-color: rgb(159, 177, 199);
-    border-left-color: rgb(159, 177, 199);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    padding-top: 8px;
-    padding-right: 8px;
-    padding-bottom: 8px;
-    padding-left: 8px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    transition: border-color 0.12s, background-color 0.12s;
+}
+
+.achievement-item:hover {
+    border-color: var(--c-border-strong);
 }
 
 .achievement-item--locked {
-    opacity: 0.7;
+    opacity: 0.55;
+}
+
+.achievement-item--expanded {
+    border-color: var(--c-accent);
 }
 
 .achievement-item__header {
     flex-direction: row;
     align-items: center;
-    column-gap: 8px;
+    column-gap: 12px;
 }
 
 .achievement-item__icon {
-    width: 34px;
-    height: 34px;
-    background-color: rgb(196, 211, 229);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(127, 147, 170);
-    border-right-color: rgb(127, 147, 170);
-    border-bottom-color: rgb(127, 147, 170);
-    border-left-color: rgb(127, 147, 170);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--c-surface-3);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -677,24 +790,55 @@
 }
 
 .achievement-item__name {
-    color: rgb(24, 38, 56);
+    color: var(--c-text);
+    font-size: 14px;
     -unity-font-style: bold;
 }
 
 .achievement-item__description {
-    color: rgb(58, 77, 101);
+    color: var(--c-text-2);
+    font-size: 12px;
     white-space: normal;
 }
 
-.achievement-item__reward {
+/* Progress bar (class added in code: achievement-item__progress) */
+
+.achievement-item__progress {
     margin-top: 8px;
-    padding-top: 6px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    padding-left: 6px;
-    border-top-width: 1px;
-    border-top-color: rgb(162, 182, 205);
-    color: rgb(35, 54, 77);
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.achievement-item__progress .unity-progress-bar__background {
+    background-color: var(--c-surface-3);
+    border-width: 0;
+    border-radius: 999px;
+    min-height: 14px;
+    height: 14px;
+}
+
+.achievement-item__progress .unity-progress-bar__progress {
+    background-color: var(--c-accent);
+    border-radius: 999px;
+    margin: 0;
+}
+
+.achievement-item__progress .unity-progress-bar__title {
+    color: var(--c-text);
+    font-size: 10px;
+    -unity-font-style: bold;
+}
+
+.achievement-item__reward {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background-color: var(--c-accent-soft);
+    border-radius: var(--r-sm);
+    border-left-width: 3px;
+    border-left-color: var(--c-accent);
+    color: var(--c-accent);
+    font-size: 12px;
+    -unity-font-style: bold;
     display: none;
 }
 
@@ -702,62 +846,44 @@
     display: flex;
 }
 
+/* ---------- Artifacts tab ---------- */
+
 .artifacts-layout {
     flex-grow: 1;
     min-height: 0;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 12px;
 }
 
 .artifact-selection-panel {
     flex-grow: 0;
-    background-color: rgb(222, 234, 248);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(151, 173, 198);
-    border-right-color: rgb(151, 173, 198);
-    border-bottom-color: rgb(151, 173, 198);
-    border-left-color: rgb(151, 173, 198);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    padding-top: 8px;
-    padding-right: 8px;
-    padding-bottom: 8px;
-    padding-left: 8px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+    padding: 12px;
 }
 
 .artifact-selection-title {
-    color: rgb(28, 42, 60);
+    color: var(--c-text-3);
+    font-size: 11px;
     -unity-font-style: bold;
 }
 
 .artifact-selection-content {
-    margin-top: 6px;
+    margin-top: 8px;
     flex-direction: row;
     align-items: center;
-    column-gap: 8px;
+    column-gap: 12px;
 }
 
 .artifact-selection-icon {
-    width: 38px;
-    height: 38px;
-    background-color: rgb(194, 210, 229);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-color: rgb(127, 147, 170);
-    border-right-color: rgb(127, 147, 170);
-    border-bottom-color: rgb(127, 147, 170);
-    border-left-color: rgb(127, 147, 170);
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    width: 42px;
+    height: 42px;
+    background-color: var(--c-surface-3);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -767,12 +893,14 @@
 }
 
 .artifact-selection-name {
-    color: rgb(25, 39, 58);
+    color: var(--c-text);
+    font-size: 14px;
     -unity-font-style: bold;
 }
 
 .artifact-selection-description {
-    color: rgb(57, 77, 99);
+    color: var(--c-text-2);
+    font-size: 12px;
     white-space: normal;
 }
 
@@ -781,33 +909,23 @@
     min-height: 0;
     align-items: center;
     justify-content: center;
-    background-color: rgb(232, 241, 251);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-top-color: rgb(166, 186, 209);
-    border-right-color: rgb(166, 186, 209);
-    border-bottom-color: rgb(166, 186, 209);
-    border-left-color: rgb(166, 186, 209);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    background-color: var(--c-bg);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
 }
 
 .artifacts-placeholder-text {
-    color: rgb(73, 93, 116);
+    color: var(--c-text-3);
 }
 
-.upgrade-node-price {
-}
+/* ---------- Notifications ---------- */
 
 .notification-center {
     position: absolute;
     top: 16px;
     left: 16px;
-    width: 320px;
+    width: 330px;
     flex-direction: column;
     align-items: stretch;
 }
@@ -818,12 +936,14 @@
     flex-shrink: 0;
     align-items: center;
     margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: rgba(30, 30, 35, 0.95);
+    padding: 12px;
+    border-radius: var(--r-md);
+    background-color: rgba(20, 25, 32, 0.97);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
     opacity: 0;
-    transition-property: opacity, translate;
-    transition-duration: 0.25s, 0.25s;
+    translate: -24px 0;
+    transition: opacity 0.25s, translate 0.25s;
 }
 
 .notification--visible {
@@ -839,8 +959,11 @@
 .notification__icon {
     width: 40px;
     height: 40px;
-    margin-right: 10px;
+    margin-right: 12px;
     flex-shrink: 0;
+    background-color: var(--c-surface-3);
+    border-radius: var(--r-sm);
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .notification__text {
@@ -851,17 +974,17 @@
 .notification__title {
     -unity-font-style: bold;
     font-size: 14px;
-    color: rgb(255, 255, 255);
+    color: var(--c-text);
 }
 
 .notification__message {
     font-size: 12px;
-    color: rgb(200, 200, 205);
+    color: var(--c-text-2);
     white-space: normal;
 }
 
-.notification--achievement { border-left-width: 4px; border-left-color: rgb(255, 196, 0); }
-.notification--reward      { border-left-width: 4px; border-left-color: rgb(120, 220, 120); }
-.notification--info        { border-left-width: 4px; border-left-color: rgb(100, 170, 255); }
-.notification--tutorial    { border-left-width: 4px; border-left-color: rgb(180, 140, 255); }
-.notification--system      { border-left-width: 4px; border-left-color: rgb(150, 150, 150); }
+.notification--achievement { border-left-width: 4px; border-left-color: rgb(245, 187, 86); }
+.notification--reward      { border-left-width: 4px; border-left-color: rgb(86, 184, 122); }
+.notification--info        { border-left-width: 4px; border-left-color: rgb(96, 165, 235); }
+.notification--tutorial    { border-left-width: 4px; border-left-color: rgb(176, 138, 250); }
+.notification--system      { border-left-width: 4px; border-left-color: rgb(140, 152, 166); }

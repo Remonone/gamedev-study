@@ -25,7 +25,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7490908315923775562
-      type: {class: LinearFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 1
         Multiplier: 1.3

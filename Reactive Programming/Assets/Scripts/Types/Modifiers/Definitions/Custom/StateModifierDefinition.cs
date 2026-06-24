@@ -1,5 +1,6 @@
 using System;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
+using Types.Enums;
 using Types.Modifiers.Definitions.Context;
 
 namespace Types.Modifiers.Definitions.Custom {
@@ -10,7 +11,7 @@ namespace Types.Modifiers.Definitions.Custom {
 
         public StatModifier? Resolve(BuildingState state, IModifierContext context) {
             if (!CanResolve(context))
-                throw new InvalidOperationException($"Cannot resolve context: {context.ToString()} for {GetType().Name}");
+                throw new InvalidOperationException($"Cannot resolve context: {context} for {GetType().Name}");
             context.TryGet<TypeCapability>(out var typeCapability);
             context.TryGet<SessionCapability>(out var sessionCapability);
             var type = typeCapability.Type;

@@ -1,8 +1,8 @@
 using System;
-using Types.Modifiers.Definitions.Values;
+using Types.Values;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Cost.Formula {
+namespace Types.Modifiers.Cost.Formula {
     [Serializable]
     public class ConstantFormula : IFormula {
 

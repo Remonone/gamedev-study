@@ -1,6 +1,6 @@
-using Types.Modifiers.Definitions.Values;
+using Types.Values;
 
-namespace Types.Modifiers.Definitions.Cost.Formula {
+namespace Types.Modifiers.Cost.Formula {
     public interface IFormula {
         public Value Evaluate(double input);
     }

@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Target {
+namespace Types.Modifiers.Target {
     [CreateAssetMenu(fileName = "StringPatternTarget", menuName = "Clicker/Modifiers/Target/By String Pattern", order = 0)]
     public class TargetByStringPattern : ModifierTarget {
 
@@ -21,12 +21,12 @@ namespace Types.Modifiers.Definitions.Target {
                 return false;
             }
 
-            var name = building.Definition.Name;
-            if (name == null) {
+            var buildingName = building.Definition.Name;
+            if (buildingName == null) {
                 return false;
             }
 
-            return GetRegex().IsMatch(name);
+            return GetRegex().IsMatch(buildingName);
         }
 
         private Regex GetRegex() {

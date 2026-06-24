@@ -1,4 +1,4 @@
-namespace Types.Modifiers.Definitions.Cost.Condition {
+namespace Types.Modifiers.Cost.Condition {
     public interface ILevelCondition {
         bool IsMet(int level);
     }

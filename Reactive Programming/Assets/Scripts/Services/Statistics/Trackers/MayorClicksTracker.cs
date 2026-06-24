@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Services.Components;
 using Services.Components.Instances;
 using R3;
-using Types.Modifiers.Definitions;
+using Types.Enums;
 
 namespace Services.Statistics.Trackers {
     public class MayorClicksTracker : StatisticTrackerBase {

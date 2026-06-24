@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Types.Modifiers.Definitions.Cost.Condition;
+using Types.Modifiers.Cost.Condition;
 using UnityEditor;
 
 namespace LevelConditionSerialization.UIElements {

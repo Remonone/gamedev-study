@@ -33,11 +33,11 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7490908315923775566
-      type: {class: ConstCondition, ns: Types.Modifiers.Definitions.Cost.Condition, asm: Assembly-CSharp}
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
     - rid: 7490908315923775567
-      type: {class: LinearFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 5000
         Multiplier: 5500

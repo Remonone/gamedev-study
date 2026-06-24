@@ -5,43 +5,40 @@
             <ui:VisualElement class="building-card__headline">
                 <ui:Label text="Label" name="Name" class="building-card__name"/>
                 <ui:Label text="Description" name="Description" class="building-card__description"/>
-
-                <ui:VisualElement class="building-card__primary-stats">
-                    <ui:VisualElement class="building-card__primary-stat">
-                        <ui:Label text="Income" class="building-card__primary-stat-key"/>
-                        <ui:Label text="Label" name="Income" class="building-card__primary-stat-value"/>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="building-card__primary-stat">
-                        <ui:Label text="Frequency" class="building-card__primary-stat-key"/>
-                        <ui:Label text="Label" name="Frequency" class="building-card__primary-stat-value"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
             </ui:VisualElement>
+            <ui:Button text="Upgrade" name="UpgradeButton" class="building-card__upgrade-button"/>
+        </ui:VisualElement>
 
-            <ui:VisualElement class="building-card__actions">
-                <ui:Button text="Upgrade" name="UpgradeButton" class="building-card__upgrade-button"/>
-                <ui:Button text="Details" name="ExpandButton" class="building-card__details-button"/>
+        <ui:VisualElement class="building-card__stats">
+            <ui:VisualElement class="building-card__stat">
+                <ui:Label text="Income" class="building-card__stat-key"/>
+                <ui:Label text="Label" name="Income" class="building-card__stat-value"/>
             </ui:VisualElement>
+            <ui:VisualElement class="building-card__stat">
+                <ui:Label text="Frequency" class="building-card__stat-key"/>
+                <ui:Label text="Label" name="Frequency" class="building-card__stat-value"/>
+            </ui:VisualElement>
+            <ui:Button text="Details" name="ExpandButton" class="building-card__expand-toggle"/>
         </ui:VisualElement>
 
         <ui:VisualElement name="DetailsContainer" class="building-card__details">
-            <ui:VisualElement class="building-card__detail-row">
+            <ui:VisualElement class="building-card__detail">
                 <ui:Label text="Stability" class="building-card__detail-key"/>
                 <ui:Label text="Label" name="Stability" class="building-card__detail-value"/>
             </ui:VisualElement>
-            <ui:VisualElement class="building-card__detail-row">
-                <ui:Label text="Stability Mul." class="building-card__detail-key"/>
+            <ui:VisualElement class="building-card__detail">
+                <ui:Label text="Stab. Mul." class="building-card__detail-key"/>
                 <ui:Label text="Label" name="StabilityMultiplier" class="building-card__detail-value"/>
             </ui:VisualElement>
-            <ui:VisualElement class="building-card__detail-row">
+            <ui:VisualElement class="building-card__detail">
                 <ui:Label text="Multiplier" class="building-card__detail-key"/>
                 <ui:Label text="Label" name="Multiplier" class="building-card__detail-value"/>
             </ui:VisualElement>
-            <ui:VisualElement class="building-card__detail-row">
+            <ui:VisualElement class="building-card__detail">
                 <ui:Label text="Crit. Chance" class="building-card__detail-key"/>
                 <ui:Label text="Label" name="CriticalChance" class="building-card__detail-value"/>
             </ui:VisualElement>
-            <ui:VisualElement class="building-card__detail-row">
+            <ui:VisualElement class="building-card__detail">
                 <ui:Label text="Crit. Mul." class="building-card__detail-key"/>
                 <ui:Label text="Label" name="CriticalMultiplier" class="building-card__detail-value"/>
             </ui:VisualElement>

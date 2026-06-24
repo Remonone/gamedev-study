@@ -1,6 +1,6 @@
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 
-namespace Types.Modifiers.Definitions {
+namespace Types {
      public interface IStructure {
           BuildingState State { get; }
      }

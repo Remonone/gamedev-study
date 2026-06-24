@@ -5,7 +5,7 @@ namespace Services.Statistics {
     public interface IStatisticsItem : IDisposable {
         string Id { get; }
         object StoredValue { get; }
-        System.Type StoredValueType { get; }
+        Type StoredValueType { get; }
         bool IsPersistent { get; }
 
         JToken SaveValue();

@@ -1,8 +1,10 @@
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Values;
+using Types.Enums;
+using Types.Modifiers;
+using Types.Modifiers.Cost;
+using Types.Values;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Buildings {
+namespace Types.Buildings {
     public sealed class BuildingState {
         public BuildingDefinition Definition;
         public int Level;

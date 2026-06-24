@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using R3;
 using Services;
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Upgrades;
+using Types.Modifiers.Cost;
+using Types.Upgrades;
 using UnityEngine;
 
 namespace Views.Models {
@@ -43,7 +43,7 @@ namespace Views.Models {
             MaxLevel = Mathf.Max(1, definition.MaxLevel);
             ChildIds = definition.ChildIds != null
                 ? definition.ChildIds
-                : (IReadOnlyList<string>)Array.Empty<string>();
+                : Array.Empty<string>();
 
             _upgradeService.ObserveUpgradeState(Id)
                 .Subscribe(OnStateChanged)

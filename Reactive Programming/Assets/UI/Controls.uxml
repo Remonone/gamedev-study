@@ -1,7 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/controls.uss?fileID=7433441132597879392&amp;guid=9d1e66dac54f56fc8ab0854258844d7c&amp;type=3#controls"/>
     <ui:VisualElement style="flex-grow: 1; flex-direction: row-reverse; flex-shrink: 0;">
-        <ui:VisualElement name="Display" style="flex-grow: 1; background-color: rgb(177, 143, 207); flex-shrink: 1; align-content: flex-start; max-width: 50%; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px;">
+        <ui:VisualElement name="Display" style="flex-grow: 1; flex-shrink: 1; align-content: flex-start;">
             <ui:VisualElement name="StorageContent">
                 <ui:VisualElement class="storage-item">
                     <ui:Label text="D:" class="storage-key"/>

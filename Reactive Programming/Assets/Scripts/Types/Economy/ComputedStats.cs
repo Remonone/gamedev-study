@@ -1,7 +1,7 @@
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Values;
+using Types.Modifiers.Cost;
+using Types.Values;
 
-namespace Types.Modifiers.Definitions {
+namespace Types.Modifiers {
     public struct ComputedStats {
         public Value ClickIncome;
         public Value Income;

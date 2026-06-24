@@ -1,6 +1,6 @@
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
-using Types.Modifiers.Definitions.Cost.Formula;
+using Types.Modifiers.Cost.Formula;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {

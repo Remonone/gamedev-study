@@ -1,7 +1,7 @@
 using System;
 using Economy.Providers;
 using R3;
-using Types.Modifiers.Definitions.Achievements;
+using Types.Achievements;
 
 namespace Services.Achievements {
     public class AchievementTrackerService : IService, IDisposable, IStartable {

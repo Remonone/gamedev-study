@@ -33,10 +33,10 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 7490908315923775564
-      type: {class: ConstCondition, ns: Types.Modifiers.Definitions.Cost.Condition, asm: Assembly-CSharp}
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Assembly-CSharp}
       data:
         _constant: 1
     - rid: 7490908315923775565
-      type: {class: ConstantFormula, ns: Types.Modifiers.Definitions.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
         BaseValue: 150000

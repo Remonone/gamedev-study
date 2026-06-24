@@ -3,7 +3,8 @@ using Services.Components;
 using Services.Components.Instances;
 using DG.Tweening;
 using R3;
-using Types.Modifiers.Definitions;
+using Types;
+using Types.Enums;
 using UnityEngine;
 
 namespace Animators {

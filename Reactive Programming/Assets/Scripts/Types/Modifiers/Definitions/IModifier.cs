@@ -1,4 +1,4 @@
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
 
 namespace Types.Modifiers.Definitions {

@@ -1,24 +1,24 @@
 using System.Collections.Generic;
-using Types.Modifiers.Definitions;
+using Types.Enums;
 using UnityEngine;
 
 namespace Services {
     public class UnlockService : IService {
-        private HashSet<string> UnlockedItems;
+        private readonly HashSet<string> _unlockedItems;
 
         public UnlockService() {
-            UnlockedItems = new();
+            _unlockedItems = new();
             UnlockItem(nameof(GovernmentInteractionType.MayorOffice));
         }
         
         public void UnlockItem(string upgradeId) {
-            if (!UnlockedItems.Add(upgradeId)) {
+            if (!_unlockedItems.Add(upgradeId)) {
                 Debug.LogWarning($"Item {upgradeId} is already unlocked");
             }
         }
         
         public bool IsItemUnlocked(string upgradeId) {
-            return UnlockedItems.Contains(upgradeId);
+            return _unlockedItems.Contains(upgradeId);
         }
     }
 }

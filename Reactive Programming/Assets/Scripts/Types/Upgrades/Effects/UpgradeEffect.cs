@@ -1,7 +1,6 @@
-using Types.Modifiers.Definitions;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Upgrades.Effects {
+namespace Types.Upgrades.Effects {
     public abstract class UpgradeEffect : ScriptableObject {
     }
 }

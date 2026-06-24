@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Upgrades.Effects;
+using Types.Modifiers.Cost;
+using Types.Upgrades.Effects;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Upgrades {
+namespace Types.Upgrades {
     [CreateAssetMenu(fileName = "Node", menuName = "Clicker/Upgrade Node", order = 0)]
     public class UpgradeNodeDefinition : ScriptableObject {
         public enum Category {Buff, Unlock, Effect}

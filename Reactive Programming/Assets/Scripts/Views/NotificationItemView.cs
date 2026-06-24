@@ -1,6 +1,6 @@
 using System;
 using R3;
-using Types.Modifiers.Definitions;
+using Types;
 using UnityEngine.UIElements;
 using Views.Models;
 

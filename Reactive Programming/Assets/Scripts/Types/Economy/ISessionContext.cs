@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using R3;
+using Types.Enums;
 
-namespace Types.Modifiers.Definitions {
+namespace Types.Modifiers {
     public interface ISessionContext {
         public int Seed { get; }
         

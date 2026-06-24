@@ -1,6 +1,6 @@
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 
-namespace Types.Modifiers.Definitions {
+namespace Types.Modifiers {
     public readonly struct BuildingUpdate {
         public readonly BuildingState Building;
         public readonly ComputedStats Stats;

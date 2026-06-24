@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Audio.Implementation;
-using Types.Modifiers.Definitions.Buildings;
-using Types.Modifiers.Definitions.Objects;
+using Constants;
+using Types.Buildings;
+using Types.Objects;
 using Economy.Providers;
 using R3;
 using Services.Player;
 using Services.Achievements;
 using Services.Components.Instances;
+using Services.Gamerule;
 using Services.Statistics;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Achievements;
+using Types;
+using Types.Modifiers;
+using Types.Achievements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Views;
@@ -53,6 +56,9 @@ namespace Services.Components {
             RegisterService(providerRegistry);
             RegisterService(unlockService);
             RegisterService(stateBenefitCalculation);
+
+            var gameRuleService = new GameRuleService(GetInitialGameRules());
+            RegisterService(gameRuleService);
             
             var buildingDefinitions = FetchBuildingDefinitions();
             _buildingWatcherService = new BuildingWatcherService(buildingDefinitions);
@@ -106,6 +112,11 @@ namespace Services.Components {
                                                             invalidationService));
             
             InitViews();
+        }
+
+        private IReadOnlyDictionary<string, object> GetInitialGameRules() {
+            return new Dictionary<string, object> {
+            };
         }
 
         private void InitAchievements() {

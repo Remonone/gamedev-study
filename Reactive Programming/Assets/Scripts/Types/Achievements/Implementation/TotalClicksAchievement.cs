@@ -1,8 +1,8 @@
 using Services.Statistics;
 
-namespace Types.Modifiers.Definitions.Achievements.Implementation {
+namespace Types.Achievements.Implementation {
     public class TotalClicksAchievement : IntThresholdAchievement {
-        private const int TARGET = 1000;
+        private const int _Target = 1000;
 
 
         public TotalClicksAchievement(IStatisticsReader reader) : base(reader) {
@@ -13,6 +13,6 @@ namespace Types.Modifiers.Definitions.Achievements.Implementation {
         public override string Description => "Click 1000 times";
 
         protected override StatisticKey<int> Key => StatisticKeys.TotalClicks;
-        protected override int Target => TARGET;
+        protected override int Target => _Target;
     }
 }

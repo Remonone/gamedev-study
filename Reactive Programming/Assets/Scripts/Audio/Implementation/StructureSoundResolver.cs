@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using Types.Modifiers.Definitions.Objects;
-using Services.Components;
+using Types.Objects;
 using Services.Components.Instances;
 using R3;
-using Types.Modifiers.Definitions;
+using Types.Enums;
 
 namespace Audio.Implementation {
     public class StructureSoundResolver : IAudioDistributor, IDisposable {

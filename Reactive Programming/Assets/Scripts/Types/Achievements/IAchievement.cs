@@ -1,7 +1,7 @@
 using System;
 using R3;
 
-namespace Types.Modifiers.Definitions.Achievements {
+namespace Types.Achievements {
     public interface IAchievement : IDisposable {
         string Id { get; }
         string Name { get; }

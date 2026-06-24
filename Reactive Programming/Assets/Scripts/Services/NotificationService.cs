@@ -1,14 +1,12 @@
 using System;
 using R3;
-using Types.Modifiers.Definitions;
+using Types;
 
 namespace Services {
     public class NotificationService : IService, IDisposable {
         
         private Subject<NotificationRequest> _onNotification = new();
         public Observable<NotificationRequest> OnNotification => _onNotification;
-
-        public NotificationService() { }
 
         public void Push(NotificationRequest request) {
             ValidateNotification(request); 

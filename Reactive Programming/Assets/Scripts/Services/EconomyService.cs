@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Economy;
 using Services.Player;
 using R3;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Values;
+using Types.Enums;
+using Types.Modifiers;
+using Types.Modifiers.Cost;
+using Types.Values;
 
 namespace Services {
     public class EconomyService : IService {

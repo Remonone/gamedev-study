@@ -11,6 +11,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9587112897a34c8296818cdcaa5b2c92, type: 3}
   m_Name: DefaultBuilding
-  m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.Definitions.Target.TargetByStringPattern
+  m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.Target.TargetByStringPattern
   Pattern: Default*
   CaseSensitive: 0

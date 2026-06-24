@@ -1,17 +1,18 @@
 using System;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Services.Components;
 using Services.Player;
 using R3;
 using Services;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Cost;
-using Types.Modifiers.Definitions.Values;
+using Types.Enums;
+using Types.Modifiers;
+using Types.Modifiers.Cost;
+using Types.Values;
 using UnityEngine;
 
 namespace Views.Models {
     public class BuildingItemViewModel : IDisposable {
-        private const int DefaultPurchaseLevels = 1;
+        private const int _DefaultPurchaseLevels = 1;
 
         private string _name;
         private GovernmentInteractionType _type;
@@ -28,7 +29,7 @@ namespace Views.Models {
         public ReactiveProperty<float> CriticalChance = new();
         public ReactiveProperty<float> CriticalMultiplier = new();
         public ReactiveProperty<bool> CanPurchase = new();
-        public ReactiveProperty<int> PurchaseLevels = new(DefaultPurchaseLevels);
+        public ReactiveProperty<int> PurchaseLevels = new(_DefaultPurchaseLevels);
         public ReactiveProperty<string> Description = new(string.Empty);
         public ReactiveProperty<Sprite> Icon = new(null);
 
@@ -76,7 +77,7 @@ namespace Views.Models {
 
         public void SetPurchaseLevels(int levels) {
             if (levels <= 0) {
-                levels = DefaultPurchaseLevels;
+                levels = _DefaultPurchaseLevels;
             }
 
             if (PurchaseLevels.Value == levels) {

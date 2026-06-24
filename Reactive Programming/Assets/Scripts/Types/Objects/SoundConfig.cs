@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Audio;
+using Types.Enums;
 using UnityEngine;
 
-namespace Types.Modifiers.Definitions.Objects {
+namespace Types.Objects {
     [CreateAssetMenu(fileName = "Sound Config", menuName = "Clicker/Sound Config", order = 0)]
     public class StructureSoundConfig : ScriptableObject {
         

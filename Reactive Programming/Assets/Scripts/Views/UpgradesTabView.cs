@@ -7,8 +7,8 @@ using Views.Models;
 
 namespace Views {
     public class UpgradesTabView : IDisposable {
-        private const float NodeWidth = 32f;
-        private const float NodeHeight = 36f;
+        private const float _NodeWidth = 32f;
+        private const float _NodeHeight = 36f;
 
         private readonly VisualElement _root;
         private readonly VisualElement _workspace;
@@ -377,8 +377,8 @@ namespace Views {
                         continue;
                     }
 
-                    var start = new Vector2(tile.Position.x + NodeWidth, tile.Position.y + NodeHeight * 0.5f);
-                    var end = new Vector2(child.Position.x, child.Position.y + NodeHeight * 0.5f);
+                    var start = new Vector2(tile.Position.x + _NodeWidth, tile.Position.y + _NodeHeight * 0.5f);
+                    var end = new Vector2(child.Position.x, child.Position.y + _NodeHeight * 0.5f);
 
                     painter.BeginPath();
                     painter.MoveTo(start);

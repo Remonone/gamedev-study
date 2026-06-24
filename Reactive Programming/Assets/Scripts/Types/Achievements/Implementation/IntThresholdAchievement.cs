@@ -1,7 +1,7 @@
 using R3;
 using Services.Statistics;
 
-namespace Types.Modifiers.Definitions.Achievements.Implementation {
+namespace Types.Achievements.Implementation {
     public abstract class IntThresholdAchievement : AchievementItem {
         
         protected abstract int Target { get; }
@@ -11,9 +11,9 @@ namespace Types.Modifiers.Definitions.Achievements.Implementation {
         }
 
         protected override void StartTracking() {
-            _statistics.GetObservable(Key)
+            Statistics.GetObservable(Key)
                 .Subscribe(OnValueChanged)
-                .AddTo(_disposable);
+                .AddTo(Disposable);
         }
 
         private void OnValueChanged(int value) {

@@ -3,8 +3,8 @@ using Services.Components;
 using Services.Player;
 using R3;
 using Services.Achievements;
-using Types.Modifiers.Definitions;
-using Types.Modifiers.Definitions.Values;
+using Types.Enums;
+using Types.Values;
 
 namespace Views.Models {
   public class Controls : IDisposable {

@@ -1,5 +1,5 @@
 using Economy.Conditions;
-using Types.Modifiers.Definitions.Buildings;
+using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
 using UnityEngine;
 
