@@ -969,6 +969,79 @@
     color: var(--c-text-3);
 }
 
+/* ---------- Research ---------- */
+
+.tab-surface--research {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.research-layout {
+    flex-grow: 1;
+    min-height: 0;
+    padding: 18px;
+    row-gap: 16px;
+}
+
+#ResearchTab.locked {
+    display: none;
+}
+
+.research-stats-panel {
+    flex-grow: 0;
+    padding: 16px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+    row-gap: 10px;
+}
+
+.research-title {
+    color: var(--c-accent);
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.research-stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--c-border);
+}
+
+.research-stat-key {
+    color: var(--c-text-2);
+}
+
+.research-stat-value {
+    color: var(--c-text);
+    -unity-font-style: bold;
+}
+
+.research-progress-row {
+    flex-direction: row;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.research-progress {
+    flex-grow: 1;
+    min-width: 0;
+    height: 28px;
+}
+
+.research-complete-button {
+    min-width: 170px;
+    height: 36px;
+    background-color: var(--c-accent);
+    color: var(--c-on-accent);
+    -unity-font-style: bold;
+}
+
 /* ---------- Notifications ---------- */
 
 .notification-center {

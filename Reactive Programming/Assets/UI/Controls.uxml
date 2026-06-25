@@ -124,6 +124,39 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:Tab>
+                    <ui:Tab name="ResearchTab" label="Research" class="main-tab">
+                        <ui:VisualElement name="ResearchTabRoot" class="tab-surface tab-surface--research">
+                            <ui:VisualElement class="research-layout">
+                                <ui:VisualElement class="research-stats-panel">
+                                    <ui:Label text="Research" class="research-title"/>
+                                    <ui:VisualElement class="research-stat-row">
+                                        <ui:Label text="Completed" class="research-stat-key"/>
+                                        <ui:Label text="0" name="ResearchCompletedCount" class="research-stat-value"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="research-stat-row">
+                                        <ui:Label text="Next cost" class="research-stat-key"/>
+                                        <ui:Label text="0" name="ResearchNextCost" class="research-stat-value"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="research-stat-row">
+                                        <ui:Label text="Invested points" class="research-stat-key"/>
+                                        <ui:Label text="0" name="ResearchInvestedPoints" class="research-stat-value"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="research-stat-row">
+                                        <ui:Label text="Points / sec" class="research-stat-key"/>
+                                        <ui:Label text="0/s" name="ResearchPointsPerSecond" class="research-stat-value"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="research-stat-row">
+                                        <ui:Label text="Scale modifier" class="research-stat-key"/>
+                                        <ui:Label text="x1" name="ResearchScaleModifier" class="research-stat-value"/>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="research-progress-row">
+                                    <ui:ProgressBar name="ResearchProgress" title="0%" class="research-progress"/>
+                                    <ui:Button text="Complete research" name="CompleteResearchButton" class="research-complete-button"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:Tab>
                 </ui:TabView>
             </ui:VisualElement>
         </ui:VisualElement>

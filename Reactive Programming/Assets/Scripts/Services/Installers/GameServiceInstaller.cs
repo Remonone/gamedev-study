@@ -16,6 +16,7 @@ using Types;
 using Types.Events.Global;
 using Types.Modifiers;
 using Types.Achievements;
+using Types.Research;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Views;
@@ -97,6 +98,11 @@ namespace Services.Components {
             RegisterService(structureClickService);
             RegisterService(new StructureSoundResolver(structureClickService, _structureSoundConfig));
             RegisterService(new PlayerEffectService(sessionContext, buildingUpgradeService, invalidationService));
+            RegisterService(new ResearchService(
+                sessionContext,
+                unlockService,
+                _notificationService,
+                FetchResearchConfig()));
             
             var tickService = new TickService(_economyService, 
                 _buildingWatcherService, 
@@ -158,6 +164,10 @@ namespace Services.Components {
 
         private List<GlobalEvent> FetchGlobalEvents() {
             return Resources.LoadAll<GlobalEvent>("GlobalEvents").ToList();
+        }
+
+        private ResearchConfig FetchResearchConfig() {
+            return Resources.Load<ResearchConfig>("Research/ResearchConfig");
         }
 
         private void InitViews() {

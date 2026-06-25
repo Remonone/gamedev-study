@@ -24,6 +24,7 @@ namespace Views {
         private UpgradesTabView _upgradesTabView;
         private AchievementsTabView _achievementsTabView;
         private ArtifactsTabView _artifactsTabView;
+        private ResearchTabView _researchTabView;
         private GlobalEventIndicatorView _globalEventIndicatorView;
 
         public void Bind(Controls controls) {
@@ -49,12 +50,14 @@ namespace Views {
             _upgradesTabView = new UpgradesTabView(_root.Q<VisualElement>("UpgradesTabRoot"));
             _achievementsTabView = new AchievementsTabView(_root.Q<VisualElement>("AchievementsTabRoot"), ResolveAchievementItemTemplate());
             _artifactsTabView = new ArtifactsTabView(_root.Q<VisualElement>("ArtifactsTabRoot"));
+            _researchTabView = new ResearchTabView(_root.Q<VisualElement>("ResearchTab"), _root.Q<VisualElement>("ResearchTabRoot"));
             _globalEventIndicatorView = new GlobalEventIndicatorView(_root.Q<VisualElement>("GlobalEventIndicator"));
 
             _buildingShopTabView.Bind(_controls.BuildingShopTab);
             _upgradesTabView.Bind(_controls.UpgradesTab);
             _achievementsTabView.Bind(_controls.AchievementsTab);
             _artifactsTabView.Bind(_controls.ArtifactsTab);
+            _researchTabView.Bind(_controls.ResearchTab);
             _globalEventIndicatorView.Bind(_controls.GlobalEventIndicator);
         }
 
@@ -71,6 +74,7 @@ namespace Views {
             _upgradesTabView?.Dispose();
             _achievementsTabView?.Dispose();
             _artifactsTabView?.Dispose();
+            _researchTabView?.Dispose();
             _globalEventIndicatorView?.Dispose();
         }
      }

@@ -2,6 +2,7 @@ using System;
 using Services.Components;
 using Services.Events;
 using Services.Player;
+using Services;
 using R3;
 using Services.Achievements;
 using Types.Enums;
@@ -17,6 +18,7 @@ namespace Views.Models {
         public UpgradesTabViewModel UpgradesTab = new();
         public AchievementsTabViewModel AchievementsTab;
         public ArtifactsTabViewModel ArtifactsTab = new();
+        public ResearchTabViewModel ResearchTab;
         public GlobalEventIndicatorViewModel GlobalEventIndicator;
 
         public ReactiveProperty<Value> DocumentsCount = new(Value.Zero);
@@ -30,6 +32,7 @@ namespace Views.Models {
             _storage = storage;
 
             AchievementsTab = new AchievementsTabViewModel(ServiceLocator.Instance.GetService<AchievementService>());
+            ResearchTab = new ResearchTabViewModel(ServiceLocator.Instance.GetService<ResearchService>());
             GlobalEventIndicator = new GlobalEventIndicatorViewModel(ServiceLocator.Instance.GetService<GlobalEventService>());
 
             _storage.ObserveByType(GovernmentInteractionType.MayorOffice)
@@ -61,6 +64,7 @@ namespace Views.Models {
         public void Dispose() {
             _disposable.Dispose();
             UpgradesTab.Dispose();
+            ResearchTab.Dispose();
             GlobalEventIndicator.Dispose();
         }
   }
