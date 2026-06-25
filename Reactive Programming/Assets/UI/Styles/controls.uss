@@ -30,6 +30,56 @@
     --r-lg: 14px;
 }
 
+.global-event-indicator {
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    width: 96px;
+    height: 96px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--c-surface-2);
+    border-width: 3px;
+    border-color: var(--c-accent);
+    border-radius: 48px;
+    overflow: visible;
+}
+
+.global-event-icon {
+    width: 74px;
+    height: 74px;
+    border-radius: 37px;
+    background-color: var(--c-surface-3);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.global-event-tooltip {
+    position: absolute;
+    left: 108px;
+    top: 8px;
+    width: 260px;
+    display: none;
+    flex-direction: column;
+    padding: 10px 12px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-sm);
+}
+
+.global-event-tooltip__title {
+    color: var(--c-accent);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.global-event-tooltip__description {
+    margin-top: 6px;
+    color: var(--c-text);
+    white-space: normal;
+}
+
 /* ------------------------------------------------------------
    This UI never scrolls horizontally. The TabView header is a
    horizontal ScrollView whose scroller (track + white dragger

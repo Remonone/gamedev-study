@@ -130,5 +130,12 @@
         <ui:VisualElement style="flex-grow: 1;"/>
     </ui:VisualElement>
     <ui:VisualElement name="NotificationCenter" class="notification-center"
-                      picking-mode="Ignore" />
+                       picking-mode="Ignore" />
+    <ui:VisualElement name="GlobalEventIndicator" class="global-event-indicator">
+        <ui:VisualElement name="GlobalEventIcon" class="global-event-icon" />
+        <ui:VisualElement name="GlobalEventTooltip" class="global-event-tooltip">
+            <ui:Label name="GlobalEventTooltipTitle" text="Global Event" class="global-event-tooltip__title" />
+            <ui:Label name="GlobalEventTooltipDescription" text="Description" class="global-event-tooltip__description" />
+        </ui:VisualElement>
+    </ui:VisualElement>
 </ui:UXML>

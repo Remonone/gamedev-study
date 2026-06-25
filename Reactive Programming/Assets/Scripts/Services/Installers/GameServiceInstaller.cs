@@ -9,9 +9,11 @@ using R3;
 using Services.Player;
 using Services.Achievements;
 using Services.Components.Instances;
+using Services.Events;
 using Services.Gamerule;
 using Services.Statistics;
 using Types;
+using Types.Events.Global;
 using Types.Modifiers;
 using Types.Achievements;
 using UnityEngine;
@@ -32,6 +34,8 @@ namespace Services.Components {
         private BuildingItemView _buildingItemView;
         [SerializeField, Tooltip("Controls view bound to the main UI model.")]
         private ControlsView _controlsView;
+        [SerializeField, Min(0f), Tooltip("Minutes between global events. Duration is configured per event in seconds.")]
+        private float _globalEventIntervalMinutes = 1f;
         
         private BuildingWatcherService _buildingWatcherService;
         private EconomyService _economyService;
@@ -66,6 +70,10 @@ namespace Services.Components {
             
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
             RegisterService(invalidationService);
+
+            var globalEventService = new GlobalEventService(FetchGlobalEvents(), invalidationService, _globalEventIntervalMinutes);
+            RegisterService(globalEventService);
+            providerRegistry.RegisterProvider(new GlobalEventModifierProvider(globalEventService));
             
             RegisterService(new UpgradeService(_storage, 
                 providerRegistry, 
@@ -146,6 +154,10 @@ namespace Services.Components {
 
         private List<BuildingDefinition> FetchBuildingDefinitions() {
             return Resources.LoadAll<BuildingDefinition>("Buildings").ToList();
+        }
+
+        private List<GlobalEvent> FetchGlobalEvents() {
+            return Resources.LoadAll<GlobalEvent>("GlobalEvents").ToList();
         }
 
         private void InitViews() {
