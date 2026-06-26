@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Linq;
+using Types;
+using Types.Practices;
 using Types.Values;
 using UnityEngine;
 
@@ -22,11 +26,21 @@ namespace Types.Research {
         [SerializeField]
         private string _readyNotificationMessage = "A research iteration is ready to claim.";
 
+        [SerializeField, Tooltip("Weights used to determine practice rarity before showing a research reward.")]
+        private List<PracticeRarityWeight> _practiceRarityWeights = new();
+
         public Value BaseResearchCost => _baseResearchCost > Value.Zero ? _baseResearchCost : Value.One;
         public float CostPerResearchMultiplier => Mathf.Max(0.0001f, _costPerResearchMultiplier);
         public float ArchiveInfluenceToPointsPerSecond => Mathf.Max(0f, _archiveInfluenceToPointsPerSecond);
         public float ScaleModifier => Mathf.Max(0.0001f, _scaleModifier);
         public string ReadyNotificationTitle => string.IsNullOrWhiteSpace(_readyNotificationTitle) ? "Research complete" : _readyNotificationTitle;
         public string ReadyNotificationMessage => string.IsNullOrWhiteSpace(_readyNotificationMessage) ? "A research iteration is ready to claim." : _readyNotificationMessage;
+
+        public IReadOnlyList<PracticeRarityWeight> PracticeRarityWeights => _practiceRarityWeights;
+
+        public PracticeRarity GetFallbackPracticeRarity() {
+            var firstPositive = _practiceRarityWeights.FirstOrDefault(entry => entry.Weight > 0f);
+            return firstPositive != null ? firstPositive.Rarity : PracticeRarity.Common;
+        }
     }
 }

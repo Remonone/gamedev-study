@@ -33,7 +33,7 @@ namespace Views.Models {
         }
 
         public void CompleteResearch() {
-            _researchService.CompleteCurrentResearch();
+            _researchService.RequestCompleteCurrentResearch();
         }
 
         public void Dispose() {

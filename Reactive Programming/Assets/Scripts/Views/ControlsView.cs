@@ -25,6 +25,7 @@ namespace Views {
         private AchievementsTabView _achievementsTabView;
         private ArtifactsTabView _artifactsTabView;
         private ResearchTabView _researchTabView;
+        private PracticeRewardPopupView _practiceRewardPopupView;
         private GlobalEventIndicatorView _globalEventIndicatorView;
 
         public void Bind(Controls controls) {
@@ -51,6 +52,7 @@ namespace Views {
             _achievementsTabView = new AchievementsTabView(_root.Q<VisualElement>("AchievementsTabRoot"), ResolveAchievementItemTemplate());
             _artifactsTabView = new ArtifactsTabView(_root.Q<VisualElement>("ArtifactsTabRoot"));
             _researchTabView = new ResearchTabView(_root.Q<VisualElement>("ResearchTab"), _root.Q<VisualElement>("ResearchTabRoot"));
+            _practiceRewardPopupView = new PracticeRewardPopupView(_root.Q<VisualElement>("PracticeRewardOverlay"));
             _globalEventIndicatorView = new GlobalEventIndicatorView(_root.Q<VisualElement>("GlobalEventIndicator"));
 
             _buildingShopTabView.Bind(_controls.BuildingShopTab);
@@ -58,6 +60,7 @@ namespace Views {
             _achievementsTabView.Bind(_controls.AchievementsTab);
             _artifactsTabView.Bind(_controls.ArtifactsTab);
             _researchTabView.Bind(_controls.ResearchTab);
+            _practiceRewardPopupView.Bind(_controls.PracticeRewardPopup);
             _globalEventIndicatorView.Bind(_controls.GlobalEventIndicator);
         }
 
@@ -75,6 +78,7 @@ namespace Views {
             _achievementsTabView?.Dispose();
             _artifactsTabView?.Dispose();
             _researchTabView?.Dispose();
+            _practiceRewardPopupView?.Dispose();
             _globalEventIndicatorView?.Dispose();
         }
      }

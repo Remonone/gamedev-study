@@ -17,7 +17,7 @@ namespace Services {
         private readonly Dictionary<string, ReactiveProperty<UpgradeNodeState>> _upgrades;
         private readonly Dictionary<string, List<string>> _parentIdsByChildId;
         private readonly Storage _storage;
-        private readonly ProviderRegistryService _providerRegistryService;
+        private readonly UpgradeModifierProvider _upgradeModifierProvider;
         private readonly InvalidationService _invalidationService;
         private readonly UnlockService _unlockService;
 
@@ -25,7 +25,7 @@ namespace Services {
 
         public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService, UnlockService unlockService) {
             _storage = storage;
-            _providerRegistryService = providerRegistryService;
+            _upgradeModifierProvider = providerRegistryService.GetProvider<UpgradeModifierProvider>();
             _invalidationService = invalidationService;
             _unlockService = unlockService;
             
@@ -121,8 +121,7 @@ namespace Services {
         }
 
         private void ApplyModifiers(UpgradeNodeState updatedState) {
-            var provider = _providerRegistryService.GetProvider<UpgradeModifierProvider>();
-            provider.AddOrUpdate(updatedState);
+            _upgradeModifierProvider.AddOrUpdate(updatedState);
 
             foreach (var effect in updatedState.Definition.Effects
                          .Select(effect => effect as ModifierUpgradeEffect)

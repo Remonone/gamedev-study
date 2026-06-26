@@ -15,6 +15,7 @@ using Services.Statistics;
 using Types;
 using Types.Events.Global;
 using Types.Modifiers;
+using Types.Practices;
 using Types.Achievements;
 using Types.Research;
 using UnityEngine;
@@ -72,6 +73,20 @@ namespace Services.Components {
             var invalidationService = new InvalidationService(_buildingWatcherService.BuildingsByName);
             RegisterService(invalidationService);
 
+            var practiceRewardConfig = FetchPracticeRewardConfig();
+            
+            var practiceService = new PracticeService(
+                FetchPractices(),
+                practiceRewardConfig,
+                invalidationService,
+                sessionContext);
+            RegisterService(practiceService);
+            providerRegistry.RegisterProvider(new PracticesModifierProvider(practiceService));
+            
+            var recycleService = new RecycleService(practiceService, _buildingWatcherService, practiceRewardConfig);
+            RegisterService(recycleService);
+            providerRegistry.RegisterProvider(new RecycleModifierProvider(recycleService));
+            
             var globalEventService = new GlobalEventService(FetchGlobalEvents(), invalidationService, _globalEventIntervalMinutes);
             RegisterService(globalEventService);
             providerRegistry.RegisterProvider(new GlobalEventModifierProvider(globalEventService));
@@ -102,6 +117,7 @@ namespace Services.Components {
                 sessionContext,
                 unlockService,
                 _notificationService,
+                practiceService,
                 FetchResearchConfig()));
             
             var tickService = new TickService(_economyService, 
@@ -168,6 +184,14 @@ namespace Services.Components {
 
         private ResearchConfig FetchResearchConfig() {
             return Resources.Load<ResearchConfig>("Research/ResearchConfig");
+        }
+
+        private List<Practice> FetchPractices() {
+            return Resources.LoadAll<Practice>("Practices").ToList();
+        }
+
+        private PracticeRewardConfig FetchPracticeRewardConfig() {
+            return Resources.Load<PracticeRewardConfig>("Practices/PracticeRewardConfig");
         }
 
         private void InitViews() {

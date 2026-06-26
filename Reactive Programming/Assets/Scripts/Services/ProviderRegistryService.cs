@@ -34,7 +34,7 @@ namespace Services {
                 .ToList();
 
             if (result.Count == 0) {
-                throw new ArgumentException($"Service of type {targetType.Name} not found.");
+                throw new ArgumentException($"Provider of type {targetType.Name} not found.");
             }
 
             return result[0];

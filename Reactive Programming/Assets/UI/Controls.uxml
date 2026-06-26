@@ -118,9 +118,7 @@
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="ArtifactsList" class="artifacts-placeholder">
-                                    <ui:Label text="Artifacts list will be displayed here." class="artifacts-placeholder-text"/>
-                                </ui:VisualElement>
+                                <ui:ScrollView name="ArtifactsList" class="artifacts-grid"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:Tab>
@@ -161,6 +159,24 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1;"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="PracticeRewardOverlay" class="practice-reward-overlay">
+        <ui:VisualElement class="practice-reward-panel">
+            <ui:Label name="PracticeRewardTitle" text="Choose practice" class="practice-reward-title"/>
+            <ui:VisualElement name="PracticeRewardOptions" class="practice-reward-options"/>
+            <ui:VisualElement class="practice-reward-selected">
+                <ui:VisualElement name="PracticeRewardSelectedIcon" class="practice-reward-selected__icon"/>
+                <ui:VisualElement class="practice-reward-selected__text">
+                    <ui:Label name="PracticeRewardSelectedName" text="No practice selected" class="practice-reward-selected__name"/>
+                    <ui:Label name="PracticeRewardSelectedDescription" text="Select a practice to inspect it." class="practice-reward-selected__description"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="practice-reward-actions">
+                <ui:Button name="PracticeRewardConfirmButton" text="Confirm" class="practice-reward-confirm"/>
+                <ui:Button name="PracticeRewardRecycleButton" text="Recycle" class="practice-reward-recycle"/>
+                <ui:Button name="PracticeRewardCancelButton" text="Cancel" class="practice-reward-cancel"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="NotificationCenter" class="notification-center"
                        picking-mode="Ignore" />

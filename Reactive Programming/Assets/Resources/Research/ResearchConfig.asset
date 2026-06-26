@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: ResearchConfig
   m_EditorClassIdentifier: Assembly-CSharp::Types.Research.ResearchConfig
   _baseResearchCost:
-    _stored: 100
+    _stored: 10
     _base:
-      Degree: 0
+      Degree: 1
   _costPerResearchMultiplier: 1
   _archiveInfluenceToPointsPerSecond: 1
   _scaleModifier: 1
   _readyNotificationTitle: Research complete
   _readyNotificationMessage: A research iteration is ready to claim.
+  _practiceRarityWeights: []

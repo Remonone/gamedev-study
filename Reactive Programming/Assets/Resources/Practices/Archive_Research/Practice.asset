@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
+  m_Name: Practice
+  m_EditorClassIdentifier: Assembly-CSharp::Types.Practice
+  _id: research_efficiency
+  _displayName: Better sorting
+  _description: Increases efficiency of sorting papers in Archive. Research speed
+    +5%, archive income +5%
+  _icon: {fileID: 0}
+  _rarity: 0
+  _weight: 1
+  _statModifiers:
+  - {fileID: 11400000, guid: 80464d0fc7694caea817119bcc231538, type: 2}
+  _influenceEffects: []
+  _researchEffects:
+  - Type: 0
+    Operation: 1
+    Value: 0.05

@@ -17,8 +17,9 @@ namespace Views.Models {
         public BuildingShopTabViewModel BuildingShopTab = new();
         public UpgradesTabViewModel UpgradesTab = new();
         public AchievementsTabViewModel AchievementsTab;
-        public ArtifactsTabViewModel ArtifactsTab = new();
+        public ArtifactsTabViewModel ArtifactsTab;
         public ResearchTabViewModel ResearchTab;
+        public PracticeRewardPopupViewModel PracticeRewardPopup;
         public GlobalEventIndicatorViewModel GlobalEventIndicator;
 
         public ReactiveProperty<Value> DocumentsCount = new(Value.Zero);
@@ -32,7 +33,11 @@ namespace Views.Models {
             _storage = storage;
 
             AchievementsTab = new AchievementsTabViewModel(ServiceLocator.Instance.GetService<AchievementService>());
-            ResearchTab = new ResearchTabViewModel(ServiceLocator.Instance.GetService<ResearchService>());
+            var researchService = ServiceLocator.Instance.GetService<ResearchService>();
+            var practiceService = ServiceLocator.Instance.GetService<PracticeService>();
+            ArtifactsTab = new ArtifactsTabViewModel(practiceService);
+            ResearchTab = new ResearchTabViewModel(researchService);
+            PracticeRewardPopup = new PracticeRewardPopupViewModel(practiceService, researchService);
             GlobalEventIndicator = new GlobalEventIndicatorViewModel(ServiceLocator.Instance.GetService<GlobalEventService>());
 
             _storage.ObserveByType(GovernmentInteractionType.MayorOffice)
@@ -64,7 +69,9 @@ namespace Views.Models {
         public void Dispose() {
             _disposable.Dispose();
             UpgradesTab.Dispose();
+            ArtifactsTab.Dispose();
             ResearchTab.Dispose();
+            PracticeRewardPopup.Dispose();
             GlobalEventIndicator.Dispose();
         }
   }

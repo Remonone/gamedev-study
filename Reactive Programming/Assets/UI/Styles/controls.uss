@@ -954,20 +954,51 @@
     white-space: normal;
 }
 
-.artifacts-placeholder {
+.artifacts-grid {
     flex-grow: 1;
     min-height: 0;
-    align-items: center;
-    justify-content: center;
     background-color: var(--c-bg);
     border-width: 1px;
     border-color: var(--c-border);
     border-radius: var(--r-md);
+    padding: 10px;
 }
 
 .artifacts-placeholder-text {
     color: var(--c-text-3);
 }
+
+.artifact-tile {
+    width: 58px;
+    height: 58px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    padding: 4px;
+    background-color: var(--c-surface-2);
+    border-width: 2px;
+    border-color: var(--c-border);
+    border-radius: var(--r-sm);
+}
+
+.artifact-tile:hover {
+    background-color: var(--c-surface-hover);
+}
+
+.artifact-tile--selected {
+    border-color: var(--c-accent);
+}
+
+.artifact-tile__icon {
+    flex-grow: 1;
+    background-color: var(--c-surface-3);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.artifact-tile--common { border-color: rgb(140, 152, 166); }
+.artifact-tile--good { border-color: rgb(86, 184, 122); }
+.artifact-tile--unusual { border-color: rgb(96, 165, 235); }
+.artifact-tile--advanced { border-color: rgb(176, 138, 250); }
+.artifact-tile--diamond { border-color: rgb(123, 230, 255); }
 
 /* ---------- Research ---------- */
 
@@ -1040,6 +1071,135 @@
     background-color: var(--c-accent);
     color: var(--c-on-accent);
     -unity-font-style: bold;
+}
+
+/* ---------- Practice reward popup ---------- */
+
+.practice-reward-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.62);
+}
+
+.practice-reward-panel {
+    width: 520px;
+    padding: 18px;
+    row-gap: 14px;
+    background-color: var(--c-surface);
+    border-width: 1px;
+    border-color: var(--c-border-strong);
+    border-radius: var(--r-lg);
+}
+
+.practice-reward-title {
+    color: var(--c-accent);
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.practice-reward-options {
+    flex-direction: row;
+    justify-content: center;
+    column-gap: 12px;
+}
+
+.practice-reward-option {
+    width: 130px;
+    height: 150px;
+    padding: 8px;
+    background-color: var(--c-surface-2);
+    border-width: 2px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+}
+
+.practice-reward-option--selected {
+    border-color: var(--c-accent);
+    background-color: var(--c-accent-soft);
+}
+
+.practice-reward-option__icon {
+    height: 82px;
+    background-color: var(--c-surface-3);
+    border-radius: var(--r-sm);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.practice-reward-option__name {
+    margin-top: 8px;
+    color: var(--c-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.practice-reward-option--common { border-color: rgb(140, 152, 166); }
+.practice-reward-option--good { border-color: rgb(86, 184, 122); }
+.practice-reward-option--unusual { border-color: rgb(96, 165, 235); }
+.practice-reward-option--advanced { border-color: rgb(176, 138, 250); }
+.practice-reward-option--diamond { border-color: rgb(123, 230, 255); }
+
+.practice-reward-selected {
+    flex-direction: row;
+    column-gap: 12px;
+    padding: 12px;
+    background-color: var(--c-surface-2);
+    border-width: 1px;
+    border-color: var(--c-border);
+    border-radius: var(--r-md);
+}
+
+.practice-reward-selected__icon {
+    width: 54px;
+    height: 54px;
+    background-color: var(--c-surface-3);
+    border-radius: var(--r-sm);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.practice-reward-selected__text {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.practice-reward-selected__name {
+    color: var(--c-text);
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.practice-reward-selected__description {
+    color: var(--c-text-2);
+    white-space: normal;
+}
+
+.practice-reward-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    column-gap: 8px;
+}
+
+.practice-reward-confirm {
+    background-color: var(--c-accent);
+    color: var(--c-on-accent);
+    -unity-font-style: bold;
+}
+
+.practice-reward-recycle {
+    background-color: var(--c-surface-3);
+    color: var(--c-text);
+}
+
+.practice-reward-cancel {
+    background-color: var(--c-surface-2);
+    color: var(--c-text-2);
 }
 
 /* ---------- Notifications ---------- */
