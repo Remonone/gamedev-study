@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Types.Modifiers;
 using Types.Modifiers.Definitions;
+using Types.QTE;
 using UnityEngine;
 
 namespace Types {
@@ -25,6 +26,8 @@ namespace Types {
         private List<InfluencePracticeEffect> _influenceEffects = new();
         [SerializeField, Tooltip("Modifiers applied to research calculations.")]
         private List<ResearchPracticeEffect> _researchEffects = new();
+        [SerializeField, Tooltip("Modifiers applied to QTE calculations.")]
+        private List<QteModifierEffect> _qteEffects = new();
 
         public string Id => string.IsNullOrWhiteSpace(_id) ? name : _id;
         public string DisplayName => string.IsNullOrWhiteSpace(_displayName) ? name : _displayName;
@@ -35,6 +38,7 @@ namespace Types {
         public IReadOnlyList<ModifierDefinition> StatModifiers => _statModifiers;
         public IReadOnlyList<InfluencePracticeEffect> InfluenceEffects => _influenceEffects;
         public IReadOnlyList<ResearchPracticeEffect> ResearchEffects => _researchEffects;
+        public IReadOnlyList<QteModifierEffect> QteEffects => _qteEffects;
     }
 
     public enum PracticeRarity {

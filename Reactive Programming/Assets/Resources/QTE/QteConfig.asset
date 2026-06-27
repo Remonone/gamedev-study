@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ffc97d09c5066e0b21dbb246d8e4f6, type: 3}
+  m_Name: QteConfig
+  m_EditorClassIdentifier: Clicker.Runtime::Types.QTE.QteConfig
+  _prefab: {fileID: 705855432661798532, guid: 0f42bb55ed1c209ed98239f8ba20ef50, type: 3}
+  _baseSpawnIntervalSeconds: 30
+  _spawnIntervalRandomStepSeconds: 5
+  _lifetimeSeconds: 10
+  _spawnMultiplier: 1
+  _baseClicksRequired: 3
+  _clicksRandomStep: 2
+  _rewards:
+  - _eligibleResources: 000000000100000002000000030000000400000005000000
+    _currentAmountMultiplier: 0.01

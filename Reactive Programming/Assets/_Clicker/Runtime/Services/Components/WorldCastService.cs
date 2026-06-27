@@ -1,6 +1,7 @@
 using R3;
 using Types;
 using Types.Buildings;
+using Types.QTE;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,7 +18,11 @@ namespace Services.Components {
         
         private RaycastHit[] _hitBuffer = new RaycastHit[2];
         
+        private Subject<QteObject> _qteClickedSubject = new();
+        
         public Observable<BuildingState> StructureClicked => _structureTypeSubject;
+        public Observable<QteObject> QTEClicked => _qteClickedSubject;
+        
 
         private void Start() {
             Observable.EveryUpdate()
@@ -30,11 +35,17 @@ namespace Services.Components {
                 return hitCount > 0 ? _hitBuffer[0].collider.gameObject : null;
             })
             .Where(clickedObject => clickedObject != null)
-            .Select(clickedObject => clickedObject.GetComponent<Structure>())
-            .Where(structure => structure != null)
-            .Subscribe(clickedObject => 
-                _structureTypeSubject.OnNext(clickedObject.State))
+            .Subscribe(OnClicked)
             .AddTo(this);
+        }
+
+        private void OnClicked(GameObject clickedObject) {
+            if (clickedObject.TryGetComponent(out Structure structure)) {
+                _structureTypeSubject.OnNext(structure.State);
+            }
+            if (clickedObject.TryGetComponent(out QteObject qteSpawnMarker)) {
+                _qteClickedSubject.OnNext(qteSpawnMarker);
+            }
         }
 
         private void OnDrawGizmos() {

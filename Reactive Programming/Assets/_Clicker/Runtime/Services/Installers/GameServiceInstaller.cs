@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Audio.Implementation;
-using Constants;
 using Types.Buildings;
 using Types.Objects;
 using Economy.Providers;
@@ -11,11 +10,13 @@ using Services.Achievements;
 using Services.Components.Instances;
 using Services.Events;
 using Services.Gamerule;
+using Services.QTE;
 using Services.Statistics;
 using Types;
 using Types.Events.Global;
 using Types.Modifiers;
 using Types.Practices;
+using Types.QTE;
 using Types.Achievements;
 using Types.Research;
 using UnityEngine;
@@ -38,6 +39,8 @@ namespace Services.Components {
         private ControlsView _controlsView;
         [SerializeField, Min(0f), Tooltip("Minutes between global events. Duration is configured per event in seconds.")]
         private float _globalEventIntervalMinutes = 1f;
+        [SerializeField, Tooltip("QTE spawn/lifetime/reward configuration. Falls back to Resources/QTE/QteConfig when empty.")]
+        private QteConfig _qteConfig;
         
         private BuildingWatcherService _buildingWatcherService;
         private EconomyService _economyService;
@@ -91,10 +94,14 @@ namespace Services.Components {
             RegisterService(globalEventService);
             providerRegistry.RegisterProvider(new GlobalEventModifierProvider(globalEventService));
             
-            RegisterService(new UpgradeService(_storage, 
+            var upgradeService = new UpgradeService(_storage, 
                 providerRegistry, 
                 invalidationService, 
-                unlockService));
+                unlockService);
+            RegisterService(upgradeService);
+
+            InitQteService(practiceService, upgradeService);
+
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 
@@ -192,6 +199,25 @@ namespace Services.Components {
 
         private PracticeRewardConfig FetchPracticeRewardConfig() {
             return Resources.Load<PracticeRewardConfig>("Practices/PracticeRewardConfig");
+        }
+
+        private QteConfig FetchQteConfig() {
+            return _qteConfig != null ? _qteConfig : Resources.Load<QteConfig>("QTE/QteConfig");
+        }
+
+        private void InitQteService(PracticeService practiceService, UpgradeService upgradeService) {
+            var config = FetchQteConfig();
+            if (config == null) {
+                Debug.LogWarning("QTE service was not registered: QTE config is missing.");
+                return;
+            }
+
+            if (config.Prefab == null) {
+                Debug.LogWarning("QTE service was not registered: QTE prefab is missing in config.");
+                return;
+            }
+
+            RegisterService(new QteService(config, _storage, practiceService, upgradeService, _worldCastService));
         }
 
         private void InitViews() {

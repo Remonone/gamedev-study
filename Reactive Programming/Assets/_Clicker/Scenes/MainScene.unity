@@ -3189,6 +3189,7 @@ MonoBehaviour:
   _buildingItemView: {fileID: 6267371284000321228, guid: 9c0529bd2aa9713f3a568a0ba1c890a8, type: 3}
   _controlsView: {fileID: 1509096126}
   _globalEventIntervalMinutes: 0.5
+  _qteConfig: {fileID: 11400000, guid: 1c6e651577168b5c682dae545506ebe9, type: 2}
 --- !u!1001 &874914703
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3851,6 +3852,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4422297280450110, guid: 8103ed667f3fc4b57a09157de64b1000, type: 3}
   m_PrefabInstance: {fileID: 1026680269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1034070257 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1000013594896426, guid: bbc649e7f9cab48e6a7aee50151b0f65, type: 3}
+  m_PrefabInstance: {fileID: 2106343196}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1074783306
 PrefabInstance:
@@ -5244,6 +5250,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4000013869204398, guid: bbc649e7f9cab48e6a7aee50151b0f65, type: 3}
   m_PrefabInstance: {fileID: 2106343196}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1559123707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034070257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c8ecb528d9ac5a49b21b42ebfcde9fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Clicker.Runtime::Types.QTE.QteSpawnMarker
+  _offset: {x: 0, y: 16, z: 0}
 --- !u!1001 &1573209507
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6896,7 +6915,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1000013594896426, guid: bbc649e7f9cab48e6a7aee50151b0f65, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1559123707}
   m_SourcePrefab: {fileID: 100100000, guid: bbc649e7f9cab48e6a7aee50151b0f65, type: 3}
 --- !u!1001 &2112263907
 PrefabInstance:
