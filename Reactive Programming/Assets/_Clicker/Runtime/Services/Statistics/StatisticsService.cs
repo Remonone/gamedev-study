@@ -92,6 +92,7 @@ namespace Services.Statistics {
             var values = new JObject();
             
             foreach (var item in _statisticsItems.Values) {
+                if (!item.IsPersistent) continue;
                 values[item.Id] = item.SaveValue();
             }
             result["values"] = values;

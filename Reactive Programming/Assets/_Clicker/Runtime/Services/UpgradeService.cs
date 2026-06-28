@@ -16,12 +16,14 @@ namespace Services {
 
         private readonly Dictionary<string, ReactiveProperty<UpgradeNodeState>> _upgrades;
         private readonly Dictionary<string, List<string>> _parentIdsByChildId;
+        private readonly HashSet<UpgradeNodeState> _ownedUpgrades;
         private readonly Storage _storage;
         private readonly UpgradeModifierProvider _upgradeModifierProvider;
         private readonly InvalidationService _invalidationService;
         private readonly UnlockService _unlockService;
 
         public Observable<Wallet> AffordabilityChanged => _storage.StructureMoney;
+        public IReadOnlyCollection<UpgradeNodeState> OwnedUpgrades => _ownedUpgrades;
 
         public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService, UnlockService unlockService) {
             _storage = storage;
@@ -31,6 +33,7 @@ namespace Services {
             
             _upgrades = new Dictionary<string, ReactiveProperty<UpgradeNodeState>>();
             _parentIdsByChildId = new Dictionary<string, List<string>>();
+            _ownedUpgrades = new HashSet<UpgradeNodeState>();
 
             var upgrades = Resources.LoadAll<UpgradeNodeDefinition>("Upgrades");
 
@@ -97,8 +100,8 @@ namespace Services {
             PublishState(id, updatedState);
 
             RefreshChildAvailability(state.Definition);
-            
-
+            _ownedUpgrades.Remove(state);
+            _ownedUpgrades.Add(updatedState);
             return true;
         }
 
@@ -265,6 +268,9 @@ namespace Services {
                     ApplyUpgrade(updatedUpgrade);
                     PublishState(upgrade.Definition.Id, updatedUpgrade);
                     RefreshChildAvailability(upgrade.Definition);
+                    if (updatedUpgrade.Level > 0) {
+                        _ownedUpgrades.Add(updatedUpgrade);    
+                    }
                 }
                 
             }

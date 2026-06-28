@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using R3;
 using Services.Components;
-using Services.Player;
 using Types.Enums;
 using Types.QTE;
-using Types.Upgrades.Effects;
 using Types.Values;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -17,22 +15,23 @@ namespace Services.QTE {
 
         private readonly CompositeDisposable _disposable = new();
         private readonly QteConfig _config;
-        private readonly Storage _storage;
-        private readonly PracticeService _practiceService;
-        private readonly UpgradeService _upgradeService;
+        private readonly QteRewardService _rewardService;
         private readonly Random _rng;
         private readonly WorldCastService _worldCastService;
+        private readonly QteModifierAggregator _qteModifierAggregator;
 
         private readonly List<QteSpawnMarker> _markers = new();
         private readonly List<ActiveQte> _activeQtes = new();
         private float _spawnTimerSeconds;
         private DisposableBag _bag;
 
-        public QteService(QteConfig config, Storage storage, PracticeService practiceService, UpgradeService upgradeService, WorldCastService worldCastService) {
+        public QteService(QteConfig config,
+            QteRewardService rewardService,
+            QteModifierAggregator modifierAggregator,
+            WorldCastService worldCastService) {
             _config = config;
-            _storage = storage;
-            _practiceService = practiceService;
-            _upgradeService = upgradeService;
+            _rewardService = rewardService;
+            _qteModifierAggregator = modifierAggregator;
             _rng = new Random();
             _bag = new DisposableBag();
             _worldCastService = worldCastService;
@@ -206,7 +205,7 @@ namespace Services.QTE {
             var index = _activeQtes.IndexOf(active);
             if (index < 0) return;
 
-            GrantReward(active);
+            _rewardService.GrantReward(active.Resource, active.Reward);
             active.ClicksRemaining--;
 
             if (active.ClicksRemaining <= 0) {
@@ -214,95 +213,11 @@ namespace Services.QTE {
             }
         }
 
-        private void GrantReward(ActiveQte active) {
-            var currentAmount = _storage.GetByType(active.Resource);
-            var rewardAmount = currentAmount * active.Reward.CurrentAmountMultiplier;
-            if (rewardAmount <= Value.Zero) return;
-            Debug.Log($"Granting {rewardAmount} {active.Resource} to {active.Marker.gameObject.name}");
-            _storage.AddMoney(active.Resource, rewardAmount);
-        }
-
         private float ResolveSpawnIntervalSeconds() {
             var randomOffset = NextFloat(-_config.SpawnIntervalRandomStepSeconds, _config.SpawnIntervalRandomStepSeconds);
             var interval = _config.BaseSpawnIntervalSeconds + randomOffset;
-            interval = ApplyModifiers(interval, QteModifierType.SpawnIntervalSeconds);
+            interval = _qteModifierAggregator.GetModifierBasedValue(interval, QteModifierType.SpawnIntervalSeconds);
             return Mathf.Max(MinSpawnIntervalSeconds, interval);
-        }
-
-        private float ApplyModifiers(float baseValue, QteModifierType type) {
-            var flat = 0f;
-            var percent = 0f;
-            var multiplier = 1f;
-            var hasOverride = false;
-            var overridePriority = int.MinValue;
-            var overrideValue = baseValue;
-
-            ApplyPracticeModifiers(type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
-            ApplyUpgradeModifiers(type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
-
-            if (hasOverride) return overrideValue;
-            return ((baseValue + flat) * (1f + percent)) * multiplier;
-        }
-
-        private void ApplyPracticeModifiers(QteModifierType type, ref float flat, ref float percent, ref float multiplier,
-            ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
-            var practices = _practiceService?.OwnedPracticeDefinitions;
-            if (practices == null) return;
-
-            for (var i = 0; i < practices.Count; i++) {
-                var effects = practices[i]?.QteEffects;
-                ApplyModifierList(effects, type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority,
-                    ref overrideValue);
-            }
-        }
-
-        private void ApplyUpgradeModifiers(QteModifierType type, ref float flat, ref float percent, ref float multiplier,
-            ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
-            var upgrades = _upgradeService?.GetAllUpgradeStates();
-            if (upgrades == null) return;
-
-            for (var i = 0; i < upgrades.Count; i++) {
-                var upgrade = upgrades[i];
-                if (upgrade == null || upgrade.Level <= 0 || upgrade.Definition?.Effects == null) continue;
-
-                var effects = upgrade.Definition.Effects;
-                for (var effectIndex = 0; effectIndex < effects.Length; effectIndex++) {
-                    if (effects[effectIndex] is not QteUpgradeEffect qteEffect) continue;
-                    ApplyModifierList(qteEffect.Effects, type, ref flat, ref percent, ref multiplier, ref hasOverride,
-                        ref overridePriority, ref overrideValue);
-                }
-            }
-        }
-
-        private static void ApplyModifierList(IReadOnlyList<QteModifierEffect> effects, QteModifierType type, ref float flat,
-            ref float percent, ref float multiplier, ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
-            if (effects == null) return;
-
-            for (var i = 0; i < effects.Count; i++) {
-                var effect = effects[i];
-                if (effect == null || effect.Type != type) continue;
-
-                switch (effect.Operation) {
-                    case ModifierOp.AddFlat:
-                        flat += effect.Value;
-                        break;
-                    case ModifierOp.AddPercent:
-                        percent += effect.Value;
-                        break;
-                    case ModifierOp.Multiply:
-                        multiplier *= effect.Value;
-                        break;
-                    case ModifierOp.Override:
-                        if (!hasOverride || effect.Priority > overridePriority) {
-                            hasOverride = true;
-                            overridePriority = effect.Priority;
-                            overrideValue = effect.Value;
-                        }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
         }
 
         private float NextFloat(float minInclusive, float maxInclusive) {

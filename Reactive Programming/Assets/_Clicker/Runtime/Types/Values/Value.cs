@@ -9,6 +9,8 @@ namespace Types.Values {
         private const double _BaseStep = 1000d;
         private const double _Log10BaseStep = 3d;
 
+        private const int _MaxBaseDifference = 4;
+
         public static readonly Value Zero = new(0d);
         public static readonly Value One = new(1d);
 
@@ -81,9 +83,9 @@ namespace Types.Values {
             var diff = first._base.Degree - other._base.Degree;
             // If the difference is more than a billion times, then ignore one of the values
             switch (diff) {
-                case >= 3:
+                case >= _MaxBaseDifference:
                     return first;
-                case <= -3:
+                case <= -_MaxBaseDifference:
                     return other;
             }
 
@@ -98,7 +100,7 @@ namespace Types.Values {
             }
             var diff = first._base.Degree - other._base.Degree;
             // If the difference is more than a billion times, then ignore one of the values
-            if (diff > 3) {
+            if (diff > _MaxBaseDifference) {
                 return first;
             }
             var newStored = first._stored - other.ScaleToDegree(first._base.Degree);

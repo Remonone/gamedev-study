@@ -7,7 +7,8 @@ namespace Services.Statistics {
         public static List<IStatisticTracker> Collect(IStatisticsWriter statistics) {
             return new() {
                 new ClickTracker(statistics),
-                new MayorClicksTracker(statistics)
+                new MayorClicksTracker(statistics),
+                new ResourceIncomePerSecondTracker(statistics)
             };
         }
     }

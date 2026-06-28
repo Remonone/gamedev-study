@@ -1,5 +1,7 @@
+using System;
+
 namespace Types.Upgrades {
-    public class UpgradeNodeState {
+    public class UpgradeNodeState : IEquatable<UpgradeNodeState> {
         public enum State {Locked, Available, InProgress, Completed}
 
         public UpgradeNodeDefinition Definition;
@@ -22,6 +24,10 @@ namespace Types.Upgrades {
             Definition = other.Definition;
             Level = other.Level;
             CurrentState = other.CurrentState;
+        }
+
+        public bool Equals(UpgradeNodeState other) {
+            return ReferenceEquals(this, other);
         }
     }
 }

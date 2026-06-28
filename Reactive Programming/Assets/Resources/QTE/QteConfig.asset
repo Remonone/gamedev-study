@@ -17,8 +17,8 @@ MonoBehaviour:
   _spawnIntervalRandomStepSeconds: 5
   _lifetimeSeconds: 10
   _spawnMultiplier: 1
-  _baseClicksRequired: 3
+  _baseClicksRequired: 20
   _clicksRandomStep: 2
   _rewards:
   - _eligibleResources: 000000000100000002000000030000000400000005000000
-    _currentAmountMultiplier: 0.01
+    _currentAmountMultiplier: 0.5

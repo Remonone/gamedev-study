@@ -21,6 +21,7 @@ using Types.Modifiers.Cost.Condition;
 using Types.Modifiers.Cost.Formula;
 using Types.Values;
 using UnityEngine;
+using Utils;
 
 public sealed class GameMechanicsEditModeTests {
     private readonly List<UnityEngine.Object> _createdObjects = new();
@@ -192,6 +193,48 @@ public sealed class GameMechanicsEditModeTests {
         Assert.That(unlockedId, Is.EqualTo("first"));
 
         Assert.Throws<ArgumentException>(() => new AchievementService(new[] { new FakeAchievement("dup"), new FakeAchievement("dup") }));
+    }
+
+    [Test]
+    public void StatisticsService_SaveOmitsNonPersistentStatistics() {
+        var statistics = Track(new StatisticsService());
+        statistics.Register(StatisticKeys.TotalClicks);
+        statistics.Register(StatisticKeys.PassiveResourceIncomePerSecond, new Wallet(), false);
+        ((IStatisticsWriter)statistics).Increment(StatisticKeys.TotalClicks);
+        ((IStatisticsWriter)statistics).Set(StatisticKeys.PassiveResourceIncomePerSecond, new Wallet {
+            MayorWallet = new Value(10)
+        });
+
+        var values = (JObject)statistics.Save()["values"];
+
+        Assert.That(values.ContainsKey(StatisticKeys.TotalClicks.Id), Is.True);
+        Assert.That(values.ContainsKey(StatisticKeys.PassiveResourceIncomePerSecond.Id), Is.False);
+    }
+
+    [Test]
+    public void ResourceIncomePerSecondCalculator_SumsActiveBuildingsByResource() {
+        var mayor = CreateBuilding("Mayor", GovernmentInteractionType.MayorOffice, click: 1, income: 3, frequency: 2, price: 1);
+        var police = CreateBuilding("Police", GovernmentInteractionType.PoliceStation, click: 1, income: 5, frequency: 4, price: 1);
+        var archive = CreateBuilding("Archive", GovernmentInteractionType.Archive, click: 1, income: 100, frequency: 10, price: 1);
+        var watcher = new BuildingWatcherService(new List<BuildingDefinition> { mayor, police, archive });
+        watcher.GetBuildingState("Mayor").Level = 1;
+        watcher.GetBuildingState("Police").Level = 1;
+        watcher.GetBuildingState("Archive").Level = 0;
+        var invalidation = new InvalidationService(watcher.BuildingsByName);
+        var upgradeService = new BuildingUpgradeService(invalidation, watcher);
+        var storage = new Storage();
+        var context = new SessionContext(0, 0, 0, 0, 0, 0);
+        var economy = new EconomyService(context, storage, watcher, upgradeService, new ProviderRegistryService());
+
+        var result = ResourceIncomePerSecondCalculator.Calculate(
+            watcher.BuildingsByName.Values,
+            economy,
+            new StateBenefitCalculationService(context));
+
+        AssertValue(result.MayorWallet, 6);
+        AssertValue(result.PoliceWallet, 20);
+        AssertValue(result.ArchiveWallet, 0);
+        AssertValue(result.CourtWallet, 0);
     }
 
     [Test]

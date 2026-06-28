@@ -100,8 +100,6 @@ namespace Services.Components {
                 unlockService);
             RegisterService(upgradeService);
 
-            InitQteService(practiceService, upgradeService);
-
             var buildingUpgradeService = new BuildingUpgradeService(invalidationService, _buildingWatcherService);
             RegisterService(buildingUpgradeService);
 
@@ -139,6 +137,7 @@ namespace Services.Components {
             InitStatistics();
             InitAchievements();
             InitTrackers();
+            InitQteService(practiceService, upgradeService);
             
             var achievements = Resources.LoadAll<AchievementModifier>("Achievements");
             var achievementStorage = new AchievementStorageService(achievements);
@@ -217,7 +216,13 @@ namespace Services.Components {
                 return;
             }
 
-            RegisterService(new QteService(config, _storage, practiceService, upgradeService, _worldCastService));
+            var aggregator = new QteModifierAggregator(practiceService, upgradeService);
+            RegisterService(aggregator);
+
+            var rewardService = new QteRewardService(_statisticsService, _storage);
+            RegisterService(rewardService);
+
+            RegisterService(new QteService(config, rewardService, aggregator, _worldCastService));
         }
 
         private void InitViews() {
