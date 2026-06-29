@@ -107,7 +107,8 @@ namespace Services.Components {
                 _storage, 
                 _buildingWatcherService, 
                 buildingUpgradeService, 
-                providerRegistry);
+                providerRegistry,
+                invalidationService);
             RegisterService(_economyService);
             
             var structureClickService = new StructureClickService(_storage, 

@@ -23,6 +23,7 @@ MonoBehaviour:
         rid: 7490908492861800536
       Type: 3
   Type: 3
+  DisplayPriority: 1
   ClickIncome:
     rid: 7490908492861800539
   Income:
@@ -40,7 +41,7 @@ MonoBehaviour:
   CriticalMultiplier:
     rid: 7490908492861800546
   IsUpgradeable: 1
-  Influence: 10
+  Influence: 50
   references:
     version: 2
     RefIds:
@@ -52,24 +53,16 @@ MonoBehaviour:
       type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         Formulas:
-        - rid: 7490908492861800537
         - rid: 7490908492861800538
-    - rid: 7490908492861800537
-      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        BaseValue:
-          _stored: 1
-          _base:
-            Degree: 1
     - rid: 7490908492861800538
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 1
+          _stored: 600
           _base:
             Degree: 0
         Rate:
-          _stored: 1.21
+          _stored: 1.22
           _base:
             Degree: 0
     - rid: 7490908492861800539
@@ -125,10 +118,10 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 2
+          _stored: 4
           _base:
             Degree: 0
         Rate:
-          _stored: 1.01
+          _stored: 1.15
           _base:
             Degree: 0

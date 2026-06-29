@@ -10,126 +10,139 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd0c408f846e4efaa2bc76a55919ffb8, type: 3}
-  m_Name: Library
-  m_EditorClassIdentifier: Assembly-CSharp::Bases.Buildings.BaseBuilding
-  Name: Library
+  m_Name: Safety Headquarters
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Buildings.BuildingDefinition
+  Name: Safety Headquarters
   Description: 
   Icon: {fileID: 0}
   Cost:
     _costItems:
     - Condition:
-        rid: 7490908315923775596
+        rid: 7490908492861800535
       Formula:
-        rid: 7490908315923775598
+        rid: 7490908492861800536
+      Type: 3
+    - Condition:
+        rid: 7490908492861800535
+      Formula:
+        rid: 7490908523317690457
       Type: 0
-  Type: 5
-  DisplayPriority: 0
+  Type: 3
+  DisplayPriority: 5
   ClickIncome:
-    rid: 7490908315923775568
+    rid: 7490908492861800539
   Income:
-    rid: 7490908315923775569
+    rid: 7490908492861800547
   Frequency:
-    rid: 7490908315923775570
+    rid: 7490908492861800541
   StabilityModifier:
-    rid: 7490908315923775571
+    rid: 7490908492861800542
   StabilityModifierMultiplier:
-    rid: 7490908315923775572
+    rid: 7490908492861800543
   MultiplierCoefficient:
-    rid: 7490908315923775574
+    rid: 7490908492861800544
   CriticalChance:
-    rid: 7490908315923775575
+    rid: 7490908492861800545
   CriticalMultiplier:
-    rid: 7490908315923775576
+    rid: 7490908492861800546
   IsUpgradeable: 1
-  Influence: 1
+  Influence: 1500
   references:
     version: 2
     RefIds:
-    - rid: 7490908315923775568
+    - rid: 7490908492861800535
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 7490908492861800536
+      type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        Formulas:
+        - rid: 7490908492861800538
+    - rid: 7490908492861800538
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 25
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 3
+          _base:
+            Degree: 0
+    - rid: 7490908492861800539
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 0
           _base:
             Degree: 0
-    - rid: 7490908315923775569
-      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        BaseValue:
-          _stored: 1
-          _base:
-            Degree: 0
-        Multiplier:
-          _stored: 1
-          _base:
-            Degree: 0
-    - rid: 7490908315923775570
+    - rid: 7490908492861800541
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 1
           _base:
             Degree: 0
-    - rid: 7490908315923775571
+    - rid: 7490908492861800542
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 1
           _base:
             Degree: 0
-    - rid: 7490908315923775572
+    - rid: 7490908492861800543
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 1
           _base:
             Degree: 0
-    - rid: 7490908315923775574
+    - rid: 7490908492861800544
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 1
           _base:
             Degree: 0
-    - rid: 7490908315923775575
+    - rid: 7490908492861800545
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 0.01
           _base:
             Degree: 0
-    - rid: 7490908315923775576
+    - rid: 7490908492861800546
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 2
           _base:
             Degree: 0
-    - rid: 7490908315923775596
-      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
-      data:
-        _constant: 1
-    - rid: 7490908315923775598
-      type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        Formulas:
-        - rid: 7490908315923775599
-        - rid: 7490908315923775600
-    - rid: 7490908315923775599
-      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        BaseValue:
-          _stored: 100
-          _base:
-            Degree: 0
-    - rid: 7490908315923775600
+    - rid: 7490908492861800547
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 4
           _base:
-            Degree: 0
+            Degree: 1
         Rate:
-          _stored: 1.03
+          _stored: 2.2
+          _base:
+            Degree: 0
+    - rid: 7490908523317690457
+      type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        Formulas:
+        - rid: 7490908523317690458
+    - rid: 7490908523317690458
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 400
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 2.4
           _base:
             Degree: 0

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Types.Modifiers.Cost.Formula;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -7,20 +10,22 @@ using UnityEngine.UIElements;
 
 namespace FormulaSerialization.UIElements {
     public sealed class FormulaField : VisualElement {
-        private readonly SerializedProperty _property;
+        private readonly SerializedObject _serializedObject;
+        private readonly string _propertyPath;
         private readonly ToolbarMenu _selector;
         private readonly Button _clearButton;
         private readonly VisualElement _fieldsContainer;
 
         public FormulaField(SerializedProperty property) {
-            _property = property.Copy();
+            _serializedObject = property.serializedObject;
+            _propertyPath = property.propertyPath;
 
             AddToClassList("formula-field");
             style.flexDirection = FlexDirection.Column;
             style.marginTop = 2;
             style.marginBottom = 2;
 
-            if (_property.propertyType != SerializedPropertyType.ManagedReference) {
+            if (property.propertyType != SerializedPropertyType.ManagedReference) {
                 Add(new HelpBox("IFormula fields must be marked with [SerializeReference].", HelpBoxMessageType.Warning));
                 return;
             }
@@ -33,8 +38,8 @@ namespace FormulaSerialization.UIElements {
                 }
             };
 
-            var label = new Label(_property.displayName) {
-                tooltip = _property.tooltip,
+            var label = new Label(property.displayName) {
+                tooltip = property.tooltip,
                 style = {
                     minWidth = EditorGUIUtility.labelWidth - 15,
                     unityTextAlign = TextAnchor.MiddleLeft
@@ -42,7 +47,7 @@ namespace FormulaSerialization.UIElements {
             };
 
             _selector = new ToolbarMenu {
-                tooltip = _property.tooltip,
+                tooltip = property.tooltip,
                 style = {
                     flexGrow = 1,
                     minWidth = 120
@@ -75,23 +80,37 @@ namespace FormulaSerialization.UIElements {
         }
 
         private void Rebuild() {
-            _property.serializedObject.Update();
-            _fieldsContainer.Clear();
-            RebuildSelector();
+            _serializedObject.Update();
+            var property = FindProperty();
+            if (property == null) {
+                _fieldsContainer.Clear();
+                _selector.SetEnabled(false);
+                _clearButton.SetEnabled(false);
+                return;
+            }
 
-            var hasFormula = _property.managedReferenceValue != null;
+            if (EnsureUniqueArrayReference(property)) {
+                _serializedObject.ApplyModifiedProperties();
+                _serializedObject.Update();
+                property = FindProperty();
+            }
+
+            _fieldsContainer.Clear();
+            RebuildSelector(property);
+
+            var hasFormula = property.managedReferenceValue != null;
             _clearButton.style.display = hasFormula ? DisplayStyle.Flex : DisplayStyle.None;
             _clearButton.SetEnabled(hasFormula);
 
             if (hasFormula) {
-                AddFormulaFields();
+                AddFormulaFields(property);
             }
         }
 
-        private void RebuildSelector() {
+        private void RebuildSelector(SerializedProperty property) {
             _selector.menu.ClearItems();
 
-            var currentType = _property.managedReferenceValue?.GetType();
+            var currentType = property.managedReferenceValue?.GetType();
             _selector.text = currentType == null
                 ? "Select Formula"
                 : FormulaTypeProvider.GetDisplayName(currentType);
@@ -116,8 +135,8 @@ namespace FormulaSerialization.UIElements {
             }
         }
 
-        private void AddFormulaFields() {
-            var iterator = _property.Copy();
+        private void AddFormulaFields(SerializedProperty property) {
+            var iterator = property.Copy();
             var endProperty = iterator.GetEndProperty();
 
             if (!iterator.NextVisible(true)) {
@@ -125,7 +144,10 @@ namespace FormulaSerialization.UIElements {
             }
 
             while (!SerializedProperty.EqualContents(iterator, endProperty)) {
-                _fieldsContainer.Add(new PropertyField(iterator.Copy()));
+                var childProperty = iterator.Copy();
+                var childField = new PropertyField(childProperty);
+                childField.BindProperty(childProperty);
+                _fieldsContainer.Add(childField);
 
                 if (!iterator.NextVisible(false)) {
                     break;
@@ -134,19 +156,166 @@ namespace FormulaSerialization.UIElements {
         }
 
         private void SetFormula(Type formulaType) {
-            Undo.RecordObjects(_property.serializedObject.targetObjects, "Set Formula");
-            _property.serializedObject.Update();
-            _property.managedReferenceValue = Activator.CreateInstance(formulaType) as IFormula;
-            _property.serializedObject.ApplyModifiedProperties();
+            var property = FindProperty();
+            if (property == null) {
+                return;
+            }
+
+            Undo.RecordObjects(_serializedObject.targetObjects, "Set Formula");
+            _serializedObject.Update();
+            property = FindProperty();
+            property.managedReferenceValue = Activator.CreateInstance(formulaType) as IFormula;
+            _serializedObject.ApplyModifiedProperties();
             Rebuild();
         }
 
         private void ClearFormula() {
-            Undo.RecordObjects(_property.serializedObject.targetObjects, "Clear Formula");
-            _property.serializedObject.Update();
-            _property.managedReferenceValue = null;
-            _property.serializedObject.ApplyModifiedProperties();
+            var property = FindProperty();
+            if (property == null) {
+                return;
+            }
+
+            Undo.RecordObjects(_serializedObject.targetObjects, "Clear Formula");
+            _serializedObject.Update();
+            property = FindProperty();
+            property.managedReferenceValue = null;
+            _serializedObject.ApplyModifiedProperties();
             Rebuild();
+        }
+
+        private SerializedProperty FindProperty() {
+            return _serializedObject.FindProperty(_propertyPath);
+        }
+
+        private bool EnsureUniqueArrayReference(SerializedProperty property) {
+            if (_serializedObject.isEditingMultipleObjects
+                || property.managedReferenceValue is not IFormula formula
+                || !TryGetArrayElementInfo(property.propertyPath, out var arrayPath, out var index, out var suffix)
+                || index <= 0) {
+                return false;
+            }
+
+            var referenceId = property.managedReferenceId;
+            for (var i = 0; i < index; i++) {
+                var sibling = _serializedObject.FindProperty($"{arrayPath}.Array.data[{i}]{suffix}");
+                if (sibling?.propertyType != SerializedPropertyType.ManagedReference) {
+                    continue;
+                }
+
+                if (sibling.managedReferenceId != referenceId && !ReferenceEquals(sibling.managedReferenceValue, formula)) {
+                    continue;
+                }
+
+                Undo.RecordObjects(_serializedObject.targetObjects, "Detach Formula Reference");
+                property.managedReferenceValue = CloneFormula(formula);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryGetArrayElementInfo(string propertyPath, out string arrayPath, out int index, out string suffix) {
+            const string arrayToken = ".Array.data[";
+
+            arrayPath = null;
+            index = -1;
+            suffix = null;
+
+            var tokenIndex = propertyPath.LastIndexOf(arrayToken, StringComparison.Ordinal);
+            if (tokenIndex < 0) {
+                return false;
+            }
+
+            var indexStart = tokenIndex + arrayToken.Length;
+            var indexEnd = propertyPath.IndexOf(']', indexStart);
+            if (indexEnd < 0 || !int.TryParse(propertyPath.Substring(indexStart, indexEnd - indexStart), out index)) {
+                return false;
+            }
+
+            arrayPath = propertyPath.Substring(0, tokenIndex);
+            suffix = propertyPath.Substring(indexEnd + 1);
+            return true;
+        }
+
+        private static IFormula CloneFormula(IFormula formula) {
+            return CloneObject(formula, new Dictionary<object, object>(ReferenceComparer.Instance)) as IFormula;
+        }
+
+        private static object CloneObject(object value, Dictionary<object, object> visited) {
+            if (value == null) {
+                return null;
+            }
+
+            var type = value.GetType();
+            if (type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal) || type.IsValueType) {
+                return value;
+            }
+
+            if (value is UnityEngine.Object) {
+                return value;
+            }
+
+            if (visited.TryGetValue(value, out var knownClone)) {
+                return knownClone;
+            }
+
+            if (value is AnimationCurve curve) {
+                var curveClone = new AnimationCurve(curve.keys) {
+                    preWrapMode = curve.preWrapMode,
+                    postWrapMode = curve.postWrapMode
+                };
+                visited[value] = curveClone;
+                return curveClone;
+            }
+
+            if (type.IsArray) {
+                var sourceArray = (Array)value;
+                var elementType = type.GetElementType();
+                var arrayClone = Array.CreateInstance(elementType, sourceArray.Length);
+                visited[value] = arrayClone;
+
+                for (var i = 0; i < sourceArray.Length; i++) {
+                    arrayClone.SetValue(CloneObject(sourceArray.GetValue(i), visited), i);
+                }
+
+                return arrayClone;
+            }
+
+            var clone = Activator.CreateInstance(type);
+            visited[value] = clone;
+
+            foreach (var field in GetSerializedFields(type)) {
+                field.SetValue(clone, CloneObject(field.GetValue(value), visited));
+            }
+
+            return clone;
+        }
+
+        private static IEnumerable<FieldInfo> GetSerializedFields(Type type) {
+            for (var current = type; current != null && current != typeof(object); current = current.BaseType) {
+                var fields = current.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+                foreach (var field in fields) {
+                    if (field.IsStatic || field.IsInitOnly || field.IsNotSerialized) {
+                        continue;
+                    }
+
+                    if (field.IsPublic || field.GetCustomAttribute<SerializeField>() != null) {
+                        yield return field;
+                    }
+                }
+            }
+        }
+
+        private sealed class ReferenceComparer : IEqualityComparer<object> {
+            public static readonly ReferenceComparer Instance = new();
+
+            public new bool Equals(object x, object y) {
+                return ReferenceEquals(x, y);
+            }
+
+            public int GetHashCode(object obj) {
+                return RuntimeHelpers.GetHashCode(obj);
+            }
         }
     }
 }

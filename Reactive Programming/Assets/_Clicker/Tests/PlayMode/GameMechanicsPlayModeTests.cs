@@ -60,7 +60,7 @@ public sealed class GameMechanicsPlayModeTests {
         var storage = new Storage();
         var upgrade = new BuildingUpgradeService(invalidation, watcher);
         var context = new SessionContext(0, 0, 0, 0, 0, 0);
-        var economy = new EconomyService(context, storage, watcher, upgrade, new ProviderRegistryService());
+        var economy = new EconomyService(context, storage, watcher, upgrade, new ProviderRegistryService(), invalidation);
         var tickService = Track(new TickService(economy, watcher, storage, new StateBenefitCalculationService(context)));
 
         tickService.StartService();

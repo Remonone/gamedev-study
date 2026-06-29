@@ -23,10 +23,11 @@ MonoBehaviour:
         rid: 7490908492861800536
       Type: 3
   Type: 3
+  DisplayPriority: 0
   ClickIncome:
     rid: 7490908492861800539
   Income:
-    rid: 7490908492861800540
+    rid: 7490908523317690456
   Frequency:
     rid: 7490908492861800541
   StabilityModifier:
@@ -40,7 +41,7 @@ MonoBehaviour:
   CriticalMultiplier:
     rid: 7490908492861800546
   IsUpgradeable: 1
-  Influence: 1
+  Influence: 10
   references:
     version: 2
     RefIds:
@@ -52,24 +53,16 @@ MonoBehaviour:
       type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         Formulas:
-        - rid: 7490908492861800537
         - rid: 7490908492861800538
-    - rid: 7490908492861800537
-      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        BaseValue:
-          _stored: 100
-          _base:
-            Degree: 0
     - rid: 7490908492861800538
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 1
+          _stored: 60
           _base:
             Degree: 0
         Rate:
-          _stored: 1.2
+          _stored: 1.16
           _base:
             Degree: 0
     - rid: 7490908492861800539
@@ -77,17 +70,6 @@ MonoBehaviour:
       data:
         BaseValue:
           _stored: 0
-          _base:
-            Degree: 0
-    - rid: 7490908492861800540
-      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
-      data:
-        BaseValue:
-          _stored: 1
-          _base:
-            Degree: 0
-        Multiplier:
-          _stored: 1
           _base:
             Degree: 0
     - rid: 7490908492861800541
@@ -130,5 +112,16 @@ MonoBehaviour:
       data:
         BaseValue:
           _stored: 2
+          _base:
+            Degree: 0
+    - rid: 7490908523317690456
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+        Rate:
+          _stored: 1.1
           _base:
             Degree: 0

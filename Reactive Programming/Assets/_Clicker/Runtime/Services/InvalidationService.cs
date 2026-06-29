@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using R3;
 using Types.Buildings;
 using Types.Enums;
 using Types.Modifiers.Target;
@@ -6,6 +7,9 @@ using Types.Modifiers.Target;
 namespace Services {
     public class InvalidationService : IService {
         private readonly IReadOnlyDictionary<string, BuildingState> _buildings;
+        private readonly Subject<Unit> _invalidated = new();
+
+        public Observable<Unit> Invalidated => _invalidated;
 
         public InvalidationService(IReadOnlyDictionary<string, BuildingState> buildings) {
             _buildings = buildings;
@@ -16,16 +20,19 @@ namespace Services {
                 return;
             }
             _buildings[name].IsDirty = true;
+            PublishInvalidated();
         }
 
         public void InvalidateBuilding(BuildingState building) {
             building.IsDirty = true;
+            PublishInvalidated();
         }
         
         public void InvalidateAll() {
             foreach (var building in _buildings.Values) {
                 building.IsDirty = true;
             }
+            PublishInvalidated();
         }
 
         public void InvalidateByStructureType(GovernmentInteractionType type) {
@@ -34,6 +41,7 @@ namespace Services {
                     building.IsDirty = true;
                 }
             }
+            PublishInvalidated();
         }
 
         public void MarkDirtyByTarget(ModifierTarget targetDeprecated) {
@@ -42,6 +50,11 @@ namespace Services {
                     building.IsDirty = true;
                 }
             }
+            PublishInvalidated();
+        }
+
+        private void PublishInvalidated() {
+            _invalidated.OnNext(Unit.Default);
         }
         
     }

@@ -128,8 +128,8 @@ MonoBehaviour:
         BaseValue:
           _stored: 1
           _base:
-            Degree: 2
+            Degree: 3
         Rate:
-          _stored: 3.2
+          _stored: 4
           _base:
             Degree: 0

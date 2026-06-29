@@ -54,7 +54,10 @@ namespace Views.Models {
                 .Select(update => update.Stats)
                 .Subscribe(OnValuesUpdated)
                 .AddTo(_disposable);
-            _storage.StructureMoney.Subscribe(_ => RefreshPurchaseState()).AddTo(_disposable);
+            _economyService.PurchasePricesInvalidated
+                .Subscribe(_ => RefreshPurchaseState())
+                .AddTo(_disposable);
+            _storage.StructureMoney.Subscribe(_ => RefreshCanPurchase()).AddTo(_disposable);
             PurchaseLevels.Subscribe(_ => RefreshPurchaseState()).AddTo(_disposable);
         }
 
@@ -72,7 +75,11 @@ namespace Views.Models {
         private void RefreshPurchaseState() {
             var levels = PurchaseLevels.Value;
             Cost.Value = _economyService.GetBuildingPurchasePrice(_name, levels);
-            CanPurchase.Value = _economyService.CanPurchaseBuilding(_name, levels);
+            RefreshCanPurchase();
+        }
+
+        private void RefreshCanPurchase() {
+            CanPurchase.Value = _storage.CanAfford(Cost.Value);
         }
 
         public void SetPurchaseLevels(int levels) {
@@ -88,8 +95,9 @@ namespace Views.Models {
         }
 
         public void Upgrade() {
-            _economyService.PurchaseBuilding(_name, PurchaseLevels.Value);
-            RefreshPurchaseState();
+            if (!_economyService.PurchaseBuilding(_name, PurchaseLevels.Value)) {
+                RefreshCanPurchase();
+            }
         }
 
         public void Dispose() {
