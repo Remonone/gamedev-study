@@ -1,6 +1,7 @@
 using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
 using Types.Modifiers.Cost.Formula;
+using Types.Values;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {
@@ -19,7 +20,7 @@ namespace Types.Modifiers.Definitions {
             return new StatModifier {
                 ModifierId = Modifier.ModifierId,
                 Operation = Modifier.Operation,
-                Value = Modifier.Value * CalculationFormula.Evaluate(levelCapability.Level).ToSingle(),
+                Value = Modifier.Value * CalculationFormula.Evaluate(new Value(levelCapability.Level)).ToSingle(),
                 Stat = Modifier.Stat,
                 Priority = Modifier.Priority
             };

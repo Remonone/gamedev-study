@@ -21,15 +21,16 @@ namespace Types.Buildings {
         
 
         public Value GetLevelBasedValue(StatType statType) {
+            var level = new Value(Level);
             switch (statType) {
-                case StatType.ClickIncome: return Definition.ClickIncome.Evaluate(Level);
-                case StatType.Income: return Definition.Income.Evaluate(Level);
-                case StatType.Frequency: return Definition.Frequency.Evaluate(Level);
-                case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.Evaluate(Level);
-                case StatType.StabilityModifier: return Definition.StabilityModifier.Evaluate(Level);
-                case StatType.StabilityModifierMultiplier: return Definition.StabilityModifierMultiplier.Evaluate(Level);
-                case StatType.CriticalChance: return Definition.CriticalChance.Evaluate(Level);
-                case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.Evaluate(Level);
+                case StatType.ClickIncome: return Definition.ClickIncome.Evaluate(level);
+                case StatType.Income: return Definition.Income.Evaluate(level);
+                case StatType.Frequency: return Definition.Frequency.Evaluate(level);
+                case StatType.MultiplierCoefficient: return Definition.MultiplierCoefficient.Evaluate(level);
+                case StatType.StabilityModifier: return Definition.StabilityModifier.Evaluate(level);
+                case StatType.StabilityModifierMultiplier: return Definition.StabilityModifierMultiplier.Evaluate(level);
+                case StatType.CriticalChance: return Definition.CriticalChance.Evaluate(level);
+                case StatType.CriticalMultiplier: return Definition.CriticalMultiplier.Evaluate(level);
                 default: return Value.Zero;
             }
         }

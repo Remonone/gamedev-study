@@ -41,5 +41,11 @@ MonoBehaviour:
     - rid: 7490908315923775561
       type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1500
-        Multiplier: 2000
+        BaseValue:
+          _stored: 1.5
+          _base:
+            Degree: 1
+        Multiplier:
+          _stored: 2
+          _base:
+            Degree: 1

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Types.Enums;
 using Types.Modifiers.Cost.Condition;
 using Types.Modifiers.Cost.Formula;
+using Types.Values;
 using UnityEngine;
 
 namespace Types.Modifiers.Cost {
@@ -14,9 +15,10 @@ namespace Types.Modifiers.Cost {
         public Price Evaluate(int level) {
             Price price = new Price();
             List<Price.Entry> entries = new();
+            var formulaInput = new Value(level);
             foreach (var item in _costItems) {
                 if (!item.Condition.IsMet(level)) continue;
-                entries.Add(new Price.Entry(item.Type, item.Formula.Evaluate(level)));
+                entries.Add(new Price.Entry(item.Type, item.Formula.Evaluate(formulaInput)));
             }
 
             price.Entries = entries.ToArray();

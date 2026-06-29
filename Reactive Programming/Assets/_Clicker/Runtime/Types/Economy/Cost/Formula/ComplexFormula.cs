@@ -10,10 +10,10 @@ namespace Types.Modifiers.Cost.Formula {
         [SerializeReference, Tooltip("Formulas evaluated in order; each result becomes the next formula input, starting from zero.")]
         public IFormula[] Formulas = Array.Empty<IFormula>();
         
-        public Value Evaluate(double input) {
+        public Value Evaluate(Value input) {
             var value = Value.Zero;
             foreach (var formula in Formulas) {
-                value = formula.Evaluate(value.ToDouble());
+                value = formula.Evaluate(value);
             }
             return value;
         }

@@ -39,4 +39,7 @@ MonoBehaviour:
     - rid: 7490908315923775565
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 150000
+        BaseValue:
+          _stored: 150
+          _base:
+            Degree: 1

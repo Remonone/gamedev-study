@@ -19,7 +19,7 @@ namespace Types.Modifiers.Definitions {
                 ModifierId = Modifier.ModifierId,
                 Operation = Modifier.Operation,
                 Stat = Modifier.Stat,
-                Value = CalculationFormula.Evaluate(state.GetLevelBasedValue(Property).ToDouble()).ToSingle(),
+                Value = CalculationFormula.Evaluate(state.GetLevelBasedValue(Property)).ToSingle(),
                 Priority = Modifier.Priority
             };
         }

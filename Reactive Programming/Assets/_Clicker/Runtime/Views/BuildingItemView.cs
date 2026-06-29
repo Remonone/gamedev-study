@@ -1,5 +1,4 @@
 using R3;
-using Types.Enums;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Utils;
@@ -43,10 +42,7 @@ namespace Views {
 
             EnsureStyleSheet();
             SetRootLayout();
-            
-            var element = GetCategoryByType(_container, viewModel.Type);
-            
-            element.Add(_root);
+            _container.Add(_root);
             
             SetProps();
             
@@ -68,12 +64,6 @@ namespace Views {
             _root.style.flexShrink = 0;
             _root.style.alignSelf = Align.Stretch;
             _root.style.width = Length.Percent(100);
-        }
-
-        private VisualElement GetCategoryByType(VisualElement container, GovernmentInteractionType type) {
-            var typeName = type.ToString();
-            
-            return container.Q<VisualElement>(typeName);
         }
 
         private void EnsureStyleSheet() {

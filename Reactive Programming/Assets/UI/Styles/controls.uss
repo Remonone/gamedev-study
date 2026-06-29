@@ -133,6 +133,7 @@
 
 .category-tab-view .unity-tab-view__header-container {
     flex-grow: 0;
+    height: 0;
     flex-shrink: 0;
     flex-wrap: wrap;
     max-height: none;
@@ -239,27 +240,11 @@
     height: 0;
 }
 
-.main-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller,
-.main-tab-view #unity-tab-view__header-container .unity-scroller,
-.main-tab-view #unity-tab-view__header-container .unity-scroller__low-button,
-.main-tab-view #unity-tab-view__header-container .unity-scroller__high-button,
-.main-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller .unity-button,
-.main-tab-view #unity-tab-view__header-container #unity-horizontal-scroller,
-.main-tab-view #unity-tab-view__header-container #unity-low-button,
-.main-tab-view #unity-tab-view__header-container #unity-high-button,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__scroll-button-left,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__scroll-button-right,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__left-scroll-button,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__right-scroll-button,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__previous-button,
-.main-tab-view #unity-tab-view__header-container #unity-tab-view__next-button,
-.main-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button,
-.main-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button-left,
-.main-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button-right,
-.main-tab-view #unity-tab-view__header-container ScrollerButton,
-.main-tab-view #unity-tab-view__header-container RepeatButton {
-    display: none;
-    width: 0;
+.building-category-tab .unity-scroll-view {
+    max-height: 100%;
+}
+
+.main-tab-view #unity-tab-view__content-container {
     height: 0;
 }
 
@@ -360,6 +345,10 @@
     min-height: 0;
 }
 
+.category-tab-view .unity-tab-view__content-viewport {
+    max-height: 100%;
+}
+
 .category-tab-view #unity-tab-view__header-container {
     flex-grow: 0;
     flex-shrink: 0;
@@ -368,8 +357,10 @@
     row-gap: 6px;
     column-gap: 6px;
     max-height: none;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
+    padding-bottom: 6px;
+    margin-bottom: 0;
+    height: 100%;
+    width: 100%;
     overflow: visible;
     border-bottom-width: 1px;
     border-bottom-color: var(--c-border);
@@ -386,30 +377,6 @@
     width: 100%;
     max-height: none;
     overflow: visible;
-}
-
-.category-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller,
-.category-tab-view #unity-tab-view__header-container .unity-scroller,
-.category-tab-view #unity-tab-view__header-container .unity-scroller__low-button,
-.category-tab-view #unity-tab-view__header-container .unity-scroller__high-button,
-.category-tab-view #unity-tab-view__header-container .unity-scroll-view__horizontal-scroller .unity-button,
-.category-tab-view #unity-tab-view__header-container #unity-horizontal-scroller,
-.category-tab-view #unity-tab-view__header-container #unity-low-button,
-.category-tab-view #unity-tab-view__header-container #unity-high-button,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__scroll-button-left,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__scroll-button-right,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__left-scroll-button,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__right-scroll-button,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__previous-button,
-.category-tab-view #unity-tab-view__header-container #unity-tab-view__next-button,
-.category-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button,
-.category-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button-left,
-.category-tab-view #unity-tab-view__header-container .unity-tab-view__scroll-button-right,
-.category-tab-view #unity-tab-view__header-container ScrollerButton,
-.category-tab-view #unity-tab-view__header-container RepeatButton {
-    display: none;
-    width: 0;
-    height: 0;
 }
 
 .category-tab-view #unity-tab-view__header-container .unity-scroll-view__content-viewport,
@@ -486,16 +453,7 @@
     align-self: stretch;
 }
 
-.category-scroll #unity-content-container {
-    flex-direction: column;
-    flex-grow: 0;
-    flex-shrink: 0;
-    align-items: stretch;
-    row-gap: 10px;
-}
-
 .category-content {
-    height: 100%;
     flex-grow: 0;
     flex-shrink: 0;
     align-self: stretch;
@@ -503,6 +461,10 @@
     flex-direction: column;
     row-gap: 10px;
     padding: 2px;
+}
+
+.building-category-tab UIDocumentRootElement {
+    position: relative;
 }
 
 /* ---------- Scrollbars (shared) ---------- */
@@ -515,7 +477,6 @@
 .unity-scroller--vertical .unity-base-slider__dragger {
     background-color: var(--c-border-strong);
     border-width: 0;
-    border-radius: 999px;
 }
 
 .unity-scroller--vertical .unity-base-slider__dragger:hover {
@@ -523,8 +484,7 @@
 }
 
 .unity-scroller--vertical .unity-scroller__low-button,
-.unity-scroller--vertical .unity-scroller__high-button,
-.unity-scroller--vertical .unity-base-slider__tracker {
+.unity-scroller--vertical .unity-scroller__high-button {
     display: none;
 }
 

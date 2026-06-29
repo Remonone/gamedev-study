@@ -7,15 +7,15 @@ namespace Types.Modifiers.Cost.Formula {
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp")]
     public class ExponentialFormula : IFormula {
         [Tooltip("Starting value before exponential growth is applied.")]
-        public double BaseValue;
+        public Value BaseValue;
         [Tooltip("Growth multiplier applied once per input step.")]
-        public double Rate;
+        public Value Rate;
         
-        public Value Evaluate(double input) {
-            if (BaseValue <= 0d) return Value.Zero;
-            if (Rate <= 0d) return input <= 0d ? new Value(BaseValue) : Value.Zero;
+        public Value Evaluate(Value input) {
+            if (BaseValue <= Value.Zero) return Value.Zero;
+            if (Rate <= Value.Zero) return input <= Value.Zero ? BaseValue : Value.Zero;
 
-            return Value.FromLog10(Math.Log10(BaseValue) + input * Math.Log10(Rate));
+            return Value.FromLog10(BaseValue.ToLog10() + input.ToDouble() * Rate.ToLog10());
         }
     }
 }

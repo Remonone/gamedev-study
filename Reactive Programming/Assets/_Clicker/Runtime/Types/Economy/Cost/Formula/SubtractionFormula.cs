@@ -4,7 +4,7 @@ namespace Types.Modifiers.Cost.Formula {
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp")]
     public class SubtractionFormula : IFormula {
         public IFormula[] Formulas;
-        public Value Evaluate(double input) {
+        public Value Evaluate(Value input) {
             if (Formulas.Length < 1) {
                 return Value.Zero;
             }

@@ -231,9 +231,13 @@ namespace Services.Components {
 
             BindNotifications();
             
-            var container = _document.rootVisualElement.Q<VisualElement>("BuildingList");
-            foreach (var building in _buildingWatcherService.BuildingsByName.Values) {
-                if (!building.Definition.IsUpgradeable) continue;
+            foreach (var building in _buildingWatcherService.BuildingsByName.Values
+                         .Where(building => building.Definition.IsUpgradeable)
+                         .OrderBy(building => building.Definition.DisplayPriority)
+                         .ThenBy(building => building.Definition.Name)) {
+                var container = GetBuildingCategoryContainer(building.Definition);
+                if (container == null) continue;
+                
                 var buildingItem = Instantiate(_buildingItemView);
                 var buildingItemViewModel = new BuildingItemViewModel(building.Definition);
                 buildingItem.Bind(buildingItemViewModel, container);
@@ -241,6 +245,17 @@ namespace Services.Components {
             
             
         }
+
+        private VisualElement GetBuildingCategoryContainer(BuildingDefinition definition) {
+            var categoryName = definition.Type.ToString();
+            var container = _document.rootVisualElement.Q<VisualElement>(categoryName);
+            if (container == null) {
+                Debug.LogWarning($"Building category container not found: {categoryName}");
+            }
+
+            return container;
+        }
+
         private void BindNotifications() {
             var notificationContainer = _document.rootVisualElement.Q<VisualElement>("NotificationCenter");
             var notificationTemplate = Resources.Load<VisualTreeAsset>("UI/NotificationItem");

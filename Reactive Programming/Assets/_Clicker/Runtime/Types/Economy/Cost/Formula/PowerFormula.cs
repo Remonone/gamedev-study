@@ -7,15 +7,15 @@ namespace Types.Modifiers.Cost.Formula {
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp")]
     public class PowerFormula : IFormula {
         [Tooltip("Coefficient multiplied by input raised to the configured power.")]
-        public double BaseValue;
+        public Value BaseValue;
         [Tooltip("Exponent applied to the input value.")]
-        public double Power;
+        public Value Power;
         
-        public Value Evaluate(double input) {
-            if (BaseValue <= 0d) return Value.Zero;
-            if (input <= 0d) return Power <= 0d ? new Value(BaseValue) : Value.Zero;
+        public Value Evaluate(Value input) {
+            if (BaseValue <= Value.Zero) return Value.Zero;
+            if (input <= Value.Zero) return Power <= Value.Zero ? BaseValue : Value.Zero;
 
-            return Value.FromLog10(Math.Log10(BaseValue) + Power * Math.Log10(input));
+            return Value.FromLog10(BaseValue.ToLog10() + Power.ToDouble() * input.ToLog10());
         }
     }
 }

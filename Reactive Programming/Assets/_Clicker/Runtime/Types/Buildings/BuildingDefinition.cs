@@ -16,6 +16,8 @@ namespace Types.Buildings {
         public CostResolver Cost;
         [Tooltip("Resource category produced and spent by this building.")]
         public GovernmentInteractionType Type;
+        [SerializeField, Tooltip("Lower values appear earlier in the building shop UI.")]
+        public int DisplayPriority;
         [SerializeReference, Tooltip("Income granted by one manual click, evaluated with the current building level.")]
         public IFormula ClickIncome;
         [SerializeReference, Tooltip("Passive income value, evaluated with the current building level.")]

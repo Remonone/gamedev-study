@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd0c408f846e4efaa2bc76a55919ffb8, type: 3}
+  m_Name: Metropolitan Administration 1
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Buildings.BuildingDefinition
+  Name: Metropolitan Administration
+  Description: 
+  Icon: {fileID: 0}
+  Cost:
+    _costItems:
+    - Condition:
+        rid: 7490908492861800521
+      Formula:
+        rid: 7490908492861800523
+      Type: 0
+  Type: 0
+  DisplayPriority: 6
+  ClickIncome:
+    rid: 7490908492861800526
+  Income:
+    rid: 7490908492861800534
+  Frequency:
+    rid: 7490908492861800527
+  StabilityModifier:
+    rid: 7490908492861800528
+  StabilityModifierMultiplier:
+    rid: 7490908492861800529
+  MultiplierCoefficient:
+    rid: 7490908492861800530
+  CriticalChance:
+    rid: 7490908492861800531
+  CriticalMultiplier:
+    rid: 7490908492861800533
+  IsUpgradeable: 1
+  Influence: 4000
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908492861800521
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 7490908492861800523
+      type: {class: MultiplicationFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        Formulas:
+        - rid: 7490908492861800524
+        - rid: 7490908492861800525
+    - rid: 7490908492861800524
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 100
+          _base:
+            Degree: 5
+    - rid: 7490908492861800525
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+        Rate:
+          _stored: 4.3
+          _base:
+            Degree: 0
+    - rid: 7490908492861800526
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 0
+          _base:
+            Degree: 0
+    - rid: 7490908492861800527
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+    - rid: 7490908492861800528
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+    - rid: 7490908492861800529
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+    - rid: 7490908492861800530
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+    - rid: 7490908492861800531
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 0.01
+          _base:
+            Degree: 0
+    - rid: 7490908492861800533
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 2
+          _base:
+            Degree: 0
+    - rid: 7490908492861800534
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 3.2
+          _base:
+            Degree: 0

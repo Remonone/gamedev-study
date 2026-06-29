@@ -2,6 +2,7 @@ using Economy.Conditions;
 using Types.Buildings;
 using Types.Modifiers.Definitions.Context;
 using Types.Modifiers.Cost.Formula;
+using Types.Values;
 using UnityEngine;
 
 namespace Types.Modifiers.Definitions {
@@ -34,7 +35,7 @@ namespace Types.Modifiers.Definitions {
             return new StatModifier {
                 Stat = Modifier.Stat,
                 Operation = Modifier.Operation,
-                Value = Modifier.Value * CalculationFormula.Evaluate(levelCapability.Level).ToSingle(),
+                Value = Modifier.Value * CalculationFormula.Evaluate(new Value(levelCapability.Level)).ToSingle(),
                 Priority = Modifier.Priority,
                 ModifierId = Modifier.ModifierId
             };

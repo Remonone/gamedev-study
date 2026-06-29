@@ -34,34 +34,22 @@
                         <ui:VisualElement name="BuildingShopTabRoot" class="tab-surface tab-surface--buildings">
                             <ui:TabView name="BuildingList" class="category-tab-view">
                                 <ui:Tab label="Mayor" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="MayorOffice" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="MayorOffice" class="category-scroll"/>
                                 </ui:Tab>
                                 <ui:Tab label="Fire Station" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="FireFighterStation" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="FireFighterStation" class="category-scroll"/>
                                 </ui:Tab>
                                 <ui:Tab label="Police" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="PoliceStation" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="PoliceStation" class="category-scroll"/>
                                 </ui:Tab>
                                 <ui:Tab label="Hospital" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="Hospital" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="Hospital" class="category-scroll"/>
                                 </ui:Tab>
                                 <ui:Tab label="Court" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="Court" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="Court" class="category-scroll"/>
                                 </ui:Tab>
                                 <ui:Tab label="Archive" class="building-category-tab">
-                                    <ui:ScrollView class="category-scroll">
-                                        <ui:VisualElement name="Archive" class="category-content"/>
-                                    </ui:ScrollView>
+                                    <ui:ScrollView name="Archive" class="category-scroll"/>
                                 </ui:Tab>
                             </ui:TabView>
                         </ui:VisualElement>
@@ -178,13 +166,12 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="NotificationCenter" class="notification-center"
-                       picking-mode="Ignore" />
+    <ui:VisualElement name="NotificationCenter" picking-mode="Ignore" class="notification-center"/>
     <ui:VisualElement name="GlobalEventIndicator" class="global-event-indicator">
-        <ui:VisualElement name="GlobalEventIcon" class="global-event-icon" />
+        <ui:VisualElement name="GlobalEventIcon" class="global-event-icon"/>
         <ui:VisualElement name="GlobalEventTooltip" class="global-event-tooltip">
-            <ui:Label name="GlobalEventTooltipTitle" text="Global Event" class="global-event-tooltip__title" />
-            <ui:Label name="GlobalEventTooltipDescription" text="Description" class="global-event-tooltip__description" />
+            <ui:Label name="GlobalEventTooltipTitle" text="Global Event" class="global-event-tooltip__title"/>
+            <ui:Label name="GlobalEventTooltipDescription" text="Description" class="global-event-tooltip__description"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

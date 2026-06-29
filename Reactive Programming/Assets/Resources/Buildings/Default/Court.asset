@@ -41,32 +41,56 @@ MonoBehaviour:
     - rid: 7490908315923775611
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
     - rid: 7490908315923775612
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 0
+        BaseValue:
+          _stored: 0
+          _base:
+            Degree: 0
     - rid: 7490908315923775613
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 0
+        BaseValue:
+          _stored: 0
+          _base:
+            Degree: 0
     - rid: 7490908315923775614
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
     - rid: 7490908315923775615
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
     - rid: 7490908315923775616
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 1
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
     - rid: 7490908315923775617
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 0.01
+        BaseValue:
+          _stored: 0.01
+          _base:
+            Degree: 0
     - rid: 7490908315923775618
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
       data:
-        BaseValue: 2
+        BaseValue:
+          _stored: 2
+          _base:
+            Degree: 0

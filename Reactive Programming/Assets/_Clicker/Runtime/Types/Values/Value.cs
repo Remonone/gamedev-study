@@ -210,6 +210,18 @@ namespace Types.Values {
             return (float)value;
         }
 
+        public double ToLog10() {
+            if (IsZero) {
+                return double.NegativeInfinity;
+            }
+
+            return Log10Value();
+        }
+
+        public static implicit operator Value(double value) {
+            return new Value(value);
+        }
+
         public Value Ceiling() {
             if (IsZero || _base.Degree > 0) {
                 return this;

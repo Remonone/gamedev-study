@@ -10,7 +10,7 @@ namespace Types.Modifiers.Cost.Formula {
         [SerializeReference, Tooltip("Nested formulas evaluated with the same input and added together.")]
         public IFormula[] Formulas;
         
-        public Value Evaluate(double input) {
+        public Value Evaluate(Value input) {
             var value = Value.Zero;
             foreach (var formula in Formulas) {
                 value += formula.Evaluate(input);
