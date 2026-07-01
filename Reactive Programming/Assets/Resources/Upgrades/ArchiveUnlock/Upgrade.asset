@@ -15,12 +15,85 @@ MonoBehaviour:
   Effects:
   - {fileID: 11400000, guid: 7ec5e53f5dfb43c1aa70c851a460c471, type: 2}
   Price:
-    _costItems: []
+    _costItems:
+    - Condition:
+        rid: 7490908539996602447
+      Formula:
+        rid: 7490908539996602448
+      Type: 0
+    - Condition:
+        rid: 7490908539996602447
+      Formula:
+        rid: 7490908539996602449
+      Type: 2
+    - Condition:
+        rid: 7490908539996602447
+      Formula:
+        rid: 7490908539996602450
+      Type: 3
+    - Condition:
+        rid: 7490908539996602447
+      Formula:
+        rid: 7490908539996602451
+      Type: 4
+    - Condition:
+        rid: 7490908539996602447
+      Formula:
+        rid: 7490908539996602452
+      Type: 1
   MaxLevel: 1
-  Position: {x: 300, y: 50}
+  Position: {x: 832.159, y: 478.8406}
   Id: archive_unlock
   Name: Unlock Archive
   Icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  Description: Opens the archive and unlocks research.
+  Description: 'History repeats itself and archive keeps this history. You can use
+    history for your own advantage!
+
+
+    <i>Unlocks researches which can provide
+    you obtain best practices from the past for building town of the dream</i>'
   NodeCategory: 1
-  ChildIds: []
+  ChildIds:
+  - upgrade_node_64
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908539996602447
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 7490908539996602448
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 5
+    - rid: 7490908539996602449
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 150
+          _base:
+            Degree: 3
+    - rid: 7490908539996602450
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 700
+          _base:
+            Degree: 2
+    - rid: 7490908539996602451
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 50
+          _base:
+            Degree: 2
+    - rid: 7490908539996602452
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 500
+          _base:
+            Degree: 1

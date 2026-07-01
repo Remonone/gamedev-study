@@ -22,22 +22,29 @@ MonoBehaviour:
         rid: 7490908315923775565
       Type: 0
   MaxLevel: 1
-  Position: {x: 150, y: 50}
+  Position: {x: 447.64334, y: 478.82498}
   Id: firefighter_unlock
   Name: Unlock Firefighter Station
   Icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  Description: This is a firefighter station
+  Description: 'Unlock firefighter service. Firefighters brings safety into the town
+    which positively aflicts on town services work speed.
+
+
+    <i>increases frequency
+    of all buildings by increasing influence of this service</i>'
   NodeCategory: 1
-  ChildIds: []
+  ChildIds:
+  - police_unlock
+  - upgrade_node_9
   references:
     version: 2
     RefIds:
     - rid: 7490908315923775564
-      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Assembly-CSharp}
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
       data:
         _constant: 1
     - rid: 7490908315923775565
-      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Assembly-CSharp}
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
           _stored: 150

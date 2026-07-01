@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3334979dc211411c9732abb6a21377ca, type: 3}
   m_Name: BlackFridayBuildingCost
   m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.Definitions.StaticModifierDefinitionDefinition
-  Target: {fileID: 11400000, guid: 73ab1a7d58dc4a51a43753aba5d2d621, type: 2}
+  Target: {fileID: 11400000, guid: e88e4ccf8f57971aa919034a064bc251, type: 2}
   Modifier:
     Stat: 3
     Operation: 2

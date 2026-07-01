@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd0c408f846e4efaa2bc76a55919ffb8, type: 3}
   m_Name: High Court of Justice
   m_EditorClassIdentifier: Assembly-CSharp::Types.Modifiers.Definitions.Buildings.BuildingDefinition
-  Name: Court of Appeals
+  Name: High Court of Justice
   Description: 
   Icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   Cost:
@@ -28,7 +28,7 @@ MonoBehaviour:
         rid: 7490908523317690461
       Type: 0
   Type: 1
-  DisplayPriority: 5
+  DisplayPriority: 6
   ClickIncome:
     rid: 7490908360147730505
   Income:
@@ -46,7 +46,7 @@ MonoBehaviour:
   CriticalMultiplier:
     rid: 7490908360147730512
   IsUpgradeable: 1
-  Influence: 3200
+  Influence: 6000
   references:
     version: 2
     RefIds:
@@ -63,11 +63,11 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 35
+          _stored: 3
           _base:
-            Degree: 3
+            Degree: 4
         Rate:
-          _stored: 2.85
+          _stored: 3.6
           _base:
             Degree: 0
     - rid: 7490908360147730505
@@ -123,11 +123,11 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 2.5
+          _stored: 25
           _base:
             Degree: 1
         Rate:
-          _stored: 2.05
+          _stored: 2.6
           _base:
             Degree: 0
     - rid: 7490908523317690461
@@ -139,10 +139,10 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 900
+          _stored: 70
           _base:
-            Degree: 2
+            Degree: 3
         Rate:
-          _stored: 2.45
+          _stored: 3.2
           _base:
             Degree: 0
