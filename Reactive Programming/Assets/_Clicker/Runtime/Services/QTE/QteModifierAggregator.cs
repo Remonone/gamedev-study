@@ -5,19 +5,40 @@ using Types.Enums;
 using Types.QTE;
 using Types.Upgrades;
 using Types.Upgrades.Effects;
+using UnityEngine;
 
 namespace Services.QTE {
     public class QteModifierAggregator : IService {
-        
-        private readonly IReadOnlyList<Practice> _ownedPractices;
-        private readonly IReadOnlyCollection<UpgradeNodeState> _ownedUpgrades;
+        private readonly PracticeService _practiceService;
+        private readonly UpgradeService _upgradeService;
 
         public QteModifierAggregator(PracticeService practiceService, UpgradeService upgradeService) {
-            _ownedPractices = practiceService.OwnedPracticeDefinitions;
-            _ownedUpgrades = upgradeService.OwnedUpgrades;
+            _practiceService = practiceService;
+            _upgradeService = upgradeService;
         }
-        
-        public float GetModifierBasedValue(float baseValue, QteModifierType type) {
+
+        public float ResolveSpawnIntervalSeconds(float baseValue) => Mathf.Max(0.1f, ResolveValue(baseValue, QteModifierTarget.SpawnIntervalSeconds, true, true));
+        public float ResolveDuplicateSpawnChance(float baseValue = 0f) => Mathf.Max(0f, ResolveValue(baseValue, QteModifierTarget.DuplicateSpawnChance, true, true));
+        public float ResolveIncomeClickMultiplier(float baseValue = 1f) => Mathf.Max(0f, ResolveValue(baseValue, QteModifierTarget.IncomeClickMultiplier, true, true));
+        public float ResolveIncomeClickCritChance(float baseValue = 0f) => Mathf.Clamp01(ResolveValue(baseValue, QteModifierTarget.IncomeClickCritChance, true, true));
+        public float ResolveIncomeClickCritMultiplier(float baseValue = 1f) => Mathf.Max(1f, ResolveValue(baseValue, QteModifierTarget.IncomeClickCritMultiplier, true, true));
+        public float ResolveDurationSeconds(float baseValue) => Mathf.Max(0.01f, ResolveValue(baseValue, QteModifierTarget.DurationSeconds, true, true));
+        public int ResolveDurabilityClicks(int baseValue) => Mathf.Max(1, Mathf.RoundToInt(ResolveValue(baseValue, QteModifierTarget.DurabilityClicks, true, true)));
+        public int ResolveWorkerCount(float baseValue = 0f) => Mathf.Max(0, Mathf.RoundToInt(ResolveValue(baseValue, QteModifierTarget.WorkerCount, true, true)));
+        public float ResolveWorkerClickFrequency(float baseValue = 0f) => Mathf.Max(0f, ResolveValue(baseValue, QteModifierTarget.WorkerClickFrequency, true, true));
+        public float ResolveWorkerIncomeMultiplier(float baseValue = 1f) => Mathf.Max(0f, ResolveValue(baseValue, QteModifierTarget.WorkerIncomeMultiplier, true, true));
+        public float ResolveWorkerBuildingUpgradeChance(float baseValue = 0.0001f) => Mathf.Clamp01(ResolveValue(baseValue, QteModifierTarget.WorkerBuildingUpgradeChance, true, true));
+
+        public QteWorkerParameterSnapshot ResolveWorkerSnapshot() {
+            return new QteWorkerParameterSnapshot {
+                Count = ResolveWorkerCount(),
+                ClickFrequency = ResolveWorkerClickFrequency(),
+                IncomeMultiplier = ResolveWorkerIncomeMultiplier(),
+                BuildingUpgradeChance = ResolveWorkerBuildingUpgradeChance()
+            };
+        }
+
+        private float ResolveValue(float baseValue, QteModifierTarget target, bool includePractices, bool includeUpgrades) {
             var flat = 0f;
             var percent = 0f;
             var multiplier = 1f;
@@ -25,61 +46,70 @@ namespace Services.QTE {
             var overridePriority = int.MinValue;
             var overrideValue = baseValue;
 
-            ApplyPracticeModifiers(type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
-            ApplyUpgradeModifiers(type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
+            if (includePractices) {
+                ApplyPracticeModifiers(target, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
+            }
 
-            if (hasOverride) return overrideValue;
-            return ((baseValue + flat) * (1f + percent)) * multiplier;
+            if (includeUpgrades) {
+                ApplyUpgradeModifiers(target, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority, ref overrideValue);
+            }
+
+            return Sanitize(hasOverride ? overrideValue : ((baseValue + flat) * (1f + percent)) * multiplier, baseValue);
         }
-        
-        private void ApplyPracticeModifiers(QteModifierType type, ref float flat, ref float percent, ref float multiplier,
+
+        private void ApplyPracticeModifiers(QteModifierTarget target, ref float flat, ref float percent, ref float multiplier,
             ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
 
-            for (var i = 0; i < _ownedPractices.Count; i++) {
-                var effects = _ownedPractices[i]?.QteEffects;
-                ApplyModifierList(effects, type, ref flat, ref percent, ref multiplier, ref hasOverride, ref overridePriority,
-                    ref overrideValue);
+            var ownedPractices = _practiceService?.OwnedPracticeDefinitions;
+            if (ownedPractices == null) return;
+
+            for (var i = 0; i < ownedPractices.Count; i++) {
+                ApplyModifierList(ownedPractices[i]?.QteImprovements, target, 1, ref flat, ref percent, ref multiplier,
+                    ref hasOverride, ref overridePriority, ref overrideValue);
             }
         }
 
-        private void ApplyUpgradeModifiers(QteModifierType type, ref float flat, ref float percent, ref float multiplier,
-            ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
+        private void ApplyUpgradeModifiers(QteModifierTarget target, ref float flat,
+            ref float percent, ref float multiplier, ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
 
-            foreach (var upgrade in _ownedUpgrades) {
+            var ownedUpgrades = _upgradeService?.OwnedUpgrades;
+            if (ownedUpgrades == null) return;
+
+            foreach (var upgrade in ownedUpgrades) {
                 if (upgrade == null || upgrade.Level <= 0 || upgrade.Definition?.Effects == null) continue;
 
                 var effects = upgrade.Definition.Effects;
                 for (var effectIndex = 0; effectIndex < effects.Length; effectIndex++) {
                     if (effects[effectIndex] is not QteUpgradeEffect qteEffect) continue;
-                    ApplyModifierList(qteEffect.Effects, type, ref flat, ref percent, ref multiplier, ref hasOverride,
-                        ref overridePriority, ref overrideValue);
+                    ApplyModifierList(qteEffect.Effects, target, upgrade.Level, ref flat, ref percent, ref multiplier,
+                        ref hasOverride, ref overridePriority, ref overrideValue);
                 }
             }
         }
-        
-        private static void ApplyModifierList(IReadOnlyList<QteModifierEffect> effects, QteModifierType type, ref float flat,
-            ref float percent, ref float multiplier, ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
-            if (effects == null) return;
 
-            for (var i = 0; i < effects.Count; i++) {
-                var effect = effects[i];
-                if (effect == null || effect.Type != type) continue;
+        private static void ApplyModifierList(IReadOnlyList<QteModifierEffect> modifiers, QteModifierTarget target, int level, ref float flat,
+            ref float percent, ref float multiplier, ref bool hasOverride, ref int overridePriority, ref float overrideValue) {
+            if (modifiers == null) return;
+
+            for (var i = 0; i < modifiers.Count; i++) {
+                var effect = modifiers[i];
+                if (effect == null || effect.Target != target || !effect.TryEvaluate(level, out var value)) continue;
 
                 switch (effect.Operation) {
                     case ModifierOp.AddFlat:
-                        flat += effect.Value;
+                        flat += value;
                         break;
                     case ModifierOp.AddPercent:
-                        percent += effect.Value;
+                        percent += value;
                         break;
                     case ModifierOp.Multiply:
-                        multiplier *= effect.Value;
+                        multiplier *= value;
                         break;
                     case ModifierOp.Override:
                         if (!hasOverride || effect.Priority > overridePriority) {
                             hasOverride = true;
                             overridePriority = effect.Priority;
-                            overrideValue = effect.Value;
+                            overrideValue = value;
                         }
                         break;
                     default:
@@ -87,5 +117,12 @@ namespace Services.QTE {
                 }
             }
         }
+
+        private static float Sanitize(float value, float fallback) {
+            if (IsFinite(value)) return value;
+            return IsFinite(fallback) ? fallback : 0f;
+        }
+
+        private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
     }
 }

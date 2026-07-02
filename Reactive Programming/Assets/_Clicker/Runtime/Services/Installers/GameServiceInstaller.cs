@@ -138,7 +138,7 @@ namespace Services.Components {
             InitStatistics();
             InitAchievements();
             InitTrackers();
-            InitQteService(practiceService, upgradeService);
+            InitQteService(practiceService, upgradeService, buildingUpgradeService, unlockService);
             
             var achievements = Resources.LoadAll<AchievementModifier>("Achievements");
             var achievementStorage = new AchievementStorageService(achievements);
@@ -205,7 +205,7 @@ namespace Services.Components {
             return _qteConfig != null ? _qteConfig : Resources.Load<QteConfig>("QTE/QteConfig");
         }
 
-        private void InitQteService(PracticeService practiceService, UpgradeService upgradeService) {
+        private void InitQteService(PracticeService practiceService, UpgradeService upgradeService, BuildingUpgradeService buildingUpgradeService, UnlockService unlockService) {
             var config = FetchQteConfig();
             if (config == null) {
                 Debug.LogWarning("QTE service was not registered: QTE config is missing.");
@@ -220,10 +220,12 @@ namespace Services.Components {
             var aggregator = new QteModifierAggregator(practiceService, upgradeService);
             RegisterService(aggregator);
 
-            var rewardService = new QteRewardService(_statisticsService, _storage);
+            var rewardService = new QteRewardService(_statisticsService, _storage, aggregator);
             RegisterService(rewardService);
 
-            RegisterService(new QteService(config, rewardService, aggregator, _worldCastService));
+            var qteService = new QteService(config, rewardService, aggregator, _worldCastService);
+            RegisterService(qteService);
+            RegisterService(new QteWorkerService(qteService, aggregator, buildingUpgradeService, _buildingWatcherService, unlockService));
         }
 
         private void InitViews() {

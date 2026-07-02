@@ -11,8 +11,6 @@ using Random = System.Random;
 
 namespace Services.QTE {
     public sealed class QteService : IService, IStartable, IDisposable {
-        private const float MinSpawnIntervalSeconds = 0.1f;
-
         private readonly CompositeDisposable _disposable = new();
         private readonly QteConfig _config;
         private readonly QteRewardService _rewardService;
@@ -83,6 +81,7 @@ namespace Services.QTE {
 
             var spawnCount = ResolveSpawnCount();
             var freeCount = CountFreeMarkers();
+            spawnCount += ResolveDuplicateSpawnCount(freeCount - spawnCount);
             if (spawnCount > freeCount) {
                 spawnCount = freeCount;
             }
@@ -114,6 +113,21 @@ namespace Services.QTE {
             }
 
             return Mathf.Max(0, count);
+        }
+
+        private int ResolveDuplicateSpawnCount(int remainingFreeMarkers) {
+            if (remainingFreeMarkers <= 0) return 0;
+
+            var chance = _qteModifierAggregator.ResolveDuplicateSpawnChance();
+            var guaranteed = Mathf.FloorToInt(chance);
+            var fractional = chance - guaranteed;
+            var count = Mathf.Min(guaranteed, remainingFreeMarkers);
+
+            if (count < remainingFreeMarkers && fractional > 0f && _rng.NextDouble() < fractional) {
+                count++;
+            }
+
+            return count;
         }
 
         private int CountFreeMarkers() {
@@ -165,7 +179,7 @@ namespace Services.QTE {
             var active = new ActiveQte {
                 Marker = marker,
                 View = view,
-                RemainingSeconds = _config.LifetimeSeconds,
+                RemainingSeconds = _qteModifierAggregator.ResolveDurationSeconds(_config.LifetimeSeconds),
                 ClicksRemaining = RollClicksRequired(),
                 Reward = reward,
                 Resource = resource
@@ -198,14 +212,15 @@ namespace Services.QTE {
         }
 
         private int RollClicksRequired() {
-            return _config.BaseClicksRequired + _rng.Next(0, _config.ClicksRandomStep + 1);
+            var baseClicks = _config.BaseClicksRequired + _rng.Next(0, _config.ClicksRandomStep + 1);
+            return _qteModifierAggregator.ResolveDurabilityClicks(baseClicks);
         }
 
         private void HandleClicked(ActiveQte active) {
             var index = _activeQtes.IndexOf(active);
             if (index < 0) return;
 
-            _rewardService.GrantReward(active.Resource, active.Reward);
+            _rewardService.GrantPlayerClickReward(active.Resource, active.Reward);
             active.ClicksRemaining--;
 
             if (active.ClicksRemaining <= 0) {
@@ -216,8 +231,28 @@ namespace Services.QTE {
         private float ResolveSpawnIntervalSeconds() {
             var randomOffset = NextFloat(-_config.SpawnIntervalRandomStepSeconds, _config.SpawnIntervalRandomStepSeconds);
             var interval = _config.BaseSpawnIntervalSeconds + randomOffset;
-            interval = _qteModifierAggregator.GetModifierBasedValue(interval, QteModifierType.SpawnIntervalSeconds);
-            return Mathf.Max(MinSpawnIntervalSeconds, interval);
+            return _qteModifierAggregator.ResolveSpawnIntervalSeconds(interval);
+        }
+
+        public bool TryWorkerClick(float workerIncomeMultiplier, out bool completed) {
+            completed = false;
+            if (_activeQtes.Count <= 0) return false;
+
+            var index = _rng.Next(0, _activeQtes.Count);
+            if (index < 0 || index >= _activeQtes.Count) return false;
+
+            var active = _activeQtes[index];
+            if (active == null || active.View == null) return false;
+
+            _rewardService.GrantWorkerClickReward(active.Resource, active.Reward, workerIncomeMultiplier);
+            active.ClicksRemaining--;
+
+            if (active.ClicksRemaining <= 0) {
+                completed = true;
+                DespawnAt(index);
+            }
+
+            return true;
         }
 
         private float NextFloat(float minInclusive, float maxInclusive) {

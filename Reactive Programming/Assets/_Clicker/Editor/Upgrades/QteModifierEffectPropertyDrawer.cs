@@ -1,21 +1,18 @@
 using System;
 using System.Collections.Generic;
-using FormulaSerialization.UIElements;
-using Types.Modifiers.Cost.Formula;
+using Types.QTE;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-namespace FormulaSerialization {
-    [CustomPropertyDrawer(typeof(IFormula), true)]
-    public sealed class FormulaPropertyDrawer : PropertyDrawer {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) {
-            return new FormulaField(property);
-        }
+namespace Clicker.Editor.Upgrades {
+    [CustomPropertyDrawer(typeof(QteModifierEffect), true)]
+    public sealed class QteModifierEffectPropertyDrawer : PropertyDrawer {
+        private static List<Type> _effectTypes;
+        private static GUIContent[] _effectLabels;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             if (property.propertyType != SerializedPropertyType.ManagedReference) {
-                EditorGUI.HelpBox(position, "IFormula fields must be marked with [SerializeReference].", MessageType.Warning);
+                EditorGUI.HelpBox(position, "QteModifierEffect fields must be marked with [SerializeReference].", MessageType.Warning);
                 return;
             }
 
@@ -24,6 +21,8 @@ namespace FormulaSerialization {
                 property.serializedObject.Update();
             }
 
+            EnsureTypeCache();
+
             var lineHeight = EditorGUIUtility.singleLineHeight;
             var spacing = EditorGUIUtility.standardVerticalSpacing;
             var headerRect = new Rect(position.x, position.y, position.width, lineHeight);
@@ -31,22 +30,20 @@ namespace FormulaSerialization {
             var clearRect = new Rect(selectorRect.xMax - 22f, selectorRect.y, 22f, lineHeight);
             selectorRect.width -= property.managedReferenceValue == null ? 0f : 26f;
 
-            var types = FormulaTypeProvider.FormulaTypes;
             var currentType = property.managedReferenceValue?.GetType();
-            var selectedIndex = GetSelectedIndex(types, currentType);
-            var labels = BuildOptions(types, "Select Formula");
+            var selectedIndex = GetSelectedIndex(currentType);
 
             EditorGUI.BeginChangeCheck();
-            var nextIndex = EditorGUI.Popup(selectorRect, selectedIndex, labels);
+            var nextIndex = EditorGUI.Popup(selectorRect, selectedIndex, _effectLabels);
             if (EditorGUI.EndChangeCheck()) {
-                Undo.RecordObjects(property.serializedObject.targetObjects, "Set Formula");
-                property.managedReferenceValue = nextIndex <= 0 ? null : Activator.CreateInstance(types[nextIndex - 1]) as IFormula;
+                Undo.RecordObjects(property.serializedObject.targetObjects, "Set QTE Modifier Effect");
+                property.managedReferenceValue = nextIndex <= 0 ? null : Activator.CreateInstance(_effectTypes[nextIndex - 1]) as QteModifierEffect;
                 property.serializedObject.ApplyModifiedProperties();
                 return;
             }
 
             if (property.managedReferenceValue != null && GUI.Button(clearRect, "x")) {
-                Undo.RecordObjects(property.serializedObject.targetObjects, "Clear Formula");
+                Undo.RecordObjects(property.serializedObject.targetObjects, "Clear QTE Modifier Effect");
                 property.managedReferenceValue = null;
                 property.serializedObject.ApplyModifiedProperties();
                 return;
@@ -54,8 +51,7 @@ namespace FormulaSerialization {
 
             if (property.managedReferenceValue == null) return;
 
-            var childY = headerRect.yMax + spacing;
-            DrawChildren(position, property, childY);
+            DrawChildren(position, property, headerRect.yMax + spacing);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -111,28 +107,48 @@ namespace FormulaSerialization {
             }
         }
 
-        private static GUIContent[] BuildOptions(IReadOnlyList<Type> types, string emptyLabel) {
-            var labels = new GUIContent[types.Count + 1];
-            labels[0] = new GUIContent(emptyLabel);
+        private static void EnsureTypeCache() {
+            if (_effectTypes != null) return;
+
+            _effectTypes = new List<Type>();
+            var types = TypeCache.GetTypesDerivedFrom<QteModifierEffect>();
             for (var i = 0; i < types.Count; i++) {
-                labels[i + 1] = new GUIContent(FormulaTypeProvider.GetDisplayName(types[i]));
+                var type = types[i];
+                if (type.IsAbstract || type.IsGenericType || type.GetConstructor(Type.EmptyTypes) == null) continue;
+                if (Attribute.GetCustomAttribute(type, typeof(SerializableAttribute)) == null) continue;
+                _effectTypes.Add(type);
             }
 
-            return labels;
+            _effectTypes.Sort((left, right) => string.Compare(GetDisplayName(left), GetDisplayName(right), StringComparison.Ordinal));
+            _effectLabels = new GUIContent[_effectTypes.Count + 1];
+            _effectLabels[0] = new GUIContent("Select QTE Effect");
+            for (var i = 0; i < _effectTypes.Count; i++) {
+                _effectLabels[i + 1] = new GUIContent(GetDisplayName(_effectTypes[i]));
+            }
         }
 
-        private static int GetSelectedIndex(IReadOnlyList<Type> types, Type currentType) {
+        private static int GetSelectedIndex(Type currentType) {
             if (currentType == null) return 0;
-            for (var i = 0; i < types.Count; i++) {
-                if (types[i] == currentType) return i + 1;
+            for (var i = 0; i < _effectTypes.Count; i++) {
+                if (_effectTypes[i] == currentType) return i + 1;
             }
 
             return 0;
         }
 
+        private static string GetDisplayName(Type type) {
+            var name = type.Name;
+            const string suffix = "QteModifierEffect";
+            if (name.EndsWith(suffix, StringComparison.Ordinal)) {
+                name = name.Substring(0, name.Length - suffix.Length);
+            }
+
+            return ObjectNames.NicifyVariableName(name);
+        }
+
         private static bool EnsureUniqueArrayReference(SerializedProperty property) {
             if (property.serializedObject.isEditingMultipleObjects
-                || property.managedReferenceValue is not IFormula formula
+                || property.managedReferenceValue is not QteModifierEffect effect
                 || !TryGetArrayElementInfo(property.propertyPath, out var arrayPath, out var index, out var suffix)
                 || index <= 0) {
                 return false;
@@ -142,10 +158,10 @@ namespace FormulaSerialization {
             for (var i = 0; i < index; i++) {
                 var sibling = property.serializedObject.FindProperty($"{arrayPath}.Array.data[{i}]{suffix}");
                 if (sibling?.propertyType != SerializedPropertyType.ManagedReference) continue;
-                if (sibling.managedReferenceId != referenceId && !ReferenceEquals(sibling.managedReferenceValue, formula)) continue;
+                if (sibling.managedReferenceId != referenceId && !ReferenceEquals(sibling.managedReferenceValue, effect)) continue;
 
-                Undo.RecordObjects(property.serializedObject.targetObjects, "Detach Formula Reference");
-                property.managedReferenceValue = CloneFormula(formula);
+                Undo.RecordObjects(property.serializedObject.targetObjects, "Detach QTE Modifier Effect Reference");
+                property.managedReferenceValue = CloneEffect(effect);
                 return true;
             }
 
@@ -170,8 +186,8 @@ namespace FormulaSerialization {
             return true;
         }
 
-        private static IFormula CloneFormula(IFormula formula) {
-            return CloneObject(formula, new Dictionary<object, object>(ReferenceComparer.Instance)) as IFormula;
+        private static QteModifierEffect CloneEffect(QteModifierEffect effect) {
+            return CloneObject(effect, new Dictionary<object, object>(ReferenceComparer.Instance)) as QteModifierEffect;
         }
 
         private static object CloneObject(object value, Dictionary<object, object> visited) {

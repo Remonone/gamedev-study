@@ -10,6 +10,7 @@ using R3;
 using Services;
 using Services.Achievements;
 using Services.Player;
+using Services.QTE;
 using Services.Statistics;
 using Types;
 using Types.Achievements;
@@ -19,6 +20,9 @@ using Types.Modifiers;
 using Types.Modifiers.Cost;
 using Types.Modifiers.Cost.Condition;
 using Types.Modifiers.Cost.Formula;
+using Types.QTE;
+using Types.Upgrades;
+using Types.Upgrades.Effects;
 using Types.Values;
 using UnityEngine;
 using Utils;
@@ -263,6 +267,92 @@ public sealed class GameMechanicsEditModeTests {
         Assert.Throws<ArgumentException>(() => registry.GetProvider<MissingProvider>());
     }
 
+    [Test]
+    public void QteModifierAggregator_ResolvesPlayerMathAndClamps() {
+        var practice = CreatePractice("qte-practice", PracticeRarity.Common, 1f);
+        var practiceEffects = (List<QteModifierEffect>)practice.QteImprovements;
+        practiceEffects.Add(CreateQteModifier<SpawnIntervalSecondsQteModifierEffect>(ModifierOp.Multiply, 0f));
+        practiceEffects.Add(CreateQteModifier<DuplicateSpawnChanceQteModifierEffect>(ModifierOp.AddPercent, 0.5f));
+        practiceEffects.Add(CreateQteModifier<IncomeClickCritChanceQteModifierEffect>(ModifierOp.AddFlat, 2f));
+        practiceEffects.Add(CreateQteModifier<IncomeClickCritMultiplierQteModifierEffect>(ModifierOp.Multiply, 0f));
+        practiceEffects.Add(new DurationSecondsQteModifierEffect { Operation = ModifierOp.Multiply });
+
+        var aggregator = CreateQteAggregator(new[] { practice });
+
+        Assert.That(aggregator.ResolveSpawnIntervalSeconds(1f), Is.EqualTo(0.1f).Within(0.0001f));
+        Assert.That(aggregator.ResolveDuplicateSpawnChance(1f), Is.EqualTo(1.5f).Within(0.0001f));
+        Assert.That(aggregator.ResolveIncomeClickCritChance(), Is.EqualTo(1f).Within(0.0001f));
+        Assert.That(aggregator.ResolveIncomeClickCritMultiplier(), Is.EqualTo(1f).Within(0.0001f));
+        Assert.That(aggregator.ResolveDurationSeconds(5f), Is.EqualTo(5f).Within(0.0001f));
+        Assert.That(aggregator.ResolveDurabilityClicks(-5), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void QteModifierAggregator_AppliesUpgradeLevelScalingAndOverridePriority() {
+        var qteEffect = CreateQteUpgradeEffect();
+        qteEffect.Effects.Add(CreateQteLevelModifier<IncomeClickMultiplierQteModifierEffect>(ModifierOp.AddFlat, 2f));
+        qteEffect.Effects.Add(CreateQteLevelModifier<IncomeClickMultiplierQteModifierEffect>(ModifierOp.AddPercent, 0.5f));
+        qteEffect.Effects.Add(CreateQteLevelModifier<IncomeClickMultiplierQteModifierEffect>(ModifierOp.Multiply, 2f));
+        qteEffect.Effects.Add(CreateQteModifier<DurationSecondsQteModifierEffect>(ModifierOp.Override, 4f, 1));
+        qteEffect.Effects.Add(CreateQteModifier<DurationSecondsQteModifierEffect>(ModifierOp.Override, 7f, 10));
+
+        var upgrade = CreateUpgradeState("qte-upgrade", 2, qteEffect);
+        var aggregator = CreateQteAggregator(Array.Empty<Practice>(), upgrade);
+
+        Assert.That(aggregator.ResolveIncomeClickMultiplier(1f), Is.EqualTo(40f).Within(0.0001f));
+        Assert.That(aggregator.ResolveDurationSeconds(1f), Is.EqualTo(7f).Within(0.0001f));
+    }
+
+    [Test]
+    public void QteModifierAggregator_ResolvesWorkerSnapshotWithAdditiveCountSemantics() {
+        var qteEffect = CreateQteUpgradeEffect();
+        qteEffect.Effects.Add(CreateQteLevelModifier<WorkerCountQteModifierEffect>(ModifierOp.AddFlat, 1.5f));
+        qteEffect.Effects.Add(CreateQteModifier<WorkerClickFrequencyQteModifierEffect>(ModifierOp.Override, 0f));
+        qteEffect.Effects.Add(CreateQteLevelModifier<WorkerIncomeMultiplierQteModifierEffect>(ModifierOp.AddPercent, 0.25f));
+        qteEffect.Effects.Add(CreateQteLevelModifier<WorkerBuildingUpgradeChanceQteModifierEffect>(ModifierOp.AddFlat, 1f));
+
+        var upgrade = CreateUpgradeState("qte-worker-upgrade", 2, qteEffect);
+        var snapshot = CreateQteAggregator(Array.Empty<Practice>(), upgrade).ResolveWorkerSnapshot();
+
+        Assert.That(snapshot.Count, Is.EqualTo(3));
+        Assert.That(snapshot.ClickFrequency, Is.EqualTo(0f).Within(0.0001f));
+        Assert.That(snapshot.IncomeMultiplier, Is.EqualTo(1.5f).Within(0.0001f));
+        Assert.That(snapshot.BuildingUpgradeChance, Is.EqualTo(1f).Within(0.0001f));
+    }
+
+    [Test]
+    public void QteModifierAggregator_AppliesPracticeOwnedWorkerModifiersAtLevelOne() {
+        var practice = CreatePractice("qte-worker-practice", PracticeRarity.Common, 1f);
+        var practiceEffects = (List<QteModifierEffect>)practice.QteImprovements;
+        practiceEffects.Add(CreateQteLevelModifier<WorkerCountQteModifierEffect>(ModifierOp.AddFlat, 2f));
+        practiceEffects.Add(CreateQteLevelModifier<WorkerIncomeMultiplierQteModifierEffect>(ModifierOp.AddPercent, 0.25f));
+
+        var snapshot = CreateQteAggregator(new[] { practice }).ResolveWorkerSnapshot();
+
+        Assert.That(snapshot.Count, Is.EqualTo(2));
+        Assert.That(snapshot.IncomeMultiplier, Is.EqualTo(1.25f).Within(0.0001f));
+    }
+
+    [Test]
+    public void QteWorkerService_UpgradesUnlockedBuildingCategoryWhenDisplayNameIsLocked() {
+        var building = CreateBuilding("LockedDisplayName", GovernmentInteractionType.Archive, click: 1, income: 1, frequency: 1, price: 1);
+        var watcher = new BuildingWatcherService(new List<BuildingDefinition> { building });
+        watcher.GetBuildingState("LockedDisplayName").Level = 1;
+        var invalidation = new InvalidationService(watcher.BuildingsByName);
+        var upgradeService = new BuildingUpgradeService(invalidation, watcher);
+        var unlockService = Track(new UnlockService());
+        unlockService.UnlockItem(GovernmentInteractionType.Archive.ToString());
+        var workerService = new QteWorkerService(null, null, upgradeService, watcher, unlockService);
+
+        Assert.That(unlockService.IsItemUnlocked("LockedDisplayName"), Is.False);
+
+        typeof(QteWorkerService)
+            .GetMethod("TryUpgradeRandomEligibleBuilding", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(workerService, new object[] { 1f });
+
+        Assert.That(watcher.GetBuildingState("LockedDisplayName").Level, Is.EqualTo(2));
+    }
+
     private T Track<T>(T disposable) where T : IDisposable {
         _disposables.Add(disposable);
         return disposable;
@@ -292,6 +382,56 @@ public sealed class GameMechanicsEditModeTests {
         SetPrivateField(practice, "_rarity", rarity);
         SetPrivateField(practice, "_weight", weight);
         return practice;
+    }
+
+    private QteUpgradeEffect CreateQteUpgradeEffect() {
+        var effect = ScriptableObject.CreateInstance<QteUpgradeEffect>();
+        _createdObjects.Add(effect);
+        return effect;
+    }
+
+    private static T CreateQteModifier<T>(ModifierOp operation, double value, int priority = 0) where T : QteModifierEffect, new() {
+        return new T {
+            Operation = operation,
+            Formula = new ConstantFormula { BaseValue = value },
+            Priority = priority
+        };
+    }
+
+    private static T CreateQteLevelModifier<T>(ModifierOp operation, double valuePerLevel, int priority = 0) where T : QteModifierEffect, new() {
+        return new T {
+            Operation = operation,
+            Formula = new LevelMultiplierFormula { ValuePerLevel = valuePerLevel },
+            Priority = priority
+        };
+    }
+
+    private UpgradeNodeState CreateUpgradeState(string id, int level, params UpgradeEffect[] effects) {
+        var definition = ScriptableObject.CreateInstance<UpgradeNodeDefinition>();
+        _createdObjects.Add(definition);
+        definition.Id = id;
+        definition.Name = id;
+        definition.Effects = effects;
+        return new UpgradeNodeState(definition, level, UpgradeNodeState.State.InProgress);
+    }
+
+    private QteModifierAggregator CreateQteAggregator(IEnumerable<Practice> practices, params UpgradeNodeState[] upgrades) {
+        var invalidation = new InvalidationService(new Dictionary<string, BuildingState>());
+        var practiceService = Track(new PracticeService(practices, null, invalidation, new SessionContext(0, 0, 0, 0, 0, 0)));
+        foreach (var practice in practices) {
+            Assert.That(practiceService.BeginResearchOffer(practice.Rarity), Is.True);
+            practiceService.SelectOfferedPractice(practice.Id);
+            Assert.That(practiceService.ConfirmSelectedOffer(), Is.True);
+        }
+
+        var registry = new ProviderRegistryService();
+        registry.RegisterProvider(new UpgradeModifierProvider());
+        var upgradeService = new UpgradeService(new Storage(), registry, invalidation, new UnlockService());
+        var ownedUpgrades = (HashSet<UpgradeNodeState>)typeof(UpgradeService)
+            .GetField("_ownedUpgrades", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(upgradeService);
+        foreach (var upgrade in upgrades) ownedUpgrades.Add(upgrade);
+        return new QteModifierAggregator(practiceService, upgradeService);
     }
 
     private static CostResolver CreateCostResolver(GovernmentInteractionType type, double amount) {
@@ -326,6 +466,15 @@ public sealed class GameMechanicsEditModeTests {
 
     private sealed class MissingProvider : IModifierProvider {
         public void Collect(ISessionContext context, BuildingState building, List<StatModifier> modifiers) { }
+    }
+
+    [Serializable]
+    private sealed class LevelMultiplierFormula : IFormula {
+        public double ValuePerLevel;
+
+        public Value Evaluate(Value input) {
+            return input * ValuePerLevel;
+        }
     }
 
     private sealed class FakeAchievement : IAchievement {
