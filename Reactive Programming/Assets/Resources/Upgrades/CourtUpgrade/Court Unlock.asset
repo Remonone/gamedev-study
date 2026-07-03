@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Court Unlock
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: 097bcc861848b5416ae161161a22172b, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602369
+      Type: 0
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602370
+      Type: 2
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602372
+      Type: 3
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602373
+      Type: 4
+  MaxLevel: 1
+  Position: {x: 780, y: 480}
+  Id: court_unlock
+  Name: Court Unlock
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.85490197, g: 0.62206936, b: 0.4509804, a: 1}
+  Description: 'Every single culprit should take responsibility for their crimes.
+    Bring justice with courts where every case can bring benefit to town well-being!
+
+
+    <i>Increasing
+    influence of the court positively afflicts on critical multiplier of buildings.
+    Also makes every single building loose less stability with upgrading it.</i>'
+  NodeCategory: 1
+  ChildIds:
+  - archive_unlock
+  - upgrade_node_42
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908539996602368
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 7490908539996602369
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 5
+          _base:
+            Degree: 4
+    - rid: 7490908539996602370
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 2
+          _base:
+            Degree: 3
+    - rid: 7490908539996602372
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 300
+          _base:
+            Degree: 2
+    - rid: 7490908539996602373
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 400
+          _base:
+            Degree: 1

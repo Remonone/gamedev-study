@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects: []
+  Price:
+    _costItems: []
+  MaxLevel: 1
+  Position: {x: 360, y: 670}
+  Id: upgrade_node_58
+  Name: upgrade_node_58
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.12, g: 0.16, b: 0.22, a: 1}
+  Description: 
+  NodeCategory: 0
+  ChildIds: []
+  references:
+    version: 2
+    RefIds: []

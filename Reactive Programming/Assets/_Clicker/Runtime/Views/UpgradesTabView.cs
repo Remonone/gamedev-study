@@ -7,9 +7,8 @@ using Views.Models;
 
 namespace Views {
     public class UpgradesTabView : IDisposable {
-        private const float _NodeWidth = 32f;
-        private const float _NodeHeight = 36f;
-
+        private const float _NodeWidth = 40f;
+        private const float _NodeHeight = 40f;
         private readonly VisualElement _root;
         private readonly VisualElement _workspace;
         private readonly VisualElement _treeWindow;
@@ -377,15 +376,35 @@ namespace Views {
                         continue;
                     }
 
-                    var start = new Vector2(tile.Position.x + _NodeWidth, tile.Position.y + _NodeHeight * 0.5f);
-                    var end = new Vector2(child.Position.x, child.Position.y + _NodeHeight * 0.5f);
+                    var parentCenter = GetNodeCenter(tile.Position);
+                    var childCenter = GetNodeCenter(child.Position);
+                    var beginPoint = GetNodeEdgeIntersection(parentCenter, childCenter);
+                    var endPoint = GetNodeEdgeIntersection(childCenter, parentCenter);
 
                     painter.BeginPath();
-                    painter.MoveTo(start);
-                    painter.LineTo(end);
+                    painter.MoveTo(beginPoint);
+                    painter.LineTo(endPoint);
                     painter.Stroke();
                 }
             }
+        }
+
+        private static Vector2 GetNodeCenter(Vector2 position) {
+            return new Vector2(position.x + _NodeWidth * 0.5f, position.y + _NodeHeight * 0.5f);
+        }
+
+        private static Vector2 GetNodeEdgeIntersection(Vector2 center, Vector2 targetCenter) {
+            var delta = targetCenter - center;
+            if (delta.sqrMagnitude <= Mathf.Epsilon) {
+                return center;
+            }
+
+            var halfWidth = _NodeWidth * 0.5f;
+            var halfHeight = _NodeHeight * 0.5f;
+            var scaleX = Mathf.Abs(delta.x) > Mathf.Epsilon ? halfWidth / Mathf.Abs(delta.x) : float.PositiveInfinity;
+            var scaleY = Mathf.Abs(delta.y) > Mathf.Epsilon ? halfHeight / Mathf.Abs(delta.y) : float.PositiveInfinity;
+
+            return center + delta * Mathf.Min(scaleX, scaleY);
         }
 
         private static void SetBackground(VisualElement element, Sprite sprite) {

@@ -1,5 +1,6 @@
 using System;
 using R3;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Views.Models;
 
@@ -40,6 +41,8 @@ namespace Views {
 
             _root.style.left = viewModel.Position.x;
             _root.style.top = viewModel.Position.y;
+            _root.style.backgroundColor = viewModel.UpgradeColor;
+            _icon.style.backgroundColor = Color.clear;
             SetBackground(viewModel.Icon);
 
             viewModel.State
@@ -80,6 +83,7 @@ namespace Views {
 
             _stateClass = GetNodeStateClass(state);
             _root.AddToClassList(_stateClass);
+            ApplyBorder(state);
         }
 
         private void RefreshLevel() {
@@ -93,6 +97,43 @@ namespace Views {
             }
 
             _icon.style.backgroundImage = new StyleBackground(sprite);
+        }
+
+        private void ApplyBorder(UpgradeNodeVisualState state) {
+            if (state == UpgradeNodeVisualState.Completed) {
+                SetBorderWidth(0f);
+                return;
+            }
+
+            SetBorderWidth(2f);
+
+            var borderColor = state == UpgradeNodeVisualState.Available
+                ? new Color(86f / 255f, 184f / 255f, 122f / 255f, 1f)
+                : GetReadableBorderColor(_viewModel.UpgradeColor);
+
+            SetBorderColor(borderColor);
+        }
+
+        private void SetBorderWidth(float width) {
+            _root.style.borderTopWidth = width;
+            _root.style.borderRightWidth = width;
+            _root.style.borderBottomWidth = width;
+            _root.style.borderLeftWidth = width;
+        }
+
+        private void SetBorderColor(Color color) {
+            _root.style.borderTopColor = color;
+            _root.style.borderRightColor = color;
+            _root.style.borderBottomColor = color;
+            _root.style.borderLeftColor = color;
+        }
+
+        private static Color GetReadableBorderColor(Color backgroundColor) {
+            var luminance = backgroundColor.r * 0.2126f + backgroundColor.g * 0.7152f + backgroundColor.b * 0.0722f;
+            var target = luminance < 0.5f ? Color.white : Color.black;
+            var color = Color.Lerp(backgroundColor, target, 0.35f);
+            color.a = 1f;
+            return color;
         }
 
         private static string GetNodeStateClass(UpgradeNodeVisualState state) {

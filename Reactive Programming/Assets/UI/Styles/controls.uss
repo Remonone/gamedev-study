@@ -576,9 +576,7 @@
     width: 40px;
     min-height: 40px;
     background-color: var(--c-surface-2);
-    border-width: 2px;
     border-color: var(--c-border-strong);
-    border-radius: var(--r-sm);
     transition: scale 0.1s, border-color 0.12s;
 }
 
@@ -587,26 +585,10 @@
 }
 
 .upgrade-node--locked {
-    border-color: var(--c-locked);
-    background-color: var(--c-surface);
     opacity: 0.7;
 }
 
-.upgrade-node--available {
-    border-color: var(--c-available);
-}
-
-.upgrade-node--inprogress {
-    border-color: var(--c-inprogress);
-}
-
-.upgrade-node--completed {
-    border-color: var(--c-completed);
-    background-color: rgba(72, 199, 176, 0.16);
-}
-
 .upgrade-node--selected {
-    border-color: var(--c-accent);
     scale: 1.12;
 }
 
@@ -615,7 +597,6 @@
     height: 100%;
     background-color: var(--c-surface-3);
     border-width: 0;
-    border-radius: 3px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -637,7 +618,7 @@
     background-color: var(--c-surface-3);
     border-width: 1px;
     border-color: var(--c-border-strong);
-    border-radius: 999px;
+    border-radius: 50px;
 }
 
 .upgrade-node__state {

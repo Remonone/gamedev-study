@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Police Unlock
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: 097bcc861848b5416ae161161a22172b, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602369
+      Type: 0
+    - Condition:
+        rid: 7490908539996602368
+      Formula:
+        rid: 7490908539996602370
+      Type: 2
+  MaxLevel: 1
+  Position: {x: 570, y: 480}
+  Id: police_unlock
+  Name: Police Unlock
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.25260285, g: 0.2919147, b: 0.6425413, a: 1}
+  Description: 'This town needs a supervising to provide a security and reliability
+    for citizens and for town services.
+
+
+    <i>Increasing influence of the police
+    positively afflicts on stability of buildings to not loose much additional income</i>'
+  NodeCategory: 1
+  ChildIds:
+  - hospital_unlock
+  - upgrade_node_20
+  references:
+    version: 2
+    RefIds:
+    - rid: 7490908539996602368
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 7490908539996602369
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 2
+    - rid: 7490908539996602370
+      type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 50
+          _base:
+            Degree: 1

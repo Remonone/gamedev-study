@@ -22,20 +22,21 @@ MonoBehaviour:
         rid: 7490908315923775565
       Type: 0
   MaxLevel: 1
-  Position: {x: 447.64334, y: 478.82498}
+  Position: {x: 465, y: 480}
   Id: firefighter_unlock
   Name: Unlock Firefighter Station
   Icon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  UpgradeColor: {r: 0.6279481, g: 0.23855144, b: 0.2140059, a: 1}
   Description: 'Unlock firefighter service. Firefighters brings safety into the town
     which positively aflicts on town services work speed.
 
 
-    <i>increases frequency
+    <i>Increases frequency
     of all buildings by increasing influence of this service</i>'
   NodeCategory: 1
   ChildIds:
   - police_unlock
-  - upgrade_node_9
+  - fire_speed_upgrade
   references:
     version: 2
     RefIds:

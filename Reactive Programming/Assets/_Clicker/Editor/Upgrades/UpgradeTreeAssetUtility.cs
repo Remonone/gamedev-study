@@ -66,6 +66,7 @@ namespace Clicker.Editor.Upgrades {
             node.Name = uniqueId;
             node.MaxLevel = 1;
             node.Position = position;
+            node.UpgradeColor = new Color(0.12f, 0.16f, 0.22f, 1f);
             node.ChildIds = new List<string>();
             node.Effects = Array.Empty<UpgradeEffect>();
 

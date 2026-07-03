@@ -22,6 +22,8 @@ namespace Types.Upgrades {
         public string Name;
         [SerializeField, Tooltip("Sprite shown as this upgrade's icon in UI.")]
         public Sprite Icon;
+        [SerializeField, Tooltip("Node background color used in the upgrade UI.")]
+        public Color UpgradeColor = new(0.12f, 0.16f, 0.22f, 1f);
         [SerializeField, TextArea, Tooltip("Description shown in the upgrade UI.")]
         public string Description;
         [SerializeField, Tooltip("How this upgrade is applied: buff, unlock or effect.")]

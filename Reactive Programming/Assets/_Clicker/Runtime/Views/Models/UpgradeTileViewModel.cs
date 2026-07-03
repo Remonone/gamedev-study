@@ -22,6 +22,7 @@ namespace Views.Models {
         public string Name { get; }
         public string Description { get; }
         public Sprite Icon { get; }
+        public Color UpgradeColor { get; }
         public Vector2 Position { get; }
         public int MaxLevel { get; }
         public IReadOnlyList<string> ChildIds { get; }
@@ -39,6 +40,9 @@ namespace Views.Models {
             Name = definition.Name;
             Description = definition.Description;
             Icon = definition.Icon;
+            UpgradeColor = definition.UpgradeColor.a <= 0.001f
+                ? new Color(0.12f, 0.16f, 0.22f, 1f)
+                : definition.UpgradeColor;
             Position = definition.Position;
             MaxLevel = Mathf.Max(1, definition.MaxLevel);
             ChildIds = definition.ChildIds != null

@@ -57,11 +57,13 @@ namespace Clicker.Editor.Upgrades {
             DrawProperty("MaxLevel");
             DrawProperty("Name");
             DrawProperty("Icon");
+            DrawProperty("UpgradeColor");
             DrawProperty("Description");
             DrawProperty("NodeCategory");
             DrawProperty("Price", true);
 
             EditorGUILayout.Space(8f);
+            DrawProperty("Position");
             DrawReadOnlyDerivedFields();
 
             EditorGUILayout.Space(8f);
@@ -97,7 +99,6 @@ namespace Clicker.Editor.Upgrades {
 
         private void DrawReadOnlyDerivedFields() {
             using (new EditorGUI.DisabledScope(true)) {
-                EditorGUILayout.Vector2Field("Position (tree controlled)", _node.Position);
                 var childIds = _node.ChildIds == null ? string.Empty : string.Join(", ", _node.ChildIds);
                 EditorGUILayout.TextField("Child Ids (links controlled)", childIds);
             }

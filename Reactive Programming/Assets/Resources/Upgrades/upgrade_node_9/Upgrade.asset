@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: 7efb78459b54eb141a148f15fa381009, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 3848164331161649225
+      Formula:
+        rid: 3848164331161649226
+      Type: 2
+  MaxLevel: 5
+  Position: {x: 465, y: 410}
+  Id: fire_speed_upgrade
+  Name: Speedfire
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
+  Description: Increases the speed of firefighter services by +5%
+  NodeCategory: 0
+  ChildIds:
+  - fire_crit_chance
+  - fire_cost_upgrade
+  - fire_income_upgrade
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164331161649225
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164331161649226
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 5
+          _base:
+            Degree: 1
+        Rate:
+          _stored: 4.5
+          _base:
+            Degree: 0

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: 51b17fcddcc4793ba84a1da16a2d0ef0, type: 2}
+  Price:
+    _costItems: []
+  MaxLevel: 10
+  Position: {x: 535, y: 270}
+  Id: fire_crit_multiplier
+  Name: Play with fire
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
+  Description: Increase crit multiplier for firefighter service by +0.5
+  NodeCategory: 0
+  ChildIds:
+  - fire_speed_upgrade_2
+  references:
+    version: 2
+    RefIds: []

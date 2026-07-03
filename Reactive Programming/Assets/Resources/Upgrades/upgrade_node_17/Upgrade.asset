@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: abba5a7f6736bfb07b3ea83ee103c994, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 3848164331161649255
+      Formula:
+        rid: 3848164331161649256
+      Type: 2
+  MaxLevel: 10
+  Position: {x: 395, y: 200}
+  Id: fire_multiplier_upgrade_2
+  Name: On fire 2
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
+  Description: Increase multiplier of firefighter services by +0.1
+  NodeCategory: 0
+  ChildIds:
+  - firefighter_total_speed_1
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164331161649255
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164331161649256
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 15
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 4.5
+          _base:
+            Degree: 0

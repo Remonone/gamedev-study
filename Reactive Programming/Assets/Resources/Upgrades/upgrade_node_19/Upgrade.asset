@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: 341619e91ce5d70a18ab6d1ed6800621, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 3848164331161649228
+      Formula:
+        rid: 3848164331161649229
+      Type: 2
+    - Condition:
+        rid: 3848164331161649228
+      Formula:
+        rid: 3848164331161649230
+      Type: 0
+  MaxLevel: 100
+  Position: {x: 395, y: 130}
+  Id: firefighter_total_speed_1
+  Name: Overload
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
+  Description: Increases all building speed by +3%, but reduces the multiplier by
+    5%.
+  NodeCategory: 0
+  ChildIds:
+  - qte_speed_upgrade
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164331161649228
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164331161649229
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 4.5
+          _base:
+            Degree: 0
+    - rid: 3848164331161649230
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 10
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 4.5
+          _base:
+            Degree: 0

@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: df497119aa525d8c3b12431aa11b56dd, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 3848164285570875491
+      Formula:
+        rid: 3848164285570875492
+      Type: 0
+  MaxLevel: 10
+  Position: {x: 220, y: 265}
+  Id: mayory_multiplier_2
+  Name: Mayor Expansion 2
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.8235294, g: 0.85882354, b: 0.45882353, a: 1}
+  Description: Increase income multiplier by +0.1 for mayor structures
+  NodeCategory: 0
+  ChildIds:
+  - mayory_frequency_2
+  - mayory_stability
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164285570875491
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164285570875492
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 50
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 2.5
+          _base:
+            Degree: 0

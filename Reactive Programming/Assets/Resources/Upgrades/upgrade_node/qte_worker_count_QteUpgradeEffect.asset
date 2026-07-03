@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 619e6ad731d9b12d3b18d786381fd412, type: 3}
+  m_Name: qte_worker_count_QteUpgradeEffect
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.Effects.QteUpgradeEffect
+  Effects:
+  - rid: 3848164310435233866
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164310435233866
+      type: {class: WorkerCountQteModifierEffect, ns: Types.QTE, asm: Clicker.Runtime}
+      data:
+        Operation: 0
+        Formula:
+          rid: 3848164310435233872
+        Priority: 0
+    - rid: 3848164310435233872
+      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 0
+          _base:
+            Degree: 0
+        Multiplier:
+          _stored: 1
+          _base:
+            Degree: 0
