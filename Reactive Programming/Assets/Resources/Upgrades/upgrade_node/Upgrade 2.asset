@@ -15,16 +15,52 @@ MonoBehaviour:
   Effects:
   - {fileID: 11400000, guid: 5ab4596d6a87ea0379a7d2e766548066, type: 2}
   Price:
-    _costItems: []
+    _costItems:
+    - Condition:
+        rid: 3848164331161649267
+      Formula:
+        rid: 3848164331161649268
+      Type: 2
+    - Condition:
+        rid: 3848164331161649267
+      Formula:
+        rid: 3848164331161649269
+      Type: 0
   MaxLevel: 10
   Position: {x: 465, y: 130}
   Id: qte_speed_upgrade
   Name: Deputy Accelerator
   Icon: {fileID: 0}
-  UpgradeColor: {r: 0.627451, g: 0, b: 0.76862746, a: 1}
+  UpgradeColor: {r: 0.72138435, g: 0.52812386, b: 0.8679245, a: 1}
   Description: Increases act frequency for deputies during their work by 5%
   NodeCategory: 0
   ChildIds: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164331161649267
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164331161649268
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 50
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 7
+          _base:
+            Degree: 0
+    - rid: 3848164331161649269
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 6.7
+          _base:
+            Degree: 0

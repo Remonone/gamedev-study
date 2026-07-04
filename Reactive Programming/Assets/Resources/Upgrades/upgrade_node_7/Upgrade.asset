@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875488
       Type: 0
-  MaxLevel: 5
+  MaxLevel: 15
   Position: {x: 220, y: 335}
   Id: mayory_frequency_2
   Name: Efficient work 2
@@ -45,6 +45,6 @@ MonoBehaviour:
           _base:
             Degree: 3
         Rate:
-          _stored: 0
+          _stored: 3.5
           _base:
             Degree: 0

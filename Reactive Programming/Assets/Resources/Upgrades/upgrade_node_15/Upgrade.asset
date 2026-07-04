@@ -15,8 +15,13 @@ MonoBehaviour:
   Effects:
   - {fileID: 11400000, guid: 51b17fcddcc4793ba84a1da16a2d0ef0, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 10
+    _costItems:
+    - Condition:
+        rid: 3848164331161649265
+      Formula:
+        rid: 3848164331161649266
+      Type: 2
+  MaxLevel: 15
   Position: {x: 535, y: 270}
   Id: fire_crit_multiplier
   Name: Play with fire
@@ -28,4 +33,19 @@ MonoBehaviour:
   - fire_speed_upgrade_2
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164331161649265
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164331161649266
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 5
+          _base:
+            Degree: 0

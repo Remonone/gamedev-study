@@ -126,7 +126,7 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 1
+          _stored: 1.2
           _base:
             Degree: 1
         Rate:

@@ -15,23 +15,16 @@ MonoBehaviour:
   Target: {fileID: 11400000, guid: 2f1b7df3bb8d4931b7aa74d31936f724, type: 2}
   Modifier:
     Stat: 1
-    Operation: 2
+    Operation: 1
     Value: 1
     Priority: 1
     ModifierId: notary_income
   CalculationFormula:
-    rid: 7490908315923775563
+    rid: 3848164331161649270
   references:
     version: 2
     RefIds:
-    - rid: 7490908315923775563
-      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+    - rid: 3848164331161649270
+      type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
       data:
-        BaseValue:
-          _stored: 0
-          _base:
-            Degree: 0
-        Multiplier:
-          _stored: 0.05
-          _base:
-            Degree: 0
+        ValuePerLevel: 0.1

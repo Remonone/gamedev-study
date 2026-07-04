@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649258
       Type: 2
-  MaxLevel: 10
+  MaxLevel: 25
   Position: {x: 465, y: 200}
   Id: fire_income_upgrade_2
   Name: Heat transfer 2

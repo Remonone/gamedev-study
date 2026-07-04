@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649245
       Type: 2
-  MaxLevel: 4
+  MaxLevel: 6
   Position: {x: 535, y: 340}
   Id: fire_crit_chance
   Name: Combustious work
@@ -42,7 +42,7 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 150
+          _stored: 500
           _base:
             Degree: 1
         Rate:

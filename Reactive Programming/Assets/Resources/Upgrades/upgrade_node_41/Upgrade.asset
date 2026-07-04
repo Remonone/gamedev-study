@@ -12,18 +12,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: dc05b814fa42a30a9876a82839309eb5, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
-  Position: {x: 675, y: 130}
-  Id: upgrade_node_41
-  Name: upgrade_node_41
+    _costItems:
+    - Condition:
+        rid: 3848164352651952603
+      Formula:
+        rid: 3848164352651952604
+      Type: 4
+    - Condition:
+        rid: 3848164352651952603
+      Formula:
+        rid: 3848164352651952605
+      Type: 0
+  MaxLevel: 100
+  Position: {x: 676.02264, y: 130.16394}
+  Id: total_multiplier
+  Name: Better healthbeing
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.4509804, b: 0.7764706, a: 1}
-  Description: 
+  Description: Increase multiplier for all buildings by +0.1
   NodeCategory: 0
-  ChildIds: []
+  ChildIds:
+  - upgrade_node
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952603
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952604
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 15
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 4
+          _base:
+            Degree: 0
+    - rid: 3848164352651952605
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 3.8
+          _base:
+            Degree: 0

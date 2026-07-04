@@ -12,26 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e22915f0065420693c3385ffb94a5fe, type: 3}
   m_Name: mayory_bureaucracy_upgrade_frequency_LevelModifierDefinitionDefinition
   m_EditorClassIdentifier: Clicker.Runtime::Types.Modifiers.Definitions.LevelModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: 2f1b7df3bb8d4931b7aa74d31936f724, type: 2}
   Modifier:
-    Stat: 0
+    Stat: 2
     Operation: 1
-    Value: -1
+    Value: 1
     Priority: 0
     ModifierId: mayory_bureaucracy_upgrade_frequency
   CalculationFormula:
-    rid: 3848164330523852801
+    rid: 3848164352651952589
   references:
     version: 2
     RefIds:
-    - rid: 3848164330523852801
-      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+    - rid: 3848164352651952589
+      type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
       data:
-        BaseValue:
-          _stored: 0
-          _base:
-            Degree: 0
-        Rate:
-          _stored: 0.025
-          _base:
-            Degree: 0
+        ValuePerLevel: -0.015

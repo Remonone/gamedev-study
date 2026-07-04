@@ -45,7 +45,7 @@ MonoBehaviour:
   NodeCategory: 1
   ChildIds:
   - court_unlock
-  - upgrade_node_31
+  - hospital_income
   references:
     version: 2
     RefIds:

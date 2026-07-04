@@ -26,7 +26,7 @@ MonoBehaviour:
   Id: qte_worker_count
   Name: Emergency Deputy
   Icon: {fileID: 0}
-  UpgradeColor: {r: 0.6247682, g: 0, b: 0.7660672, a: 1}
+  UpgradeColor: {r: 0.72156864, g: 0.5294118, b: 0.87058824, a: 1}
   Description: Hire deputy for handling emergency cases
   NodeCategory: 0
   ChildIds: []

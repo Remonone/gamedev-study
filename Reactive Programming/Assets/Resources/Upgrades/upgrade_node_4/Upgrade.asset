@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875492
       Type: 0
-  MaxLevel: 10
+  MaxLevel: 20
   Position: {x: 220, y: 265}
   Id: mayory_multiplier_2
   Name: Mayor Expansion 2
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.8235294, g: 0.85882354, b: 0.45882353, a: 1}
-  Description: Increase income multiplier by +0.1 for mayor structures
+  Description: Increase income multiplier by +0.2 for mayor structures
   NodeCategory: 0
   ChildIds:
   - mayory_frequency_2
@@ -47,6 +47,6 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 2.5
+          _stored: 3
           _base:
             Degree: 0

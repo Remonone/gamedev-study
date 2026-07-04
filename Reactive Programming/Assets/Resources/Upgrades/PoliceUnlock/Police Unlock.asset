@@ -41,7 +41,7 @@ MonoBehaviour:
   NodeCategory: 1
   ChildIds:
   - hospital_unlock
-  - upgrade_node_20
+  - police_multiplier
   references:
     version: 2
     RefIds:

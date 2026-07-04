@@ -44,7 +44,7 @@ MonoBehaviour:
           _base:
             Degree: 1
         Rate:
-          _stored: 1.8
+          _stored: 3
           _base:
             Degree: 0
     - rid: 7490908315923775557

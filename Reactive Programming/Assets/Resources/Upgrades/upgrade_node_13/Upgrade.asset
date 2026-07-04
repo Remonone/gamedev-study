@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649254
       Type: 2
-  MaxLevel: 5
+  MaxLevel: 10
   Position: {x: 396.54736, y: 270.34387}
   Id: fire_multiplier
   Name: On fire
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
-  Description: Increase multiplier of firefighter services by +0.05
+  Description: Increase multiplier of firefighter services by +0.1
   NodeCategory: 0
   ChildIds:
   - fire_multiplier_upgrade_2
@@ -47,6 +47,6 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 4
+          _stored: 5
           _base:
             Degree: 0

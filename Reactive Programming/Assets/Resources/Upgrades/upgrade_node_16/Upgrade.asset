@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649234
       Type: 2
-  MaxLevel: 10
+  MaxLevel: 15
   Position: {x: 535, y: 200}
   Id: fire_speed_upgrade_2
   Name: Speedfire 2
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
-  Description: Increases the speed of firefighter services by +5%
+  Description: Increases the speed of firefighter services by +10%
   NodeCategory: 0
   ChildIds: []
   references:
@@ -41,10 +41,10 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 0
+          _stored: 25
           _base:
-            Degree: 0
+            Degree: 2
         Rate:
-          _stored: 0
+          _stored: 4.3
           _base:
             Degree: 0

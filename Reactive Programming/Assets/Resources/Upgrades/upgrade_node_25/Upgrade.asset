@@ -12,20 +12,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: ff5624c8c606743de98dd363c86bd5a4, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164352651952564
+      Formula:
+        rid: 3848164352651952565
+      Type: 3
+  MaxLevel: 25
   Position: {x: 570, y: 760}
-  Id: upgrade_node_25
-  Name: upgrade_node_25
+  Id: police_multiplier_2
+  Name: Snatch reveal 2
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.25490198, g: 0.29411766, b: 0.6431373, a: 1}
-  Description: 
+  Description: Increase police multiplier by +0.5
   NodeCategory: 0
   ChildIds:
-  - upgrade_node_28
-  - upgrade_node_30
+  - police_income_2
+  - total_stability
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952564
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952565
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 500
+          _base:
+            Degree: 1
+        Rate:
+          _stored: 5
+          _base:
+            Degree: 0

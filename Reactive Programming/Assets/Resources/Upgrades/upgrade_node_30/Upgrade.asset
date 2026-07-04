@@ -12,18 +12,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: 11d78d11590fe6251b05d5c582a78f21, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164352651952558
+      Formula:
+        rid: 3848164352651952559
+      Type: 3
+    - Condition:
+        rid: 3848164352651952558
+      Formula:
+        rid: 3848164352651952568
+      Type: 0
+  MaxLevel: 100
   Position: {x: 570, y: 830}
-  Id: upgrade_node_30
-  Name: upgrade_node_30
+  Id: total_stability
+  Name: Secure streets
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.25490198, g: 0.29411766, b: 0.6431373, a: 1}
-  Description: 
+  Description: Increase stability of each building by +5%
   NodeCategory: 0
-  ChildIds: []
+  ChildIds:
+  - qte_income_multiplier
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952558
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952559
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 5
+          _base:
+            Degree: 0
+    - rid: 3848164352651952568
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 100
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 5
+          _base:
+            Degree: 0

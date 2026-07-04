@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875470
       Type: 0
-  MaxLevel: 4
+  MaxLevel: 6
   Position: {x: 290, y: 520}
   Id: mayor_crit_chance
   Name: Mayor Lucky Day
@@ -47,6 +47,6 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 3.2
+          _stored: 3.5
           _base:
             Degree: 0

@@ -59,9 +59,9 @@ MonoBehaviour:
       type: {class: ConstantFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 1
+          _stored: 200
           _base:
-            Degree: 3
+            Degree: 2
     - rid: 7490908492861800525
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
@@ -126,7 +126,7 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
       data:
         BaseValue:
-          _stored: 10
+          _stored: 45
           _base:
             Degree: 1
         Rate:

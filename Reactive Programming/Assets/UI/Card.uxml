@@ -4,11 +4,11 @@
             <ui:VisualElement name="Icon" class="building-card__icon"/>
             <ui:VisualElement class="building-card__headline">
                 <ui:Label text="Label" name="Name" class="building-card__name"/>
+                <ui:Label text="Label" name="Level" class="building-card__name"/>
                 <ui:Label text="Description" name="Description" class="building-card__description"/>
             </ui:VisualElement>
             <ui:Button text="Upgrade" name="UpgradeButton" class="building-card__upgrade-button"/>
         </ui:VisualElement>
-
         <ui:VisualElement class="building-card__stats">
             <ui:VisualElement class="building-card__stat">
                 <ui:Label text="Income" class="building-card__stat-key"/>
@@ -20,7 +20,6 @@
             </ui:VisualElement>
             <ui:Button text="Details" name="ExpandButton" class="building-card__expand-toggle"/>
         </ui:VisualElement>
-
         <ui:VisualElement name="DetailsContainer" class="building-card__details">
             <ui:VisualElement class="building-card__detail">
                 <ui:Label text="Stability" class="building-card__detail-key"/>

@@ -32,6 +32,6 @@ MonoBehaviour:
           _base:
             Degree: 0
         Multiplier:
-          _stored: 1.01
+          _stored: 0.01
           _base:
             Degree: 0

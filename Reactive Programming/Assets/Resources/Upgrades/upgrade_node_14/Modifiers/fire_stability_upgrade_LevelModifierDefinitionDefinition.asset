@@ -12,17 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e22915f0065420693c3385ffb94a5fe, type: 3}
   m_Name: fire_stability_upgrade_LevelModifierDefinitionDefinition
   m_EditorClassIdentifier: Clicker.Runtime::Types.Modifiers.Definitions.LevelModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: 57e963f38d30e936c949bbd3f853ae51, type: 2}
   Modifier:
-    Stat: 0
-    Operation: 0
-    Value: 0
+    Stat: 4
+    Operation: 1
+    Value: 1
     Priority: 0
     ModifierId: fire_stability_upgrade
   CalculationFormula:
-    rid: -2
+    rid: 3848164331161649264
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 3848164331161649264
+      type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
+      data:
+        ValuePerLevel: 0.01

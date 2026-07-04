@@ -47,6 +47,6 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 2.5
+          _stored: 3
           _base:
             Degree: 0

@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875505
       Type: 0
-  MaxLevel: 4
+  MaxLevel: 15
   Position: {x: 360, y: 480}
   Id: mayory_income
   Name: Mayor Influence
   Icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   UpgradeColor: {r: 0.8232864, g: 0.85882354, b: 0.45882353, a: 1}
-  Description: Increase income of mayor structures by +5% each level
+  Description: Increase income of mayor structures by +10%
   NodeCategory: 0
   ChildIds:
   - firefighter_unlock
@@ -42,7 +42,7 @@ MonoBehaviour:
           _base:
             Degree: 1
         Rate:
-          _stored: 1.9
+          _stored: 3.6
           _base:
             Degree: 0
     - rid: 7490908315923775566

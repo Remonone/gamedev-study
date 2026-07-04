@@ -20,18 +20,11 @@ MonoBehaviour:
     Priority: 0
     ModifierId: mayory_frequency_upgrade_2
   CalculationFormula:
-    rid: 3848164285570875490
+    rid: 3848164331161649272
   references:
     version: 2
     RefIds:
-    - rid: 3848164285570875490
-      type: {class: LinearFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+    - rid: 3848164331161649272
+      type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
       data:
-        BaseValue:
-          _stored: 0
-          _base:
-            Degree: 0
-        Multiplier:
-          _stored: 0.02
-          _base:
-            Degree: 0
+        ValuePerLevel: 0.02

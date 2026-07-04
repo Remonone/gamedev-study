@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649226
       Type: 2
-  MaxLevel: 5
+  MaxLevel: 3
   Position: {x: 465, y: 410}
   Id: fire_speed_upgrade
   Name: Speedfire
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.6313726, g: 0.23921569, b: 0.21568628, a: 1}
-  Description: Increases the speed of firefighter services by +5%
+  Description: Increases the speed of firefighter services by +2%
   NodeCategory: 0
   ChildIds:
   - fire_crit_chance

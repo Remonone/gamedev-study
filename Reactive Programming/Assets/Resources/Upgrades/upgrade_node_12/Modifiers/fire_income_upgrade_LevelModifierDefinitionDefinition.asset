@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e22915f0065420693c3385ffb94a5fe, type: 3}
   m_Name: fire_income_upgrade_LevelModifierDefinitionDefinition
   m_EditorClassIdentifier: Clicker.Runtime::Types.Modifiers.Definitions.LevelModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: 57e963f38d30e936c949bbd3f853ae51, type: 2}
   Modifier:
     Stat: 1
     Operation: 1

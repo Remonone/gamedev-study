@@ -15,7 +15,7 @@ MonoBehaviour:
   Target: {fileID: 11400000, guid: 2f1b7df3bb8d4931b7aa74d31936f724, type: 2}
   Modifier:
     Stat: 7
-    Operation: 1
+    Operation: 0
     Value: 1
     Priority: 1
     ModifierId: crit_chance_mayor_upgrade

@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875479
       Type: 0
-  MaxLevel: 10
+  MaxLevel: 15
   Position: {x: 360, y: 550}
   Id: mayor_crit_multiplier
   Name: Mayory Success
@@ -45,6 +45,6 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 2.1
+          _stored: 3
           _base:
             Degree: 0

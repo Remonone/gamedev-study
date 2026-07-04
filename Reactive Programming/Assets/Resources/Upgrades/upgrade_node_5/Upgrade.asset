@@ -21,13 +21,13 @@ MonoBehaviour:
       Formula:
         rid: 3848164310435233875
       Type: 0
-  MaxLevel: 10
+  MaxLevel: 30
   Position: {x: 290, y: 230}
   Id: mayory_income_2
   Name: Mayor Influence
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.8235294, g: 0.85882354, b: 0.45882353, a: 1}
-  Description: Increase income of mayor structures by +5% each level
+  Description: Increase income of mayor structures by +15% each level
   NodeCategory: 0
   ChildIds:
   - mayor_bureaucracy

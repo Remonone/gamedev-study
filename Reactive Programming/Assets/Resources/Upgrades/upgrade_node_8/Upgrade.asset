@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164285570875483
       Type: 0
-  MaxLevel: 2
+  MaxLevel: 5
   Position: {x: 150, y: 300}
   Id: mayory_stability
   Name: Mayor Supervision

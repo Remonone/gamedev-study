@@ -32,6 +32,7 @@ namespace Views.Models {
         public ReactiveProperty<int> PurchaseLevels = new(_DefaultPurchaseLevels);
         public ReactiveProperty<string> Description = new(string.Empty);
         public ReactiveProperty<Sprite> Icon = new(null);
+        public ReactiveProperty<int> Level = new(0);
 
         private Storage _storage;
         
@@ -51,7 +52,6 @@ namespace Views.Models {
             
             _economyService.BuildingUpdate
                 .Where(update => update.Building.Definition.Equals(definition))
-                .Select(update => update.Stats)
                 .Subscribe(OnValuesUpdated)
                 .AddTo(_disposable);
             _economyService.PurchasePricesInvalidated
@@ -61,7 +61,8 @@ namespace Views.Models {
             PurchaseLevels.Subscribe(_ => RefreshPurchaseState()).AddTo(_disposable);
         }
 
-        private void OnValuesUpdated(ComputedStats stats) {
+        private void OnValuesUpdated(BuildingUpdate buildingUpdate) {
+            var stats = buildingUpdate.Building.Cache;
             Income.Value = stats.Income;
             Frequency.Value = stats.Frequency;
             Stability.Value = stats.StabilityModifier;
@@ -69,6 +70,7 @@ namespace Views.Models {
             Multiplier.Value = stats.MultiplierCoefficient;
             CriticalChance.Value = stats.CriticalChance;
             CriticalMultiplier.Value = stats.CriticalMultiplier;
+            Level.Value = buildingUpdate.Building.Level;
             RefreshPurchaseState();
         }
 

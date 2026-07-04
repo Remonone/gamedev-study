@@ -22,6 +22,7 @@ namespace Views {
         private VisualElement _cardRoot;
         private VisualElement _icon;
         private Label _name;
+        private Label _level;
         private Label _description;
         private Label _incomeLabel;
         private Label _frequencyLabel;
@@ -55,6 +56,7 @@ namespace Views {
             viewModel.CriticalChance.Subscribe(criticalChance => _criticalChanceLabel.text = $"{criticalChance}").AddTo(this);
             viewModel.CriticalMultiplier.Subscribe(criticalMultiplier => _criticalMultiplierLabel.text = $"{criticalMultiplier}").AddTo(this);
             viewModel.CanPurchase.Subscribe(canPurchase => _upgradeButton.SetEnabled(canPurchase)).AddTo(this);
+            viewModel.Level.Subscribe(level => _level.text = $"{level}").AddTo(this);
             viewModel.Description.Subscribe(description => _description.text = description).AddTo(this);
             viewModel.Icon.Subscribe(SetIcon).AddTo(this);
         }
@@ -80,6 +82,7 @@ namespace Views {
             _cardRoot = _root.Q<VisualElement>("CardRoot");
             _icon = _root.Q<VisualElement>("Icon");
             _name = _root.Q<Label>("Name");
+            _level = _root.Q<Label>("Level");
             _description = _root.Q<Label>("Description");
             _incomeLabel = _root.Q<Label>("Income");
             _frequencyLabel = _root.Q<Label>("Frequency");

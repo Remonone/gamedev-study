@@ -21,7 +21,7 @@ MonoBehaviour:
       Formula:
         rid: 3848164331161649261
       Type: 2
-  MaxLevel: 5
+  MaxLevel: 10
   Position: {x: 465, y: 270}
   Id: fire_stabilize
   Name: Localize the fire

@@ -12,18 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: 1d7ad5bc16d8ebca9accf27eac01fbe7, type: 2}
   Price:
-    _costItems: []
+    _costItems:
+    - Condition:
+        rid: -2
+      Formula:
+        rid: -2
+      Type: 0
   MaxLevel: 1
   Position: {x: 605, y: 410}
-  Id: upgrade_node_34
-  Name: upgrade_node_34
+  Id: hospital_frequency_2
+  Name: Medical equipment 2
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.4509804, b: 0.7764706, a: 1}
-  Description: 
+  Description: Increase hospital services frequency by +5%
   NodeCategory: 0
   ChildIds: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

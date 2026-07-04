@@ -12,19 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: 1569eda40dc8843339ed05731c576f9b, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164352651952601
+      Formula:
+        rid: 3848164352651952602
+      Type: 4
+  MaxLevel: 20
   Position: {x: 675, y: 270}
-  Id: upgrade_node_35
-  Name: upgrade_node_35
+  Id: hospital_income_2
+  Name: Better care 2
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.4509804, b: 0.7764706, a: 1}
-  Description: 
+  Description: Increase income from hospital services by +15%
   NodeCategory: 0
   ChildIds:
-  - upgrade_node_36
+  - hospital_stability
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952601
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952602
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 500
+          _base:
+            Degree: 1
+        Rate:
+          _stored: 6
+          _base:
+            Degree: 0

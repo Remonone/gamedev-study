@@ -27,4 +27,4 @@ MonoBehaviour:
     - rid: 3848164331161649252
       type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
       data:
-        ValuePerLevel: 0.1
+        ValuePerLevel: 0.2

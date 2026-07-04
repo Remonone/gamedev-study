@@ -12,18 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: 2ecad14f612102112ac0933215850a67, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164352651952570
+      Formula:
+        rid: 3848164352651952571
+      Type: 3
+  MaxLevel: 25
   Position: {x: 640, y: 760}
-  Id: upgrade_node_28
-  Name: upgrade_node_28
+  Id: police_income_2
+  Name: Police watchfulness
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.25490198, g: 0.29411766, b: 0.6431373, a: 1}
-  Description: 
+  Description: Increase income from police services by +15%
   NodeCategory: 0
-  ChildIds: []
+  ChildIds:
+  - upgrade_node_1
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952570
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952571
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 3
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 4.5
+          _base:
+            Degree: 0
