@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: StateFunding
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: state_funding
+  _displayName: State Funding
+  _description: After negotiation with state administration, town have achieved more
+    funding benefits from the state. Decreases price of all buildings by 25%
   _icon: {fileID: 0}
-  _rarity: 0
-  _weight: 1
-  _statModifiers: []
+  _rarity: 4
+  _weight: 500
+  _statModifiers:
+  - {fileID: 11400000, guid: 198484a0adc8779f99b6458779e8f816, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

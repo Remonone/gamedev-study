@@ -12,14 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: FirefighterFrequency
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: firefighter_frequency
+  _displayName: Firefighter priority
+  _description: Increases funding for the firefighters. Increases it influence, which
+    causes slight increase in frequency for all buildings, but reduces stability
+    of services by -5%
   _icon: {fileID: 0}
   _rarity: 0
   _weight: 1
-  _statModifiers: []
-  _influenceEffects: []
+  _statModifiers:
+  - {fileID: 11400000, guid: 96542c3fdcacd7a60a01ae9657fa336f, type: 2}
+  _influenceEffects:
+  - Target: {fileID: 11400000, guid: 959d0a315f6031a4e80e06e5d22b0606, type: 2}
+    SourceInfluence: 2
+    UseAllInfluence: 0
+    Stat: 2
+    Operation: 1
+    BaseValue: 0
+    ValuePerInfluence: 0.0001
+    Priority: 0
+    ModifierId: firefigter_frequency_buff
   _researchEffects: []
   _qteImprovements: []
   references:

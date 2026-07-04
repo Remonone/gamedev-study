@@ -39,12 +39,12 @@ namespace Types.Modifiers.Definitions.Custom {
                     break;
                 case GovernmentInteractionType.Hospital:
                     modifier.Stat = StatType.MultiplierCoefficient;
-                    modifier.Operation = ModifierOp.Multiply;
-                    operation = value => (float)(Math.Log10(value) / 2f);
+                    modifier.Operation = ModifierOp.AddFlat;
+                    operation = value => (float)(Math.Log10(value) / 4f);
                     break;
                 case GovernmentInteractionType.Court:
                     modifier.Stat = StatType.CriticalMultiplier;
-                    modifier.Operation = ModifierOp.Multiply;
+                    modifier.Operation = ModifierOp.AddFlat;
                     operation = value => (float)Math.Log10(value);
                     break;
                 default:

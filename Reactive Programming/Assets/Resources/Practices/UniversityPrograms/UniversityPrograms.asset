@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: UniversityPrograms
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: university_programs
+  _displayName: University programs
+  _description: Open new programs for recruting new students, which increases services
+    efficiency. Increasing income by +15% and critical chance by +0.5%, but increases
+    the cost of recruting new personnel by 5%
   _icon: {fileID: 0}
-  _rarity: 0
-  _weight: 1
-  _statModifiers: []
+  _rarity: 2
+  _weight: 100
+  _statModifiers:
+  - {fileID: 11400000, guid: 6ef24a02da5c13832bcc9775670633bf, type: 2}
+  - {fileID: 11400000, guid: 841355f449f479d2e80fb005a4a80d85, type: 2}
+  - {fileID: 11400000, guid: a54c547ee4f04cc4cb370ad9a62ac7f4, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

@@ -8,7 +8,12 @@ namespace Services {
     public class StateBenefitCalculationService : IService {
 	    
 	    private readonly ISessionContext _context;
+	    private BuildingUpgradeService _buildingUpgradeService;
 	    private readonly Random _random;
+	    
+	    private double _lastStabilityUpdate = 0;
+
+	    private float _stabilityCache;
 	    
 		public StateBenefitCalculationService(ISessionContext context) {
 			_context = context;
@@ -16,13 +21,15 @@ namespace Services {
 		}
 		
 		public void CalculateBenefits(BuildingState state, ref Value value) {
-			var stability = CalculateStabilityValue();
-			var multiplier = Math.Max(1f, state.Cache.MultiplierCoefficient * stability);
+			var multiplier = state.Cache.MultiplierCoefficient * state.Cache.StabilityModifier;
 			value *= multiplier;
 		}
 
 
-		private float CalculateStabilityValue() {
+		public float CalculateStabilityValue() {
+			if(_lastStabilityUpdate != 0 && Math.Abs(_lastStabilityUpdate - _context.LastInfluenceUpdate) < 0.001d)
+				return _stabilityCache;
+			_lastStabilityUpdate = _context.LastInfluenceUpdate;
 			var capital = _context.GetInfluenceValue(GovernmentInteractionType.MayorOffice) 
 			              + _context.GetInfluenceValue(GovernmentInteractionType.Archive) + _context.GetInfluenceValue(GovernmentInteractionType.Hospital) +
 			              _context.GetInfluenceValue(GovernmentInteractionType.FireFighterStation) + _context.GetInfluenceValue(GovernmentInteractionType.Court);
@@ -34,12 +41,13 @@ namespace Services {
 				return (float)Math.Max(0, Math.Min(1f, capitalDecreasal));
 			}
 			var policeEffect = Math.Log10(court+police);
-			return (float)Math.Max(0, Math.Min(1f, capitalDecreasal * policeEffect));
+			_stabilityCache = (float)Math.Max(0, Math.Min(1f, capitalDecreasal * policeEffect));
+			return _stabilityCache;
 		}
 
 		public void CalculateCritChance(BuildingState state, ref Value value) {
 			if (_random.NextDouble() < state.Cache.CriticalChance) {
-				var multiplier = Math.Max(1f, state.Cache.CriticalMultiplier * CalculateStabilityValue());
+				var multiplier = Math.Max(1f, state.Cache.CriticalMultiplier * state.Cache.StabilityModifier);
 				value *= multiplier;
 			}
 		}

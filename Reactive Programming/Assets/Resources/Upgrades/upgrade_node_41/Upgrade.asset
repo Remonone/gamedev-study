@@ -27,7 +27,7 @@ MonoBehaviour:
         rid: 3848164352651952605
       Type: 0
   MaxLevel: 100
-  Position: {x: 676.02264, y: 130.16394}
+  Position: {x: 675, y: 130}
   Id: total_multiplier
   Name: Better healthbeing
   Icon: {fileID: 0}
@@ -51,7 +51,7 @@ MonoBehaviour:
           _base:
             Degree: 2
         Rate:
-          _stored: 4
+          _stored: 5.6
           _base:
             Degree: 0
     - rid: 3848164352651952605

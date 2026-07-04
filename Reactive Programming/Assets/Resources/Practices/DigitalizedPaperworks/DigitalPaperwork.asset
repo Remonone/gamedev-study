@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: DigitalPaperwork
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: digital_paperwork
+  _displayName: Digital paperwork
+  _description: Replace old-fashion paper bureaucracy with new technologies and shift
+    all bureaucracy into digital systems but requires additional spendings for implementing
+    new infrastructure. Increases frequency of all buildings by +20%, but also increases
+    the cost of buildings by 5%
   _icon: {fileID: 0}
-  _rarity: 0
-  _weight: 1
-  _statModifiers: []
+  _rarity: 3
+  _weight: 180
+  _statModifiers:
+  - {fileID: 11400000, guid: 8dc021cf15319370fbd315333d712992, type: 2}
+  - {fileID: 11400000, guid: 5dd6d7a26f732c1cb9c16d5520c7cf1c, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

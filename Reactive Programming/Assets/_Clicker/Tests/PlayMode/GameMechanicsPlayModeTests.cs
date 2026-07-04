@@ -60,8 +60,9 @@ public sealed class GameMechanicsPlayModeTests {
         var storage = new Storage();
         var upgrade = new BuildingUpgradeService(invalidation, watcher);
         var context = new SessionContext(0, 0, 0, 0, 0, 0);
-        var economy = new EconomyService(context, storage, watcher, upgrade, new ProviderRegistryService(), invalidation);
-        var tickService = Track(new TickService(economy, watcher, storage, new StateBenefitCalculationService(context)));
+        var stateBenefit = new StateBenefitCalculationService(context);
+        var economy = new EconomyService(context, storage, watcher, upgrade, new ProviderRegistryService(), invalidation, stateBenefit);
+        var tickService = Track(new TickService(economy, watcher, storage, stateBenefit));
 
         tickService.StartService();
         yield return new WaitForSeconds(0.05f);

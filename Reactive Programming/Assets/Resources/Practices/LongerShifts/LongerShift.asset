@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: LongerShift
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: long_shift
+  _displayName: Longer Shifts
+  _description: Increase shifts for services. Increases multiplier by +0.2, but reduces
+    frequency by -5%
   _icon: {fileID: 0}
   _rarity: 0
   _weight: 1
-  _statModifiers: []
+  _statModifiers:
+  - {fileID: 0}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

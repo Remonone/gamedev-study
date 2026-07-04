@@ -12,7 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 619e6ad731d9b12d3b18d786381fd412, type: 3}
   m_Name: upgrade_node_QteUpgradeEffect 1
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.Effects.QteUpgradeEffect
-  Effects: []
+  Effects:
+  - rid: 3848164352651952607
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952607
+      type: {class: DurationSecondsQteModifierEffect, ns: Types.QTE, asm: Clicker.Runtime}
+      data:
+        Operation: 0
+        Formula:
+          rid: 3848164352651952610
+        Priority: 0
+    - rid: 3848164352651952610
+      type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
+      data:
+        ValuePerLevel: 5

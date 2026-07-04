@@ -16,7 +16,7 @@ MonoBehaviour:
   Modifier:
     Stat: 2
     Operation: 1
-    Value: 1
+    Value: -1
     Priority: 0
     ModifierId: mayory_bureaucracy_upgrade_frequency
   CalculationFormula:
@@ -27,4 +27,4 @@ MonoBehaviour:
     - rid: 3848164352651952589
       type: {class: GameMechanicsEditModeTests/LevelMultiplierFormula, ns: , asm: Clicker.EditMode.Tests}
       data:
-        ValuePerLevel: -0.015
+        ValuePerLevel: 0.015

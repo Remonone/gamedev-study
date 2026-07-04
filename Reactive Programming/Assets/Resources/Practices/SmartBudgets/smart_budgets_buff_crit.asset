@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3334979dc211411c9732abb6a21377ca, type: 3}
   m_Name: smart_budgets_buff_crit
   m_EditorClassIdentifier: Clicker.Runtime::Types.Modifiers.Definitions.StaticModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: 959d0a315f6031a4e80e06e5d22b0606, type: 2}
   Modifier:
-    Stat: 0
+    Stat: 8
     Operation: 0
-    Value: 0
+    Value: 0.5
     Priority: 0
-    ModifierId: 
+    ModifierId: smart_budgets_buff_crit

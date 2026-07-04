@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Types.Enums;
+using UnityEngine;
 
 namespace Types.Modifiers {
     public class SessionContext : ISessionContext {
        
         private readonly int _seed;
+        private double _lastInfluenceUpdate = 0;
         
         private Dictionary<GovernmentInteractionType, Influence> _governmentInfluence = new Dictionary<GovernmentInteractionType, Influence> {
             [GovernmentInteractionType.MayorOffice] = new(0),
@@ -16,9 +18,11 @@ namespace Types.Modifiers {
         };
         
         public int Seed => _seed;
+        public double LastInfluenceUpdate => _lastInfluenceUpdate;
 
         public SessionContext() {
             _seed = UnityEngine.Random.Range(0, int.MaxValue);
+            _lastInfluenceUpdate = Time.timeAsDouble;
         }
         
         public SessionContext(int mayorInfluence, int firefighterInfluence, int policeInfluence, int ambulanceInfluence, int courtInfluence, int archiveInfluence) {
@@ -37,6 +41,7 @@ namespace Types.Modifiers {
 
         public void SetInfluence(GovernmentInteractionType type, int value) {
             _governmentInfluence[type].ValueInternal = value;
+            _lastInfluenceUpdate = Time.timeAsDouble;
         }
 
         public int GetInfluenceInternalValue(GovernmentInteractionType type) {

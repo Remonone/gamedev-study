@@ -18,6 +18,7 @@ namespace Services {
         private readonly BuildingWatcherService _buildingWatcherService;
         private readonly Storage _storage;
         private readonly ProviderRegistryService _providerRegistryService;
+        private readonly StateBenefitCalculationService _calculationService;
         private readonly CompositeDisposable _disposable = new();
         private readonly Dictionary<PurchasePriceCacheKey, Price> _purchasePriceCache = new();
         
@@ -33,11 +34,13 @@ namespace Services {
             BuildingWatcherService watcherService,
             BuildingUpgradeService buildingUpgradeService,
             ProviderRegistryService providerRegistryService,
-            InvalidationService invalidationService) {
+            InvalidationService invalidationService,
+            StateBenefitCalculationService calculationService) {
             _sessionContext = sessionContext;
             _buildingWatcherService = watcherService;
             _buildingUpgradeService = buildingUpgradeService;
             _providerRegistryService = providerRegistryService;
+            _calculationService = calculationService;
             _storage = storage;
             _statResolver = new StatResolver();
 
@@ -51,6 +54,7 @@ namespace Services {
             var modifiers = new List<StatModifier>();
             _providerRegistryService.FetchModifiers(_sessionContext, building, modifiers);
             building.Cache = _statResolver.Resolve(building, modifiers);
+            building.Cache.StabilityModifier *= _calculationService.CalculateStabilityValue();
             building.IsDirty = false;
             _buildingUpdate.OnNext(new BuildingUpdate(building, building.Cache));
             return building.Cache;

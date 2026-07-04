@@ -15,16 +15,52 @@ MonoBehaviour:
   Effects:
   - {fileID: 11400000, guid: dd9256102c0401115af26195c076104c, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164352651952611
+      Formula:
+        rid: 3848164352651952612
+      Type: 4
+    - Condition:
+        rid: 3848164352651952611
+      Formula:
+        rid: 3848164352651952613
+      Type: 0
+  MaxLevel: 5
   Position: {x: 605, y: 130}
   Id: upgrade_node
-  Name: upgrade_node
+  Name: Additional time
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.72156864, g: 0.5294118, b: 0.87058824, a: 1}
-  Description: 
+  Description: Increases emergency situation timespan by +5 seconds
   NodeCategory: 0
   ChildIds: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164352651952611
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164352651952612
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 11
+          _base:
+            Degree: 0
+    - rid: 3848164352651952613
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 4
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 8
+          _base:
+            Degree: 0

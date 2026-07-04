@@ -110,8 +110,10 @@ public sealed class GameMechanicsEditModeTests {
         var watcher = new BuildingWatcherService(new List<BuildingDefinition> { building });
         var invalidation = new InvalidationService(watcher.BuildingsByName);
         var upgradeService = new BuildingUpgradeService(invalidation, watcher);
+        var context = new SessionContext(0, 0, 0, 0, 0, 0);
+        var stateBenefit = new StateBenefitCalculationService(context);
         var storage = new Storage();
-        var economy = new EconomyService(new SessionContext(0, 0, 0, 0, 0, 0), storage, watcher, upgradeService, new ProviderRegistryService(), invalidation);
+        var economy = new EconomyService(context, storage, watcher, upgradeService, new ProviderRegistryService(), invalidation, stateBenefit);
         var upgradesRaised = 0;
         Track(upgradeService.OnBuildingUpgrade.Subscribe(_ => upgradesRaised++));
         storage.AddMoney(GovernmentInteractionType.MayorOffice, new Value(50));
@@ -228,12 +230,13 @@ public sealed class GameMechanicsEditModeTests {
         var upgradeService = new BuildingUpgradeService(invalidation, watcher);
         var storage = new Storage();
         var context = new SessionContext(0, 0, 0, 0, 0, 0);
-        var economy = new EconomyService(context, storage, watcher, upgradeService, new ProviderRegistryService(), invalidation);
+        var stateBenefit = new StateBenefitCalculationService(context);
+        var economy = new EconomyService(context, storage, watcher, upgradeService, new ProviderRegistryService(), invalidation, stateBenefit);
 
         var result = ResourceIncomePerSecondCalculator.Calculate(
             watcher.BuildingsByName.Values,
             economy,
-            new StateBenefitCalculationService(context));
+            stateBenefit);
 
         AssertValue(result.MayorWallet, 6);
         AssertValue(result.PoliceWallet, 20);

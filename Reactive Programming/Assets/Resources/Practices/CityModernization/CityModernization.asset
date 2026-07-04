@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: CityModernization
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: city_modernization
+  _displayName: City Modernization
+  _description: Improving city infrastructure and planning, increasing efficiency
+    of all services by +35%
   _icon: {fileID: 0}
-  _rarity: 0
-  _weight: 1
-  _statModifiers: []
+  _rarity: 3
+  _weight: 200
+  _statModifiers:
+  - {fileID: 11400000, guid: 2503167fe46f7365cbf40405bbc7b936, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

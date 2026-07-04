@@ -12,13 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: PoliceDominance
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: police_dominance
+  _displayName: Police benefits
+  _description: Give more power to the police services. Increases the income of police
+    by +10%, but reduces stability by -3% of all structures
   _icon: {fileID: 0}
   _rarity: 0
   _weight: 1
-  _statModifiers: []
+  _statModifiers:
+  - {fileID: 11400000, guid: 98bdd2acb7ee4bf06b51fe3fa566edda, type: 2}
+  - {fileID: 11400000, guid: 4857565bbb5f332bba91cb891fc9fc2f, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

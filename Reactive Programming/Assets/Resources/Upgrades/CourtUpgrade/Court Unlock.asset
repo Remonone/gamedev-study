@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Court Unlock
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
   Effects:
-  - {fileID: 11400000, guid: 097bcc861848b5416ae161161a22172b, type: 2}
+  - {fileID: 11400000, guid: 99629219084ea03c78b983757d6efc61, type: 2}
   Price:
     _costItems:
     - Condition:

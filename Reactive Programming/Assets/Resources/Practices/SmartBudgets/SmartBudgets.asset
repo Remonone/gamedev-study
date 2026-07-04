@@ -12,13 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
   m_Name: SmartBudgets
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
-  _id: 
-  _displayName: 
-  _description: 
+  _id: smart_budgets
+  _displayName: Smart budgets
+  _description: Administration consider changing approach for budgeting services
+    to motivate them to increase performance. Increases multiplier by +0.5 and critical
+    multiplier by +0.5, but slightly increases prices of buildings by 3%
   _icon: {fileID: 0}
-  _rarity: 0
-  _weight: 1
-  _statModifiers: []
+  _rarity: 2
+  _weight: 50
+  _statModifiers:
+  - {fileID: 11400000, guid: 3cd557acd4a0781979997b5e9956806f, type: 2}
+  - {fileID: 11400000, guid: 83c26909713d722e7b4891441c0f0d2e, type: 2}
+  - {fileID: 11400000, guid: 1d0952d6bba4adfbea17dfaefcbf6f63, type: 2}
   _influenceEffects: []
   _researchEffects: []
   _qteImprovements: []

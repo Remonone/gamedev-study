@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3334979dc211411c9732abb6a21377ca, type: 3}
   m_Name: police_dominance_buff
   m_EditorClassIdentifier: Clicker.Runtime::Types.Modifiers.Definitions.StaticModifierDefinitionDefinition
-  Target: {fileID: 0}
+  Target: {fileID: 11400000, guid: f53c7941909ebf32a826c52a5e764455, type: 2}
   Modifier:
-    Stat: 0
-    Operation: 0
-    Value: 0
+    Stat: 1
+    Operation: 1
+    Value: 0.1
     Priority: 0
-    ModifierId: 
+    ModifierId: police_dominance_buff
