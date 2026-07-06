@@ -5,16 +5,33 @@ using Types.Enums;
 using Types.QTE;
 using Types.Upgrades;
 using Types.Upgrades.Effects;
+using R3;
 using UnityEngine;
 
 namespace Services.QTE {
-    public class QteModifierAggregator : IService {
+    public class QteModifierAggregator : IService, IDisposable {
         private readonly PracticeService _practiceService;
         private readonly UpgradeService _upgradeService;
+        private readonly CompositeDisposable _disposable = new();
+        private QteWorkerParameterSnapshot _workerSnapshot;
+
+        public bool IsDirty { get; private set; } = true;
 
         public QteModifierAggregator(PracticeService practiceService, UpgradeService upgradeService) {
             _practiceService = practiceService;
             _upgradeService = upgradeService;
+
+            if (_practiceService != null) {
+                _practiceService.Changed
+                    .Subscribe(_ => MarkWorkerSnapshotDirty())
+                    .AddTo(_disposable);
+            }
+
+            if (_upgradeService != null) {
+                _upgradeService.Changed
+                    .Subscribe(_ => MarkWorkerSnapshotDirty())
+                    .AddTo(_disposable);
+            }
         }
 
         public float ResolveSpawnIntervalSeconds(float baseValue) => Mathf.Max(0.1f, ResolveValue(baseValue, QteModifierTarget.SpawnIntervalSeconds, true, true));
@@ -30,12 +47,25 @@ namespace Services.QTE {
         public float ResolveWorkerBuildingUpgradeChance(float baseValue = 0.0001f) => Mathf.Clamp01(ResolveValue(baseValue, QteModifierTarget.WorkerBuildingUpgradeChance, true, true));
 
         public QteWorkerParameterSnapshot ResolveWorkerSnapshot() {
-            return new QteWorkerParameterSnapshot {
+            if (!IsDirty) return _workerSnapshot;
+
+            _workerSnapshot = new QteWorkerParameterSnapshot {
                 Count = ResolveWorkerCount(),
                 ClickFrequency = ResolveWorkerClickFrequency(),
                 IncomeMultiplier = ResolveWorkerIncomeMultiplier(),
                 BuildingUpgradeChance = ResolveWorkerBuildingUpgradeChance()
             };
+
+            IsDirty = false;
+            return _workerSnapshot;
+        }
+
+        public void Dispose() {
+            _disposable.Dispose();
+        }
+
+        private void MarkWorkerSnapshotDirty() {
+            IsDirty = true;
         }
 
         private float ResolveValue(float baseValue, QteModifierTarget target, bool includePractices, bool includeUpgrades) {

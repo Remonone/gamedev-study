@@ -337,6 +337,50 @@ public sealed class GameMechanicsEditModeTests {
     }
 
     [Test]
+    public void QteModifierAggregator_InvalidatesWorkerSnapshotWhenPracticeServiceChanges() {
+        var practice = CreatePractice("qte-cache-practice", PracticeRarity.Common, 1f);
+        var practiceEffects = (List<QteModifierEffect>)practice.QteImprovements;
+        practiceEffects.Add(CreateQteModifier<WorkerCountQteModifierEffect>(ModifierOp.AddFlat, 2f));
+        var invalidation = new InvalidationService(new Dictionary<string, BuildingState>());
+        var practiceService = Track(new PracticeService(new[] { practice }, null, invalidation, new SessionContext(0, 0, 0, 0, 0, 0)));
+        var upgradeService = CreateUpgradeService(invalidation);
+        var aggregator = Track(new QteModifierAggregator(practiceService, upgradeService));
+
+        Assert.That(aggregator.IsDirty, Is.True);
+        Assert.That(aggregator.ResolveWorkerSnapshot().Count, Is.EqualTo(0));
+        Assert.That(aggregator.IsDirty, Is.False);
+
+        Assert.That(practiceService.BeginResearchOffer(practice.Rarity), Is.True);
+        practiceService.SelectOfferedPractice(practice.Id);
+        Assert.That(practiceService.ConfirmSelectedOffer(), Is.True);
+
+        Assert.That(aggregator.IsDirty, Is.True);
+        Assert.That(aggregator.ResolveWorkerSnapshot().Count, Is.EqualTo(2));
+        Assert.That(aggregator.IsDirty, Is.False);
+    }
+
+    [Test]
+    public void QteModifierAggregator_InvalidatesWorkerSnapshotWhenUpgradeServiceChanges() {
+        var qteEffect = CreateQteUpgradeEffect();
+        qteEffect.Effects.Add(CreateQteModifier<WorkerCountQteModifierEffect>(ModifierOp.AddFlat, 2f));
+        var upgrade = CreateUpgradeState("qte-cache-upgrade", 0, qteEffect);
+        var invalidation = new InvalidationService(new Dictionary<string, BuildingState>());
+        var practiceService = Track(new PracticeService(Array.Empty<Practice>(), null, invalidation, new SessionContext(0, 0, 0, 0, 0, 0)));
+        var upgradeService = CreateUpgradeService(invalidation, upgrade);
+        var aggregator = Track(new QteModifierAggregator(practiceService, upgradeService));
+
+        Assert.That(aggregator.IsDirty, Is.True);
+        Assert.That(aggregator.ResolveWorkerSnapshot().Count, Is.EqualTo(0));
+        Assert.That(aggregator.IsDirty, Is.False);
+
+        Assert.That(upgradeService.TryUpgrade(upgrade.Definition.Id), Is.True);
+
+        Assert.That(aggregator.IsDirty, Is.True);
+        Assert.That(aggregator.ResolveWorkerSnapshot().Count, Is.EqualTo(2));
+        Assert.That(aggregator.IsDirty, Is.False);
+    }
+
+    [Test]
     public void QteWorkerService_UpgradesUnlockedBuildingCategoryWhenDisplayNameIsLocked() {
         var building = CreateBuilding("LockedDisplayName", GovernmentInteractionType.Archive, click: 1, income: 1, frequency: 1, price: 1);
         var watcher = new BuildingWatcherService(new List<BuildingDefinition> { building });
@@ -427,14 +471,34 @@ public sealed class GameMechanicsEditModeTests {
             Assert.That(practiceService.ConfirmSelectedOffer(), Is.True);
         }
 
+        var upgradeService = CreateUpgradeService(invalidation, upgrades);
+        return Track(new QteModifierAggregator(practiceService, upgradeService));
+    }
+
+    private UpgradeService CreateUpgradeService(InvalidationService invalidation, params UpgradeNodeState[] upgrades) {
         var registry = new ProviderRegistryService();
         registry.RegisterProvider(new UpgradeModifierProvider());
         var upgradeService = new UpgradeService(new Storage(), registry, invalidation, new UnlockService());
+        var upgradesById = (Dictionary<string, ReactiveProperty<UpgradeNodeState>>)typeof(UpgradeService)
+            .GetField("_upgrades", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(upgradeService);
+        upgradesById.Clear();
+        var parentIdsByChildId = (Dictionary<string, List<string>>)typeof(UpgradeService)
+            .GetField("_parentIdsByChildId", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(upgradeService);
+        parentIdsByChildId.Clear();
         var ownedUpgrades = (HashSet<UpgradeNodeState>)typeof(UpgradeService)
             .GetField("_ownedUpgrades", BindingFlags.Instance | BindingFlags.NonPublic)
             .GetValue(upgradeService);
-        foreach (var upgrade in upgrades) ownedUpgrades.Add(upgrade);
-        return new QteModifierAggregator(practiceService, upgradeService);
+        ownedUpgrades.Clear();
+        foreach (var upgrade in upgrades) {
+            upgradesById.Add(upgrade.Definition.Id, new ReactiveProperty<UpgradeNodeState>(upgrade));
+            if (upgrade.Level > 0) {
+                ownedUpgrades.Add(upgrade);
+            }
+        }
+
+        return upgradeService;
     }
 
     private static CostResolver CreateCostResolver(GovernmentInteractionType type, double amount) {

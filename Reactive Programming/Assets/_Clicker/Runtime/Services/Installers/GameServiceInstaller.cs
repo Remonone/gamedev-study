@@ -224,7 +224,7 @@ namespace Services.Components {
             var rewardService = new QteRewardService(_statisticsService, _storage, aggregator);
             RegisterService(rewardService);
 
-            var qteService = new QteService(config, rewardService, aggregator, _worldCastService);
+            var qteService = new QteService(config, rewardService, aggregator, _worldCastService, unlockService);
             RegisterService(qteService);
             RegisterService(new QteWorkerService(qteService, aggregator, buildingUpgradeService, _buildingWatcherService, unlockService));
         }

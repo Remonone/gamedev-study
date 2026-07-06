@@ -21,8 +21,10 @@ namespace Services {
         private readonly UpgradeModifierProvider _upgradeModifierProvider;
         private readonly InvalidationService _invalidationService;
         private readonly UnlockService _unlockService;
+        private readonly Subject<Unit> _changed = new();
 
         public Observable<Wallet> AffordabilityChanged => _storage.StructureMoney;
+        public Observable<Unit> Changed => _changed;
         public IReadOnlyCollection<UpgradeNodeState> OwnedUpgrades => _ownedUpgrades;
 
         public UpgradeService(Storage storage, ProviderRegistryService providerRegistryService, InvalidationService invalidationService, UnlockService unlockService) {
@@ -102,6 +104,7 @@ namespace Services {
             RefreshChildAvailability(state.Definition);
             _ownedUpgrades.Remove(state);
             _ownedUpgrades.Add(updatedState);
+            NotifyChanged();
             return true;
         }
 
@@ -253,6 +256,7 @@ namespace Services {
         }
 
         public void Load(JToken data) {
+            var changed = false;
             if (data?["activeUpgrades"] is JArray upgrades) {
                 foreach (var upgradeData in upgrades.OfType<JObject>()) {
                     if (upgradeData["upgradeId"] == null ||
@@ -269,11 +273,20 @@ namespace Services {
                     PublishState(upgrade.Definition.Id, updatedUpgrade);
                     RefreshChildAvailability(upgrade.Definition);
                     if (updatedUpgrade.Level > 0) {
-                        _ownedUpgrades.Add(updatedUpgrade);    
+                        _ownedUpgrades.Add(updatedUpgrade);
+                        changed = true;
                     }
                 }
                 
             }
+
+            if (changed) {
+                NotifyChanged();
+            }
+        }
+
+        private void NotifyChanged() {
+            _changed.OnNext(Unit.Default);
         }
     }
 }

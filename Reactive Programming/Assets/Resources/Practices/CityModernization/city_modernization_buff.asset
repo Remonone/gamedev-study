@@ -16,6 +16,6 @@ MonoBehaviour:
   Modifier:
     Stat: 1
     Operation: 1
-    Value: 0.35
+    Value: 0.25
     Priority: 0
     ModifierId: city_modernization_buff

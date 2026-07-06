@@ -16,11 +16,11 @@ MonoBehaviour:
   Price:
     _costItems: []
   MaxLevel: 1
-  Position: {x: 1072.4858, y: 615.6429}
+  Position: {x: 1090, y: 620}
   Id: upgrade_node_75
   Name: upgrade_node_75
   Icon: {fileID: 0}
-  UpgradeColor: {r: 0.12, g: 0.16, b: 0.22, a: 1}
+  UpgradeColor: {r: 0.84705883, g: 0.84705883, b: 0.84705883, a: 1}
   Description: 
   NodeCategory: 0
   ChildIds:

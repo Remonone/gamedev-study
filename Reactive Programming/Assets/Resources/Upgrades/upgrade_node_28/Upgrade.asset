@@ -29,8 +29,7 @@ MonoBehaviour:
   UpgradeColor: {r: 0.25490198, g: 0.29411766, b: 0.6431373, a: 1}
   Description: Increase income from police services by +15%
   NodeCategory: 0
-  ChildIds:
-  - upgrade_node_1
+  ChildIds: []
   references:
     version: 2
     RefIds:

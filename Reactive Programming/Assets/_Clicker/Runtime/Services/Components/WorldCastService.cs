@@ -19,9 +19,11 @@ namespace Services.Components {
         private RaycastHit[] _hitBuffer = new RaycastHit[2];
         
         private Subject<QteObject> _qteClickedSubject = new();
+        private Subject<Unit> _onClick = new();
         
         public Observable<BuildingState> StructureClicked => _structureTypeSubject;
         public Observable<QteObject> QTEClicked => _qteClickedSubject;
+        public Observable<Unit> OnClick => _onClick; 
         
 
         private void Start() {
@@ -40,6 +42,7 @@ namespace Services.Components {
         }
 
         private void OnClicked(GameObject clickedObject) {
+            _onClick.OnNext(Unit.Default);
             if (clickedObject.TryGetComponent(out Structure structure)) {
                 _structureTypeSubject.OnNext(structure.State);
             }

@@ -12,19 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: bbde55e8b2e6b241195eb1caea8407f5, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164362000793704
+      Formula:
+        rid: 3848164362000793706
+      Type: 1
+  MaxLevel: 20
   Position: {x: 780, y: 760}
-  Id: upgrade_node_50
-  Name: upgrade_node_50
+  Id: court_frequency_2
+  Name: 
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.62352943, b: 0.4509804, a: 1}
-  Description: 
+  Description: Increase  frequency of all courts by +5%
   NodeCategory: 0
-  ChildIds:
-  - upgrade_node_51
+  ChildIds: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164362000793704
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164362000793706
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 900
+          _base:
+            Degree: 1
+        Rate:
+          _stored: 5.4
+          _base:
+            Degree: 0

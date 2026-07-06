@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
   _id: city_modernization
   _displayName: City Modernization
-  _description: Improving city infrastructure and planning, increasing efficiency
-    of all services by +35%
+  _description: Improving city infrastructure and planning, increasing income of
+    all services by +25%
   _icon: {fileID: 0}
   _rarity: 3
   _weight: 200

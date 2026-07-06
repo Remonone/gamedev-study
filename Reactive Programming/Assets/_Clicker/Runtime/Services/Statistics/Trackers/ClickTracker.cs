@@ -1,17 +1,16 @@
 using System.Collections.Generic;
 using Services.Components;
-using Services.Components.Instances;
 using R3;
 
 namespace Services.Statistics.Trackers {
     public class ClickTracker : StatisticTrackerBase {
         
-        private readonly StructureClickService _structureClickService;
+        private readonly WorldCastService _worldCastService;
         
         private readonly CompositeDisposable _disposable = new();
         
         public ClickTracker(IStatisticsWriter statistics) : base(statistics) {
-            _structureClickService = ServiceLocator.Instance.GetService<StructureClickService>();
+            _worldCastService = ServiceLocator.Instance.GetService<WorldCastService>();
         }
 
         public override IReadOnlyCollection<string> ProducedStatisticIds { get; } = new[] {
@@ -19,7 +18,7 @@ namespace Services.Statistics.Trackers {
         };
         
         public override void Start() {
-                _structureClickService.StructureInteraction
+                _worldCastService.OnClick
                     .Subscribe(_ => Increment(StatisticKeys.TotalClicks)).AddTo(_disposable);
         }
         

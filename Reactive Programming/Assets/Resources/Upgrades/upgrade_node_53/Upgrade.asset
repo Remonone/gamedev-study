@@ -14,16 +14,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
   Effects: []
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164362000793682
+      Formula:
+        rid: 3848164362000793683
+      Type: 1
+  MaxLevel: 15
   Position: {x: 710, y: 830}
-  Id: upgrade_node_53
-  Name: upgrade_node_53
+  Id: court_crit_multiplier_2
+  Name: 
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.62352943, b: 0.4509804, a: 1}
-  Description: 
+  Description: Increase critical multiplier of courts by +0.5
   NodeCategory: 0
   ChildIds: []
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164362000793682
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164362000793683
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1.5
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 6
+          _base:
+            Degree: 0

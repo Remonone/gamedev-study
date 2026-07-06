@@ -4,7 +4,6 @@ using R3;
 using Services.Components;
 using Types.Enums;
 using Types.QTE;
-using Types.Values;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = System.Random;
@@ -17,6 +16,7 @@ namespace Services.QTE {
         private readonly Random _rng;
         private readonly WorldCastService _worldCastService;
         private readonly QteModifierAggregator _qteModifierAggregator;
+        private readonly UnlockService _unlockService;
 
         private readonly List<QteSpawnMarker> _markers = new();
         private readonly List<ActiveQte> _activeQtes = new();
@@ -26,13 +26,15 @@ namespace Services.QTE {
         public QteService(QteConfig config,
             QteRewardService rewardService,
             QteModifierAggregator modifierAggregator,
-            WorldCastService worldCastService) {
+            WorldCastService worldCastService,
+            UnlockService unlockService) {
             _config = config;
             _rewardService = rewardService;
             _qteModifierAggregator = modifierAggregator;
             _rng = new Random();
             _bag = new DisposableBag();
             _worldCastService = worldCastService;
+            _unlockService = unlockService;
         }
 
         public void StartService() {
@@ -204,6 +206,7 @@ namespace Services.QTE {
                     continue;
                 }
 
+                if (!_unlockService.IsItemUnlocked(resource.ToString())) continue;
                 reward = selected;
                 return true;
             }

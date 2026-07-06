@@ -52,7 +52,7 @@ MonoBehaviour:
   NodeCategory: 1
   ChildIds:
   - archive_unlock
-  - upgrade_node_42
+  - court_crit_chance
   references:
     version: 2
     RefIds:

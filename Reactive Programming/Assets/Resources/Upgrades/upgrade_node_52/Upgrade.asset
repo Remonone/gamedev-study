@@ -12,19 +12,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
   m_Name: Upgrade
   m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
-  Effects: []
+  Effects:
+  - {fileID: 11400000, guid: aeaf24de721ede24b9168c3a2bcb3ce6, type: 2}
   Price:
-    _costItems: []
-  MaxLevel: 1
+    _costItems:
+    - Condition:
+        rid: 3848164362000793712
+      Formula:
+        rid: 3848164362000793713
+      Type: 1
+    - Condition:
+        rid: 3848164362000793712
+      Formula:
+        rid: 3848164362000793716
+      Type: 0
+  MaxLevel: 12
   Position: {x: 780, y: 830}
-  Id: upgrade_node_52
-  Name: upgrade_node_52
+  Id: court_cost
+  Name: 
   Icon: {fileID: 0}
   UpgradeColor: {r: 0.85490197, g: 0.62352943, b: 0.4509804, a: 1}
-  Description: 
+  Description: Reduces the cost of the courts by +5%
   NodeCategory: 0
   ChildIds:
-  - upgrade_node_54
+  - total_critical_multiplier
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164362000793712
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164362000793713
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 1.5
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 6.5
+          _base:
+            Degree: 0
+    - rid: 3848164362000793716
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 4
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 6.5
+          _base:
+            Degree: 0

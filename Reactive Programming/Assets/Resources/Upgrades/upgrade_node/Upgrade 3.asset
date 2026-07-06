@@ -17,9 +17,14 @@ MonoBehaviour:
   Price:
     _costItems:
     - Condition:
-        rid: -2
+        rid: 3848164362000793673
       Formula:
-        rid: -2
+        rid: 3848164362000793674
+      Type: 3
+    - Condition:
+        rid: 3848164362000793673
+      Formula:
+        rid: 3848164362000793675
       Type: 0
   MaxLevel: 10
   Position: {x: 570, y: 900}
@@ -33,5 +38,29 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 3848164362000793673
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164362000793674
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 150
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 4
+          _base:
+            Degree: 0
+    - rid: 3848164362000793675
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 400
+          _base:
+            Degree: 3
+        Rate:
+          _stored: 5
+          _base:
+            Degree: 0
