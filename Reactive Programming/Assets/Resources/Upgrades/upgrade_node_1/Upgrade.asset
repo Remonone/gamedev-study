@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d949be53d8984f55a27d7c7db114a9f6, type: 3}
+  m_Name: Upgrade
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Upgrades.UpgradeNodeDefinition
+  Effects:
+  - {fileID: 11400000, guid: ea5384c0c23ab32b895f84563f75d236, type: 2}
+  Price:
+    _costItems:
+    - Condition:
+        rid: 3848164362000793722
+      Formula:
+        rid: 3848164362000793723
+      Type: 1
+    - Condition:
+        rid: 3848164362000793722
+      Formula:
+        rid: 3848164362000793724
+      Type: 0
+  MaxLevel: 10
+  Position: {x: 850, y: 900}
+  Id: qte_crit_multiplier
+  Name: 
+  Icon: {fileID: 0}
+  UpgradeColor: {r: 0.12, g: 0.16, b: 0.22, a: 1}
+  Description: Increase deputies critical multiplier by +0.5
+  NodeCategory: 0
+  ChildIds: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 3848164362000793722
+      type: {class: ConstCondition, ns: Types.Modifiers.Cost.Condition, asm: Clicker.Runtime}
+      data:
+        _constant: 1
+    - rid: 3848164362000793723
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 200
+          _base:
+            Degree: 2
+        Rate:
+          _stored: 10
+          _base:
+            Degree: 0
+    - rid: 3848164362000793724
+      type: {class: ExponentialFormula, ns: Types.Modifiers.Cost.Formula, asm: Clicker.Runtime}
+      data:
+        BaseValue:
+          _stored: 50
+          _base:
+            Degree: 4
+        Rate:
+          _stored: 11
+          _base:
+            Degree: 0

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d088b18c8170401a91deef6d63d95d3d, type: 3}
+  m_Name: HospitalExperimental
+  m_EditorClassIdentifier: Clicker.Runtime::Types.Practice
+  _id: hospital_experimental
+  _displayName: Experimental medicine
+  _description: Hospital services start using experimental medicine to improve the
+    quality. Increases critical chance by +0.5%, but reduces income by -5%
+  _icon: {fileID: 0}
+  _rarity: 1
+  _weight: 50
+  _statModifiers:
+  - {fileID: 11400000, guid: 3a264ed346aac0a5f8d41ce09e8c1d69, type: 2}
+  - {fileID: 11400000, guid: 2d2c556e1fccd8da78029d37b762e5dd, type: 2}
+  _influenceEffects: []
+  _researchEffects: []
+  _qteImprovements: []
+  references:
+    version: 2
+    RefIds: []
