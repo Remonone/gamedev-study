@@ -17,6 +17,22 @@
       },
       "hash": "11836003a5e2ffcb7715ecec7e1fbb9d9cdb5bb8"
     },
+    "com.cysharp.r3": {
+      "version": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.imgui": "1.0.0"
+      },
+      "hash": "c6f8a932d9b8e771a9f405e6d72058a21ce0b457"
+    },
+    "com.github-glitchenzo.nugetforunity": {
+      "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=src/NuGetForUnity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "acc1c7bc9ea34c33b830e40316fca52553878d29"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.10",
       "depth": 0,
