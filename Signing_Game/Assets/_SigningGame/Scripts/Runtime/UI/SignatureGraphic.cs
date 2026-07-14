@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
-namespace Presentation {
+namespace UI {
     [RequireComponent(typeof(CanvasRenderer))]
     public class SignatureGraphic : MaskableGraphic {
         [SerializeField, Min(0.5f)] private float _thickness = 3f;
@@ -27,7 +26,7 @@ namespace Presentation {
 
             Vector2 prevPosition = _activeStroke[^1];
 
-            if ((localPos - prevPosition).magnitude < minimumDistance * minimumDistance) return false;
+            if ((localPos - prevPosition).sqrMagnitude < minimumDistance * minimumDistance) return false;
             
             _activeStroke.Add(localPos);
             SetVerticesDirty();
@@ -99,7 +98,7 @@ namespace Presentation {
             int startIndex = vertexHelper.currentVertCount;
             
             vertexHelper.AddVert(start + normal, vertexColor, Vector2.zero);
-            vertexHelper.AddVert(end - normal, vertexColor, Vector2.zero);
+            vertexHelper.AddVert(start - normal, vertexColor, Vector2.zero);
             vertexHelper.AddVert(end - normal, vertexColor, Vector2.zero);
             vertexHelper.AddVert(end + normal, vertexColor, Vector2.zero);
             

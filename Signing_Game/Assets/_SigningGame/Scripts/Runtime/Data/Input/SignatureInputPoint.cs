@@ -1,4 +1,4 @@
-using System.Numerics;
+using UnityEngine;
 
 namespace Data.Input {
     public record SignatureInputPoint(Vector2 Position, float Time);
