@@ -21,6 +21,19 @@ namespace Presentation {
             gameObject.SetActive(true);
         }
 
+        public SignatureAttempt CollectSignature(float endTime) {
+            if (_viewModel == null) {
+                throw new InvalidOperationException("DocumentView must be initialized before collection.");
+            }
+
+            if (float.IsNaN(endTime) || float.IsInfinity(endTime)) {
+                throw new ArgumentOutOfRangeException(nameof(endTime), "Time must be finite.");
+            }
+
+            _field.FinishActiveStrokeForCollection(endTime);
+            return _viewModel.CollectSignature(endTime);
+        }
+
         private void Awake() {
             _field.OnInput.Subscribe(OnDraw).AddTo(this);
         }

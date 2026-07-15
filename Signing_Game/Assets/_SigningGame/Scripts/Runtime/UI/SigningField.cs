@@ -37,6 +37,7 @@ namespace UI {
         private bool _isDrawing;
         private int _activePointerId;
         private Vector2 _lastNormalizedPosition;
+        private float _lastPointerTimestamp;
 
         private void Awake() {
             _drawingRect = GetComponent<RectTransform>();
@@ -53,11 +54,12 @@ namespace UI {
             _activePointerId = e.pointerId;
             _signatureGraphic.BeginStroke(localPos);
             _lastNormalizedPosition = Normalize(localPos);
+            _lastPointerTimestamp = Time.unscaledTime;
 
             _inputEvents.OnNext(new SignatureInputEvent(
                 SignatureInputEventType.StrokeStarted,
                 _lastNormalizedPosition,
-                Time.unscaledTime));
+                _lastPointerTimestamp));
         }
 
         public void OnDrag(PointerEventData eventData) {
@@ -67,15 +69,16 @@ namespace UI {
 
             if (!TryGetLocalPosition(eventData, out var position)) return;
 
+            _lastNormalizedPosition = Normalize(position);
+            _lastPointerTimestamp = Time.unscaledTime;
+
             bool pointWasAdded = _signatureGraphic.TryAddPoint(position, _minimumPointDistance);
             if (!pointWasAdded) return;
-
-            _lastNormalizedPosition = Normalize(position);
 
             _inputEvents.OnNext(new SignatureInputEvent(
                 SignatureInputEventType.PointAdded,
                 _lastNormalizedPosition,
-                Time.unscaledTime));
+                _lastPointerTimestamp));
         }
 
         public void OnPointerUp(PointerEventData e) {
@@ -86,9 +89,16 @@ namespace UI {
             if (TryGetLocalPosition(e, out Vector2 localPos)) {
                 _signatureGraphic.TryAddPoint(localPos, _minimumPointDistance);
                 _lastNormalizedPosition = Normalize(localPos);
+                _lastPointerTimestamp = Time.unscaledTime;
             }
 
-            EndActiveStroke();
+            FinishActiveStrokeForCollection(_lastPointerTimestamp);
+        }
+
+        public void FinishActiveStrokeForCollection(float endTime) {
+            if (!_isDrawing) return;
+
+            EndActiveStroke(_lastPointerTimestamp);
         }
 
         [ContextMenu("Clear canvas")]
@@ -127,14 +137,14 @@ namespace UI {
         }
 
         private void OnDisable() {
-            EndActiveStroke();
+            EndActiveStroke(_lastPointerTimestamp);
         }
 
         private void OnDestroy() {
             _inputEvents.Dispose();
         }
 
-        private void EndActiveStroke() {
+        private void EndActiveStroke(float timestamp) {
             if (!_isDrawing) return;
 
             _signatureGraphic.EndStroke();
@@ -145,7 +155,7 @@ namespace UI {
             _inputEvents.OnNext(new SignatureInputEvent(
                 SignatureInputEventType.StrokeEnded,
                 _lastNormalizedPosition,
-                Time.unscaledTime));
+                timestamp));
         }
 
         private void CancelActiveStroke() {

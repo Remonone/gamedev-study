@@ -44,6 +44,23 @@ namespace Presentation {
             return _signatureRecorder.CompleteAttempt(endTime);
         }
 
+        public SignatureAttempt CollectSignature(float endTime) {
+            if (float.IsNaN(endTime) || float.IsInfinity(endTime)) {
+                throw new ArgumentOutOfRangeException(nameof(endTime), "Time must be finite.");
+            }
+
+            if (!IsSigning) {
+                return new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0f);
+            }
+
+            if (IsStrokeActive) {
+                throw new InvalidOperationException(
+                    "The active stroke must be ended before collecting the signature.");
+            }
+
+            return _signatureRecorder.CompleteAttempt(endTime);
+        }
+
         public void CancelSignature() {
             _signatureRecorder.CancelAttempt();
         }
