@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Services.Locator {
-    public class ServiceScope {
+    public class ServiceScope : IDisposable {
         private readonly Dictionary<Type, object> _services = new();
         private readonly List<object> _ordered = new();
         private readonly HashSet<object> _orderedSet = new();
