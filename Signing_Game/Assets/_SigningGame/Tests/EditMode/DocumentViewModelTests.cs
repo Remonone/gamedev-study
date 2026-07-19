@@ -4,6 +4,11 @@ using Contracts;
 using Data.Input;
 using NUnit.Framework;
 using Presentation;
+using Authoring;
+using Data.Enums;
+using Data.Requests;
+using Data.Results;
+using Data.Rules;
 using UnityEngine;
 
 namespace SigningGame.Tests.EditMode {
@@ -135,6 +140,21 @@ namespace SigningGame.Tests.EditMode {
             Assert.Throws<InvalidOperationException>(() => viewModel.CompleteSignature(1f));
         }
 
+        [Test]
+        public void OptionalEvaluation_PublishesAndReturnsSameResult() {
+            var preset = ScriptableObject.CreateInstance<SignaturePresetDefinition>();
+            var expected = new SignatureEvaluationResult(SignatureEvaluationStatus.Accepted, SignatureFailureReason.None,
+                1, 1, .5f, "v", new SignatureScoreBreakdown(1, 1, 1, 1, 1),
+                Array.Empty<SignatureStrokeMatchResult>());
+            var evaluator = new FixedEvaluator(expected);
+            var viewModel = new DocumentViewModel(new RecordingSignatureRecorder(), evaluator, preset,
+                new SignatureDifficultyRules("d", .5f, 1, 1, 1, new SignatureScoreWeights(1, 0, 0, 0)), SignatureRuleModifiers.None);
+            SignatureEvaluationResult actual = viewModel.Evaluate(new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0));
+            Assert.That(viewModel.CanEvaluate, Is.True); Assert.That(actual, Is.SameAs(expected));
+            viewModel.Dispose(); Assert.Throws<ObjectDisposedException>(() => viewModel.Evaluate(new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0)));
+            UnityEngine.Object.DestroyImmediate(preset);
+        }
+
         private static SignatureInputPoint Point(float x, float y, float time) {
             return new SignatureInputPoint(new Vector2(x, y), time);
         }
@@ -187,6 +207,13 @@ namespace SigningGame.Tests.EditMode {
                 IsAttemptActive = false;
                 IsStrokeActive = false;
             }
+        }
+
+        private sealed class FixedEvaluator : ISignatureEvaluator {
+            private readonly SignatureEvaluationResult _result; public FixedEvaluator(SignatureEvaluationResult result) => _result = result;
+            public SignatureEvaluationResult Evaluate(SignatureEvaluationRequest request) => _result;
+            public SignatureEvaluationResult Evaluate(SignatureAttempt attempt, SignaturePresetDefinition preset,
+                SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers) => _result;
         }
     }
 }

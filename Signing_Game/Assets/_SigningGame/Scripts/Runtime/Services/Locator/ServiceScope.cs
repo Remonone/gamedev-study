@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Services.Locator {
-    public class ServiceScope : IDisposable {
+    public class ServiceScope : IServiceScope, IDisposable {
         private readonly Dictionary<Type, object> _services = new();
         private readonly List<object> _ordered = new();
-        private readonly HashSet<object> _orderedSet = new();
+        private readonly HashSet<object> _orderedSet = new(ReferenceComparer.Instance);
 
         public ServiceScope Register<T>(T service) {
             Type type = typeof(T);
@@ -18,6 +19,8 @@ namespace Services.Locator {
         }
 
         public ServiceScope Register(Type type, object service) {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (service == null) throw new ArgumentNullException(nameof(service));
             if (!type.IsInstanceOfType(service)) {
                 throw new ArgumentException($"Service is a {service.GetType()}. Provided type is {type}.", nameof(service));
             }
@@ -49,26 +52,26 @@ namespace Services.Locator {
             throw new ArgumentException($"Service of type {type} not registered.");
         }
 
-        public async Awaitable PreInitializeAsync(ServiceLocator container) {
+        public async Awaitable PreInitializeAsync(IServiceScope scope) {
             foreach (var service in _ordered) {
                 if (service is IPreInitialize preInitialize) {
-                    await preInitialize.PreInitializeAsync(container);
+                    await preInitialize.PreInitializeAsync(scope);
                 }
             }
         }
 
-        public async Awaitable InitializeAsync(ServiceLocator container) {
+        public async Awaitable InitializeAsync(IServiceScope scope) {
             foreach (var service in _ordered) {
                 if (service is IInitialize initialize) {
-                    await initialize.InitializeAsync(container);
+                    await initialize.InitializeAsync(scope);
                 }
             }
         }
 
-        public async Awaitable PostInitializeAsync(ServiceLocator container) {
+        public async Awaitable PostInitializeAsync(IServiceScope scope) {
             foreach (var service in _ordered) {
                 if (service is IPostInitialize postInitialize) {
-                    await postInitialize.PostInitializeAsync(container);
+                    await postInitialize.PostInitializeAsync(scope);
                 }
             }
         }
@@ -88,6 +91,12 @@ namespace Services.Locator {
             if (service != null && _orderedSet.Add(service)) {
                 _ordered.Add(service);
             }
+        }
+
+        private sealed class ReferenceComparer : IEqualityComparer<object> {
+            public static readonly ReferenceComparer Instance = new();
+            public new bool Equals(object x, object y) => ReferenceEquals(x, y);
+            public int GetHashCode(object obj) => RuntimeHelpers.GetHashCode(obj);
         }
     }
 }

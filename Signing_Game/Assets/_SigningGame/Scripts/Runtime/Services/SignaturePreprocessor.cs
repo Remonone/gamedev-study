@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Contracts;
 using Data.Input;
@@ -12,17 +13,21 @@ namespace Services {
         private const float _GeometryEpsilon = 0.000001f;
 
         public ProcessedSignature Process(SignatureAttempt attempt, SignatureProcessingRules rules) {
+            if (attempt == null) throw new ArgumentNullException(nameof(attempt));
+            if (rules == null) throw new ArgumentNullException(nameof(rules));
+            ValidateRules(rules);
             if (attempt.Strokes.Count == 0) return null;
 
             List<List<Vector2>> signatureStrokes = new List<List<Vector2>>();
             
             foreach (var stroke in attempt.Strokes) {
+                if (stroke == null || stroke.Points == null) continue;
                 if (stroke.Points.Count < 2) continue;
                 if(stroke.Points.Count > rules.MaximumInputPointCount) continue;
                 
                 List<Vector2> filteredPoints = FilterStroke(stroke.Points, rules.MinimumInputPointDistance);
 
-                if (filteredPoints.Count < 2) {
+                if (filteredPoints.Count < rules.MinimumUsablePointCountPerStroke) {
                     continue;
                 }
                 var strokeLength = CalculateStrokeLength(filteredPoints);
@@ -33,7 +38,7 @@ namespace Services {
 
                 if (resampledPoints.Count < 2) continue;
                 
-                SmoothStroke(resampledPoints);
+                SmoothStroke(resampledPoints, rules.SmoothingPasses);
 
                 filteredPoints = ResampleStroke(resampledPoints, rules.ResampledPointCountPerStroke);
                 signatureStrokes.Add(filteredPoints);
@@ -42,7 +47,7 @@ namespace Services {
             if (signatureStrokes.Count == 0) return null;
             
             if(!TryCalculateBounds(signatureStrokes, out Rect bounds)) return null;
-            NormalizeToUnitSquare(bounds, ref signatureStrokes, out Rect normalizedBounds);
+            if (!NormalizeToUnitSquare(bounds, ref signatureStrokes, out Rect normalizedBounds)) return null;
             
             var processedStrokes = new List<ProcessedSignatureStroke>(signatureStrokes.Count);
             float totalLength = 0f;
@@ -82,7 +87,7 @@ namespace Services {
             
             int segmentIndex = 1;
 
-            for (int outputIndex = 1; outputIndex < outputPointCount; outputIndex++) {
+            for (int outputIndex = 1; outputIndex < outputPointCount - 1; outputIndex++) {
                 float targetDistance = outputIndex / ((float)outputPointCount - 1) * totalLength;
                 while (segmentIndex < refinedPoints.Count - 1 &&
                        cumulativeDistances[segmentIndex] <
@@ -134,12 +139,13 @@ namespace Services {
             return result;
         }
 
-        private void NormalizeToUnitSquare(Rect bounds, ref List<List<Vector2>> strokes, out Rect normalizedBounds) {
+        private bool NormalizeToUnitSquare(Rect bounds, ref List<List<Vector2>> strokes, out Rect normalizedBounds) {
             float maxDimension = Mathf.Max(bounds.width, bounds.height);
 
             if (maxDimension <= _GeometryEpsilon) {
                 normalizedBounds = default;
                 strokes.Clear();
+                return false;
             }
 
             float scale = 1f / maxDimension;
@@ -160,20 +166,24 @@ namespace Services {
             }
             
             normalizedBounds = new Rect(centerOffset.x, centerOffset.y, normalizedWidth, normalizedHeight);
+            return true;
         }
 
-        private void SmoothStroke(List<Vector2> input) {
-            if (input.Count < 3) return;
+        private void SmoothStroke(List<Vector2> input, int passes) {
+            if (input.Count < 3 || passes <= 0) return;
             
             var source = new Vector2[input.Count];
-            
-            for (int i = 0; i < input.Count; i++) {
-                source[i] = input[i];
+            var destination = new Vector2[input.Count];
+            for (int i = 0; i < input.Count; i++) source[i] = input[i];
+            for (int pass = 0; pass < passes; pass++) {
+                destination[0] = source[0];
+                destination[^1] = source[^1];
+                for (int i = 1; i < input.Count - 1; i++) {
+                    destination[i] = source[i - 1] * _SmoothingFactor + source[i] * (1 - _SmoothingFactor * 2) + source[i + 1] * _SmoothingFactor;
+                }
+                (source, destination) = (destination, source);
             }
-            
-            for (int i = 1; i < input.Count - 1; i++) {
-                input[i] = source[i - 1] * _SmoothingFactor + source[i] * (1 - _SmoothingFactor * 2) + source [i + 1] * _SmoothingFactor;
-            }
+            for (int i = 0; i < input.Count; i++) input[i] = source[i];
         }
         
         private float CalculateStrokeLength(List<Vector2> rawPoints) {
@@ -233,6 +243,8 @@ namespace Services {
             var finitePoints = new List<Vector2>(input.Count);
             
             foreach (SignatureInputPoint inputPoint in input) {
+                if (inputPoint == null)
+                    continue;
                 Vector2 position = inputPoint.Position;
 
                 if (!IsFinite(position))
@@ -277,6 +289,14 @@ namespace Services {
 
         private static bool IsFinite(float value) {
             return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static void ValidateRules(SignatureProcessingRules rules) {
+            if (!IsFinite(rules.MinimumInputPointDistance) || rules.MinimumInputPointDistance < 0f ||
+                rules.MinimumUsablePointCountPerStroke < 2 || !IsFinite(rules.MinimumStrokeLength) ||
+                rules.MinimumStrokeLength < 0f || rules.ResampledPointCountPerStroke < 2 ||
+                rules.SmoothingPasses < 0 || rules.MaximumInputPointCount < rules.MinimumUsablePointCountPerStroke)
+                throw new ArgumentException("Processing rules are invalid.", nameof(rules));
         }
         
         private static bool TryCalculateBounds(IReadOnlyList<List<Vector2>> strokes, out Rect bounds) {

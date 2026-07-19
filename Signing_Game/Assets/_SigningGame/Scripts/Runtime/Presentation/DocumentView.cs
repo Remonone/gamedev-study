@@ -15,8 +15,11 @@ namespace Presentation {
         public void Init(DocumentViewModel viewModel) {
             DocumentViewModel nextViewModel = viewModel
                 ?? throw new ArgumentNullException(nameof(viewModel));
+            if (ReferenceEquals(_viewModel, nextViewModel))
+                throw new InvalidOperationException("DocumentView cannot be reinitialized with the same ViewModel instance.");
 
             _field.Clear();
+            _viewModel?.Dispose();
             _viewModel = nextViewModel;
             gameObject.SetActive(true);
         }
@@ -64,6 +67,11 @@ namespace Presentation {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void OnDestroy() {
+            _viewModel?.Dispose();
+            _viewModel = null;
         }
     }
 }

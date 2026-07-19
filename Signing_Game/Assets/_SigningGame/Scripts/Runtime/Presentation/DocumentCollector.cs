@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Data.Input;
+using Data.Results;
 using R3;
 using R3.Triggers;
 using UnityEngine;
@@ -19,10 +20,12 @@ namespace Presentation {
 
         private readonly Dictionary<DocumentView, CollectionState> _documentStates = new();
         private readonly Subject<SignatureAttempt> _collected = new();
+        private readonly Subject<SignatureEvaluationResult> _evaluated = new();
         private Graphic _dropSurface;
         private IDisposable _dropSubscription;
 
         public Observable<SignatureAttempt> Collected => _collected;
+        public Observable<SignatureEvaluationResult> Evaluated => _evaluated;
 
         private void Awake() {
             _dropSurface = GetComponent<Graphic>();
@@ -46,6 +49,7 @@ namespace Presentation {
             _dropSubscription?.Dispose();
             _dropSubscription = null;
             _collected.Dispose();
+            _evaluated.Dispose();
         }
 
         public bool TryCollect(DocumentView document, float endTime, out SignatureAttempt attempt) {
@@ -78,18 +82,26 @@ namespace Presentation {
             DocumentView document = pointerDrag.GetComponentInParent<DocumentView>();
             if (document == null) return;
 
+            bool destructionScheduled = false;
             try {
                 if (!TryCollect(document, Time.unscaledTime, out SignatureAttempt attempt)) return;
-
                 try {
                     _collected.OnNext(attempt);
+                    if (document.ViewModel.CanEvaluate) {
+                        SignatureEvaluationResult result = document.ViewModel.Evaluate(attempt);
+                        _evaluated.OnNext(result);
+                    }
                 }
                 finally {
-                    if (document != null) Destroy(document.gameObject);
+                    if (document != null) {
+                        destructionScheduled = true;
+                        Destroy(document.gameObject);
+                    }
                 }
             }
             catch (Exception exception) {
                 Debug.LogException(exception, this);
+                if (!destructionScheduled && document != null) Destroy(document.gameObject);
             }
         }
 

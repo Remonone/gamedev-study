@@ -1,3 +1,4 @@
+using Data.Rules;
 using UnityEngine;
 
 namespace Authoring {
@@ -38,5 +39,13 @@ namespace Authoring {
 
         public SignatureScoreWeightsDefinition ScoreWeights =>
             _scoreWeights;
+
+        public SignatureDifficultyRules ToRules() {
+            SignatureScoreWeightsDefinition weights = _scoreWeights;
+            return new SignatureDifficultyRules(_id, _minimumSimilarity, _corridorWidthMultiplier,
+                _coverageRequirementMultiplier, _alignmentToleranceMultiplier,
+                weights == null ? null : new SignatureScoreWeights(weights.CorridorFit, weights.Coverage,
+                    weights.Direction, weights.StrokeStructure));
+        }
     }
 }

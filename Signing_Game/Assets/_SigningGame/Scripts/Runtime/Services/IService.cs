@@ -6,14 +6,14 @@ namespace Services {
     public interface IService : IDisposable { }
 
     public interface IPreInitialize {
-        Awaitable PreInitializeAsync(ServiceLocator container);
+        Awaitable PreInitializeAsync(IServiceScope scope);
     }
 
     public interface IInitialize {
-        Awaitable InitializeAsync(ServiceLocator container);
+        Awaitable InitializeAsync(IServiceScope scope);
     }
 
     public interface IPostInitialize {
-        Awaitable PostInitializeAsync(ServiceLocator container);
+        Awaitable PostInitializeAsync(IServiceScope scope);
     }
 }

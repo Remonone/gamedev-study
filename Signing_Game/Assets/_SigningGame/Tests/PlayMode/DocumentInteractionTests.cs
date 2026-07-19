@@ -2,6 +2,11 @@ using System;
 using System.Collections;
 using System.Reflection;
 using Contracts;
+using Authoring;
+using Data.Enums;
+using Data.Requests;
+using Data.Results;
+using Data.Rules;
 using Data.Input;
 using NUnit.Framework;
 using Presentation;
@@ -280,6 +285,35 @@ namespace SigningGame.Tests.PlayMode {
             Assert.That(canvasGroup.blocksRaycasts, Is.True);
         }
 
+        [UnityTest]
+        public IEnumerator Collector_OptInPublishesCollectedThenLocalAndAggregateSameResult() {
+            DocumentCollector collector = CreateCollector(~0);
+            var preset = ScriptableObject.CreateInstance<SignaturePresetDefinition>();
+            var expected = new SignatureEvaluationResult(SignatureEvaluationStatus.Accepted, SignatureFailureReason.None,
+                1, 1, .5f, "v", new SignatureScoreBreakdown(1, 1, 1, 1, 1),
+                Array.Empty<SignatureStrokeMatchResult>());
+            var evaluator = new FixedEvaluator(expected);
+            var viewModel = new DocumentViewModel(new Services.SignatureRecorder(), evaluator, preset,
+                new SignatureDifficultyRules("d", .5f, 1, 1, 1, new SignatureScoreWeights(1, 0, 0, 0)), SignatureRuleModifiers.None);
+            DocumentView document = CreateDocument(Vector2.zero, 8, viewModel);
+            var order = new System.Collections.Generic.List<string>(); SignatureEvaluationResult aggregate = null;
+            collector.Collected.Subscribe(_ => order.Add("collected"));
+            viewModel.Evaluated.Subscribe(_ => order.Add("local"));
+            collector.Evaluated.Subscribe(value => { order.Add("aggregate"); aggregate = value; });
+            yield return null;
+            ExecuteEvents.Execute(collector.gameObject, Pointer(document.gameObject), ExecuteEvents.dropHandler);
+            CollectionAssert.AreEqual(new[] { "collected", "local", "aggregate" }, order);
+            Assert.That(aggregate, Is.SameAs(expected)); Assert.That(evaluator.Count, Is.EqualTo(1));
+            yield return null; UnityEngine.Object.DestroyImmediate(preset);
+        }
+
+        [UnityTest]
+        public IEnumerator DocumentView_RejectsSameInstanceReinitialization() {
+            var viewModel = new DocumentViewModel(); DocumentView document = CreateDocument(Vector2.zero, 8, viewModel);
+            yield return null;
+            Assert.Throws<InvalidOperationException>(() => document.Init(viewModel));
+        }
+
         private DocumentView CreateDocument(Vector2 position, int layer = 8, DocumentViewModel viewModel = null) {
             var documentObject = new GameObject("Document", typeof(RectTransform));
             documentObject.SetActive(false);
@@ -369,6 +403,14 @@ namespace SigningGame.Tests.PlayMode {
                 return new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0f);
             }
             public void CancelAttempt() { }
+        }
+
+        private sealed class FixedEvaluator : ISignatureEvaluator {
+            private readonly SignatureEvaluationResult _result; public int Count { get; private set; }
+            public FixedEvaluator(SignatureEvaluationResult result) => _result = result;
+            public SignatureEvaluationResult Evaluate(SignatureEvaluationRequest request) { Count++; return _result; }
+            public SignatureEvaluationResult Evaluate(SignatureAttempt attempt, SignaturePresetDefinition preset,
+                SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers) { Count++; return _result; }
         }
     }
 }

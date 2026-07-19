@@ -4,6 +4,7 @@ namespace Data.Rules {
         int MinimumUsablePointCountPerStroke,
         float MinimumStrokeLength,
         int ResampledPointCountPerStroke,
+        int SmoothingPasses,
         int MaximumInputPointCount
     );
 }

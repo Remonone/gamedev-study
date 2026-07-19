@@ -7,8 +7,11 @@ namespace Services {
             
         }
 
-        Awaitable IInitialize.InitializeAsync(ServiceLocator container) {
-            return null;
+        Awaitable IInitialize.InitializeAsync(IServiceScope scope) {
+            var source = new AwaitableCompletionSource();
+            Awaitable awaitable = source.Awaitable;
+            source.SetResult();
+            return awaitable;
         }
     }
 }

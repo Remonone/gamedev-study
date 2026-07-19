@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Bootstrap;
 using Constants;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -69,8 +71,12 @@ namespace Services.Locator {
         }
 
         public ServiceLocator Register(Type type, object service) {
-            if(!Array.Exists(type.GetInterfaces(), i => i == typeof(IService)))
-                throw new ArgumentException("Service must implement IService.", nameof(service));
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (service == null) throw new ArgumentNullException(nameof(service));
+            if (!type.IsInstanceOfType(service))
+                throw new ArgumentException($"Service is not assignable to {type}.", nameof(service));
+            if (service is not IService)
+                throw new ArgumentException("Service instance must implement IService.", nameof(service));
             _scope.Register(type, service);
             return this;
         }
@@ -80,21 +86,33 @@ namespace Services.Locator {
             return _scope.TryGet(out service);
         }
 
-        public ServiceLocator Get<T>(out T service) where T : class {
-            if (TryGetService(out service)) return this;
-            
-            if (TryGetNextInHierarchy(out ServiceLocator container)) {
-                container.Get(out service);
-                return this;
+        public bool TryGet<T>(out T service) where T : class {
+            var visited = new HashSet<ServiceLocator>(ServiceLocatorReferenceComparer.Instance);
+            ServiceLocator current = this;
+            while (current != null && visited.Add(current)) {
+                if (current.TryGetService(out service)) return true;
+                if (!current.TryGetNextInHierarchy(out current)) break;
             }
-            
-            throw new ArgumentException($"Service of type {typeof(T)} not registered.");
+
+            service = null;
+            return false;
+        }
+
+        public T Get<T>() where T : class {
+            if (TryGet(out T service)) return service;
+            throw new InvalidOperationException(
+                $"Service of type {typeof(T)} was not found in the service locator hierarchy.");
+        }
+
+        public ServiceLocator Get<T>(out T service) where T : class {
+            service = Get<T>();
+            return this;
         }
 
         internal async Awaitable InitializeScopeAsync() {
-            await _scope.PreInitializeAsync(this);
-            await _scope.InitializeAsync(this);
-            await _scope.PostInitializeAsync(this);
+            await _scope.PreInitializeAsync(_scope);
+            await _scope.InitializeAsync(_scope);
+            await _scope.PostInitializeAsync(_scope);
             IsReady = true;
         }
 
@@ -123,7 +141,7 @@ namespace Services.Locator {
         void OnDestroy() {
             _scope.Dispose();
 
-            if (this == Application) {
+            if (this == _applicationLocator) {
                 _applicationLocator = null;
             } else if (_sceneScopes.ContainsValue(this)) {
                 _sceneScopes.Remove(gameObject.scene);
@@ -145,6 +163,12 @@ namespace Services.Locator {
             
             container = transform.parent?.GetComponentInParent<ServiceLocator>() ?? ForSceneOf(this);
             return container != null;
+        }
+
+        private sealed class ServiceLocatorReferenceComparer : IEqualityComparer<ServiceLocator> {
+            public static readonly ServiceLocatorReferenceComparer Instance = new();
+            public bool Equals(ServiceLocator x, ServiceLocator y) => ReferenceEquals(x, y);
+            public int GetHashCode(ServiceLocator obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
         }
         
 #if UNITY_EDITOR
