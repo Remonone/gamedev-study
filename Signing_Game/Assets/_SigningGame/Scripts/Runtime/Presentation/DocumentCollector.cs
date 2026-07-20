@@ -87,10 +87,8 @@ namespace Presentation {
                 if (!TryCollect(document, Time.unscaledTime, out SignatureAttempt attempt)) return;
                 try {
                     _collected.OnNext(attempt);
-                    if (document.ViewModel.CanEvaluate) {
-                        SignatureEvaluationResult result = document.ViewModel.Evaluate(attempt);
-                        _evaluated.OnNext(result);
-                    }
+                    SignatureEvaluationResult result = document.ViewModel.Evaluate(attempt);
+                    _evaluated.OnNext(result);
                 }
                 finally {
                     if (document != null) {

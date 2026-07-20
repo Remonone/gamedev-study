@@ -4,20 +4,20 @@ namespace Data.Rules {
         public readonly float MinimumSimilarityOffset;
         public readonly float CoverageRequirementMultiplier;
         public readonly float AlignmentToleranceMultiplier;
-        public readonly int AdditionalSmoothingPasses;
+        public readonly float DirectionContributionMultiplier;
 
         public SignatureRuleModifiers(
         float CorridorWidthMultiplier,
         float MinimumSimilarityOffset,
         float CoverageRequirementMultiplier,
         float AlignmentToleranceMultiplier,
-        int AdditionalSmoothingPasses
+        float DirectionContributionMultiplier
         ) {
             this.CorridorWidthMultiplier = CorridorWidthMultiplier;
             this.MinimumSimilarityOffset = MinimumSimilarityOffset;
             this.CoverageRequirementMultiplier = CoverageRequirementMultiplier;
             this.AlignmentToleranceMultiplier = AlignmentToleranceMultiplier;
-            this.AdditionalSmoothingPasses = AdditionalSmoothingPasses;
+            this.DirectionContributionMultiplier = DirectionContributionMultiplier;
         }
 
         public static SignatureRuleModifiers None => new(
@@ -25,7 +25,7 @@ namespace Data.Rules {
             MinimumSimilarityOffset: 0f,
             CoverageRequirementMultiplier: 1f,
             AlignmentToleranceMultiplier: 1f,
-            AdditionalSmoothingPasses: 0
+            DirectionContributionMultiplier: 1f
         );
     }
 }

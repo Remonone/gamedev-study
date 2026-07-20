@@ -20,7 +20,6 @@ namespace Presentation {
         public bool IsSigning => _signatureRecorder.IsAttemptActive;
         public bool IsStrokeActive => _signatureRecorder.IsStrokeActive;
         public bool CanCompleteSignature => IsSigning && !IsStrokeActive;
-        public bool CanEvaluate => _evaluator != null && _preset != null && _difficulty != null;
         public Observable<SignatureEvaluationResult> Evaluated => _evaluated;
 
         public DocumentViewModel()
@@ -48,7 +47,6 @@ namespace Presentation {
 
         public SignatureEvaluationResult Evaluate(SignatureAttempt attempt) {
             if (_disposed) throw new ObjectDisposedException(nameof(DocumentViewModel));
-            if (!CanEvaluate) throw new InvalidOperationException("Document evaluation is not configured.");
             SignatureEvaluationResult result = _evaluator.Evaluate(attempt, _preset, _difficulty, _modifiers);
             _evaluated.OnNext(result);
             return result;

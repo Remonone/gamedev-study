@@ -9,21 +9,18 @@ namespace Authoring {
     public sealed class SignaturePresetDefinition : ScriptableObject {
         [SerializeField] private string _id;
 
-        [SerializeField, Min(1)] private int _version = 1;
 
         [SerializeField] private SignatureStrokeMatchMode _strokeMatchMode =
             SignatureStrokeMatchMode.Ordered;
 
         [SerializeField] private SignatureAlignmentDefinition _alignment = new();
-
-        [SerializeField] private List<SignatureTemplateVariantDefinition> _variants = new();
+        [SerializeField] private SignatureProcessingProfileDefinition _processingProfile;
+        [SerializeField] private List<SignatureVariantDefinition> _variants = new();
 
         public string Id => _id;
-        public int Version => _version;
         public SignatureStrokeMatchMode StrokeMatchMode => _strokeMatchMode;
         public SignatureAlignmentDefinition Alignment => _alignment;
-
-        public IReadOnlyList<SignatureTemplateVariantDefinition> Variants =>
-            _variants;
+        public SignatureProcessingProfileDefinition ProcessingProfile => _processingProfile;
+        public IReadOnlyList<SignatureVariantDefinition> Variants => _variants;
     }
 }

@@ -525,6 +525,8 @@ MonoBehaviour:
   _documentPrefab: {fileID: 3783055059766703464, guid: 454f142c76b409077895ba4ae7a9c0cf, type: 3}
   _parent: {fileID: 1526093115}
   _anchoredSpawnPosition: {x: -519, y: 0}
+  _signaturePreset: {fileID: 11400000, guid: 2e11a5975676314e6a8e9a11f8f70a9c, type: 2}
+  _difficultyProfile: {fileID: 11400000, guid: bdaba90eb1534a3f0be70b578f091b7d, type: 2}
 --- !u!1 &442592878
 GameObject:
   m_ObjectHideFlags: 0

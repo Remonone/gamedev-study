@@ -149,8 +149,8 @@ namespace SigningGame.Tests.EditMode {
             var evaluator = new FixedEvaluator(expected);
             var viewModel = new DocumentViewModel(new RecordingSignatureRecorder(), evaluator, preset,
                 new SignatureDifficultyRules("d", .5f, 1, 1, 1, new SignatureScoreWeights(1, 0, 0, 0)), SignatureRuleModifiers.None);
-            SignatureEvaluationResult actual = viewModel.Evaluate(new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0));
-            Assert.That(viewModel.CanEvaluate, Is.True); Assert.That(actual, Is.SameAs(expected));
+            SignatureEvaluationResult actual = viewModel.Evaluate(new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0)); 
+            Assert.That(actual, Is.SameAs(expected));
             viewModel.Dispose(); Assert.Throws<ObjectDisposedException>(() => viewModel.Evaluate(new SignatureAttempt(Array.Empty<SignatureStrokeAttempt>(), 0)));
             UnityEngine.Object.DestroyImmediate(preset);
         }
