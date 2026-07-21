@@ -2,6 +2,7 @@ using System;
 using Authoring;
 using Contracts;
 using Data.Rules;
+using Services;
 using Services.Locator;
 using UnityEngine;
 
@@ -32,8 +33,9 @@ namespace Presentation {
             ((RectTransform)document.transform).anchoredPosition = _anchoredSpawnPosition;
             if (hasPreset) {
                 ServiceLocator.For(this).Get(out ISignatureEvaluator evaluator);
-                document.Init(new DocumentViewModel(new Services.SignatureRecorder(), evaluator, _signaturePreset,
-                    _difficultyProfile.ToRules(), SignatureRuleModifiers.None));
+                ServiceLocator.For(this).Get(out RewardConvertor convertor);
+                document.Init(new DocumentViewModel(new SignatureRecorder(), evaluator, _signaturePreset,
+                    _difficultyProfile.ToRules(), SignatureRuleModifiers.None, convertor));
             } else {
                 document.Init(new DocumentViewModel());
             }

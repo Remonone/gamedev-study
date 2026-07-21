@@ -20,7 +20,6 @@ namespace SigningGame.Editor.Signatures {
     [Serializable]
     public sealed class RecordedSignatureSampleDefinition {
         [SerializeField] private string _id;
-        [SerializeField] private bool _enabled = true;
         [SerializeField] private string _comment;
         [SerializeField] private List<RecordedSignatureStrokeDefinition> _strokes;
         public string Id => _id;

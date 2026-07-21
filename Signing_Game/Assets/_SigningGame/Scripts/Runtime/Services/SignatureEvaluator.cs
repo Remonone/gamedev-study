@@ -70,15 +70,9 @@ namespace Services {
                 if (best == null || candidate.Similarity > best.Similarity) best = candidate;
             }
             bool accepted = best.Similarity >= rules.MinimumSimilarity;
-            float quality = 0f;
-            if (accepted) {
-                quality = rules.MinimumSimilarity == 1f && best.Similarity == 1f
-                    ? 1f : Mathf.InverseLerp(rules.MinimumSimilarity, 1f, best.Similarity);
-            }
             return new SignatureEvaluationResult(accepted ? SignatureEvaluationStatus.Accepted : SignatureEvaluationStatus.Rejected,
                 accepted ? SignatureFailureReason.None : SignatureFailureReason.BelowSimilarityThreshold,
-                Mathf.Clamp01(best.Similarity), accepted ? Mathf.Clamp01(quality) : 0f, rules.MinimumSimilarity,
-                best.VariantId, best.Breakdown, best.StrokeResults);
+                Mathf.Clamp01(best.Similarity), rules.MinimumSimilarity, best.Breakdown);
         }
 
         private static bool HasOversizedStroke(SignatureAttempt attempt, SignatureProcessingRules rules) {
@@ -100,8 +94,7 @@ namespace Services {
         }
 
         private static SignatureEvaluationResult Invalid(SignatureFailureReason reason) =>
-            new(SignatureEvaluationStatus.InvalidAttempt, reason, 0f, 0f, 0f, null, EmptyBreakdown,
-                EmptyStrokeResults);
+            new(SignatureEvaluationStatus.InvalidAttempt, reason, 0f, 0f, EmptyBreakdown);
         private void EnsureInitialized() {
             if (!_initialized)
                 throw new InvalidOperationException("SignatureEvaluator must be initialized before evaluation.");

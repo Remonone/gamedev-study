@@ -19,7 +19,6 @@ namespace Presentation {
                 throw new InvalidOperationException("DocumentView cannot be reinitialized with the same ViewModel instance.");
 
             _field.Clear();
-            _viewModel?.Dispose();
             _viewModel = nextViewModel;
             gameObject.SetActive(true);
         }
@@ -70,7 +69,6 @@ namespace Presentation {
         }
 
         private void OnDestroy() {
-            _viewModel?.Dispose();
             _viewModel = null;
         }
     }

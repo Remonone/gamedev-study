@@ -23,10 +23,7 @@ namespace SigningGame.Editor.Signatures {
         private SignatureEvaluator _evaluator;
         private ServiceScope _serviceScope;
         private SignatureEvaluationResult _result;
-        private ProcessedSignature _processed;
-        private CompiledSignaturePreset _compiled;
         private int _observedCanvasRevision;
-        private float _evaluatedCorridorWidthMultiplier = 1f;
 
         [MenuItem("Game/Signatures/Preset Test")]
         private static void Open() => GetWindow<SignaturePresetTestWindow>("Signature Test");
@@ -51,7 +48,6 @@ namespace SigningGame.Editor.Signatures {
                 _observedCanvasRevision = _canvas.Revision;
                 ClearEvaluationState();
             }
-            DrawOverlay(rect);
             using (new EditorGUILayout.HorizontalScope()) {
                 if (GUILayout.Button("Clear")) {
                     _canvas.Clear();
@@ -64,20 +60,13 @@ namespace SigningGame.Editor.Signatures {
                 EditorGUILayout.LabelField("Status", DisplayStatus(_result.Status));
                 EditorGUILayout.LabelField("Failure", _result.FailureReason.ToString());
                 EditorGUILayout.LabelField("Similarity", _result.Similarity.ToString("F4"));
-                EditorGUILayout.LabelField("Quality", _result.Quality.ToString("F4"));
                 EditorGUILayout.LabelField("Minimum Similarity Threshold", _result.MinimumSimilarity.ToString("F4"));
-                EditorGUILayout.LabelField("Matched Variant", _result.MatchedVariantId ?? "-");
                 SignatureScoreBreakdown breakdown = _result.ScoreBreakdown;
                 EditorGUILayout.LabelField("Corridor Fit", breakdown.CorridorFit.ToString("F4"));
                 EditorGUILayout.LabelField("Coverage", breakdown.Coverage.ToString("F4"));
                 EditorGUILayout.LabelField("Direction", breakdown.Direction.ToString("F4"));
                 EditorGUILayout.LabelField("Stroke Structure", breakdown.StrokeStructure.ToString("F4"));
                 EditorGUILayout.LabelField("Total", breakdown.Total.ToString("F4"));
-                foreach (SignatureStrokeMatchResult stroke in _result.StrokeResults)
-                    EditorGUILayout.LabelField("Stroke",
-                        $"input index {stroke.InputStrokeIndex}, template ID {stroke.TemplateStrokeId}, " +
-                        $"fit {stroke.CorridorFit:F3}, coverage {stroke.Coverage:F3}, " +
-                        $"direction {stroke.Direction:F3}, similarity {stroke.Similarity:F3}");
             }
             Repaint();
         }
@@ -93,12 +82,8 @@ namespace SigningGame.Editor.Signatures {
                 Data.Input.SignatureAttempt attempt = _canvas.ToAttempt();
                 SignatureDifficultyRules difficultyRules = _difficulty.ToRules();
                 _repository.Invalidate(_preset);
-                _compiled = _repository.GetOrCompile(_preset);
-                _processed = _preprocessor.Process(attempt, _compiled.Processing);
                 SignatureEvaluationResult result = _evaluator.Evaluate(attempt, _preset, difficultyRules,
                     SignatureRuleModifiers.None);
-                _evaluatedCorridorWidthMultiplier = difficultyRules.CorridorWidthMultiplier *
-                                                    SignatureRuleModifiers.None.CorridorWidthMultiplier;
                 _result = result;
             } catch (System.Exception exception) {
                 ClearEvaluationState();
@@ -106,29 +91,9 @@ namespace SigningGame.Editor.Signatures {
             }
         }
 
-        private void DrawOverlay(Rect rect) {
-            if (_result == null || _compiled == null) return;
-            Handles.BeginGUI();
-            SignatureTemplateVariant matchedVariant = null;
-            foreach (SignatureTemplateVariant candidate in _compiled.Variants)
-                if (candidate.Id == _result.MatchedVariantId) { matchedVariant = candidate; break; }
-            if (matchedVariant != null) foreach (SignatureTemplateStroke stroke in matchedVariant.Strokes)
-                for (int i = 0; i < stroke.Nodes.Count; i++) {
-                    SignatureCorridorNode node = stroke.Nodes[i]; Vector2 point = Map(rect, node.Position);
-                    Handles.color = new Color(1f, 0.65f, 0f, 0.35f); Handles.DrawWireDisc(point, Vector3.forward,
-                        node.Radius * _evaluatedCorridorWidthMultiplier * Mathf.Min(rect.width, rect.height));
-                    if (i > 0) Handles.DrawLine(Map(rect, stroke.Nodes[i - 1].Position), point);
-                }
-            if (_processed != null) { Handles.color = Color.cyan; foreach (ProcessedSignatureStroke stroke in _processed.Strokes)
-                for (int i = 1; i < stroke.Points.Count; i++) Handles.DrawLine(Map(rect, stroke.Points[i - 1].Position), Map(rect, stroke.Points[i].Position)); }
-            Handles.EndGUI();
-        }
 
         private void ClearEvaluationState() {
             _result = null;
-            _processed = null;
-            _compiled = null;
-            _evaluatedCorridorWidthMultiplier = 1f;
         }
         private static string DisplayStatus(SignatureEvaluationStatus status) => status switch {
             SignatureEvaluationStatus.Accepted => "Accepted",

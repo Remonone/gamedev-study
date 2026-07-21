@@ -525,7 +525,7 @@ MonoBehaviour:
   _documentPrefab: {fileID: 3783055059766703464, guid: 454f142c76b409077895ba4ae7a9c0cf, type: 3}
   _parent: {fileID: 1526093115}
   _anchoredSpawnPosition: {x: -519, y: 0}
-  _signaturePreset: {fileID: 11400000, guid: 2e11a5975676314e6a8e9a11f8f70a9c, type: 2}
+  _signaturePreset: {fileID: 11400000, guid: d5b2daf95d086843c8f37326c258f49c, type: 2}
   _difficultyProfile: {fileID: 11400000, guid: bdaba90eb1534a3f0be70b578f091b7d, type: 2}
 --- !u!1 &442592878
 GameObject:
@@ -851,6 +851,7 @@ RectTransform:
   m_Children:
   - {fileID: 224136729}
   - {fileID: 434916738}
+  - {fileID: 2068326863}
   m_Father: {fileID: 1425001059}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -921,6 +922,56 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &2068326862
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2068326863}
+  - component: {fileID: 2068326864}
+  m_Layer: 5
+  m_Name: RewardSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2068326863
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068326862}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1526093115}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2068326864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068326862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 406bd60aecbe427e9de7c36dc8f5e457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::UI.RewardSpawner
+  _rewardPrefab: {fileID: -9153317747232767414, guid: d135ee125a447e2049f6cebff96eb695, type: 3}
+  _canvas: {fileID: 1526093118}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

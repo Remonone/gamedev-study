@@ -12,6 +12,7 @@ namespace Bootstrap.Installer {
             var resolver = new RuleResolver();
             var matcher = new SignatureMatcher();
             var evaluator = new SignatureEvaluator();
+            var convertor = new RewardConvertor();
 
             RegisterShared(container, signaturePreprocessor, typeof(ISignaturePreprocessor));
             RegisterShared(container, compiler, typeof(ISignaturePresetCompiler));
@@ -19,6 +20,7 @@ namespace Bootstrap.Installer {
             RegisterShared(container, resolver, typeof(ISignatureRulesResolver));
             RegisterShared(container, matcher, typeof(ISignatureMatcher));
             RegisterShared(container, evaluator, typeof(ISignatureEvaluator));
+            container.Register(convertor);
         }
 
         private static void RegisterShared<T>(ServiceLocator container, T service, Type contract) where T : IService {

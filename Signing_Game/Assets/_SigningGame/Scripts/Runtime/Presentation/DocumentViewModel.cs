@@ -4,23 +4,20 @@ using Data.Input;
 using Data.Results;
 using Data.Rules;
 using Authoring;
-using R3;
+using Data.Enums;
 using Services;
 
 namespace Presentation {
-    public sealed class DocumentViewModel : IDisposable {
+    public sealed class DocumentViewModel {
         private readonly ISignatureRecorder _signatureRecorder;
         private readonly ISignatureEvaluator _evaluator;
         private readonly SignaturePresetDefinition _preset;
         private readonly SignatureDifficultyRules _difficulty;
+        private readonly RewardConvertor _rewardConvertor;
         private readonly SignatureRuleModifiers _modifiers;
-        private readonly Subject<SignatureEvaluationResult> _evaluated = new();
-        private bool _disposed;
 
         public bool IsSigning => _signatureRecorder.IsAttemptActive;
         public bool IsStrokeActive => _signatureRecorder.IsStrokeActive;
-        public bool CanCompleteSignature => IsSigning && !IsStrokeActive;
-        public Observable<SignatureEvaluationResult> Evaluated => _evaluated;
 
         public DocumentViewModel()
             : this(new SignatureRecorder()) {
@@ -32,23 +29,23 @@ namespace Presentation {
         }
 
         public DocumentViewModel(ISignatureRecorder signatureRecorder, ISignatureEvaluator evaluator,
-            SignaturePresetDefinition preset, SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers)
+            SignaturePresetDefinition preset, SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers, RewardConvertor convertor)
             : this(signatureRecorder) {
             _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
             _preset = preset ?? throw new ArgumentNullException(nameof(preset));
             _difficulty = difficulty ?? throw new ArgumentNullException(nameof(difficulty));
             _modifiers = modifiers;
+            _rewardConvertor = convertor ?? throw new ArgumentNullException(nameof(convertor));
         }
 
         public DocumentViewModel(ISignatureEvaluator evaluator, SignaturePresetDefinition preset,
-            SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers)
-            : this(new SignatureRecorder(), evaluator, preset, difficulty, modifiers) {
+            SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers, RewardConvertor convertor)
+            : this(new SignatureRecorder(), evaluator, preset, difficulty, modifiers, convertor) {
         }
 
         public SignatureEvaluationResult Evaluate(SignatureAttempt attempt) {
-            if (_disposed) throw new ObjectDisposedException(nameof(DocumentViewModel));
             SignatureEvaluationResult result = _evaluator.Evaluate(attempt, _preset, _difficulty, _modifiers);
-            _evaluated.OnNext(result);
+            _rewardConvertor.CalculateReward(result, RewardKind.SignedByPlayer);
             return result;
         }
 
@@ -95,12 +92,6 @@ namespace Presentation {
 
         public void CancelSignature() {
             _signatureRecorder.CancelAttempt();
-        }
-
-        public void Dispose() {
-            if (_disposed) return;
-            _disposed = true;
-            _evaluated.Dispose();
         }
     }
 }

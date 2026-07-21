@@ -6,8 +6,6 @@ namespace Data.Enums {
         NoUsableStrokes = 2,
         TooFewPoints = 3,
         TooManyPoints = 4,
-        StrokeTooShort = 5,
-
-        BelowSimilarityThreshold = 6
+        BelowSimilarityThreshold = 5
     }
 }
