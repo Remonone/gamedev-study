@@ -1,20 +1,12 @@
 using System;
 using Contracts;
 using Data.Input;
-using Data.Results;
-using Data.Rules;
-using Authoring;
-using Data.Enums;
 using Services;
 
 namespace Presentation {
     public sealed class DocumentViewModel {
         private readonly ISignatureRecorder _signatureRecorder;
-        private readonly ISignatureEvaluator _evaluator;
-        private readonly SignaturePresetDefinition _preset;
-        private readonly SignatureDifficultyRules _difficulty;
-        private readonly RewardConvertor _rewardConvertor;
-        private readonly SignatureRuleModifiers _modifiers;
+        private readonly PlayerSignatureAcceptor _acceptor;
 
         public bool IsSigning => _signatureRecorder.IsAttemptActive;
         public bool IsStrokeActive => _signatureRecorder.IsStrokeActive;
@@ -22,31 +14,22 @@ namespace Presentation {
         public DocumentViewModel()
             : this(new SignatureRecorder()) {
         }
+        
+        public DocumentViewModel(PlayerSignatureAcceptor acceptor) : this(new SignatureRecorder(), acceptor) {} 
 
         public DocumentViewModel(ISignatureRecorder signatureRecorder) {
             _signatureRecorder = signatureRecorder
                 ?? throw new ArgumentNullException(nameof(signatureRecorder));
         }
 
-        public DocumentViewModel(ISignatureRecorder signatureRecorder, ISignatureEvaluator evaluator,
-            SignaturePresetDefinition preset, SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers, RewardConvertor convertor)
+        public DocumentViewModel(ISignatureRecorder signatureRecorder, PlayerSignatureAcceptor acceptor)
             : this(signatureRecorder) {
-            _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
-            _preset = preset ?? throw new ArgumentNullException(nameof(preset));
-            _difficulty = difficulty ?? throw new ArgumentNullException(nameof(difficulty));
-            _modifiers = modifiers;
-            _rewardConvertor = convertor ?? throw new ArgumentNullException(nameof(convertor));
+            _acceptor = acceptor;
         }
 
-        public DocumentViewModel(ISignatureEvaluator evaluator, SignaturePresetDefinition preset,
-            SignatureDifficultyRules difficulty, SignatureRuleModifiers modifiers, RewardConvertor convertor)
-            : this(new SignatureRecorder(), evaluator, preset, difficulty, modifiers, convertor) {
-        }
 
-        public SignatureEvaluationResult Evaluate(SignatureAttempt attempt) {
-            SignatureEvaluationResult result = _evaluator.Evaluate(attempt, _preset, _difficulty, _modifiers);
-            _rewardConvertor.CalculateReward(result, RewardKind.SignedByPlayer);
-            return result;
+        public void Evaluate(SignatureAttempt attempt) {
+            _acceptor?.AcceptSignature(attempt);
         }
 
         public void StartStroke(SignatureInputPoint firstPoint) {

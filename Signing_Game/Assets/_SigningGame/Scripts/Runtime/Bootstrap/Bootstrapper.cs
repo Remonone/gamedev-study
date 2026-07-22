@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Services.Locator;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace Bootstrap {
 
         private async void Awake() => await BootstrapOnDemand();
 
-        public async Awaitable BootstrapOnDemand() {
+        public async UniTask BootstrapOnDemand() {
             if (_hasBeenBootstrapped) return;
             _hasBeenBootstrapped = true;
 

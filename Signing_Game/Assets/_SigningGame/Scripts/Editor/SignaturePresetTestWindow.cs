@@ -111,7 +111,7 @@ namespace SigningGame.Editor.Signatures {
                 _resolver = new RuleResolver();
                 _matcher = new SignatureMatcher();
                 _evaluator = new SignatureEvaluator();
-                _serviceScope = new ServiceScope();
+                _serviceScope = new ServiceScope(null);
                 _serviceScope.Register(_preprocessor).Register(typeof(ISignaturePreprocessor), _preprocessor)
                     .Register(_compiler).Register(typeof(ISignaturePresetCompiler), _compiler)
                     .Register(_repository).Register(typeof(ISignaturePresetRepository), _repository)

@@ -3,5 +3,7 @@ namespace Services.Locator {
         T Get<T>() where T : class;
         
         bool TryGet<T>(out T service) where T : class;
+        
+        ServiceLocator Container { get; }
     }
 }

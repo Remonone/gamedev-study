@@ -20,12 +20,10 @@ namespace Presentation {
 
         private readonly Dictionary<DocumentView, CollectionState> _documentStates = new();
         private readonly Subject<SignatureAttempt> _collected = new();
-        private readonly Subject<SignatureEvaluationResult> _evaluated = new();
         private Graphic _dropSurface;
         private IDisposable _dropSubscription;
 
         public Observable<SignatureAttempt> Collected => _collected;
-        public Observable<SignatureEvaluationResult> Evaluated => _evaluated;
 
         private void Awake() {
             _dropSurface = GetComponent<Graphic>();
@@ -49,7 +47,6 @@ namespace Presentation {
             _dropSubscription?.Dispose();
             _dropSubscription = null;
             _collected.Dispose();
-            _evaluated.Dispose();
         }
 
         public bool TryCollect(DocumentView document, float endTime, out SignatureAttempt attempt) {
@@ -87,8 +84,7 @@ namespace Presentation {
                 if (!TryCollect(document, Time.unscaledTime, out SignatureAttempt attempt)) return;
                 try {
                     _collected.OnNext(attempt);
-                    SignatureEvaluationResult result = document.ViewModel.Evaluate(attempt);
-                    _evaluated.OnNext(result);
+                    document.ViewModel.Evaluate(attempt);
                 }
                 finally {
                     if (document != null) {

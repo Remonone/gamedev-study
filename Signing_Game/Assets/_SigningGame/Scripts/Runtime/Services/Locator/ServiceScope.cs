@@ -5,9 +5,16 @@ using UnityEngine;
 
 namespace Services.Locator {
     public class ServiceScope : IServiceScope, IDisposable {
+        private readonly ServiceLocator _container;
         private readonly Dictionary<Type, object> _services = new();
         private readonly List<object> _ordered = new();
         private readonly HashSet<object> _orderedSet = new(ReferenceComparer.Instance);
+        
+        public ServiceLocator Container => _container;
+
+        public ServiceScope(ServiceLocator container) {
+            _container = container;
+        }
 
         public ServiceScope Register<T>(T service) {
             Type type = typeof(T);

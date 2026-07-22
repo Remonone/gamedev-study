@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bootstrap;
 using Constants;
+using Cysharp.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,7 +16,7 @@ namespace Services.Locator {
         private static Dictionary<Scene, ServiceLocator> _sceneScopes = new();
         private static List<GameObject> _tmpSceneGameObjects = new();
 
-        private ServiceScope _scope = new();
+        private ServiceScope _scope;
 
         public bool IsReady { get; private set; }
 
@@ -29,6 +30,8 @@ namespace Services.Locator {
                 }
 
                 var container = new GameObject(InternalConstants.GLOBAL_SERVICE_SCOPE, typeof(ServiceLocator));
+                var locator = container.GetComponent<ServiceLocator>();
+                locator._scope = new(locator);
                 _ = container.AddComponent<GameGlobalBootstrapper>().BootstrapOnDemand();
 
                 return _applicationLocator;
@@ -66,6 +69,7 @@ namespace Services.Locator {
         }
 
         public ServiceLocator Register<T>(T service) where T : IService {
+            _scope ??= new ServiceScope(this);
             _scope.Register(service);
             return this;
         }
@@ -77,13 +81,17 @@ namespace Services.Locator {
                 throw new ArgumentException($"Service is not assignable to {type}.", nameof(service));
             if (service is not IService)
                 throw new ArgumentException("Service instance must implement IService.", nameof(service));
+            _scope ??= new ServiceScope(this);
             _scope.Register(type, service);
             return this;
         }
 
 
         public bool TryGetService<T>(out T service) where T : class {
-            return _scope.TryGet(out service);
+            if (_scope != null) return _scope.TryGet(out service);
+            Debug.LogWarning($"Trying to get service of type {typeof(T)} from a empty service locator with no scope.");
+            service = null;
+            return false;
         }
 
         public bool TryGet<T>(out T service) where T : class {
@@ -109,7 +117,7 @@ namespace Services.Locator {
             return this;
         }
 
-        internal async Awaitable InitializeScopeAsync() {
+        internal async UniTask InitializeScopeAsync() {
             await _scope.PreInitializeAsync(_scope);
             await _scope.InitializeAsync(_scope);
             await _scope.PostInitializeAsync(_scope);

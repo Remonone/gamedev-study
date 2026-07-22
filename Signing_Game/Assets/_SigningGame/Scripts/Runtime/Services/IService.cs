@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Services.Locator;
 using UnityEngine;
 
@@ -6,14 +7,14 @@ namespace Services {
     public interface IService : IDisposable { }
 
     public interface IPreInitialize {
-        Awaitable PreInitializeAsync(IServiceScope scope);
+        UniTask PreInitializeAsync(IServiceScope scope);
     }
 
     public interface IInitialize {
-        Awaitable InitializeAsync(IServiceScope scope);
+        UniTask InitializeAsync(IServiceScope scope);
     }
 
     public interface IPostInitialize {
-        Awaitable PostInitializeAsync(IServiceScope scope);
+        UniTask PostInitializeAsync(IServiceScope scope);
     }
 }

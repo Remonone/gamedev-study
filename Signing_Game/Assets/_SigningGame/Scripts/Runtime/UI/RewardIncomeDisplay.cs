@@ -1,17 +1,15 @@
-using System;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using Utils;
 
 namespace UI {
     public class RewardIncomeDisplay : MonoBehaviour {
         private TMP_Text _text;
         
-        private Value _reward;
+        private bool _isAccepted;
+        private float _accuracy;
 
         private bool _isRewardSet;
-        private float _accuracy;
+        
 
         private void Awake() {
             _text = GetComponent<TMP_Text>();
@@ -24,12 +22,12 @@ namespace UI {
                 Destroy(gameObject);
                 return;
             }
-            _text.text = $"+{_reward}$\nAcc.: {(_accuracy * 100f):0.00}%";
+            _text.text = $"+{(_isAccepted ? "Nice!" : "Rejected!")}$\nAcc.: {(_accuracy * 100f):0.00}%";
         }
 
-        public void SetReward(Value reward, float accuracy) {
+        public void SetReward(float accuracy, bool isAccepted) {
             _isRewardSet = true;
-            _reward = reward;
+            _isAccepted = isAccepted;
             _accuracy = accuracy;
         }
     }

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using Authoring;
 using Contracts;
+using Cysharp.Threading.Tasks;
 using Data.Enums;
 using Data.Input;
 using Data.Processed;
@@ -15,15 +15,13 @@ using UnityEngine;
 namespace Services {
     public sealed class SignatureEvaluator : IService, ISignatureEvaluator, IInitialize {
         private static readonly SignatureScoreBreakdown EmptyBreakdown = new(0f, 0f, 0f, 0f, 0f);
-        private static readonly IReadOnlyList<SignatureStrokeMatchResult> EmptyStrokeResults =
-            Array.AsReadOnly(Array.Empty<SignatureStrokeMatchResult>());
         private ISignaturePreprocessor _preprocessor;
         private ISignaturePresetRepository _repository;
         private ISignatureRulesResolver _resolver;
         private ISignatureMatcher _matcher;
         private bool _initialized;
 
-        Awaitable IInitialize.InitializeAsync(IServiceScope scope) {
+        UniTask IInitialize.InitializeAsync(IServiceScope scope) {
             if (scope == null) throw new ArgumentNullException(nameof(scope));
             ISignaturePreprocessor preprocessor = scope.Get<ISignaturePreprocessor>();
             ISignaturePresetRepository repository = scope.Get<ISignaturePresetRepository>();
@@ -35,11 +33,8 @@ namespace Services {
             _resolver = resolver;
             _matcher = matcher;
             _initialized = true;
-
-            var source = new AwaitableCompletionSource();
-            Awaitable awaitable = source.Awaitable;
-            source.SetResult();
-            return awaitable;
+            
+            return UniTask.CompletedTask;
         }
 
         public SignatureEvaluationResult Evaluate(SignatureEvaluationRequest request) {

@@ -1,4 +1,3 @@
-using System;
 using Contracts;
 using Services;
 using Services.Locator;
@@ -12,7 +11,6 @@ namespace Bootstrap.Installer {
             var resolver = new RuleResolver();
             var matcher = new SignatureMatcher();
             var evaluator = new SignatureEvaluator();
-            var convertor = new RewardConvertor();
 
             RegisterShared(container, signaturePreprocessor, typeof(ISignaturePreprocessor));
             RegisterShared(container, compiler, typeof(ISignaturePresetCompiler));
@@ -20,12 +18,13 @@ namespace Bootstrap.Installer {
             RegisterShared(container, resolver, typeof(ISignatureRulesResolver));
             RegisterShared(container, matcher, typeof(ISignatureMatcher));
             RegisterShared(container, evaluator, typeof(ISignatureEvaluator));
-            container.Register(convertor);
+            RegisterShared(container, new MoneyAggregator(), typeof(IMoneyAggregator));
+            container.Register(new WalletService());
+            container.Register(new DifficultyProfileEvaluator());
+            container.Register(new PlayerStatStash());
+            container.Register(new PlayerSignatureAcceptor());
         }
 
-        private static void RegisterShared<T>(ServiceLocator container, T service, Type contract) where T : IService {
-            container.Register(service);
-            container.Register(contract, service);
-        }
+        
     }
 }

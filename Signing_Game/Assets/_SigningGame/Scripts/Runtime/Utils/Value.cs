@@ -21,6 +21,7 @@ namespace Utils {
 
         public static readonly Value Zero = new(0d);
         public static readonly Value One = new(1d);
+        public static readonly Value Infinity = new(1, new BaseValue(int.MaxValue));
 
         [SerializeField, JsonProperty("stored"), Tooltip("Mantissa stored in the current thousand-based degree.")]
         private double _stored;
@@ -276,6 +277,10 @@ namespace Utils {
     public struct BaseValue {
         [Tooltip("Power of 1000 used to scale a Value.")]
         public int Degree;
+
+        public BaseValue(int degree) {
+            Degree = degree;
+        }
 
         public override string ToString() {
             if (Degree <= 4) return GetDegreeConst();
