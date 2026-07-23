@@ -103,7 +103,7 @@ namespace Utils {
             return new Value(newStored, new BaseValue { Degree = degree });
         }
 
-        public static Value? operator -(Value first, Value other) {
+        public static Value operator -(Value first, Value other) {
             if (other > first) {
                 return null;
             }

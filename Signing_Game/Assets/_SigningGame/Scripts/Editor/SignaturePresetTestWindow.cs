@@ -112,12 +112,12 @@ namespace SigningGame.Editor.Signatures {
                 _matcher = new SignatureMatcher();
                 _evaluator = new SignatureEvaluator();
                 _serviceScope = new ServiceScope(null);
-                _serviceScope.Register(_preprocessor).Register(typeof(ISignaturePreprocessor), _preprocessor)
-                    .Register(_compiler).Register(typeof(ISignaturePresetCompiler), _compiler)
-                    .Register(_repository).Register(typeof(ISignaturePresetRepository), _repository)
-                    .Register(_resolver).Register(typeof(ISignatureRulesResolver), _resolver)
-                    .Register(_matcher).Register(typeof(ISignatureMatcher), _matcher)
-                    .Register(_evaluator).Register(typeof(ISignatureEvaluator), _evaluator);
+                _serviceScope.Register(_preprocessor)
+                    .Register(_compiler)
+                    .Register(_repository)
+                    .Register(_resolver)
+                    .Register(_matcher)
+                    .Register(_evaluator);
                 Awaitable initialization = _serviceScope.InitializeAsync(_serviceScope);
                 initialization.GetAwaiter().GetResult();
             } catch {

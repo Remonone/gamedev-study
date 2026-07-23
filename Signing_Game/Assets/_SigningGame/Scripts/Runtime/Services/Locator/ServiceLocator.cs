@@ -68,37 +68,39 @@ namespace Services.Locator {
             return mb.GetComponent<ServiceLocator>() ?? ForSceneOf(mb) ?? Application;
         }
 
-        public ServiceLocator Register<T>(T service) where T : IService {
-            _scope ??= new ServiceScope(this);
-            _scope.Register(service);
+        public ServiceLocator Register<T>(T service) where T : class {
+            ServiceScope scope = _scope ?? new ServiceScope(this);
+            scope.Register(service);
+            _scope ??= scope;
             return this;
         }
 
         public ServiceLocator Register(Type type, object service) {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (service == null) throw new ArgumentNullException(nameof(service));
-            if (!type.IsInstanceOfType(service))
-                throw new ArgumentException($"Service is not assignable to {type}.", nameof(service));
-            if (service is not IService)
-                throw new ArgumentException("Service instance must implement IService.", nameof(service));
-            _scope ??= new ServiceScope(this);
-            _scope.Register(type, service);
+            ServiceScope scope = _scope ?? new ServiceScope(this);
+            scope.Register(type, service);
+            _scope ??= scope;
             return this;
         }
 
+        public ServiceLocator Register(object service, params Type[] contracts) {
+            ServiceScope scope = _scope ?? new ServiceScope(this);
+            scope.Register(service, contracts);
+            _scope ??= scope;
+            return this;
+        }
 
-        public bool TryGetService<T>(out T service) where T : class {
-            if (_scope != null) return _scope.TryGet(out service);
+        public bool TryGetService<T>(out T service, int index = 0) where T : class {
+            if (_scope != null) return _scope.TryGet(out service, index);
             Debug.LogWarning($"Trying to get service of type {typeof(T)} from a empty service locator with no scope.");
             service = null;
             return false;
         }
 
-        public bool TryGet<T>(out T service) where T : class {
+        public bool TryGet<T>(out T service, int index = 0) where T : class {
             var visited = new HashSet<ServiceLocator>(ServiceLocatorReferenceComparer.Instance);
             ServiceLocator current = this;
             while (current != null && visited.Add(current)) {
-                if (current.TryGetService(out service)) return true;
+                if (current.TryGetService(out service, index)) return true;
                 if (!current.TryGetNextInHierarchy(out current)) break;
             }
 
@@ -106,14 +108,14 @@ namespace Services.Locator {
             return false;
         }
 
-        public T Get<T>() where T : class {
-            if (TryGet(out T service)) return service;
+        public T Get<T>(int index = 0) where T : class {
+            if (TryGet(out T service, index)) return service;
             throw new InvalidOperationException(
-                $"Service of type {typeof(T)} was not found in the service locator hierarchy.");
+                $"Service contract '{typeof(T)}' has no registration at index {index} in the service locator hierarchy.");
         }
 
-        public ServiceLocator Get<T>(out T service) where T : class {
-            service = Get<T>();
+        public ServiceLocator Get<T>(out T service, int index = 0) where T : class {
+            service = Get<T>(index);
             return this;
         }
 

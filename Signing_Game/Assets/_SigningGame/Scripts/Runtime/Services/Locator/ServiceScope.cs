@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Services.Locator {
     public class ServiceScope : IServiceScope, IDisposable {
         private readonly ServiceLocator _container;
-        private readonly Dictionary<Type, object> _services = new();
+        private readonly Dictionary<Type, List<IService>> _services = new();
         private readonly List<object> _ordered = new();
         private readonly HashSet<object> _orderedSet = new(ReferenceComparer.Instance);
         
@@ -16,47 +16,65 @@ namespace Services.Locator {
             _container = container;
         }
 
-        public ServiceScope Register<T>(T service) {
-            Type type = typeof(T);
-            if (!_services.TryAdd(type, service)) {
-                throw new InvalidOperationException($"Service of type {type} already registered.");
+        public ServiceScope Register<T>(T service) where T : class {
+            IService validatedService = ValidateService(service, nameof(service));
+            Type contractType = typeof(T);
+            Type concreteType = service.GetType();
+
+            if (contractType == concreteType || contractType == typeof(IService)) {
+                RegisterImplicit(validatedService, concreteType);
+            } else {
+                ValidateContract(contractType, service, nameof(service));
+                AddMapping(contractType, validatedService);
+                AddMapping(concreteType, validatedService);
             }
-            TrackOrder(service);
+
+            TrackOrder(validatedService);
             return this;
         }
 
         public ServiceScope Register(Type type, object service) {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (service == null) throw new ArgumentNullException(nameof(service));
-            if (!type.IsInstanceOfType(service)) {
-                throw new ArgumentException($"Service is a {service.GetType()}. Provided type is {type}.", nameof(service));
-            }
-            if (!_services.TryAdd(type, service)) {
-                throw new InvalidOperationException($"Service of type {type} already registered.");
-            }
-            TrackOrder(service);
+            IService validatedService = ValidateService(service, nameof(service));
+            ValidateContract(type, service, nameof(type));
+
+            AddMapping(type, validatedService);
+            AddMapping(service.GetType(), validatedService);
+            TrackOrder(validatedService);
             return this;
         }
 
-        public bool TryGet<T>(out T service) where T : class {
-            Type type = typeof(T);
+        public ServiceScope Register(object service, params Type[] contracts) {
+            IService validatedService = ValidateService(service, nameof(service));
+            if (contracts == null) throw new ArgumentNullException(nameof(contracts));
 
-            if (_services.TryGetValue(type, out object obj)) {
-                service = obj as T;
-                return true;
+            var uniqueContracts = new HashSet<Type>();
+            var validatedContracts = new List<Type>();
+            foreach (Type contract in contracts) {
+                ValidateContract(contract, service, nameof(contracts));
+                if (uniqueContracts.Add(contract)) validatedContracts.Add(contract);
             }
-            service = null;
-            return false;
+
+            foreach (Type contract in validatedContracts) AddMapping(contract, validatedService);
+            AddMapping(service.GetType(), validatedService);
+            TrackOrder(validatedService);
+            return this;
         }
 
-        public T Get<T>() where T : class {
-            Type type = typeof(T);
-
-            if (_services.TryGetValue(type, out object service)) {
-                return service as T;
+        public bool TryGet<T>(out T service, int index = 0) where T : class {
+            if (index < 0 || !_services.TryGetValue(typeof(T), out List<IService> services) ||
+                index >= services.Count) {
+                service = default;
+                return false;
             }
 
-            throw new ArgumentException($"Service of type {type} not registered.");
+            service = (T)(object)services[index];
+            return true;
+        }
+
+        public T Get<T>(int index = 0) where T : class {
+            if (TryGet(out T service, index)) return service;
+            throw new InvalidOperationException(
+                $"Service contract '{typeof(T)}' has no registration at index {index} in this scope.");
         }
 
         public async Awaitable PreInitializeAsync(IServiceScope scope) {
@@ -94,10 +112,67 @@ namespace Services.Locator {
             _orderedSet.Clear();
         }
 
-        private void TrackOrder(object service) {
-            if (service != null && _orderedSet.Add(service)) {
+        private void RegisterImplicit(IService service, Type concreteType) {
+            AddMapping(concreteType, service);
+
+            for (Type baseType = concreteType.BaseType; baseType != null; baseType = baseType.BaseType) {
+                if (typeof(IService).IsAssignableFrom(baseType)) AddMapping(baseType, service);
+            }
+
+            foreach (Type interfaceType in concreteType.GetInterfaces()) {
+                if (!IsExcludedImplicitInterface(interfaceType)) AddMapping(interfaceType, service);
+            }
+        }
+
+        private void AddMapping(Type contract, IService service) {
+            if (!_services.TryGetValue(contract, out List<IService> services)) {
+                services = new List<IService>();
+                _services.Add(contract, services);
+            }
+
+            foreach (IService registeredService in services) {
+                if (ReferenceEquals(registeredService, service)) return;
+            }
+
+            services.Add(service);
+        }
+
+        private void TrackOrder(IService service) {
+            if (_orderedSet.Add(service)) {
                 _ordered.Add(service);
             }
+        }
+
+        private static IService ValidateService(object service, string parameterName) {
+            if (service == null) throw new ArgumentNullException(parameterName);
+            if (service is not IService validatedService) {
+                throw new ArgumentException("Service instance must implement IService.", parameterName);
+            }
+            if (!service.GetType().IsClass) {
+                throw new ArgumentException("Service runtime type must be a class.", parameterName);
+            }
+
+            return validatedService;
+        }
+
+        private static void ValidateContract(Type contract, object service, string parameterName) {
+            if (contract == null) throw new ArgumentNullException(parameterName);
+            if (!contract.IsClass && !contract.IsInterface) {
+                throw new ArgumentException($"Service contract '{contract}' must be a class or interface.", parameterName);
+            }
+            if (!contract.IsInstanceOfType(service)) {
+                throw new ArgumentException(
+                    $"Service of runtime type '{service.GetType()}' is not assignable to contract '{contract}'.",
+                    parameterName);
+            }
+        }
+
+        private static bool IsExcludedImplicitInterface(Type interfaceType) {
+            return interfaceType == typeof(IService) ||
+                   interfaceType == typeof(IDisposable) ||
+                   interfaceType == typeof(IPreInitialize) ||
+                   interfaceType == typeof(IInitialize) ||
+                   interfaceType == typeof(IPostInitialize);
         }
 
         private sealed class ReferenceComparer : IEqualityComparer<object> {
