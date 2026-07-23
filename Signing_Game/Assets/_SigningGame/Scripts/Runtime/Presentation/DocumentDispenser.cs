@@ -1,15 +1,13 @@
 using System;
-using Authoring;
 using Services;
 using Services.Locator;
 using UnityEngine;
 
 namespace Presentation {
-    public sealed class DocumentDispenser : MonoBehaviour {
+    public sealed class DocumentDispenser : MonoBehaviour, IService {
         [SerializeField] private DocumentView _documentPrefab;
         [SerializeField] private RectTransform _parent;
         [SerializeField] private Vector2 _anchoredSpawnPosition;
-        [SerializeField] private SignatureDifficultyProfileDefinition _difficultyProfile;
 
         [ContextMenu("Spawn")]
         public DocumentView Spawn() {
@@ -25,5 +23,7 @@ namespace Presentation {
             document.Init(new DocumentViewModel(new SignatureRecorder(), acceptor));
             return document;
         }
+
+        public void Dispose() { }
     }
 }
