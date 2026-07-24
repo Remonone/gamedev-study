@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Data.Cache;
 using R3;
 using Services.Locator;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Services {
         private readonly ReactiveProperty<float> _currentProgress = new();
 
         public ReadOnlyReactiveProperty<float> CurrentProgress => _currentProgress;
+
+        private IReadOnlyCacheData<GenerationEntries> _generatorCache;
 
         private readonly Subject<int> _documentCount = new();
         private readonly Subject<Unit> _documentAdded = new();
@@ -35,6 +38,7 @@ namespace Services {
 
         public UniTask InitializeAsync(IServiceScope scope) {
             _stash = scope.Get<PlayerStatStash>();
+            _generatorCache = _stash.GenerationData;
             return UniTask.CompletedTask;
         }
 
@@ -44,7 +48,7 @@ namespace Services {
         }
 
         private void OnUpdate(float dt) {
-            var tokenPerSecond = _stash.GenerationTokenPerSecond;
+            var tokenPerSecond = _generatorCache.Value.TokenPerSecond;
             _currentPoint += dt * tokenPerSecond;
 
             int generatedDocuments = Mathf.FloorToInt(_currentPoint / RequiredPointsForDocument);

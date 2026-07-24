@@ -1,29 +1,26 @@
 using Authoring;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Cache;
 using Data.Rules;
 using Services.Locator;
-using Utils;
 
 namespace Services {
-    public class PlayerStatStash : IService, IInitialize, IPostInitialize {
+    public class PlayerStatStash : IService, IPreInitialize, IInitialize, IPostInitialize {
 
         private ISignaturePresetRepository _signaturePresetRepository;
         
-        private string _signatureId = "test_preset";
         private SignaturePresetDefinition _signaturePreset;
-        // TODO: Change to PropertyHolder
-        private double _maxMultiplicationScale = 1;
-        private float _minMultiplyScale = 0.4f;
-        private Value _incomePerDocument = 1;
-        private float _generationTokenPerSecond = 1;
-        private float _dispenseCooldown = 5f;
-            
-        public double MaxMultiplicationScale => _maxMultiplicationScale;
-        public float MinMultiplyScale => _minMultiplyScale;
-        public Value IncomePerDocument => _incomePerDocument;
-        public float GenerationTokenPerSecond => _generationTokenPerSecond;
-        public float DispenseCooldown => _dispenseCooldown;
+        private ICacheDataFactory _dataFactory;
+
+        private CachedData<IncomeEntries> _incomeData;
+        private CachedData<SignatureEntries> _signatureData;
+        private CachedData<GenerationEntries> _generationData;
+        
+        public IReadOnlyCacheData<IncomeEntries> IncomeData => _incomeData;
+        public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
+        public IReadOnlyCacheData<GenerationEntries> GenerationData => _generationData;
+        
         
         public void Dispose() {
         }
@@ -40,11 +37,21 @@ namespace Services {
         
         public UniTask InitializeAsync(IServiceScope scope) {
             _signaturePresetRepository = scope.Get<ISignaturePresetRepository>();
+            
+            
             return UniTask.CompletedTask;
         }
 
         public async UniTask PostInitializeAsync(IServiceScope scope) {
-            _signaturePreset = await _signaturePresetRepository.RequestPreset(_signatureId);
+            _signaturePreset = await _signaturePresetRepository.RequestPreset(_signatureData.Value.SignatureId);
+        }
+
+        public UniTask PreInitializeAsync(IServiceScope scope) {
+            _dataFactory = new CachedDataFactory(scope, scope.Get<ICacheVersionProvider>());
+            _incomeData = _dataFactory.Create<IncomeEntries>();
+            _signatureData = _dataFactory.Create<SignatureEntries>();
+            _generationData = _dataFactory.Create<GenerationEntries>();
+            return UniTask.CompletedTask;
         }
     }
 }

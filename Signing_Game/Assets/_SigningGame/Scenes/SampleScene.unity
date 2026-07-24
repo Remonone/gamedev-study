@@ -689,6 +689,7 @@ GameObject:
   - component: {fileID: 579059836}
   - component: {fileID: 579059835}
   - component: {fileID: 579059839}
+  - component: {fileID: 579059840}
   m_Layer: 0
   m_Name: 'Scope [Scene]'
   m_TagString: Untagged
@@ -723,6 +724,7 @@ MonoBehaviour:
   _installers:
   - {fileID: 579059835}
   - {fileID: 579059839}
+  - {fileID: 579059840}
 --- !u!114 &579059837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -764,6 +766,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Bootstrap.Installer.GameSceneMonoBehaviorInstaller
   _services:
   - {fileID: 434916737}
+--- !u!114 &579059840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579059834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5099e2cdc6416196f49a3b4cac59c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Bootstrap.Installer.CacheInstaller
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

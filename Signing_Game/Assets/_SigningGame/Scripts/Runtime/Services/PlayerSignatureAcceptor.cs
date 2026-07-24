@@ -1,6 +1,7 @@
 using System;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Cache;
 using Data.Enums;
 using Data.Input;
 using Data.Results;
@@ -16,6 +17,7 @@ namespace Services {
         private PlayerStatStash _stash;
         private IMoneyAggregator _aggregator;
         private DifficultyProfileEvaluator _difficultyEvaluator;
+        private IReadOnlyCacheData<IncomeEntries> _incomeData;
         
         private Subject<DocumentHandleResult> _documentResults = new();
         
@@ -30,6 +32,7 @@ namespace Services {
             _difficultyEvaluator = scope.Get<DifficultyProfileEvaluator>();
             _aggregator = scope.Get<IMoneyAggregator>();
             _stash = scope.Get<PlayerStatStash>();
+            _incomeData = _stash.IncomeData;
             return UniTask.CompletedTask;
         }
 
@@ -44,9 +47,9 @@ namespace Services {
         }
 
         private void SendReward(SignatureEvaluationResult evaluationResult) {
-            var income = _stash.IncomePerDocument;
-            var maxMultiplicationScale = _stash.MaxMultiplicationScale;
-            var minMultiplyScale = _stash.MinMultiplyScale;
+            var income = _incomeData.Value.IncomePerDocument;
+            var maxMultiplicationScale = _incomeData.Value.MaxMultiplicationScale;
+            var minMultiplyScale = _incomeData.Value.MinMultiplyScale;
             
             var accuracyBonus = Math.Min(Math.Min(evaluationResult.Similarity / minMultiplyScale, 1), maxMultiplicationScale);
             var result = income * accuracyBonus;

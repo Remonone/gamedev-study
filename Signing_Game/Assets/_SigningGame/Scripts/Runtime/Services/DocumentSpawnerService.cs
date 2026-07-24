@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Data.Cache;
 using Presentation;
 using R3;
 using Services.Locator;
@@ -11,7 +12,8 @@ namespace Services {
         private DocumentDispenser _dispenser;
         private DocumentGeneratorService _generator;
         private PlayerStatStash _stash;
-
+        private IReadOnlyCacheData<GenerationEntries> _generationData;
+        
         private Cooldown _dispenseCooldown;
 
         private readonly CompositeDisposable _disposables = new();
@@ -20,8 +22,10 @@ namespace Services {
             _dispenser = scope.Get<DocumentDispenser>();
             _generator = scope.Get<DocumentGeneratorService>();
             _stash = scope.Get<PlayerStatStash>();
+            _generationData = _stash.GenerationData;
+            
             _dispenseCooldown =
-                new Cooldown(_stash.DispenseCooldown, Observable.EveryUpdate().Select(_ => Time.deltaTime));
+                new Cooldown(_generationData.Value.DispenseCooldown, Observable.EveryUpdate().Select(_ => Time.deltaTime));
 
             return UniTask.CompletedTask;
         }
