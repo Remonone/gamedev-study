@@ -1,3 +1,15 @@
+using Utils.Attributes;
+
 namespace Data.Cache {
-    public sealed record GenerationEntries(float TokenPerSecond, float DispenseCooldown);
+    [CacheEntryGroup("Generation")]
+    public struct GenerationEntries {
+        [ModifiableParameter("TokenPerSecond")]
+        public float TokenPerSecond;
+        [ModifiableParameter("DispenseCooldown")]
+        public float DispenseCooldown;
+        public GenerationEntries(float tokenPerSecond, float dispenseCooldown) {
+            TokenPerSecond = tokenPerSecond;
+            DispenseCooldown = dispenseCooldown;
+        }
+    }
 }

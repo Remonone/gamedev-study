@@ -1,3 +1,10 @@
 namespace Data.Cache {
-    public sealed record SignatureEntries(string SignatureId);
+    
+    public struct SignatureEntries {
+        public string SignatureId { get; }
+        
+        public SignatureEntries(string signatureId) {
+            SignatureId = signatureId;
+        }
+    }
 }

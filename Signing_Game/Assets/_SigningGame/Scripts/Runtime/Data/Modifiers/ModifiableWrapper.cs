@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using Data.Modifiers;
+using Data.Modifiers.Calculation;
+using Utils.Metadata;
+
+namespace _SigningGame.Scripts.Runtime.Data.Modifiers {
+    public class ModifiableWrapper<T> : IModifiableWrapper where T : struct {
+        
+        private readonly Dictionary<string, ICacheParameterMetadata> _parameters = new();
+        
+        public string GroupId { get; }
+        public string DisplayName { get; }
+        
+        public Type EntryType => typeof(T);
+        public IReadOnlyCollection<ICacheParameterMetadata> Parameters => _parameters.Values;
+
+        public ModifiableWrapper(string groupId, string displayName, IEnumerable<ICacheParameterMetadata> parameters) {
+            GroupId = groupId;
+            DisplayName = displayName;
+            _parameters = new(StringComparer.Ordinal);
+            foreach (var parameter in parameters) {
+                if (parameter.EntryType != typeof(T))
+                    throw new ArgumentException(
+                        $"Parameter type {parameter.EntryType} does not match wrapper type {typeof(T)}"
+                    );
+                if (!_parameters.TryAdd(parameter.Key.ParameterId, parameter))
+                    throw new ArgumentException($"Parameter {parameter.Key.ParameterId} is already registered inside {groupId}.");
+            }
+        }
+
+        public bool TryGetParameter(string parameterId, out ICacheParameterMetadata parameter) {
+            return _parameters.TryGetValue(parameterId, out parameter);
+        }
+
+        public T Apply(in T source, string parameterId, NumericModifierOperation operation, double operand) {
+            if (!TryGetParameter(parameterId, out var parameter))
+                throw new KeyNotFoundException($"Parameter {parameterId} is not registered inside {GroupId}.");
+            object boxed = source;
+            
+            var rawValue = parameter.GetValue(boxed);
+            var currentValue = NumericTypeUtility.ToDouble(rawValue);
+            var modifiedValue = NumericModifierCalculator.Apply(currentValue, operation, operand);
+
+            modifiedValue = Math.Clamp(modifiedValue, parameter.Minimum, parameter.Maximum);
+            
+            parameter.SetValue(boxed, modifiedValue);
+            return (T)boxed;
+        }
+        
+        object IModifiableWrapper.Apply(object source, string parameterId, NumericModifierOperation operation, double operand) {
+            if (source is not T entry) {
+                throw new ArgumentException($"Source {source} is not of type {typeof(T)}");
+            }
+            return Apply(entry, parameterId, operation, operand);
+        }
+    }
+}
