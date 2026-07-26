@@ -12,7 +12,7 @@ namespace Utils {
     }
     
     [Serializable]
-    public class Value : IComparable<IValue>, IEquatable<IValue>, IValue {
+    public struct Value : IComparable<IValue>, IEquatable<IValue>, IValue {
 
         private const double _BaseStep = 1000d;
         private const double _Log10BaseStep = 3d;
@@ -103,7 +103,7 @@ namespace Utils {
             return new Value(newStored, new BaseValue { Degree = degree });
         }
 
-        public static Value operator -(Value first, Value other) {
+        public static Value? operator -(Value first, Value other) {
             if (other > first) {
                 return null;
             }
@@ -198,7 +198,7 @@ namespace Utils {
                 return (_stored.GetHashCode() * 397) ^ _base.Degree;
             }
         }
-
+        
         public double ToDouble() {
             if (IsZero) return 0d;
 

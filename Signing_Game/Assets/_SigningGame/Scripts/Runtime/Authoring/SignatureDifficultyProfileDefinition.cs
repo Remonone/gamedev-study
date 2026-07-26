@@ -10,8 +10,6 @@ namespace Authoring {
     {
         [SerializeField]
         private string _id;
-        
-        [SerializeField] private CacheParameterReference _cacheParameter;
 
         [SerializeField, Range(0f, 1f)]
         private float _minimumSimilarity = 0.4f;

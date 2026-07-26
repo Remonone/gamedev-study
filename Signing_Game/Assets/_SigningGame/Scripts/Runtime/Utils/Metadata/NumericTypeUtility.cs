@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Utils.Metadata {
-    public class NumericTypeUtility {
+    public static class NumericTypeUtility {
         private static readonly HashSet<Type> SupportedTypes = new() {
             typeof(byte),
             typeof(sbyte),
@@ -14,7 +14,8 @@ namespace Utils.Metadata {
             typeof(ulong),
             typeof(float),
             typeof(double),
-            typeof(decimal)
+            typeof(decimal),
+            typeof(Value)
         };
         
         public static bool IsSupportedType(Type type) => SupportedTypes.Contains(type);
@@ -22,6 +23,9 @@ namespace Utils.Metadata {
         public static double ToDouble(object value) {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
+            if (value is Value v) {
+                return v.ToDouble();
+            }
             return Convert.ToDouble(value);
         }
 
@@ -66,6 +70,10 @@ namespace Utils.Metadata {
             }
             if (targetType == typeof(decimal)) {
                 return (decimal)value;
+            }
+
+            if (targetType == typeof(Value)) {
+                return new Value(value);
             }
             throw new NotSupportedException($"Unsupported type: {targetType}");
         }

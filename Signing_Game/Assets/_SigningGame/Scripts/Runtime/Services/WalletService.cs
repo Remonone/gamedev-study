@@ -22,7 +22,7 @@ namespace Services {
             if (value.IsZero) return false;
             if (!_balance.IsSignificant(value)) return true;
             if (_balance < value) return false;
-            _balance -= value;
+            _balance = (_balance - value).Value;
             _balanceChanged.OnNext(_balance);
             return true;
         }

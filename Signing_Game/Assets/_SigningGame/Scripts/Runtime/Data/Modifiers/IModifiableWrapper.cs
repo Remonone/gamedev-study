@@ -11,6 +11,8 @@ namespace Data.Modifiers {
         IReadOnlyCollection<ICacheParameterMetadata> Parameters { get; }
         
         bool TryGetParameter(string parameterId, out ICacheParameterMetadata parameter);
+        
+        bool IsApplicable(object source);
 
         object Apply(object source, string parameterId, NumericModifierOperation operation, double operand);
     }

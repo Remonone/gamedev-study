@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Data.Modifiers;
 using Data.Modifiers.Calculation;
 using Utils.Metadata;
 
-namespace _SigningGame.Scripts.Runtime.Data.Modifiers {
+namespace Data.Modifiers {
     public class ModifiableWrapper<T> : IModifiableWrapper where T : struct {
         
         private readonly Dictionary<string, ICacheParameterMetadata> _parameters = new();
@@ -33,12 +32,17 @@ namespace _SigningGame.Scripts.Runtime.Data.Modifiers {
             return _parameters.TryGetValue(parameterId, out parameter);
         }
 
+        public bool IsApplicable(object source) {
+            return source is T;
+        }
+
         public T Apply(in T source, string parameterId, NumericModifierOperation operation, double operand) {
             if (!TryGetParameter(parameterId, out var parameter))
                 throw new KeyNotFoundException($"Parameter {parameterId} is not registered inside {GroupId}.");
             object boxed = source;
             
             var rawValue = parameter.GetValue(boxed);
+            // BUG: If Value-instance is applied and it is greater than 2^64 then it will be clamped to double.MaxValue 
             var currentValue = NumericTypeUtility.ToDouble(rawValue);
             var modifiedValue = NumericModifierCalculator.Apply(currentValue, operation, operand);
 
