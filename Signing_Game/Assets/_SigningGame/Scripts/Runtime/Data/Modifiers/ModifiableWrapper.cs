@@ -6,7 +6,7 @@ using Utils.Metadata;
 namespace Data.Modifiers {
     public class ModifiableWrapper<T> : IModifiableWrapper where T : struct {
         
-        private readonly Dictionary<string, ICacheParameterMetadata> _parameters = new();
+        private readonly Dictionary<string, ICacheParameterMetadata> _parameters;
         
         public string GroupId { get; }
         public string DisplayName { get; }

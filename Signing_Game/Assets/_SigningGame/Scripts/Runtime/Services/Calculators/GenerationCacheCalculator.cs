@@ -1,12 +1,35 @@
+using Constants;
+using Contracts;
+using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Modifiers;
+using Services.Locator;
 
 namespace Services.Calculators {
-    public sealed class GenerationCacheCalculator : ICacheCalculator<GenerationEntries>, IService {
+    public sealed class GenerationCacheCalculator : ICacheCalculator<GenerationEntries>, IService, IPreInitialize {
         
-        public void Dispose() { }
+        private IModifierService _modifierService;
+        private IAssetProvider _assetProvider;
+        
+        private IAssetListLease<GenerationReference> _referenceLease;
+        private GenerationReference _reference;
+
+        public void Dispose() {
+            _referenceLease.Dispose();
+            _referenceLease = null;
+            _reference = null;
+        }
 
         public GenerationEntries Calculate() {
-            return new GenerationEntries(1, 11f);
+            var value = _reference.Value;
+            return _modifierService.Apply(value);
+        }
+
+        public async UniTask PreInitializeAsync(IServiceScope scope) {
+            _modifierService = scope.Get<IModifierService>();
+            _assetProvider = scope.Container.Get<IAssetProvider>();
+            _referenceLease = await _assetProvider.LoadAssetsByLabelAsync<GenerationReference>(AddressableConstants.CACHE_REFERENCE_LABEL);
+            _reference = _referenceLease.Assets[0];
         }
     }
 }

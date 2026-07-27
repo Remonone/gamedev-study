@@ -21,6 +21,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - signature_preset
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4affc12de63de6f3d9594820847715c7
+    m_Address: Assets/_SigningGame/Data/Cache References/Generation Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59621308983250653b27210859a7db92
+    m_Address: Assets/_SigningGame/Data/Cache References/Signature Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bdaba90eb1534a3f0be70b578f091b7d
     m_Address: Assets/_SigningGame/Data/Difficulty.asset
     m_ReadOnly: 0
@@ -32,6 +44,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - signature_preset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e43c06818ea522cfd85762b16d11ec67
+    m_Address: Assets/_SigningGame/Data/Cache References/Income Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: f348fdc5e02b8f9058f94dda1c0b8b38, type: 2}

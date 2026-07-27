@@ -1,7 +1,9 @@
+using System;
+using UnityEngine;
 using Utils.Attributes;
 
 namespace Data.Cache {
-    [CacheEntryGroup("Generation")]
+    [Serializable, CacheEntryGroup("Generation")]
     public struct GenerationEntries {
         [ModifiableParameter("TokenPerSecond")]
         public float TokenPerSecond;
@@ -12,4 +14,6 @@ namespace Data.Cache {
             DispenseCooldown = dispenseCooldown;
         }
     }
+    [CreateAssetMenu(menuName = "References/Generation Reference")]
+    public class GenerationReference : BaseEntries<GenerationEntries> { }
 }

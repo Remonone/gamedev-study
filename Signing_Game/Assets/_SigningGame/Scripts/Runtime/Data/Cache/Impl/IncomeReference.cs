@@ -1,8 +1,10 @@
+using System;
+using UnityEngine;
 using Utils;
 using Utils.Attributes;
 
 namespace Data.Cache {
-    [CacheEntryGroup("Income")]
+    [Serializable, CacheEntryGroup("Income")]
     public struct IncomeEntries {
         [ModifiableParameter("MaxMultiplicationScale")]
         public float MaxMultiplicationScale;
@@ -17,4 +19,7 @@ namespace Data.Cache {
             IncomePerDocument = incomePerDocument;
         }
     }
+    
+    [CreateAssetMenu(menuName = "References/Income Reference")]
+    public class IncomeReference : BaseEntries<IncomeEntries> { }
 }

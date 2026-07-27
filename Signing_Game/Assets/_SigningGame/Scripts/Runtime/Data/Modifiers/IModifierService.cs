@@ -1,5 +1,5 @@
 namespace Data.Modifiers {
-    public class IModifierService {
-        
+    public interface IModifierService {
+        T Apply<T>(T value) where T : struct;
     }
 }

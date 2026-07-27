@@ -1,5 +1,6 @@
 using Contracts;
 using Data.Cache;
+using Data.Modifiers;
 using Services;
 using Services.Locator;
 
@@ -12,8 +13,8 @@ namespace Bootstrap.Installer {
             container.Register<ISignatureRulesResolver>(new RuleResolver());
             container.Register<ISignatureMatcher>(new SignatureMatcher());
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
+            container.Register<IModifierService>(new ModifierService());
             container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
-            
             container.Register(new DocumentSpawnerService());
             container.Register(new MoneyAggregator());
             container.Register(new DocumentGeneratorService());
