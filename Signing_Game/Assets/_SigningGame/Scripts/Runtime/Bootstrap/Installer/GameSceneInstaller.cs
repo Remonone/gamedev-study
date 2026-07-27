@@ -7,6 +7,9 @@ using Services.Locator;
 namespace Bootstrap.Installer {
     public class GameSceneInstaller : MonoInstaller {
         public override void Install(ServiceLocator container) {
+            var saveService = new SaveService();
+            container.Register(saveService);
+            container.Register(new AutoSaveService(saveService));
             container.Register<ISignaturePreprocessor>(new SignaturePreprocessor());
             container.Register<ISignaturePresetCompiler>(new SignaturePresetCompiler());
             container.Register<ISignaturePresetRepository>(new SignaturePresetRepository());

@@ -20,6 +20,7 @@ namespace Presentation {
         }
         
         public void Dispose() {
+            _disposable.Dispose();
             Balance?.Dispose();
         }
     }

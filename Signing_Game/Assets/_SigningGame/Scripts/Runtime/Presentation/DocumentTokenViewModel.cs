@@ -8,8 +8,8 @@ namespace Presentation {
         private DocumentGeneratorService _generator;
         private CompositeDisposable _disposable = new();
         
-        private Subject<int> _quantityChanged = new();
-        private Subject<float> _progressChanged = new();
+        private ReactiveProperty<int> _quantityChanged = new();
+        private ReactiveProperty<float> _progressChanged = new();
         
         public Observable<int> QuantityChanged => _quantityChanged;
         public Observable<float> ProgressChanged => _progressChanged;
@@ -22,11 +22,11 @@ namespace Presentation {
         }
         
         private void UpdateQuantity(int quantity) {
-            _quantityChanged.OnNext(quantity);
+            _quantityChanged.Value = quantity;
         }
 
         private void UpdateProgress(float progress) {
-            _progressChanged.OnNext(progress);
+            _progressChanged.Value = progress;
         }
 
         public void Dispose() {
