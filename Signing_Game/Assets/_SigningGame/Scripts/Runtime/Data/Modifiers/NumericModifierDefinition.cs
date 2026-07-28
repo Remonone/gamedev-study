@@ -16,6 +16,10 @@ namespace Data.Modifiers {
             return wrapper.IsApplicable(value);
         }
 
+        public Type GetGroupType() {
+            return PredefinedMetadataWrapperStorage.Get(_parameter.GroupId).EntryType;
+        }
+
         public TValue Apply<TValue>(TValue value, IModifierContext context) {
             var wrapper = PredefinedMetadataWrapperStorage.Get(_parameter.GroupId);
             if (!wrapper.IsApplicable(value)) return value;

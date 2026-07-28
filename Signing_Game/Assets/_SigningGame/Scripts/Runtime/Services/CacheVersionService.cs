@@ -23,5 +23,15 @@ namespace Services {
             if (!_versions.ContainsKey(typeof(T))) return;
             _versions[typeof(T)]++;
         }
+        
+        void ICacheInvalidator.InvalidateAll() {
+            foreach (var type in _versions.Keys) {
+                _versions[type]++;
+            }
+        }
+        void ICacheInvalidator.Invalidate(Type type) {
+            if (!_versions.ContainsKey(type)) return;
+            _versions[type]++;
+        }
     }
 }

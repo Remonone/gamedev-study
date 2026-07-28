@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Data.Modifiers.Providers;
+using Services.Locator;
 
 namespace Services {
-    public class ModifierStorage : IService {
+    public class ModifierStorage : IService, IInitialize, IPostInitialize {
 
         private readonly Dictionary<Type, IModifierProvider> _providers;
 
@@ -39,6 +41,18 @@ namespace Services {
         
         public void Dispose() {
             
+        }
+
+        public UniTask InitializeAsync(IServiceScope scope) {
+            _providers.Add(typeof(UpgradeModifierProvider), new UpgradeModifierProvider());
+            return UniTask.CompletedTask;
+        }
+
+        public UniTask PostInitializeAsync(IServiceScope scope) {
+            foreach (var provider in _providers.Values) {
+                provider.Init(scope);
+            }
+            return UniTask.CompletedTask;
         }
     }
 }
