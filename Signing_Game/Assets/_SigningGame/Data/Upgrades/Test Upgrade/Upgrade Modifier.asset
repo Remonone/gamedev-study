@@ -12,7 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
   m_Name: Upgrade Modifier
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
-  NumericModifiers: []
+  NumericModifiers:
+  - _operation: 0
+    _value:
+      rid: 3848164893709828168
+    _parameter:
+      _groupId: Generation
+      _parameterId: TokenPerSecond
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3848164893709828168
+      type: {class: ConstantNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
+      data:
+        _value:
+          _stored: 1
+          _base:
+            Degree: 0

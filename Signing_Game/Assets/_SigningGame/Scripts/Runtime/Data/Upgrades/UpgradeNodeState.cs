@@ -4,9 +4,9 @@ namespace Data.Upgrades {
     public class UpgradeNodeState : IEquatable<UpgradeNodeState> {
         public enum State { Locked, Available, InProgress, Completed }
 
-        public UpgradeNodeDefinition Definition;
-        public int Level;
-        public State CurrentState;
+        public UpgradeNodeDefinition Definition { get; }
+        public int Level { get; internal set; }
+        public State CurrentState { get; internal set; }
 
         public UpgradeNodeState(UpgradeNodeDefinition definition, int level, State currentState) {
             Definition = definition;

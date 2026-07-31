@@ -12,17 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
-  Id: 
-  Name: 
-  Description: 
-  MaxLevel: 0
+  Id: test_upgrade
+  Name: Test Upgrade
+  Description: Test Description
+  MaxLevel: 3
   Icon: {fileID: 0}
   CostFormula:
-    rid: -2
+    rid: 3848164893709828167
   Modifiers:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: a8a878f1935f0f75fa8a18a898d26672, type: 2}
+  TreePosition: {x: 0, y: 0}
+  LockedDisplayMode: 0
+  ParentUnlockMode: 0
+  StatisticRequirementMode: 0
+  StatisticRequirements: []
+  Children: []
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 3848164893709828167
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+      data:
+        Value:
+          _stored: 1
+          _base:
+            Degree: 0

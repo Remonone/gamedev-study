@@ -16,12 +16,16 @@ namespace Bootstrap.Installer {
             container.Register<ISignatureRulesResolver>(new RuleResolver());
             container.Register<ISignatureMatcher>(new SignatureMatcher());
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
+            container.Register(new ModifierStorage());
             container.Register<IModifierService>(new ModifierService());
             container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
             container.Register(new DocumentSpawnerService());
             container.Register(new MoneyAggregator());
             container.Register(new DocumentGeneratorService());
             container.Register(new WalletService());
+            container.Register(new UpgradeService());
+            container.Register(new GameStatisticsService());
+            container.Register(new UpgradeTreeService());
             container.Register(new DifficultyProfileEvaluator());
             container.Register(new PlayerStatStash());
             container.Register(new PlayerSignatureAcceptor());

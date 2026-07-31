@@ -23,17 +23,15 @@ namespace Services {
             _generator = scope.Get<DocumentGeneratorService>();
             _stash = scope.Get<PlayerStatStash>();
             _generationData = _stash.GenerationData;
-            
-            _dispenseCooldown =
-                new Cooldown(_generationData.Value.DispenseCooldown, Observable.EveryUpdate().Select(_ => Time.deltaTime));
-
             return UniTask.CompletedTask;
         }
 
         public UniTask PostInitializeAsync(IServiceScope scope) {
+            _dispenseCooldown =
+                new Cooldown(_generationData.Value.DispenseCooldown, Observable.EveryUpdate().Select(_ => Time.deltaTime));
+            _dispenseCooldown.TryStart();
             _dispenseCooldown.Completed.Subscribe(_ => TrySpawn()).AddTo(_disposables);
             _generator.DocumentAdded.Subscribe(_ => TrySpawn()).AddTo(_disposables);
-
             TrySpawn();
             return UniTask.CompletedTask;
         }

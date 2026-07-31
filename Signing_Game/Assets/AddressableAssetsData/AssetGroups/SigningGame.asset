@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: SigningGame
   m_GUID: 3983ba293478c1fceb179ddd49f53f91
   m_SerializeEntries:
+  - m_GUID: 2a7bdc569ef3422b38610408a3a5dcf4
+    m_Address: Assets/_SigningGame/Data/Upgrades/Test Upgrade/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e11a5975676314e6a8e9a11f8f70a9c
     m_Address: Assets/_SigningGame/Data/SignaturePreset.asset
     m_ReadOnly: 0
