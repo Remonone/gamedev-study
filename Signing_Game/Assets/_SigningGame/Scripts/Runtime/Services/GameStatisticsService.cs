@@ -6,6 +6,31 @@ using Newtonsoft.Json.Linq;
 using R3;
 
 namespace Services {
+    public enum GameStatisticMutationKind {
+        Set = 0,
+        Add = 1
+    }
+
+    public readonly struct GameStatisticMutation {
+        public string StatisticId { get; }
+        public GameStatisticMutationKind Kind { get; }
+        public double Value { get; }
+
+        private GameStatisticMutation(string statisticId, GameStatisticMutationKind kind, double value) {
+            StatisticId = statisticId;
+            Kind = kind;
+            Value = value;
+        }
+
+        public static GameStatisticMutation Set(string statisticId, double value) {
+            return new GameStatisticMutation(statisticId, GameStatisticMutationKind.Set, value);
+        }
+
+        public static GameStatisticMutation Add(string statisticId, double value) {
+            return new GameStatisticMutation(statisticId, GameStatisticMutationKind.Add, value);
+        }
+    }
+
     public sealed class GameStatisticsService : IService, ISaveable {
         private readonly Dictionary<string, double> _values = new(StringComparer.Ordinal);
         private readonly Subject<Unit> _changed = new();
@@ -29,6 +54,50 @@ namespace Services {
             ValidateEntry(statisticId, next);
             SetValue(statisticId, next);
             return next;
+        }
+
+        public bool ApplyBatch(IReadOnlyList<GameStatisticMutation> mutations, int count) {
+            if (mutations == null) throw new ArgumentNullException(nameof(mutations));
+            if (count < 0 || count > mutations.Count) throw new ArgumentOutOfRangeException(nameof(count));
+
+            for (int index = 0; index < count; index++) {
+                GameStatisticMutation mutation = mutations[index];
+                ValidateEntry(mutation.StatisticId, mutation.Value);
+                if (!Enum.IsDefined(typeof(GameStatisticMutationKind), mutation.Kind)) {
+                    throw new ArgumentOutOfRangeException(nameof(mutations),
+                        $"Statistic mutation at index {index} has an invalid kind.");
+                }
+
+                for (int previous = 0; previous < index; previous++) {
+                    if (string.Equals(mutations[previous].StatisticId, mutation.StatisticId,
+                            StringComparison.Ordinal)) {
+                        throw new ArgumentException(
+                            $"Statistic '{mutation.StatisticId}' occurs more than once in the batch.",
+                            nameof(mutations));
+                    }
+                }
+
+                _values.TryGetValue(mutation.StatisticId, out double current);
+                double next = mutation.Kind == GameStatisticMutationKind.Add
+                    ? current + mutation.Value
+                    : mutation.Value;
+                ValidateEntry(mutation.StatisticId, next);
+            }
+
+            bool changed = false;
+            for (int index = 0; index < count; index++) {
+                GameStatisticMutation mutation = mutations[index];
+                _values.TryGetValue(mutation.StatisticId, out double current);
+                double next = mutation.Kind == GameStatisticMutationKind.Add
+                    ? current + mutation.Value
+                    : mutation.Value;
+                if (_values.ContainsKey(mutation.StatisticId) && current.Equals(next)) continue;
+                _values[mutation.StatisticId] = next;
+                changed = true;
+            }
+
+            if (changed) _changed.OnNext(Unit.Default);
+            return changed;
         }
 
         public bool TryGetValue(string statisticId, out double value) {

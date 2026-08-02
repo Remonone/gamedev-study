@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - signature_preset
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e90777b347e2c6efa7af138a85f8a67
+    m_Address: Assets/_SigningGame/Data/Cache References/Office Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4affc12de63de6f3d9594820847715c7
     m_Address: Assets/_SigningGame/Data/Cache References/Generation Reference.asset
     m_ReadOnly: 0
@@ -56,6 +62,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee8077b5d710293fab66e0c40ecb1179
+    m_Address: Assets/_SigningGame/Data/Upgrades/Office/Office Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: f348fdc5e02b8f9058f94dda1c0b8b38, type: 2}

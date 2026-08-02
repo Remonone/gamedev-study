@@ -13,22 +13,29 @@ namespace Services {
         public string SaveId => "wallet";
         
         public Observable<IValue> BalanceChanged => _balanceChanged;
+        public Value CurrentBalance => _balance;
 
         public WalletService() {
             _balance = new(0);
             _balanceChanged = new ReactiveProperty<IValue>(_balance);
         }
         
-        public void ReplenishWallet(Value value) {
-            if (value.IsZero || !_balance.IsSignificant(value)) return;
+        public bool ReplenishWallet(Value value) {
+            if (value.IsZero || !_balance.IsSignificant(value)) return false;
             _balance += value;
             _balanceChanged.Value = _balance;
+            return true;
+        }
+
+        public bool CanAfford(Value value) {
+            if (value.IsZero) return false;
+            if (!_balance.IsSignificant(value)) return true;
+            return _balance >= value;
         }
 
         public bool TryWithdrawWallet(Value value) {
-            if (value.IsZero) return false;
+            if (!CanAfford(value)) return false;
             if (!_balance.IsSignificant(value)) return true;
-            if (_balance < value) return false;
             _balance = (_balance - value).Value;
             _balanceChanged.Value = _balance;
             return true;

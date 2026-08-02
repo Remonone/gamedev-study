@@ -25,9 +25,11 @@ namespace Bootstrap.Installer {
             container.Register(new WalletService());
             container.Register(new UpgradeService());
             container.Register(new GameStatisticsService());
+            container.Register(new UnlockService());
             container.Register(new UpgradeTreeService());
             container.Register(new DifficultyProfileEvaluator());
             container.Register(new PlayerStatStash());
+            container.Register(new OfficeService());
             container.Register(new PlayerSignatureAcceptor());
         }
 

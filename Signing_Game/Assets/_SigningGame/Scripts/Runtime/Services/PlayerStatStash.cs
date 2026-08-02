@@ -16,10 +16,12 @@ namespace Services {
         private CachedData<IncomeEntries> _incomeData;
         private CachedData<SignatureEntries> _signatureData;
         private CachedData<GenerationEntries> _generationData;
+        private CachedData<OfficeEntries> _officeData;
         
         public IReadOnlyCacheData<IncomeEntries> IncomeData => _incomeData;
         public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
         public IReadOnlyCacheData<GenerationEntries> GenerationData => _generationData;
+        public IReadOnlyCacheData<OfficeEntries> OfficeData => _officeData;
         
         
         public void Dispose() {
@@ -51,6 +53,7 @@ namespace Services {
             _incomeData = _dataFactory.Create<IncomeEntries>();
             _signatureData = _dataFactory.Create<SignatureEntries>();
             _generationData = _dataFactory.Create<GenerationEntries>();
+            _officeData = _dataFactory.Create<OfficeEntries>();
             return UniTask.CompletedTask;
         }
     }

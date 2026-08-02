@@ -48,7 +48,7 @@ namespace Data.Modifiers {
 
             modifiedValue = Math.Clamp(modifiedValue, parameter.Minimum, parameter.Maximum);
             
-            parameter.SetValue(boxed, modifiedValue);
+            parameter.SetValue(boxed, NumericTypeUtility.FromDouble(modifiedValue, parameter.ValueType));
             return (T)boxed;
         }
         

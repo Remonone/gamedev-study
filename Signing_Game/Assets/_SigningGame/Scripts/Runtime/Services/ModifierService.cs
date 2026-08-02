@@ -12,7 +12,7 @@ namespace Services {
             foreach (var provider in _storage.Providers) {
                 result = provider.Collect(result);
             }
-            return value;
+            return result;
         }
         
         

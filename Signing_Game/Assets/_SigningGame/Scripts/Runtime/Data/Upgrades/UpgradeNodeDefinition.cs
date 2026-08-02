@@ -49,6 +49,7 @@ namespace Data.Upgrades {
         public Sprite Icon;
         [SerializeReference] public IFormula CostFormula;
         [SerializeReference] public ModifierDefinition[] Modifiers;
+        public string[] FeatureUnlockIds = Array.Empty<string>();
 
         [Header("Tree")]
         public Vector2 TreePosition;

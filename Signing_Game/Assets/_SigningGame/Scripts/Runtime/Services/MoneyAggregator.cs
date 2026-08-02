@@ -13,9 +13,9 @@ namespace Services {
             
         }
 
-        public void AddMoney(Value amount) {
+        public Value AddMoney(Value amount) {
             var value = amount * _stash.GetIncomeModifiers();
-            _wallet.ReplenishWallet(value);
+            return _wallet.ReplenishWallet(value) ? value : Value.Zero;
         }
 
         public UniTask InitializeAsync(IServiceScope scope) {

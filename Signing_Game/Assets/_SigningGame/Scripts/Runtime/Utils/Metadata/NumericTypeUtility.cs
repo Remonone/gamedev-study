@@ -62,7 +62,7 @@ namespace Utils.Metadata {
             }
 
             if (targetType == typeof(float)) {
-                return (float)Math.Round(value);
+                return (float)value;
             }
 
             if (targetType == typeof(double)) {
