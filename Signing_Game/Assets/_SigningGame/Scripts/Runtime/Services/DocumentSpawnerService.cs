@@ -27,6 +27,7 @@ namespace Services {
         }
 
         public UniTask PostInitializeAsync(IServiceScope scope) {
+            if (true) return UniTask.CompletedTask;
             _dispenseCooldown =
                 new Cooldown(_generationData.Value.DispenseCooldown, Observable.EveryUpdate().Select(_ => Time.deltaTime));
             _dispenseCooldown.TryStart();

@@ -1,12 +1,20 @@
 using System;
+using Data.Documents;
 using Data.Input;
 using R3;
+using TMPro;
 using UI;
 using UnityEngine;
+using UnityEngine.UI;
+using Utils.Text;
+using Utils.Text.Generator;
 
 namespace Presentation {
     public class DocumentView : MonoBehaviour {
         [SerializeField] private SigningField _field;
+        [SerializeField] private Image _header;
+        [SerializeField] private TextMeshProUGUI _text;
+        [SerializeField] private DocumentTextSettings _textSettings;
 
         private DocumentViewModel _viewModel;
 
@@ -20,7 +28,15 @@ namespace Presentation {
 
             _field.Clear();
             _viewModel = nextViewModel;
+            RefreshView();
             gameObject.SetActive(true);
+        }
+
+        private void RefreshView() {
+            ulong seed = _viewModel.TextSeed;
+            var document = DeterministicDocumentGenerator.Generate(seed, _textSettings);
+            _text.text = TmpDocumentFormatter.Format(document);
+            _header.color = _viewModel.HeaderColor;
         }
 
         public SignatureAttempt CollectSignature(float endTime) {

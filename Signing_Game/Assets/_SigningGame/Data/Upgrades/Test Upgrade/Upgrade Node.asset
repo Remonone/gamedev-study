@@ -18,9 +18,10 @@ MonoBehaviour:
   MaxLevel: 3
   Icon: {fileID: 0}
   CostFormula:
-    rid: 3848164893709828167
+    rid: 841080302622474240
   Modifiers:
   - {fileID: 11400000, guid: a8a878f1935f0f75fa8a18a898d26672, type: 2}
+  FeatureUnlockIds: []
   TreePosition: {x: 0, y: 0}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
@@ -30,10 +31,14 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3848164893709828167
-      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080302622474240
+      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        Value:
+        BaseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+        Slope:
           _stored: 1
           _base:
             Degree: 0

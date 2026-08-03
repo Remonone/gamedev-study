@@ -8,6 +8,7 @@ namespace Bootstrap.Installer {
             container.Register(new GenerationCacheCalculator());
             container.Register(new SignatureCacheCalculator());
             container.Register(new OfficeCacheCalculator());
+            container.Register(new DocumentCacheCalculator());
         }
     }
 }

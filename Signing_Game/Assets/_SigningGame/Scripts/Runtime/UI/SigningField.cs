@@ -33,6 +33,7 @@ namespace UI {
         public Observable<SignatureInputEvent> OnInput => _inputEvents;
 
         private RectTransform _drawingRect;
+        private RectTransform _signatureRect;
 
         private bool _isDrawing;
         private int _activePointerId;
@@ -41,6 +42,7 @@ namespace UI {
 
         private void Awake() {
             _drawingRect = GetComponent<RectTransform>();
+            _signatureRect = _signatureGraphic.rectTransform;
 
             _signatureGraphic.raycastTarget = false;
         }
@@ -52,7 +54,7 @@ namespace UI {
             if (!TryGetLocalPosition(e, out Vector2 localPos)) return;
             _isDrawing = true;
             _activePointerId = e.pointerId;
-            _signatureGraphic.BeginStroke(localPos);
+            _signatureGraphic.BeginStroke(ToSignatureLocalPosition(localPos));
             _lastNormalizedPosition = Normalize(localPos);
             _lastPointerTimestamp = Time.unscaledTime;
 
@@ -72,7 +74,9 @@ namespace UI {
             _lastNormalizedPosition = Normalize(position);
             _lastPointerTimestamp = Time.unscaledTime;
 
-            bool pointWasAdded = _signatureGraphic.TryAddPoint(position, _minimumPointDistance);
+            bool pointWasAdded = _signatureGraphic.TryAddPoint(
+                ToSignatureLocalPosition(position),
+                _minimumPointDistance);
             if (!pointWasAdded) return;
 
             _inputEvents.OnNext(new SignatureInputEvent(
@@ -87,7 +91,7 @@ namespace UI {
             if (e.pointerId != _activePointerId) return;
 
             if (TryGetLocalPosition(e, out Vector2 localPos)) {
-                _signatureGraphic.TryAddPoint(localPos, _minimumPointDistance);
+                _signatureGraphic.TryAddPoint(ToSignatureLocalPosition(localPos), _minimumPointDistance);
                 _lastNormalizedPosition = Normalize(localPos);
                 _lastPointerTimestamp = Time.unscaledTime;
             }
@@ -134,6 +138,13 @@ namespace UI {
             position.x = Mathf.Clamp(position.x, rect.xMin, rect.xMax);
             position.y = Mathf.Clamp(position.y, rect.yMin, rect.yMax);
             return true;
+        }
+
+        private Vector2 ToSignatureLocalPosition(Vector2 drawingLocalPosition) {
+            if (_signatureRect == _drawingRect) return drawingLocalPosition;
+
+            Vector3 worldPosition = _drawingRect.TransformPoint(drawingLocalPosition);
+            return _signatureRect.InverseTransformPoint(worldPosition);
         }
 
         private void OnDisable() {

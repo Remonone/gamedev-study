@@ -13,6 +13,7 @@ namespace Data.Modifiers.Providers {
             var affectingModifiers = _upgradeService.OwnedUpgrades
                 .SelectMany(upgrade => upgrade.Definition.Modifiers)
                 .SelectMany(modifier => modifier.NumericModifiers)
+                .Where(modifier => modifier != null)
                 .Where(modifier => modifier.IsApplicable(typeof(T)));
             foreach (var modifier in affectingModifiers) {
                 result = modifier.Apply(result, context);

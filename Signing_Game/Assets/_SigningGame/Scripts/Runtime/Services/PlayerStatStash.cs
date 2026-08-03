@@ -17,11 +17,13 @@ namespace Services {
         private CachedData<SignatureEntries> _signatureData;
         private CachedData<GenerationEntries> _generationData;
         private CachedData<OfficeEntries> _officeData;
+        private CachedData<DocumentEntries> _documents;
         
         public IReadOnlyCacheData<IncomeEntries> IncomeData => _incomeData;
         public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
         public IReadOnlyCacheData<GenerationEntries> GenerationData => _generationData;
         public IReadOnlyCacheData<OfficeEntries> OfficeData => _officeData;
+        public IReadOnlyCacheData<DocumentEntries> Documents => _documents;
         
         
         public void Dispose() {
@@ -39,8 +41,6 @@ namespace Services {
         
         public UniTask InitializeAsync(IServiceScope scope) {
             _signaturePresetRepository = scope.Get<ISignaturePresetRepository>();
-            
-            
             return UniTask.CompletedTask;
         }
 
@@ -54,6 +54,7 @@ namespace Services {
             _signatureData = _dataFactory.Create<SignatureEntries>();
             _generationData = _dataFactory.Create<GenerationEntries>();
             _officeData = _dataFactory.Create<OfficeEntries>();
+            _documents = _dataFactory.Create<DocumentEntries>();
             return UniTask.CompletedTask;
         }
     }

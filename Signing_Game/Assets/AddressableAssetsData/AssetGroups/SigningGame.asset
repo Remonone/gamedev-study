@@ -51,6 +51,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - difficulty_profile
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d211cd14103799a1db54dc7df32fcefd
+    m_Address: Assets/_SigningGame/Data/Cache References/Document Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d5b2daf95d086843c8f37326c258f49c
     m_Address: Assets/_SigningGame/Data/Test Preset.asset
     m_ReadOnly: 0
