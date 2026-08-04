@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
+using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Documents;
-using Data.Cache;
 using DG.Tweening;
 using R3;
 using Services;
@@ -21,16 +22,13 @@ namespace Presentation {
         [SerializeField] private Transform _shallowDocumentActive;
 
         private DocumentView _activeDocument;
-        private IReadOnlyCacheData<DocumentEntries> _documents;
         private DocumentDispenser _dispenser;
-        private DocumentGeneratorService _generator;
+        private DispenseViewModel _viewModel;
         private IDisposable _dragObservation;
         private IDisposable _documentHoverObservation;
         private bool _isPointerOverDispenseArea;
         private bool _isPointerOverDocument;
         private bool _isRetreatScheduled;
-        
-        private StableRandom _random;
         
         public void OnPointerEnter(PointerEventData eventData) {
             _isPointerOverDispenseArea = true;
@@ -44,14 +42,32 @@ namespace Presentation {
         }
 
         private bool TrySummonDocument() {
-            if (!_generator.TryObtainDocument()) return false;
+            if (!_viewModel.TryCreateContext(out IDocumentContext context)) return false;
 
-            _activeDocument = _dispenser.Spawn(BuildContext());
-            var dragView = _activeDocument.GetComponent<DocumentDragView>();
-            _dragObservation = dragView.IsDragging.Where(dragging => dragging).Subscribe(OnDrag);
-            _documentHoverObservation = dragView.IsPointerOver.Subscribe(OnDocumentHoverChanged);
-            _activeDocument.transform.position = _shallowDocumentRest.position;
-            return true;
+            try {
+                _activeDocument = _dispenser.Spawn(context);
+                var dragView = _activeDocument.GetComponent<DocumentDragView>();
+                if (dragView == null) {
+                    throw new InvalidOperationException("A dispensed document requires DocumentDragView.");
+                }
+
+                _activeDocument.transform.position = _shallowDocumentRest.position;
+                _dragObservation = dragView.IsDragging.Where(dragging => dragging).Subscribe(OnDrag);
+                _documentHoverObservation = dragView.IsPointerOver.Subscribe(OnDocumentHoverChanged);
+                return true;
+            }
+            catch (Exception exception) {
+                ClearDocumentSubscriptions();
+                context.Dispose();
+                if (_activeDocument != null) {
+                    _activeDocument.ViewModel?.Dispose();
+                    Destroy(_activeDocument.gameObject);
+                    _activeDocument = null;
+                }
+
+                Debug.LogException(exception, this);
+                return false;
+            }
         }
         
         private void OnDrag(bool dragging) {
@@ -69,16 +85,6 @@ namespace Presentation {
             ClearDocumentSubscriptions();
             _isPointerOverDocument = false;
             _activeDocument = null;
-        }
-
-        private IDocumentContext BuildContext() {
-            DocumentProperties properties = new DocumentProperties();
-            properties.AddBehavior(_random.NextUInt64());
-            var initialHue = 1f - 0.225f;
-            var hue = initialHue - _documents.Value.SelectedDocumentQualityLevel * 0.025f;
-            var color = Color.HSVToRGB(hue, 0.8f, 0.8f);
-            properties.AddBehavior(color);
-            return properties;
         }
 
         public void OnPointerExit(PointerEventData eventData) {
@@ -131,15 +137,24 @@ namespace Presentation {
         
         public void Dispose() {
             ClearDocumentSubscriptions();
+            if (_activeDocument != null) {
+                _activeDocument.ViewModel?.Dispose();
+                Destroy(_activeDocument.gameObject);
+            }
             _activeDocument = null;
         }
 
         public UniTask InitializeAsync(IServiceScope scope) {
-            var stash = scope.Get<PlayerStatStash>();
             _dispenser = scope.Get<DocumentDispenser>();
-            _generator = scope.Get<DocumentGeneratorService>();
-            _documents = stash.Documents;
-            _random = new StableRandom((ulong)Time.deltaTime);
+            var producers = new List<IDocumentProducer>();
+            for (int index = 0; scope.TryGet(out IDocumentProducer producer, index); index++) {
+                producers.Add(producer);
+            }
+
+            _viewModel = new DispenseViewModel(
+                producers,
+                scope.Get<PlayerStatStash>().Documents,
+                new StableRandom((ulong)Time.deltaTime));
             return UniTask.CompletedTask;
         }
     }

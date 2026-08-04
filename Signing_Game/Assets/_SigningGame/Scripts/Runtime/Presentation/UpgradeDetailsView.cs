@@ -1,5 +1,7 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Presentation {
@@ -11,16 +13,18 @@ namespace Presentation {
         [SerializeField] private TextMeshProUGUI _levelText;
         [SerializeField] private TextMeshProUGUI _priceText;
         [SerializeField] private Button _buyButton;
+        private UnityAction _buyAction;
 
         private void Awake() {
             Hide();
         }
 
-        public void Show(UpgradeNodePresentationModel model) {
+        public void Show(UpgradeNodePresentationModel model, Func<string, bool> purchase) {
             if (model == null) {
                 Hide();
                 return;
             }
+            if (purchase == null) throw new ArgumentNullException(nameof(purchase));
 
             if (_nameText != null) _nameText.text = model.Name;
             if (_icon != null) {
@@ -31,12 +35,29 @@ namespace Presentation {
             if (_descriptionText != null) _descriptionText.text = model.Description;
             if (_levelText != null) _levelText.text = $"{model.CurrentLevel}/{model.MaxLevel}";
             if (_priceText != null) _priceText.text = model.Price;
-            if (_buyButton != null) _buyButton.gameObject.SetActive(true);
+            if (_buyButton != null) {
+                UnbindBuyButton();
+                _buyAction = () => purchase(model.Id);
+                _buyButton.onClick.AddListener(_buyAction);
+                _buyButton.interactable = model.CanPurchase;
+                _buyButton.gameObject.SetActive(true);
+            }
             if (_panelRoot != null) _panelRoot.SetActive(true);
         }
 
         public void Hide() {
+            UnbindBuyButton();
             if (_panelRoot != null) _panelRoot.SetActive(false);
+        }
+
+        private void OnDestroy() {
+            UnbindBuyButton();
+        }
+
+        private void UnbindBuyButton() {
+            if (_buyButton == null || _buyAction == null) return;
+            _buyButton.onClick.RemoveListener(_buyAction);
+            _buyAction = null;
         }
     }
 }

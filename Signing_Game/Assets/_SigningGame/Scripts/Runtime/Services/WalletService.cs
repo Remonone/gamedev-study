@@ -34,11 +34,19 @@ namespace Services {
         }
 
         public bool TryWithdrawWallet(Value value) {
+            return TryWithdrawWallet(value, true);
+        }
+
+        internal bool TryWithdrawWallet(Value value, bool notify) {
             if (!CanAfford(value)) return false;
             if (!_balance.IsSignificant(value)) return true;
             _balance = (_balance - value).Value;
-            _balanceChanged.Value = _balance;
+            if (notify) NotifyBalanceChanged();
             return true;
+        }
+
+        internal void NotifyBalanceChanged() {
+            _balanceChanged.Value = _balance;
         }
 
         public JToken Serialize() {

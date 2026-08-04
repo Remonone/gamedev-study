@@ -4,7 +4,9 @@ using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Enums;
 using Data.Modifiers;
+using Data.Results;
 using Data.Upgrades;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,19 +17,24 @@ using Utils;
 
 namespace Services {
     public class UpgradeService : IService, IInitialize, ISaveable {
-
         private Dictionary<string, UpgradeNodeState> _states = new(StringComparer.Ordinal);
-        private Dictionary<string, int> _upgradeRestore;
+        private HashSet<UpgradeNodeState> _ownedUpgrades = new();
+        private List<PendingUpgradeRecord> _pendingUpgrades = new();
+        private RestoreData _upgradeRestore;
         private ICacheInvalidator _cacheInvalidator;
         private bool _definitionsBuilt;
-        
-        private HashSet<UpgradeNodeState> _ownedUpgrades = new();
+        private bool _isMutating;
+
+        private readonly Dictionary<long, string> _activeClaims = new();
+        private readonly HashSet<string> _claimedUpgradeIds = new(StringComparer.Ordinal);
+        private int _claimEpoch;
+        private long _nextClaimToken;
         private readonly Subject<Unit> _changed = new();
-        
+
         private WalletService _wallet;
         private IAssetListLease<UpgradeNodeDefinition> _lease;
         private IAssetProvider _assetProvider;
-        
+
         public IReadOnlyCollection<UpgradeNodeState> OwnedUpgrades => _ownedUpgrades;
         public IReadOnlyCollection<UpgradeNodeState> Nodes => _states.Values;
         public Observable<Unit> Changed => _changed;
@@ -57,7 +64,7 @@ namespace Services {
             if (assets == null) throw new ArgumentNullException(nameof(assets));
 
             var states = new Dictionary<string, UpgradeNodeState>(StringComparer.Ordinal);
-            foreach (var asset in assets) {
+            foreach (UpgradeNodeDefinition asset in assets) {
                 ValidateDefinition(asset);
                 if (!states.TryAdd(asset.Id, new UpgradeNodeState(asset))) {
                     throw new InvalidOperationException($"Duplicate upgrade ID '{asset.Id}'.");
@@ -66,52 +73,167 @@ namespace Services {
 
             _states = states;
             _ownedUpgrades = new HashSet<UpgradeNodeState>();
+            _pendingUpgrades = new List<PendingUpgradeRecord>();
+            InvalidateAllClaims();
             _definitionsBuilt = true;
         }
 
+        public bool CanUpgrade(string upgradeId) {
+            UpgradeNodeState upgrade = GetUpgrade(upgradeId);
+            if (upgrade == null || _wallet == null ||
+                upgrade.CurrentState is not (UpgradeNodeState.State.Available or UpgradeNodeState.State.InProgress)) {
+                return false;
+            }
+
+            return _wallet.CanAfford(ResolvePrice(upgrade));
+        }
 
         public bool TryUpgrade(string upgradeId) {
-            var upgrade = GetUpgrade(upgradeId);
-            if (upgrade == null || upgrade.CurrentState is not (UpgradeNodeState.State.Available or UpgradeNodeState.State.InProgress)) {
-                return false;
-            }
+            if (_isMutating || !CanUpgrade(upgradeId)) return false;
 
-            var price = ResolvePrice(upgrade);
-            if (!_wallet.TryWithdrawWallet(price)) {
-                return false;
-            }
+            UpgradeNodeState upgrade = GetUpgrade(upgradeId);
+            Value price = ResolvePrice(upgrade);
             var updated = new UpgradeNodeState(upgrade);
+            bool firstPurchase = updated.Level == 0;
 
-            updated.Level++;
+            if (firstPurchase) {
+                updated.CurrentState = UpgradeNodeState.State.Pending;
+                updated.Effectiveness = 0f;
+            }
+            else {
+                updated.Level++;
+                updated.CurrentState = updated.Level >= updated.Definition.MaxLevel
+                    ? UpgradeNodeState.State.Completed
+                    : UpgradeNodeState.State.InProgress;
+            }
+
+            _isMutating = true;
+            try {
+                if (!_wallet.TryWithdrawWallet(price, false)) return false;
+
+                _states[upgradeId] = updated;
+                if (firstPurchase) {
+                    _pendingUpgrades.Add(new PendingUpgradeRecord(upgradeId, price));
+                }
+                else {
+                    _ownedUpgrades.Remove(upgrade);
+                    _ownedUpgrades.Add(updated);
+                    InvalidateGroups(updated.Definition.Modifiers);
+                }
+
+                _wallet.NotifyBalanceChanged();
+                NotifyChanged();
+                return true;
+            }
+            finally {
+                _isMutating = false;
+            }
+        }
+
+        internal bool TryClaimPendingUpgrade(out UpgradeDocumentClaim claim) {
+            claim = default;
+            if (_isMutating) return false;
+
+            for (int index = 0; index < _pendingUpgrades.Count; index++) {
+                string upgradeId = _pendingUpgrades[index].UpgradeId;
+                if (_claimedUpgradeIds.Contains(upgradeId)) continue;
+
+                long token = ++_nextClaimToken;
+                _activeClaims.Add(token, upgradeId);
+                _claimedUpgradeIds.Add(upgradeId);
+                claim = new UpgradeDocumentClaim(_claimEpoch, token, upgradeId);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryCompletePendingUpgrade(
+            UpgradeDocumentClaim claim,
+            SignatureEvaluationResult result) {
+            if (result == null) throw new ArgumentNullException(nameof(result));
+            if (_isMutating || !IsValidClaim(claim)) return false;
+
+            int pendingIndex = FindPendingIndex(claim.UpgradeId);
+            UpgradeNodeState upgrade = GetUpgrade(claim.UpgradeId);
+            if (pendingIndex < 0 || upgrade == null ||
+                upgrade.Level != 0 || upgrade.CurrentState != UpgradeNodeState.State.Pending) {
+                ReleaseClaim(claim);
+                return false;
+            }
+
+            var updated = new UpgradeNodeState(upgrade) {
+                Level = 1,
+                Effectiveness = ResolveEffectiveness(result)
+            };
             updated.CurrentState = updated.Level >= updated.Definition.MaxLevel
                 ? UpgradeNodeState.State.Completed
                 : UpgradeNodeState.State.InProgress;
-            
-            _ownedUpgrades.Remove(upgrade);
-            _ownedUpgrades.Add(updated);
-            _states[upgradeId] = updated;
-            
-            InvalidateGroups(updated.Definition.Modifiers);
 
-            NotifyChanged();
+            _isMutating = true;
+            try {
+                ReleaseClaim(claim);
+                _pendingUpgrades.RemoveAt(pendingIndex);
+                _states[claim.UpgradeId] = updated;
+                _ownedUpgrades.Add(updated);
+                InvalidateGroups(updated.Definition.Modifiers);
+                NotifyChanged();
+                return true;
+            }
+            finally {
+                _isMutating = false;
+            }
+        }
+
+        internal bool TryReleasePendingUpgrade(UpgradeDocumentClaim claim) {
+            if (!IsValidClaim(claim)) return false;
+            ReleaseClaim(claim);
             return true;
+        }
+
+        private bool IsValidClaim(UpgradeDocumentClaim claim) {
+            return claim.Epoch == _claimEpoch &&
+                   _activeClaims.TryGetValue(claim.Token, out string upgradeId) &&
+                   string.Equals(upgradeId, claim.UpgradeId, StringComparison.Ordinal);
+        }
+
+        private void ReleaseClaim(UpgradeDocumentClaim claim) {
+            _activeClaims.Remove(claim.Token);
+            _claimedUpgradeIds.Remove(claim.UpgradeId);
+        }
+
+        private int FindPendingIndex(string upgradeId) {
+            for (int index = 0; index < _pendingUpgrades.Count; index++) {
+                if (string.Equals(_pendingUpgrades[index].UpgradeId, upgradeId, StringComparison.Ordinal)) {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
+        private static float ResolveEffectiveness(SignatureEvaluationResult result) {
+            float similarity = result.Similarity;
+            float minimum = result.MinimumSimilarity;
+            if (!IsFinite(similarity) || !IsFinite(minimum) || minimum <= 0f) {
+                return result.Status == SignatureEvaluationStatus.Accepted ? 1f : 0f;
+            }
+
+            return Mathf.Clamp01(similarity / minimum);
         }
 
         private void NotifyChanged() {
             _changed.OnNext(Unit.Default);
         }
 
-
         private void InvalidateGroups(ModifierDefinition[] definitionModifiers) {
             if (definitionModifiers == null || _cacheInvalidator == null) return;
             var affectedGroups = new HashSet<Type>();
-            foreach (var modifier in definitionModifiers) {
-                affectedGroups.UnionWith(modifier.GetAffectedTypes());
+            foreach (ModifierDefinition modifier in definitionModifiers) {
+                if (modifier != null) affectedGroups.UnionWith(modifier.GetAffectedTypes());
             }
 
-            foreach (var group in affectedGroups) {
-                _cacheInvalidator.Invalidate(group);
-            }
+            foreach (Type group in affectedGroups) _cacheInvalidator.Invalidate(group);
         }
 
         public Value ResolvePrice(UpgradeNodeState state) {
@@ -142,43 +264,36 @@ namespace Services {
         }
 
         public string SaveId => "Upgrades";
+
         public JToken Serialize() {
-            var result = new JObject();
-            var list = new JArray();
-            result.Add("upgrades", list);
-            foreach (var upgrade in _ownedUpgrades) {
-                list.Add(new JObject {
+            var owned = new JArray();
+            foreach (UpgradeNodeState upgrade in _ownedUpgrades) {
+                owned.Add(new JObject {
                     ["id"] = upgrade.Definition.Id,
-                    ["level"] = upgrade.Level
+                    ["level"] = upgrade.Level,
+                    ["effectiveness"] = upgrade.Effectiveness
                 });
             }
 
-            return result;
+            var pending = new JArray();
+            for (int index = 0; index < _pendingUpgrades.Count; index++) {
+                PendingUpgradeRecord upgrade = _pendingUpgrades[index];
+                pending.Add(new JObject {
+                    ["id"] = upgrade.UpgradeId,
+                    ["paidStored"] = upgrade.PaidPrice.Stored,
+                    ["paidDegree"] = upgrade.PaidPrice.Base.Degree
+                });
+            }
+
+            return new JObject {
+                ["upgrades"] = owned,
+                ["pendingUpgrades"] = pending
+            };
         }
 
         public void Deserialize(JToken state) {
-            if (state is not JObject root || root["upgrades"] is not JArray upgrades) {
-                throw new JsonSerializationException("Upgrade state must contain an upgrades array.");
-            }
-
-            var restored = new Dictionary<string, int>(StringComparer.Ordinal);
-            foreach (JToken upgrade in upgrades) {
-                if (upgrade is not JObject data || data["id"]?.Type != JTokenType.String ||
-                    data["level"]?.Type != JTokenType.Integer) {
-                    throw new JsonSerializationException("Each saved upgrade must contain a string ID and integer level.");
-                }
-
-                string id = data["id"].Value<string>();
-                int level = data["level"].Value<int>();
-                if (string.IsNullOrWhiteSpace(id) || level <= 0) {
-                    throw new JsonSerializationException("Saved upgrade IDs must be non-empty and levels must be positive.");
-                }
-
-                if (!restored.TryAdd(id, level)) {
-                    throw new JsonSerializationException($"Duplicate saved upgrade ID '{id}'.");
-                }
-            }
-
+            if (_isMutating) throw new InvalidOperationException("Cannot restore upgrades during another upgrade mutation.");
+            RestoreData restored = ParseRestore(state);
             if (!_definitionsBuilt) {
                 _upgradeRestore = restored;
                 return;
@@ -186,31 +301,34 @@ namespace Services {
 
             ApplyRestore(restored, true);
         }
-        
+
         public void Dispose() {
             _changed.Dispose();
+            InvalidateAllClaims();
             _states.Clear();
             _ownedUpgrades.Clear();
-            _upgradeRestore?.Clear();
+            _pendingUpgrades.Clear();
             _upgradeRestore = null;
             _lease?.Dispose();
             _lease = null;
         }
 
-        private void ApplyRestore(IReadOnlyDictionary<string, int> restored, bool notify) {
+        private void ApplyRestore(RestoreData restored, bool notify) {
+            if (_isMutating) throw new InvalidOperationException("Cannot restore upgrades during another upgrade mutation.");
+
             var nextStates = new Dictionary<string, UpgradeNodeState>(_states.Count, StringComparer.Ordinal);
             foreach (KeyValuePair<string, UpgradeNodeState> pair in _states) {
                 nextStates.Add(pair.Key, new UpgradeNodeState(pair.Value.Definition));
             }
 
             var nextOwned = new HashSet<UpgradeNodeState>();
-            foreach (KeyValuePair<string, int> pair in restored) {
+            foreach (KeyValuePair<string, OwnedUpgradeRestore> pair in restored.Owned) {
                 if (!nextStates.TryGetValue(pair.Key, out UpgradeNodeState state)) {
                     Debug.LogWarning($"Saved upgrade '{pair.Key}' is not present in the loaded catalog and was ignored.");
                     continue;
                 }
 
-                int level = pair.Value;
+                int level = pair.Value.Level;
                 if (level > state.Definition.MaxLevel) {
                     Debug.LogWarning(
                         $"Saved level {level} for upgrade '{pair.Key}' exceeds its maximum and was clamped.");
@@ -218,22 +336,155 @@ namespace Services {
                 }
 
                 state.Level = level;
+                state.Effectiveness = pair.Value.Effectiveness;
                 state.CurrentState = level >= state.Definition.MaxLevel
                     ? UpgradeNodeState.State.Completed
                     : UpgradeNodeState.State.InProgress;
                 nextOwned.Add(state);
             }
 
+            var nextPending = new List<PendingUpgradeRecord>();
+            var refunds = new List<PendingUpgradeRecord>();
+            for (int index = 0; index < restored.Pending.Count; index++) {
+                PendingUpgradeRecord pending = restored.Pending[index];
+                if (!nextStates.TryGetValue(pending.UpgradeId, out UpgradeNodeState state)) {
+                    refunds.Add(pending);
+                    continue;
+                }
+
+                state.Level = 0;
+                state.Effectiveness = 0f;
+                state.CurrentState = UpgradeNodeState.State.Pending;
+                nextPending.Add(pending);
+            }
+
             var affectedGroups = new HashSet<Type>();
             CollectAffectedGroups(_ownedUpgrades, affectedGroups);
             CollectAffectedGroups(nextOwned, affectedGroups);
-            _states = nextStates;
-            _ownedUpgrades = nextOwned;
-            InvalidateGroups(affectedGroups);
-            if (notify) NotifyChanged();
+
+            _isMutating = true;
+            try {
+                InvalidateAllClaims();
+                _states = nextStates;
+                _ownedUpgrades = nextOwned;
+                _pendingUpgrades = nextPending;
+                InvalidateGroups(affectedGroups);
+
+                for (int index = 0; index < refunds.Count; index++) {
+                    PendingUpgradeRecord refund = refunds[index];
+                    Debug.LogWarning(
+                        $"Pending upgrade '{refund.UpgradeId}' is not present in the loaded catalog; its paid cost was refunded.");
+                    _wallet.ReplenishWallet(refund.PaidPrice);
+                }
+
+                if (notify) NotifyChanged();
+            }
+            finally {
+                _isMutating = false;
+            }
         }
 
-        private static void CollectAffectedGroups(IEnumerable<UpgradeNodeState> upgrades, HashSet<Type> affectedGroups) {
+        private static RestoreData ParseRestore(JToken state) {
+            if (state is not JObject root || root["upgrades"] is not JArray upgrades) {
+                throw new JsonSerializationException("Upgrade state must contain an upgrades array.");
+            }
+
+            JToken pendingToken = root["pendingUpgrades"];
+            if (pendingToken != null && pendingToken is not JArray) {
+                throw new JsonSerializationException("Pending upgrade state must be an array.");
+            }
+
+            var restored = new RestoreData();
+            var allIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (JToken upgrade in upgrades) {
+                if (upgrade is not JObject data || data["id"]?.Type != JTokenType.String ||
+                    data["level"]?.Type != JTokenType.Integer) {
+                    throw new JsonSerializationException(
+                        "Each saved upgrade must contain a string ID and integer level.");
+                }
+
+                string id = data["id"].Value<string>();
+                int level = data["level"].Value<int>();
+                float effectiveness = 1f;
+                if (data["effectiveness"] != null &&
+                    !TryReadNumber(data["effectiveness"], out effectiveness)) {
+                    throw new JsonSerializationException("Saved upgrade effectiveness must be numeric.");
+                }
+
+                if (string.IsNullOrWhiteSpace(id) || level <= 0 || !IsFinite(effectiveness) ||
+                    effectiveness < 0f || effectiveness > 1f) {
+                    throw new JsonSerializationException("Saved upgrade data contains values outside valid ranges.");
+                }
+
+                if (!allIds.Add(id)) throw new JsonSerializationException($"Duplicate saved upgrade ID '{id}'.");
+                restored.Owned.Add(id, new OwnedUpgradeRestore(level, effectiveness));
+            }
+
+            if (pendingToken is JArray pendingUpgrades) {
+                foreach (JToken upgrade in pendingUpgrades) {
+                    if (upgrade is not JObject data || data["id"]?.Type != JTokenType.String ||
+                        !TryReadValue(data["paidStored"], data["paidDegree"], out Value paidPrice)) {
+                        throw new JsonSerializationException(
+                            "Each pending upgrade must contain an ID and a canonical paid cost.");
+                    }
+
+                    string id = data["id"].Value<string>();
+                    if (string.IsNullOrWhiteSpace(id) || paidPrice.IsZero) {
+                        throw new JsonSerializationException("Pending upgrade data contains values outside valid ranges.");
+                    }
+
+                    if (!allIds.Add(id)) throw new JsonSerializationException($"Duplicate saved upgrade ID '{id}'.");
+                    restored.Pending.Add(new PendingUpgradeRecord(id, paidPrice));
+                }
+            }
+
+            return restored;
+        }
+
+        private static bool TryReadValue(JToken storedToken, JToken degreeToken, out Value value) {
+            value = default;
+            if (!TryReadNumber(storedToken, out double stored) || degreeToken?.Type != JTokenType.Integer) {
+                return false;
+            }
+
+            int degree = degreeToken.Value<int>();
+            bool invalidStored = double.IsNaN(stored) || double.IsInfinity(stored) || stored <= 0d || stored >= 1000d;
+            bool invalidDegree = degree < 0 || degree > 0 && stored < 1d;
+            if (invalidStored || invalidDegree) return false;
+
+            var candidate = new Value(stored, new BaseValue(degree));
+            if (candidate.Stored != stored || candidate.Base.Degree != degree) return false;
+            value = candidate;
+            return true;
+        }
+
+        private static bool TryReadNumber(JToken token, out float value) {
+            if (token?.Type is JTokenType.Integer or JTokenType.Float) {
+                value = token.Value<float>();
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        private static bool IsFinite(float value) {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static bool TryReadNumber(JToken token, out double value) {
+            if (token?.Type is JTokenType.Integer or JTokenType.Float) {
+                value = token.Value<double>();
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        private static void CollectAffectedGroups(
+            IEnumerable<UpgradeNodeState> upgrades,
+            HashSet<Type> affectedGroups) {
             foreach (UpgradeNodeState upgrade in upgrades) {
                 ModifierDefinition[] modifiers = upgrade.Definition.Modifiers;
                 if (modifiers == null) continue;
@@ -248,6 +499,12 @@ namespace Services {
             foreach (Type group in affectedGroups) _cacheInvalidator.Invalidate(group);
         }
 
+        private void InvalidateAllClaims() {
+            _claimEpoch++;
+            _activeClaims.Clear();
+            _claimedUpgradeIds.Clear();
+        }
+
         private static void ValidateDefinition(UpgradeNodeDefinition definition) {
             if (definition == null) throw new InvalidOperationException("Upgrade catalog contains a null definition.");
             if (string.IsNullOrWhiteSpace(definition.Id)) {
@@ -260,6 +517,43 @@ namespace Services {
 
             if (definition.CostFormula == null) {
                 throw new InvalidOperationException($"Upgrade '{definition.Id}' has no cost formula.");
+            }
+        }
+
+        private sealed class RestoreData {
+            public readonly Dictionary<string, OwnedUpgradeRestore> Owned = new(StringComparer.Ordinal);
+            public readonly List<PendingUpgradeRecord> Pending = new();
+        }
+
+        private readonly struct OwnedUpgradeRestore {
+            public int Level { get; }
+            public float Effectiveness { get; }
+
+            public OwnedUpgradeRestore(int level, float effectiveness) {
+                Level = level;
+                Effectiveness = effectiveness;
+            }
+        }
+
+        private readonly struct PendingUpgradeRecord {
+            public string UpgradeId { get; }
+            public Value PaidPrice { get; }
+
+            public PendingUpgradeRecord(string upgradeId, Value paidPrice) {
+                UpgradeId = upgradeId;
+                PaidPrice = paidPrice;
+            }
+        }
+
+        internal readonly struct UpgradeDocumentClaim {
+            internal int Epoch { get; }
+            internal long Token { get; }
+            internal string UpgradeId { get; }
+
+            internal UpgradeDocumentClaim(int epoch, long token, string upgradeId) {
+                Epoch = epoch;
+                Token = token;
+                UpgradeId = upgradeId;
             }
         }
     }

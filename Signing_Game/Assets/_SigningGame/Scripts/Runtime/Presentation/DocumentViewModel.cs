@@ -6,10 +6,12 @@ using Services;
 using UnityEngine;
 
 namespace Presentation {
-    public sealed class DocumentViewModel {
+    public sealed class DocumentViewModel : IDisposable {
         private ISignatureRecorder _signatureRecorder;
         private PlayerSignatureAcceptor _acceptor;
-        private IDocumentContext _context;
+        private IDocumentSession _session;
+        private bool _evaluated;
+        private bool _disposed;
         
         private Color _headerColor = Color.HSVToRGB(1f - 0.225f, .8f, .8f);
         private ulong _textSeed = (ulong)UnityEngine.Random.Range(int.MinValue, int.MaxValue);
@@ -21,7 +23,10 @@ namespace Presentation {
         public bool IsStrokeActive => _signatureRecorder.IsStrokeActive;
 
         public void Evaluate(SignatureAttempt attempt) {
-            _acceptor?.AcceptSignature(attempt);
+            if (_disposed) throw new ObjectDisposedException(nameof(DocumentViewModel));
+            if (_evaluated) throw new InvalidOperationException("A document can only be evaluated once.");
+            _evaluated = true;
+            _acceptor.AcceptSignature(attempt, _session);
         }
 
         public void StartStroke(SignatureInputPoint firstPoint) {
@@ -62,13 +67,19 @@ namespace Presentation {
         }
 
         private void SetContext(IDocumentContext context) {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _context.GetBehavior<ulong>(out _textSeed);
-            _context.GetBehavior<Color>(out _headerColor);
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            try {
+                context.GetBehavior<ulong>(out _textSeed);
+                context.GetBehavior<Color>(out _headerColor);
+                _session = context.TakeSession();
+            }
+            finally {
+                context.Dispose();
+            }
         }
 
         private void SetAcceptor(PlayerSignatureAcceptor acceptor) {
-            _acceptor = acceptor;
+            _acceptor = acceptor ?? throw new ArgumentNullException(nameof(acceptor));
         }
 
         private void SetRecorder(ISignatureRecorder recorder) {
@@ -77,6 +88,13 @@ namespace Presentation {
 
         public void CancelSignature() {
             _signatureRecorder.CancelAttempt();
+        }
+
+        public void Dispose() {
+            if (_disposed) return;
+            _disposed = true;
+            _session?.Dispose();
+            _session = null;
         }
         
         public class DocumentViewModelBuilder {
@@ -101,6 +119,11 @@ namespace Presentation {
                 model.SetRecorder(new SignatureRecorder());
                 _model = new DocumentViewModel();
                 return model;
+            }
+
+            public void Reset() {
+                _model.Dispose();
+                _model = new DocumentViewModel();
             }
         }
     }

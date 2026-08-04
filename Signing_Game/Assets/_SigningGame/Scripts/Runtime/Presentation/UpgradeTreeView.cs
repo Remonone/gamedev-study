@@ -33,7 +33,10 @@ namespace Presentation {
             }
 
             if (this == null) return;
-            _viewModel = new UpgradeTreeViewModel(locator.Get<UpgradeTreeService>());
+            _viewModel = new UpgradeTreeViewModel(
+                locator.Get<UpgradeTreeService>(),
+                locator.Get<UpgradeService>(),
+                locator.Get<WalletService>());
             _viewModel.Changed.Subscribe(_ => RefreshNodes()).AddTo(_viewSubscriptions);
             _viewModel.SelectedNode.Subscribe(OnSelectedNodeChanged).AddTo(_viewSubscriptions);
             RefreshNodes();
@@ -76,7 +79,7 @@ namespace Presentation {
 
         private void OnSelectedNodeChanged(UpgradeNodePresentationModel node) {
             if (node == null) _detailsView.Hide();
-            else _detailsView.Show(node);
+            else _detailsView.Show(node, _viewModel.Purchase);
         }
 
         private void OnDestroy() {

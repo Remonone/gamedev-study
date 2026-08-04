@@ -2,16 +2,22 @@ using System;
 
 namespace Data.Upgrades {
     public class UpgradeNodeState : IEquatable<UpgradeNodeState> {
-        public enum State { Locked, Available, InProgress, Completed }
+        public enum State { Locked, Available, Pending, InProgress, Completed }
 
         public UpgradeNodeDefinition Definition { get; }
         public int Level { get; internal set; }
         public State CurrentState { get; internal set; }
+        public float Effectiveness { get; internal set; }
 
-        public UpgradeNodeState(UpgradeNodeDefinition definition, int level, State currentState) {
+        public UpgradeNodeState(
+            UpgradeNodeDefinition definition,
+            int level,
+            State currentState,
+            float effectiveness = 1f) {
             Definition = definition;
             Level = level;
             CurrentState = currentState;
+            Effectiveness = effectiveness;
         }
         
         public UpgradeNodeState(UpgradeNodeDefinition definition) : this(definition, 0, State.Locked) { }
@@ -20,13 +26,15 @@ namespace Data.Upgrades {
             Definition = other.Definition;
             Level = other.Level;
             CurrentState = other.CurrentState;
+            Effectiveness = other.Effectiveness;
         }
         
 
         public bool Equals(UpgradeNodeState other) {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(Definition, other.Definition) && Level == other.Level && CurrentState == other.CurrentState;
+            return Equals(Definition, other.Definition) && Level == other.Level &&
+                   CurrentState == other.CurrentState && Effectiveness.Equals(other.Effectiveness);
         }
 
         public override bool Equals(object obj) {
@@ -37,7 +45,7 @@ namespace Data.Upgrades {
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(Definition, Level, (int)CurrentState);
+            return HashCode.Combine(Definition, Level, (int)CurrentState, Effectiveness);
         }
     }
 }

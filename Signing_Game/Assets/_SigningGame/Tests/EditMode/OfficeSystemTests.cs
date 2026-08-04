@@ -13,6 +13,8 @@ using Data.Modifiers.Numeric;
 using Data.Modifiers.Providers;
 using Data.Office;
 using Data.Persistence;
+using Data.Enums;
+using Data.Results;
 using Data.Upgrades;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -50,9 +52,9 @@ namespace Tests.EditMode {
                 out UnlockService unlocks);
             SetAllAvailable(upgrades);
 
-            Assert.That(upgrades.TryUpgrade("first"), Is.True);
+            PurchaseAndComplete(upgrades, "first");
             Assert.That(unlocks.IsUnlocked(FeatureIds.Office), Is.True);
-            Assert.That(upgrades.TryUpgrade("second"), Is.True);
+            PurchaseAndComplete(upgrades, "second");
             Assert.That(unlocks.UnlockedFeatures.Count, Is.EqualTo(1));
 
             upgrades.Deserialize(new JObject {
@@ -75,7 +77,7 @@ namespace Tests.EditMode {
                 out UnlockService unlocks);
             SetAllAvailable(upgrades);
 
-            Assert.That(upgrades.TryUpgrade("invalid"), Is.True);
+            PurchaseAndComplete(upgrades, "invalid");
             Assert.That(unlocks.UnlockedFeatures, Is.EquivalentTo(new[] { FeatureIds.Office }));
         }
 
@@ -357,6 +359,7 @@ namespace Tests.EditMode {
                 .Register<ICacheCalculator<SignatureEntries>>(new StaticCalculator<SignatureEntries>(default))
                 .Register<ICacheCalculator<GenerationEntries>>(new StaticCalculator<GenerationEntries>(default))
                 .Register<ICacheCalculator<OfficeEntries>>(officeCalculator)
+                .Register<ICacheCalculator<DocumentEntries>>(new StaticCalculator<DocumentEntries>(default))
                 .Register(stash)
                 .Register<IMoneyAggregator>(money)
                 .Register(office);
@@ -429,6 +432,17 @@ namespace Tests.EditMode {
             });
         }
 
+        private static void PurchaseAndComplete(UpgradeService upgrades, string upgradeId) {
+            Assert.That(upgrades.TryUpgrade(upgradeId), Is.True);
+            Assert.That(upgrades.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim), Is.True);
+            Assert.That(upgrades.TryCompletePendingUpgrade(claim, new SignatureEvaluationResult(
+                SignatureEvaluationStatus.Accepted,
+                SignatureFailureReason.None,
+                1f,
+                0.4f,
+                null)), Is.True);
+        }
+
         private static void AssertStatistic(GameStatisticsService statistics, string id, double expected) {
             Assert.That(statistics.TryGetValue(id, out double value), Is.True, id);
             Assert.That(value, Is.EqualTo(expected), id);
@@ -459,7 +473,7 @@ namespace Tests.EditMode {
             }
 
             public void UnlockOffice() {
-                Assert.That(Upgrades.TryUpgrade("office_unlock"), Is.True);
+                PurchaseAndComplete(Upgrades, "office_unlock");
             }
 
             public void Dispose() {

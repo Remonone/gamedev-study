@@ -85,6 +85,7 @@ namespace Presentation {
         }
 
         private void OnDestroy() {
+            _viewModel?.Dispose();
             _viewModel = null;
         }
     }

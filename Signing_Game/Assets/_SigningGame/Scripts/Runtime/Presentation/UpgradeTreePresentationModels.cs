@@ -12,9 +12,13 @@ namespace Presentation {
         public string Price { get; }
         public bool IsUnlocked { get; }
         public bool IsVisible { get; }
+        public bool IsPending { get; }
+        public float Effectiveness { get; }
+        public bool CanPurchase { get; }
 
         public UpgradeNodePresentationModel(string id, string name, string description, Sprite icon,
-            Vector2 position, int currentLevel, int maxLevel, string price, bool isUnlocked, bool isVisible) {
+            Vector2 position, int currentLevel, int maxLevel, string price, bool isUnlocked, bool isVisible,
+            bool isPending, float effectiveness, bool canPurchase) {
             Id = id;
             Name = name;
             Description = description;
@@ -25,6 +29,9 @@ namespace Presentation {
             Price = price;
             IsUnlocked = isUnlocked;
             IsVisible = isVisible;
+            IsPending = isPending;
+            Effectiveness = effectiveness;
+            CanPurchase = canPurchase;
         }
     }
 

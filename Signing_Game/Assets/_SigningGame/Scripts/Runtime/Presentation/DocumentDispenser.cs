@@ -18,21 +18,35 @@ namespace Presentation {
 
         [ContextMenu("Spawn")]
         public DocumentView Spawn(IDocumentContext context = null) {
+            if (context == null) {
+                throw new ArgumentNullException(nameof(context), "A document context is required.");
+            }
             if (_documentPrefab == null) {
                 throw new InvalidOperationException("DocumentDispenser requires a document prefab.");
             }
             if (_parent == null) {
                 throw new InvalidOperationException("DocumentDispenser requires a parent RectTransform.");
             }
-            DocumentView document = Instantiate(_documentPrefab, _parent, false);
-            ((RectTransform)document.transform).anchoredPosition = _anchoredSpawnPosition;
-            ServiceLocator.For(this).Get(out PlayerSignatureAcceptor acceptor);
-            var viewModel = _builder
-                .SetContext(context)
-                .SetAcceptor(acceptor)
-                .Build();
-            document.Init(viewModel);
-            return document;
+            DocumentView document = null;
+            DocumentViewModel viewModel = null;
+            try {
+                document = Instantiate(_documentPrefab, _parent, false);
+                ((RectTransform)document.transform).anchoredPosition = _anchoredSpawnPosition;
+                ServiceLocator.For(this).Get(out PlayerSignatureAcceptor acceptor);
+                viewModel = _builder
+                    .SetContext(context)
+                    .SetAcceptor(acceptor)
+                    .Build();
+                document.Init(viewModel);
+                return document;
+            }
+            catch {
+                viewModel?.Dispose();
+                _builder.Reset();
+                context.Dispose();
+                if (document != null) Destroy(document.gameObject);
+                throw;
+            }
         }
 
         public void Dispose() { }

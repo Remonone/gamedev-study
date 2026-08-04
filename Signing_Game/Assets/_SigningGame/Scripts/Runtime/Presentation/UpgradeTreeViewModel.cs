@@ -7,6 +7,7 @@ using Services;
 namespace Presentation {
     public sealed class UpgradeTreeViewModel : IDisposable {
         private readonly UpgradeTreeService _treeService;
+        private readonly UpgradeService _upgradeService;
         private readonly CompositeDisposable _subscriptions = new();
         private readonly Subject<Unit> _changed = new();
         private readonly ReactiveProperty<UpgradeNodePresentationModel> _selectedNode = new();
@@ -18,9 +19,15 @@ namespace Presentation {
         public Observable<Unit> Changed => _changed;
         public Observable<UpgradeNodePresentationModel> SelectedNode => _selectedNode;
 
-        public UpgradeTreeViewModel(UpgradeTreeService treeService) {
+        public UpgradeTreeViewModel(
+            UpgradeTreeService treeService,
+            UpgradeService upgradeService,
+            WalletService walletService) {
             _treeService = treeService ?? throw new ArgumentNullException(nameof(treeService));
+            _upgradeService = upgradeService ?? throw new ArgumentNullException(nameof(upgradeService));
+            if (walletService == null) throw new ArgumentNullException(nameof(walletService));
             _treeService.Changed.Subscribe(_ => Rebuild()).AddTo(_subscriptions);
+            walletService.BalanceChanged.Subscribe(_ => Rebuild()).AddTo(_subscriptions);
             Rebuild();
         }
 
@@ -33,6 +40,11 @@ namespace Presentation {
                     return;
                 }
             }
+        }
+
+        public bool Purchase(string upgradeId) {
+            if (string.IsNullOrWhiteSpace(upgradeId)) return false;
+            return _upgradeService.TryUpgrade(upgradeId);
         }
 
         public void Dispose() {
@@ -51,7 +63,8 @@ namespace Presentation {
             var byId = new Dictionary<string, UpgradeNodePresentationModel>(StringComparer.Ordinal);
             foreach (UpgradeNodeState state in _treeService.Nodes) {
                 bool completed = state.Level >= state.Definition.MaxLevel;
-                string price = completed ? "MAX" : _treeService.ResolvePrice(state).ToString();
+                bool pending = state.CurrentState == UpgradeNodeState.State.Pending;
+                string price = pending ? "PENDING" : completed ? "MAX" : _treeService.ResolvePrice(state).ToString();
                 var node = new UpgradeNodePresentationModel(
                     state.Definition.Id,
                     state.Definition.Name,
@@ -62,7 +75,10 @@ namespace Presentation {
                     state.Definition.MaxLevel,
                     price,
                     _treeService.IsUnlocked(state.Definition.Id),
-                    _treeService.IsVisible(state.Definition.Id));
+                    _treeService.IsVisible(state.Definition.Id),
+                    pending,
+                    state.Effectiveness,
+                    _upgradeService.CanUpgrade(state.Definition.Id));
                 _nodes.Add(node);
                 byId.Add(node.Id, node);
             }

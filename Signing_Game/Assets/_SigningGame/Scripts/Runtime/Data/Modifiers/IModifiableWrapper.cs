@@ -14,6 +14,11 @@ namespace Data.Modifiers {
         
         bool IsApplicable(object source);
 
-        object Apply(object source, string parameterId, NumericModifierOperation operation, double operand);
+        object Apply(
+            object source,
+            string parameterId,
+            NumericModifierOperation operation,
+            double operand,
+            double effectiveness = 1d);
     }
 }

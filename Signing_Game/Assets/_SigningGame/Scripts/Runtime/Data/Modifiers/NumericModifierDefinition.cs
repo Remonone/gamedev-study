@@ -23,7 +23,15 @@ namespace Data.Modifiers {
         public TValue Apply<TValue>(TValue value, IModifierContext context) {
             var wrapper = PredefinedMetadataWrapperStorage.Get(_parameter.GroupId);
             if (!wrapper.IsApplicable(value)) return value;
-            return (TValue)wrapper.Apply(value, _parameter.ParameterId, _operation, _value.Evaluate(context).ToDouble());
+            double effectiveness = context.TryGet(out ModifierEffectivenessCapability capability)
+                ? capability.Effectiveness
+                : 1d;
+            return (TValue)wrapper.Apply(
+                value,
+                _parameter.ParameterId,
+                _operation,
+                _value.Evaluate(context).ToDouble(),
+                effectiveness);
         }
         
     }

@@ -36,7 +36,12 @@ namespace Data.Modifiers {
             return source is T;
         }
 
-        public T Apply(in T source, string parameterId, NumericModifierOperation operation, double operand) {
+        public T Apply(
+            in T source,
+            string parameterId,
+            NumericModifierOperation operation,
+            double operand,
+            double effectiveness = 1d) {
             if (!TryGetParameter(parameterId, out var parameter))
                 throw new KeyNotFoundException($"Parameter {parameterId} is not registered inside {GroupId}.");
             object boxed = source;
@@ -44,7 +49,7 @@ namespace Data.Modifiers {
             var rawValue = parameter.GetValue(boxed);
             // BUG: If Value-instance is applied and it is greater than 2^64 then it will be clamped to double.MaxValue 
             var currentValue = NumericTypeUtility.ToDouble(rawValue);
-            var modifiedValue = NumericModifierCalculator.Apply(currentValue, operation, operand);
+            var modifiedValue = NumericModifierCalculator.Apply(currentValue, operation, operand, effectiveness);
 
             modifiedValue = Math.Clamp(modifiedValue, parameter.Minimum, parameter.Maximum);
             
@@ -52,11 +57,16 @@ namespace Data.Modifiers {
             return (T)boxed;
         }
         
-        object IModifiableWrapper.Apply(object source, string parameterId, NumericModifierOperation operation, double operand) {
+        object IModifiableWrapper.Apply(
+            object source,
+            string parameterId,
+            NumericModifierOperation operation,
+            double operand,
+            double effectiveness) {
             if (source is not T entry) {
                 throw new ArgumentException($"Source {source} is not of type {typeof(T)}");
             }
-            return Apply(entry, parameterId, operation, operand);
+            return Apply(entry, parameterId, operation, operand, effectiveness);
         }
     }
 }

@@ -6,6 +6,8 @@ using Cysharp.Threading.Tasks;
 using Data.Cache;
 using Data.Formulas;
 using Data.Modifiers;
+using Data.Enums;
+using Data.Results;
 using Data.Upgrades;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,6 +27,7 @@ namespace Tests.EditMode {
         private readonly List<UpgradeNodeDefinition> _definitions = new();
         private readonly List<ModifierDefinition> _modifierDefinitions = new();
         private readonly List<IDisposable> _disposables = new();
+        private WalletService _lastWallet;
 
         [TearDown]
         public void TearDown() {
@@ -76,14 +79,14 @@ namespace Tests.EditMode {
                 out GameStatisticsService statistics, out UpgradeTreeService tree);
             Assert.That(tree.IsUnlocked("child"), Is.False);
 
-            Assert.That(upgrades.TryUpgrade("first"), Is.True);
+            PurchaseAndComplete(upgrades, "first");
             Assert.That(tree.IsUnlocked("child"), Is.True);
 
             child.ParentUnlockMode = ParentUnlockMode.All;
             tree.Reevaluate();
             Assert.That(tree.IsUnlocked("child"), Is.False);
 
-            Assert.That(upgrades.TryUpgrade("second"), Is.True);
+            PurchaseAndComplete(upgrades, "second");
             Assert.That(tree.IsUnlocked("child"), Is.True);
             Assert.That(statistics, Is.Not.Null);
         }
@@ -104,11 +107,11 @@ namespace Tests.EditMode {
 
             SetupTree(new[] { parent, child }, out UpgradeService upgrades,
                 out GameStatisticsService statistics, out UpgradeTreeService tree);
-            Assert.That(upgrades.TryUpgrade("parent"), Is.True);
+            PurchaseAndComplete(upgrades, "parent");
             Assert.That(tree.IsUnlocked("child"), Is.False);
             Assert.That(tree.IsVisible("child"), Is.False);
 
-            using var viewModel = new UpgradeTreeViewModel(tree);
+            using var viewModel = new UpgradeTreeViewModel(tree, upgrades, _lastWallet);
             Assert.That(viewModel.Edges, Is.Empty);
 
             statistics.SetValue("documents", 5d);
@@ -210,12 +213,14 @@ namespace Tests.EditMode {
         }
 
         [Test]
-        public void TryUpgrade_ReplacesCatalogBeforeNotificationAndTreeNotifiesAfterSource() {
+        public void TryUpgradeAndCompletion_ReplaceCatalogBeforeNotificationsAndTreeNotifiesAfterSource() {
             UpgradeNodeDefinition definition = CreateDefinition("upgrade", maxLevel: 2);
             SetupTree(new[] { definition }, out UpgradeService upgrades, out _, out UpgradeTreeService tree,
                 subscribeBeforeTree: (service, events) => service.Changed.Subscribe(_ => {
-                    events.Add("upgrade");
-                    Assert.That(service.GetUpgrade("upgrade").Level, Is.EqualTo(1));
+                    UpgradeNodeState current = service.GetUpgrade("upgrade");
+                    events.Add(current.CurrentState == UpgradeNodeState.State.Pending
+                        ? "upgrade-pending"
+                        : "upgrade-complete");
                 }));
 
             var order = _notificationOrder;
@@ -223,9 +228,15 @@ namespace Tests.EditMode {
             UpgradeNodeState before = upgrades.GetUpgrade("upgrade");
 
             Assert.That(upgrades.TryUpgrade("upgrade"), Is.True);
+            Assert.That(upgrades.GetUpgrade("upgrade").Level, Is.Zero);
+            Assert.That(upgrades.GetUpgrade("upgrade").CurrentState, Is.EqualTo(UpgradeNodeState.State.Pending));
+            CompletePending(upgrades);
 
             Assert.That(upgrades.GetUpgrade("upgrade"), Is.Not.SameAs(before));
-            Assert.That(order, Is.EqualTo(new[] { "upgrade", "tree" }));
+            Assert.That(upgrades.GetUpgrade("upgrade").Level, Is.EqualTo(1));
+            Assert.That(order, Is.EqualTo(new[] {
+                "upgrade-pending", "tree", "upgrade-complete", "tree"
+            }));
         }
 
         [Test]
@@ -274,7 +285,7 @@ namespace Tests.EditMode {
         public void Restore_MalformedDataIsAtomicAndUnknownIdsAreIgnored() {
             UpgradeNodeDefinition definition = CreateDefinition("known", maxLevel: 2);
             SetupTree(new[] { definition }, out UpgradeService upgrades, out _, out _);
-            Assert.That(upgrades.TryUpgrade("known"), Is.True);
+            PurchaseAndComplete(upgrades, "known");
             UpgradeNodeState before = upgrades.GetUpgrade("known");
 
             Assert.Throws<JsonSerializationException>(() => upgrades.Deserialize(new JObject {
@@ -342,6 +353,7 @@ namespace Tests.EditMode {
             statistics = new GameStatisticsService();
             tree = new UpgradeTreeService();
             var scope = CreateUpgradeScope(upgrades);
+            _lastWallet = scope.Get<WalletService>();
             scope.Register(statistics).Register(tree);
             _disposables.Add(scope);
             upgrades.InitializeAsync(scope).GetAwaiter().GetResult();
@@ -364,6 +376,21 @@ namespace Tests.EditMode {
                 .Register(cache, typeof(ICacheInvalidator), typeof(ICacheVersionProvider))
                 .Register(upgrades);
             return scope;
+        }
+
+        private static void PurchaseAndComplete(UpgradeService upgrades, string upgradeId) {
+            Assert.That(upgrades.TryUpgrade(upgradeId), Is.True);
+            CompletePending(upgrades);
+        }
+
+        private static void CompletePending(UpgradeService upgrades, float similarity = 1f, float minimum = 0.4f) {
+            Assert.That(upgrades.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim), Is.True);
+            Assert.That(upgrades.TryCompletePendingUpgrade(claim, new SignatureEvaluationResult(
+                SignatureEvaluationStatus.Accepted,
+                SignatureFailureReason.None,
+                similarity,
+                minimum,
+                null)), Is.True);
         }
 
         private UpgradeNodeDefinition CreateDefinition(string id, int maxLevel = 1) {
