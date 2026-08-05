@@ -11,6 +11,10 @@ namespace Services.Calculators {
     public sealed class OfficeCacheCalculator : ICacheCalculator<OfficeEntries>, IService, IPreInitialize {
         public const int MaximumClerkCapacity = 256;
         public const float MaximumDocumentsPerSecond = 1000f;
+        public const double DefaultBaseClerkMultiplierMedian = 2d;
+        public const double DefaultClerkMultiplierRangeStep = 1d;
+        public const double DefaultMinimumClerkMultiplier = 1d;
+        public const double DefaultMaximumHireSignatureMultiplier = 2d;
 
         private IModifierService _modifierService;
         private IAssetProvider _assetProvider;
@@ -72,14 +76,15 @@ namespace Services.Calculators {
                     "Office quality, acceptance threshold, and reward multiplier must be finite values between 0 and 1.");
             }
 
-            double baseCost = value.BaseHireCost.ToDouble();
-            if (value.BaseHireCost.IsZero || double.IsNaN(baseCost) || double.IsInfinity(baseCost) || baseCost <= 0d) {
-                throw new InvalidOperationException("Office base hire cost must be positive and finite.");
+            if (!IsFiniteInRange(value.BaseClerkMultiplierMedian, double.Epsilon, double.MaxValue)) {
+                throw new InvalidOperationException("Office base clerk multiplier median must be positive and finite.");
             }
 
-            if (float.IsNaN(value.HireCostGrowthMultiplier) || float.IsInfinity(value.HireCostGrowthMultiplier) ||
-                value.HireCostGrowthMultiplier < 1f) {
-                throw new InvalidOperationException("Office hire cost growth multiplier must be finite and at least 1.");
+            if (!IsFiniteInRange(value.ClerkMultiplierRangeStep, 0d, double.MaxValue) ||
+                !IsFiniteInRange(value.MinimumClerkMultiplier, 0d, double.MaxValue) ||
+                !IsFiniteInRange(value.MaximumHireSignatureMultiplier, 1d, double.MaxValue)) {
+                throw new InvalidOperationException(
+                    "Office clerk multiplier range step and minimum must be finite and non-negative, and the maximum hire signature multiplier must be finite and at least 1.");
             }
         }
 
@@ -95,6 +100,14 @@ namespace Services.Calculators {
             value.QualityCeiling = Normalize(value.QualityCeiling, 0f, 1f, 0f, ref normalized);
             value.AcceptanceThreshold = Normalize(value.AcceptanceThreshold, 0f, 1f, 1f, ref normalized);
             value.RewardMultiplier = Normalize(value.RewardMultiplier, 0f, 1f, 0f, ref normalized);
+            value.BaseClerkMultiplierMedian = Normalize(value.BaseClerkMultiplierMedian, double.Epsilon,
+                double.MaxValue, DefaultBaseClerkMultiplierMedian, ref normalized);
+            value.ClerkMultiplierRangeStep = Normalize(value.ClerkMultiplierRangeStep, 0d, double.MaxValue,
+                DefaultClerkMultiplierRangeStep, ref normalized);
+            value.MinimumClerkMultiplier = Normalize(value.MinimumClerkMultiplier, 0d, double.MaxValue,
+                DefaultMinimumClerkMultiplier, ref normalized);
+            value.MaximumHireSignatureMultiplier = Normalize(value.MaximumHireSignatureMultiplier, 1d,
+                double.MaxValue, DefaultMaximumHireSignatureMultiplier, ref normalized);
 
             if (normalized) {
                 Debug.LogWarning("Invalid effective office values were normalized to safe ranges.");
@@ -117,6 +130,22 @@ namespace Services.Calculators {
 
         private static bool IsFiniteInRange(float value, float minimum, float maximum) {
             return !float.IsNaN(value) && !float.IsInfinity(value) && value >= minimum && value <= maximum;
+        }
+
+        private static double Normalize(double value, double minimum, double maximum, double nonFiniteFallback,
+            ref bool normalized) {
+            if (double.IsNaN(value) || double.IsInfinity(value)) {
+                normalized = true;
+                return nonFiniteFallback;
+            }
+
+            double clamped = Math.Clamp(value, minimum, maximum);
+            normalized |= !clamped.Equals(value);
+            return clamped;
+        }
+
+        private static bool IsFiniteInRange(double value, double minimum, double maximum) {
+            return !double.IsNaN(value) && !double.IsInfinity(value) && value >= minimum && value <= maximum;
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Utils;
 using Utils.Attributes;
 
 namespace Data.Cache {
@@ -21,8 +20,17 @@ namespace Data.Cache {
         [ModifiableParameter("RewardMultiplier", Minimum = 0d, Maximum = 1d)]
         public float RewardMultiplier;
 
-        public Value BaseHireCost;
-        public float HireCostGrowthMultiplier;
+        [ModifiableParameter("BaseClerkMultiplierMedian", Minimum = double.Epsilon)]
+        public double BaseClerkMultiplierMedian;
+
+        [ModifiableParameter("ClerkMultiplierRangeStep", Minimum = 0d)]
+        public double ClerkMultiplierRangeStep;
+
+        [ModifiableParameter("MinimumClerkMultiplier", Minimum = 0d)]
+        public double MinimumClerkMultiplier;
+
+        [ModifiableParameter("MaximumHireSignatureMultiplier", Minimum = 1d)]
+        public double MaximumHireSignatureMultiplier;
     }
 
     [CreateAssetMenu(menuName = "References/Office Reference", fileName = "Office Reference")]

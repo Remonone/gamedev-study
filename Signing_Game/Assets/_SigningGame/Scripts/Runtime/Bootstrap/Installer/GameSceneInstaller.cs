@@ -32,6 +32,7 @@ namespace Bootstrap.Installer {
             container.Register(new NormalDocumentProducer());
             container.Register(new UpgradeDocumentProducer());
             container.Register(new OfficeService());
+            container.Register(new ClerkHireDocumentProducer());
             container.Register(new PlayerSignatureAcceptor());
         }
 
