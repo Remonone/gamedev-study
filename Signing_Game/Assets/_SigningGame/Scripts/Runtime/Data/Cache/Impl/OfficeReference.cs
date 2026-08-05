@@ -31,6 +31,9 @@ namespace Data.Cache {
 
         [ModifiableParameter("MaximumHireSignatureMultiplier", Minimum = 1d)]
         public double MaximumHireSignatureMultiplier;
+
+        [ModifiableParameter("SalaryReviewCostRatio", Minimum = 0d, Maximum = 1d)]
+        public double SalaryReviewCostRatio;
     }
 
     [CreateAssetMenu(menuName = "References/Office Reference", fileName = "Office Reference")]

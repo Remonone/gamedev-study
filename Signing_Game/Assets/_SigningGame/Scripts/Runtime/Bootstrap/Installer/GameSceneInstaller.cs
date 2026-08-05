@@ -33,6 +33,7 @@ namespace Bootstrap.Installer {
             container.Register(new UpgradeDocumentProducer());
             container.Register(new OfficeService());
             container.Register(new ClerkHireDocumentProducer());
+            container.Register(new ClerkSalaryReviewDocumentProducer());
             container.Register(new PlayerSignatureAcceptor());
         }
 

@@ -125,6 +125,7 @@ namespace Tests.EditMode {
             unsafeValues.ClerkMultiplierRangeStep = double.PositiveInfinity;
             unsafeValues.MinimumClerkMultiplier = -1d;
             unsafeValues.MaximumHireSignatureMultiplier = double.NaN;
+            unsafeValues.SalaryReviewCostRatio = double.NaN;
             LogAssert.Expect(LogType.Warning, "Invalid effective office values were normalized to safe ranges.");
 
             OfficeEntries safe = OfficeCacheCalculator.NormalizeEffective(unsafeValues);
@@ -139,6 +140,8 @@ namespace Tests.EditMode {
             Assert.That(safe.MinimumClerkMultiplier, Is.Zero);
             Assert.That(safe.MaximumHireSignatureMultiplier,
                 Is.EqualTo(OfficeCacheCalculator.DefaultMaximumHireSignatureMultiplier));
+            Assert.That(safe.SalaryReviewCostRatio,
+                Is.EqualTo(OfficeCacheCalculator.DefaultSalaryReviewCostRatio));
         }
 
         [Test]
@@ -328,6 +331,194 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Hiring_PersistsRandomProfileAndDecomposesEfficiencyWithoutChangingFinalMultiplier() {
+            var rolls = new Queue<float>(new[] { 0.5f, 0f, 1f });
+            OfficeHarness harness = CreateHarness(CreateEntries(), () => rolls.Dequeue());
+            harness.UnlockOffice();
+
+            HireClerk(harness, new Value(10), 1f, 0.4f);
+
+            OfficeClerkState clerk = harness.Office.Clerks[0];
+            Assert.That(clerk.Name, Is.EqualTo("Alex"));
+            Assert.That(clerk.Age, Is.EqualTo(65));
+            Assert.That(clerk.OriginalHirePrice, Is.EqualTo(new Value(10)));
+            Assert.That(clerk.BaseEfficiency, Is.EqualTo(3d));
+            Assert.That(clerk.BonusEfficiency, Is.EqualTo(1d));
+            Assert.That(clerk.IncomeMultiplier, Is.EqualTo(6d));
+
+            JObject serialized = (JObject)harness.Office.Serialize();
+            JObject savedClerk = (JObject)((JArray)serialized["clerks"])[0];
+            Assert.That(savedClerk["incomeMultiplier"], Is.Null);
+            harness.Office.Deserialize(serialized);
+            Assert.That(harness.Office.Clerks[0].Name, Is.EqualTo("Alex"));
+            Assert.That(harness.Office.Clerks[0].IncomeMultiplier, Is.EqualTo(6d));
+        }
+
+        [Test]
+        public void Hiring_AllProfileRandomFailuresOccurBeforeDebit() {
+            for (int failingDraw = 1; failingDraw <= 3; failingDraw++) {
+                int calls = 0;
+                OfficeHarness harness = CreateHarness(CreateEntries(), () => {
+                    calls++;
+                    if (calls == failingDraw) throw new InvalidOperationException("random failed");
+                    return 0.5f;
+                });
+                harness.UnlockOffice();
+                Value before = harness.Wallet.CurrentBalance;
+
+                Assert.Throws<InvalidOperationException>(() => harness.Office.TryStartClerkHire(Value.One));
+                Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo(before));
+                Assert.That(harness.Office.PendingHireCount, Is.Zero);
+            }
+        }
+
+        [Test]
+        public void SalaryReview_DebitsOriginalBidAndAcceptedSignatureReplacesBonus() {
+            OfficeHarness harness = CreateHarness(CreateEntries());
+            harness.UnlockOffice();
+            HireClerk(harness, new Value(10), 0.4f, 0.4f);
+            OfficeClerkState clerk = harness.Office.Clerks[0];
+            Assert.That(clerk.BonusEfficiency, Is.Zero);
+            Value before = harness.Wallet.CurrentBalance;
+
+            Value reviewCost = harness.Office.GetSalaryReviewCost(clerk.Id);
+            Assert.That(reviewCost.ToDouble(), Is.EqualTo(5d).Within(0.000001d));
+            Assert.That(harness.Office.TryStartSalaryReview(clerk.Id), Is.True);
+            Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo((before - reviewCost).Value));
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim claim), Is.True);
+            Assert.That(harness.Office.TryCompletePendingSalaryReview(
+                claim,
+                Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+
+            Assert.That(clerk.BonusEfficiency, Is.EqualTo(1d));
+            Assert.That(clerk.IncomeMultiplier, Is.EqualTo(6d));
+            Assert.That(harness.Office.PendingSalaryReviewCount, Is.Zero);
+        }
+
+        [Test]
+        public void SalaryReview_RejectionAndMalformedAcceptanceNeverRefundOrChangeBonus() {
+            OfficeHarness rejected = CreateHarness(CreateEntries());
+            rejected.UnlockOffice();
+            HireClerk(rejected, Value.One, 1f, 0.4f);
+            OfficeClerkState rejectedClerk = rejected.Office.Clerks[0];
+            Assert.That(rejected.Office.TryStartSalaryReview(rejectedClerk.Id), Is.True);
+            Value afterDebit = rejected.Wallet.CurrentBalance;
+            Assert.That(rejected.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim rejectedClaim), Is.True);
+            Assert.That(rejected.Office.TryCompletePendingSalaryReview(
+                rejectedClaim,
+                Evaluation(SignatureEvaluationStatus.Rejected, 0.2f, 0.4f)), Is.True);
+            Assert.That(rejectedClerk.BonusEfficiency, Is.EqualTo(1d));
+            Assert.That(rejected.Wallet.CurrentBalance, Is.EqualTo(afterDebit));
+
+            Assert.That(rejected.Office.TryStartSalaryReview(rejectedClerk.Id), Is.True);
+            Value afterSecondDebit = rejected.Wallet.CurrentBalance;
+            Assert.That(rejected.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim malformedClaim), Is.True);
+            Assert.That(rejected.Office.TryCompletePendingSalaryReview(
+                malformedClaim,
+                Evaluation(SignatureEvaluationStatus.Accepted, float.NaN, 0.4f)), Is.True);
+            Assert.That(rejectedClerk.BonusEfficiency, Is.EqualTo(1d));
+            Assert.That(rejected.Wallet.CurrentBalance, Is.EqualTo(afterSecondDebit));
+        }
+
+        [Test]
+        public void SalaryReview_FreeAndInsignificantCostsHaveExplicitEligibility() {
+            OfficeEntries freeEntries = CreateEntries();
+            freeEntries.SalaryReviewCostRatio = 0d;
+            OfficeHarness free = CreateHarness(freeEntries);
+            free.UnlockOffice();
+            HireClerk(free);
+            Value freeBalance = free.Wallet.CurrentBalance;
+            Assert.That(free.Office.TryStartSalaryReview(free.Office.Clerks[0].Id), Is.True);
+            Assert.That(free.Wallet.CurrentBalance, Is.EqualTo(freeBalance));
+
+            OfficeHarness insignificant = CreateHarness(CreateEntries());
+            insignificant.UnlockOffice();
+            HireClerk(insignificant);
+            insignificant.Wallet.Deserialize(new JObject { ["stored"] = 1d, ["degree"] = 4 });
+            Assert.That(insignificant.Office.CanStartSalaryReview(insignificant.Office.Clerks[0].Id), Is.False);
+            Assert.That(insignificant.Office.TryStartSalaryReview(insignificant.Office.Clerks[0].Id), Is.False);
+        }
+
+        [Test]
+        public void SalaryReview_TargetedDismissalInvalidatesOnlyThatClerksClaim() {
+            OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
+            harness.UnlockOffice();
+            HireClerk(harness);
+            HireClerk(harness);
+            int firstId = harness.Office.Clerks[0].Id;
+            int secondId = harness.Office.Clerks[1].Id;
+            Assert.That(harness.Office.TryStartSalaryReview(firstId), Is.True);
+            Assert.That(harness.Office.TryStartSalaryReview(secondId), Is.True);
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim firstClaim), Is.True);
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim secondClaim), Is.True);
+
+            Assert.That(harness.Office.TryDismissClerk(firstId), Is.True);
+
+            Assert.That(harness.Office.TryCompletePendingSalaryReview(
+                firstClaim,
+                Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.False);
+            Assert.That(harness.Office.TryCompletePendingSalaryReview(
+                secondClaim,
+                Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+            Assert.That(harness.Office.ClerkCount, Is.EqualTo(1));
+            Assert.That(harness.Office.Clerks[0].Id, Is.EqualTo(secondId));
+            AssertStatistic(harness.Statistics, GameStatisticIds.OfficeClerkCount, 1d);
+        }
+
+        [Test]
+        public void SalaryReview_RestoreInvalidatesClaimsButMalformedRestorePreservesThem() {
+            OfficeHarness harness = CreateHarness(CreateEntries());
+            harness.UnlockOffice();
+            HireClerk(harness);
+            int clerkId = harness.Office.Clerks[0].Id;
+            Assert.That(harness.Office.TryStartSalaryReview(clerkId), Is.True);
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim originalClaim), Is.True);
+            JObject valid = (JObject)harness.Office.Serialize();
+            JObject malformed = (JObject)valid.DeepClone();
+            ((JObject)((JArray)malformed["clerks"])[0]).Remove("age");
+
+            Assert.Throws<JsonSerializationException>(() => harness.Office.Deserialize(malformed));
+            Assert.That(harness.Office.TryReleasePendingSalaryReview(originalClaim), Is.True);
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(
+                out OfficeService.SalaryReviewDocumentClaim staleAfterRestore), Is.True);
+
+            harness.Office.Deserialize(valid);
+
+            Assert.That(harness.Office.TryCompletePendingSalaryReview(
+                staleAfterRestore,
+                Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.False);
+            Assert.That(harness.Office.TryClaimPendingSalaryReview(out _), Is.True);
+        }
+
+        [Test]
+        public void SalaryReviewPersistence_RejectsUnknownAndDuplicateClerkReferencesAtomically() {
+            OfficeHarness harness = CreateHarness(CreateEntries());
+            harness.UnlockOffice();
+            HireClerk(harness);
+            Assert.That(harness.Office.TryStartSalaryReview(harness.Office.Clerks[0].Id), Is.True);
+            JObject before = (JObject)harness.Office.Serialize();
+
+            JObject unknown = (JObject)before.DeepClone();
+            ((JObject)((JArray)unknown["pendingSalaryReviews"])[0])["clerkId"] = 999;
+            Assert.Throws<JsonSerializationException>(() => harness.Office.Deserialize(unknown));
+            Assert.That(JToken.DeepEquals(harness.Office.Serialize(), before), Is.True);
+
+            JObject duplicate = (JObject)before.DeepClone();
+            JObject duplicateRecord = (JObject)((JArray)duplicate["pendingSalaryReviews"])[0].DeepClone();
+            duplicateRecord["requestId"] = 2L;
+            ((JArray)duplicate["pendingSalaryReviews"]).Add(duplicateRecord);
+            duplicate["nextSalaryReviewRequestId"] = 3L;
+            Assert.Throws<JsonSerializationException>(() => harness.Office.Deserialize(duplicate));
+            Assert.That(JToken.DeepEquals(harness.Office.Serialize(), before), Is.True);
+        }
+
+        [Test]
         public void HiringPersistence_InvalidatesClaimsMigratesLegacyAndPreservesRequestCounter() {
             OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
             harness.UnlockOffice();
@@ -438,6 +629,48 @@ namespace Tests.EditMode {
             Assert.That(harness.Upgrades.GetUpgrade("document_upgrade").CurrentState,
                 Is.EqualTo(UpgradeNodeState.State.Pending));
             Assert.That(harness.Documents.Serialize()["documentQuantity"]?.Value<int>(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SalaryReviewProducer_ReissuesExcludesPlayerModifiersAndLosesTieToHireRegistration() {
+            OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
+            harness.UnlockOffice();
+            HireClerk(harness);
+            int clerkId = harness.Office.Clerks[0].Id;
+            Assert.That(harness.Office.TryStartSalaryReview(clerkId), Is.True);
+            Value afterReviewDebit = harness.Wallet.CurrentBalance;
+            Assert.That(harness.Office.TryStartClerkHire(Value.One), Is.True);
+            var hireProducer = new ClerkHireDocumentProducer();
+            var reviewProducer = new ClerkSalaryReviewDocumentProducer();
+            hireProducer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+            reviewProducer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+            Assert.That(reviewProducer.TryProduce(out IDocumentSession released), Is.True);
+            var baseRules = new SignatureDifficultyRules("base", 0.4f, 1f, 1f, 1f, null);
+            var playerModifiers = new SignatureRuleModifiers(2f, -0.2f, 2f, 2f, 2f);
+            DocumentEvaluationInputs inputs = released.EvaluationPolicy.Resolve(baseRules, playerModifiers);
+            Assert.That(inputs.Modifiers.MinimumSimilarityOffset, Is.Zero);
+            released.Dispose();
+
+            var viewModel = new DispenseViewModel(
+                new IDocumentProducer[] { hireProducer, reviewProducer },
+                new StaticCache<DocumentEntries>(default),
+                new StableRandom(123));
+            Assert.That(viewModel.TryCreateContext(out IDocumentContext context), Is.True);
+            IDocumentSession selected = context.TakeSession();
+            context.Dispose();
+            Assert.That(selected.TryProcess(Evaluation(
+                SignatureEvaluationStatus.Accepted, 0.4f, 0.4f)), Is.True);
+            selected.Dispose();
+
+            Assert.That(harness.Office.PendingHireCount, Is.Zero,
+                "The hire producer must win the equal-priority registration-order tie.");
+            Assert.That(harness.Office.PendingSalaryReviewCount, Is.EqualTo(1));
+            Assert.That(reviewProducer.TryProduce(out IDocumentSession rejectedReview), Is.True);
+            Assert.That(rejectedReview.TryProcess(Evaluation(
+                SignatureEvaluationStatus.Rejected, 0.2f, 0.4f)), Is.True);
+            rejectedReview.Dispose();
+            Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo((afterReviewDebit - Value.One).Value),
+                "The rejected review is not refunded; only the subsequent hire changed the balance.");
         }
 
         [Test]
@@ -554,7 +787,7 @@ namespace Tests.EditMode {
 
         [Test]
         public void Tick_AcceptsAndRejectsUsingOfficeRewardRules() {
-            var rolls = new Queue<float>(new[] { 0.5f, 1f, 0f });
+            var rolls = new Queue<float>(new[] { 0.5f, 0.5f, 0.5f, 1f, 0f });
             OfficeHarness harness = CreateHarness(CreateEntries(speed: 2f), () => rolls.Dequeue());
             harness.UnlockOffice();
             HireClerk(harness);
@@ -767,7 +1000,8 @@ namespace Tests.EditMode {
                 BaseClerkMultiplierMedian = 2d,
                 ClerkMultiplierRangeStep = 0d,
                 MinimumClerkMultiplier = 1d,
-                MaximumHireSignatureMultiplier = 2d
+                MaximumHireSignatureMultiplier = 2d,
+                SalaryReviewCostRatio = 0.5d
             };
         }
 

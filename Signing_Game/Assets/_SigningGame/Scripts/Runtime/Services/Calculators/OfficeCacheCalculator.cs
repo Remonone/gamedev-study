@@ -15,6 +15,7 @@ namespace Services.Calculators {
         public const double DefaultClerkMultiplierRangeStep = 1d;
         public const double DefaultMinimumClerkMultiplier = 1d;
         public const double DefaultMaximumHireSignatureMultiplier = 2d;
+        public const double DefaultSalaryReviewCostRatio = 0.5d;
 
         private IModifierService _modifierService;
         private IAssetProvider _assetProvider;
@@ -82,9 +83,10 @@ namespace Services.Calculators {
 
             if (!IsFiniteInRange(value.ClerkMultiplierRangeStep, 0d, double.MaxValue) ||
                 !IsFiniteInRange(value.MinimumClerkMultiplier, 0d, double.MaxValue) ||
-                !IsFiniteInRange(value.MaximumHireSignatureMultiplier, 1d, double.MaxValue)) {
+                !IsFiniteInRange(value.MaximumHireSignatureMultiplier, 1d, double.MaxValue) ||
+                !IsFiniteInRange(value.SalaryReviewCostRatio, 0d, 1d)) {
                 throw new InvalidOperationException(
-                    "Office clerk multiplier range step and minimum must be finite and non-negative, and the maximum hire signature multiplier must be finite and at least 1.");
+                    "Office clerk multiplier range step and minimum must be finite and non-negative, the maximum hire signature multiplier must be finite and at least 1, and the salary review cost ratio must be between 0 and 1.");
             }
         }
 
@@ -108,6 +110,8 @@ namespace Services.Calculators {
                 DefaultMinimumClerkMultiplier, ref normalized);
             value.MaximumHireSignatureMultiplier = Normalize(value.MaximumHireSignatureMultiplier, 1d,
                 double.MaxValue, DefaultMaximumHireSignatureMultiplier, ref normalized);
+            value.SalaryReviewCostRatio = Normalize(value.SalaryReviewCostRatio, 0d, 1d,
+                DefaultSalaryReviewCostRatio, ref normalized);
 
             if (normalized) {
                 Debug.LogWarning("Invalid effective office values were normalized to safe ranges.");

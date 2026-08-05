@@ -22,3 +22,4 @@ MonoBehaviour:
     ClerkMultiplierRangeStep: 1
     MinimumClerkMultiplier: 1
     MaximumHireSignatureMultiplier: 2
+    SalaryReviewCostRatio: 0.5

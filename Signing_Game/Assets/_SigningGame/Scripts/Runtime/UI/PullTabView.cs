@@ -54,7 +54,7 @@ namespace UI {
         private float _closedAxis;
         private float _openAxis;
         private float _disabledAxis;
-        private float _pulledObjectClosedAxis;
+        private float _pulledObjectClosedAnchoredAxis;
 
         public bool IsAvailable => _availabilityState.Value;
         public bool IsOpen => _openState.Value;
@@ -71,6 +71,14 @@ namespace UI {
             if (!TryInitialize()) return;
 
             CancelMotion();
+            SnapToLogicalPosition();
+            RefreshInteraction();
+        }
+
+        private void OnRectTransformDimensionsChange() {
+            if (!_initialized || !_isValid || _commonParent == null) return;
+            CancelMotion();
+            RefreshMarkerAxes();
             SnapToLogicalPosition();
             RefreshInteraction();
         }
@@ -201,6 +209,13 @@ namespace UI {
             return reachedThreshold ? !startedOpen : startedOpen;
         }
 
+        internal static float ResolvePulledAnchoredAxis(
+            float closedAnchoredAxis,
+            float handleAxis,
+            float closedHandleAxis) {
+            return closedAnchoredAxis + handleAxis - closedHandleAxis;
+        }
+
         private bool TryInitialize() {
             if (_initialized) return _isValid;
 
@@ -223,14 +238,12 @@ namespace UI {
                 return FailInitialization("PullTabView pulled object requires a CanvasGroup so hidden content cannot block UI raycasts.");
             }
 
-            _closedAxis = GetMarkerAxis(_startPosition);
-            _openAxis = GetMarkerAxis(_stopPosition);
-            _disabledAxis = GetMarkerAxis(_disabledPosition);
+            RefreshMarkerAxes();
             if (Mathf.Approximately(_closedAxis, _openAxis)) {
                 return FailInitialization("PullTabView start and stop positions must differ on the selected movement axis.");
             }
 
-            _pulledObjectClosedAxis = GetAxis(_pulledObject.localPosition);
+            _pulledObjectClosedAnchoredAxis = GetAxis(_pulledObject.anchoredPosition);
             _availabilityState.Value = _initiallyAvailable;
             _openState.Value = false;
             _isValid = true;
@@ -259,6 +272,12 @@ namespace UI {
             return GetAxis(parentLocalPosition);
         }
 
+        private void RefreshMarkerAxes() {
+            _closedAxis = GetMarkerAxis(_startPosition);
+            _openAxis = GetMarkerAxis(_stopPosition);
+            _disabledAxis = GetMarkerAxis(_disabledPosition);
+        }
+
         private float GetAxis(Vector2 value) {
             return _movementAxis == PullTabAxis.X ? value.x : value.y;
         }
@@ -272,12 +291,18 @@ namespace UI {
             SetAxis(ref handlePosition, handleAxis);
             _handle.localPosition = handlePosition;
 
-            Vector3 pulledObjectPosition = _pulledObject.localPosition;
-            SetAxis(ref pulledObjectPosition, _pulledObjectClosedAxis + handleAxis - _closedAxis);
-            _pulledObject.localPosition = pulledObjectPosition;
+            Vector2 pulledObjectPosition = _pulledObject.anchoredPosition;
+            SetAxis(ref pulledObjectPosition,
+                ResolvePulledAnchoredAxis(_pulledObjectClosedAnchoredAxis, handleAxis, _closedAxis));
+            _pulledObject.anchoredPosition = pulledObjectPosition;
         }
 
         private void SetAxis(ref Vector3 position, float value) {
+            if (_movementAxis == PullTabAxis.X) position.x = value;
+            else position.y = value;
+        }
+
+        private void SetAxis(ref Vector2 position, float value) {
             if (_movementAxis == PullTabAxis.X) position.x = value;
             else position.y = value;
         }
