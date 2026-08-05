@@ -1,9 +1,12 @@
 using System;
+using System.Globalization;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Documents;
 using Data.Results;
 using Data.Rules;
 using Services.Locator;
+using R3;
 
 namespace Services {
     public sealed class ClerkSalaryReviewDocumentProducer : IService, IInitialize, IDocumentProducer {
@@ -11,6 +14,7 @@ namespace Services {
         private OfficeService _office;
 
         public int Priority => 200;
+        public Observable<Unit> OffersChanged => _office.DocumentOffersChanged;
 
         public UniTask InitializeAsync(IServiceScope scope) {
             _office = scope.Get<OfficeService>();
@@ -19,7 +23,18 @@ namespace Services {
 
         public bool TryProduce(out IDocumentSession session) {
             session = null;
-            if (!_office.TryClaimPendingSalaryReview(out OfficeService.SalaryReviewDocumentClaim claim)) {
+            return TryPeekOffer(out DocumentOffer offer) && TryProduce(offer.Key, out session);
+        }
+
+        public bool TryPeekOffer(out DocumentOffer offer) {
+            return _office.TryPeekPendingSalaryReviewDocument(out offer);
+        }
+
+        public bool TryProduce(DocumentOfferKey offerKey, out IDocumentSession session) {
+            session = null;
+            if (offerKey.Kind != DocumentKind.ClerkSalaryReview ||
+                !long.TryParse(offerKey.DomainId, NumberStyles.None, CultureInfo.InvariantCulture, out long requestId) ||
+                !_office.TryClaimPendingSalaryReview(requestId, out OfficeService.SalaryReviewDocumentClaim claim)) {
                 return false;
             }
 

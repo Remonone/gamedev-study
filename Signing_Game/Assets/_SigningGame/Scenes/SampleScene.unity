@@ -1182,7 +1182,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02d930c6ec6865c038accae4ff8dcbdc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Presentation.DocumentDispenser
-  _documentPrefab: {fileID: 3783055059766703464, guid: 454f142c76b409077895ba4ae7a9c0cf, type: 3}
+  _normalDocumentPrefab: {fileID: 3783055059766703464, guid: 454f142c76b409077895ba4ae7a9c0cf, type: 3}
+  _upgradeDocumentPrefab: {fileID: 8207366429140191783, guid: c23b7f5d9b8382fa7adfdbfa2ffdb3df, type: 3}
+  _clerkHireDocumentPrefab: {fileID: 4107510202491868331, guid: ff89d7865ae7ca378b9ea342eaeede9e, type: 3}
+  _clerkSalaryReviewDocumentPrefab: {fileID: 282573185973706789, guid: 94eed2f660e4f844994c0dcac112c95e, type: 3}
+  _billDocumentPrefab: {fileID: 0}
   _parent: {fileID: 1987065009}
   _anchoredSpawnPosition: {x: -519, y: 0}
 --- !u!1 &442592878

@@ -1,9 +1,11 @@
 using System;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Documents;
 using Data.Results;
 using Data.Rules;
 using Services.Locator;
+using R3;
 
 namespace Services {
     public sealed class UpgradeDocumentProducer : IService, IInitialize, IDocumentProducer {
@@ -11,6 +13,7 @@ namespace Services {
         private UpgradeService _upgrades;
 
         public int Priority => 100;
+        public Observable<Unit> OffersChanged => _upgrades.DocumentOffersChanged;
 
         public UniTask InitializeAsync(IServiceScope scope) {
             _upgrades = scope.Get<UpgradeService>();
@@ -19,7 +22,20 @@ namespace Services {
 
         public bool TryProduce(out IDocumentSession session) {
             session = null;
-            if (!_upgrades.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim)) return false;
+            return TryPeekOffer(out DocumentOffer offer) && TryProduce(offer.Key, out session);
+        }
+
+        public bool TryPeekOffer(out DocumentOffer offer) {
+            return _upgrades.TryPeekPendingUpgradeDocument(out offer);
+        }
+
+        public bool TryProduce(DocumentOfferKey offerKey, out IDocumentSession session) {
+            session = null;
+            if (offerKey.Kind != DocumentKind.Upgrade ||
+                !_upgrades.TryClaimPendingUpgrade(offerKey.DomainId, out UpgradeService.UpgradeDocumentClaim claim)) {
+                return false;
+            }
+
             session = new UpgradeDocumentSession(_upgrades, claim);
             return true;
         }

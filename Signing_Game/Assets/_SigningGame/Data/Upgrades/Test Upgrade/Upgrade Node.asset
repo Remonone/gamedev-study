@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: test_upgrade
   Name: Test Upgrade
-  Description: Test Description
+  Description: 'Document generation: ${token_per_second}'
   MaxLevel: 3
   Icon: {fileID: 0}
   CostFormula:
@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers:
   - {fileID: 11400000, guid: a8a878f1935f0f75fa8a18a898d26672, type: 2}
   FeatureUnlockIds: []
-  TreePosition: {x: 0, y: 0}
+  TreePosition: {x: 150, y: 150}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

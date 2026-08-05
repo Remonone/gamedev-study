@@ -5,6 +5,7 @@ using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Documents;
 using Data.Enums;
 using Data.Office;
 using Data.Results;
@@ -42,6 +43,7 @@ namespace Services {
         private readonly GameStatisticMutation[] _tickStatisticMutations = new GameStatisticMutation[3];
         private readonly GameStatisticMutation[] _singleStatisticMutation = new GameStatisticMutation[1];
         private readonly Subject<Unit> _changed = new();
+        private readonly Subject<Unit> _documentOffersChanged = new();
         private readonly Subject<OfficeDocumentResult> _documentProcessed = new();
         private readonly CompositeDisposable _subscriptions = new();
         private readonly Func<float> _randomValue;
@@ -86,6 +88,7 @@ namespace Services {
         public double SalaryReviewCostRatio => _officeData?.Value.SalaryReviewCostRatio ?? 0d;
         public IReadOnlyList<OfficeClerkState> Clerks => _readOnlyClerks;
         public Observable<Unit> Changed => _changed;
+        public Observable<Unit> DocumentOffersChanged => _documentOffersChanged;
         public Observable<OfficeDocumentResult> DocumentProcessed => _documentProcessed;
 
         public OfficeService() : this(null, null) { }
@@ -97,6 +100,7 @@ namespace Services {
         }
 
         public UniTask InitializeAsync(IServiceScope scope) {
+            bool restoredDocumentOffers = false;
             BeginTransaction();
             try {
                 _unlocks = scope.Get<UnlockService>();
@@ -113,6 +117,7 @@ namespace Services {
                 if (_pendingRestore != null) {
                     ApplyRestore(_pendingRestore);
                     _pendingRestore = null;
+                    restoredDocumentOffers = true;
                 }
 
                 _unlocks.Changed.Subscribe(_ => RequestChanged()).AddTo(_subscriptions);
@@ -124,6 +129,8 @@ namespace Services {
             } finally {
                 EndTransaction();
             }
+
+            if (restoredDocumentOffers) NotifyDocumentOffersChanged();
 
             return UniTask.CompletedTask;
         }
@@ -144,6 +151,7 @@ namespace Services {
             if (!_initialized || _isMutating || _isTicking) return false;
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 if (!CanStartClerkHireCore(bid)) return false;
@@ -172,28 +180,60 @@ namespace Services {
                 _nextHireRequestId++;
                 _wallet.NotifyBalanceChanged();
                 RequestChanged();
+                documentOffersChanged = true;
                 return true;
             } finally {
                 try {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
 
         internal bool TryClaimPendingClerkHire(out ClerkHireDocumentClaim claim) {
             claim = default;
+            return TryPeekPendingClerkHireDocument(out DocumentOffer offer) &&
+                   long.TryParse(offer.Key.DomainId, out long requestId) &&
+                   TryClaimPendingClerkHire(requestId, out claim);
+        }
+
+        internal bool TryPeekPendingClerkHireDocument(out DocumentOffer offer) {
+            offer = null;
+            if (!_initialized || _isMutating || _isTicking) return false;
+
+            for (int index = 0; index < _pendingHires.Count; index++) {
+                PendingClerkHireRecord pending = _pendingHires[index];
+                long requestId = pending.RequestId;
+                if (_claimedHireRequestIds.Contains(requestId)) continue;
+
+                offer = new DocumentOffer(
+                    new DocumentOfferKey(DocumentKind.ClerkHire, requestId.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    true,
+                    personName: pending.ClerkName,
+                    personAge: pending.ClerkAge,
+                    amount: pending.PaidPrice,
+                    internalMultiplier: pending.RolledBaseMultiplier);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryClaimPendingClerkHire(long requestedId, out ClerkHireDocumentClaim claim) {
+            claim = default;
             if (!_initialized || _isMutating || _isTicking || _nextHireClaimToken == long.MaxValue) return false;
 
             for (int index = 0; index < _pendingHires.Count; index++) {
                 long requestId = _pendingHires[index].RequestId;
-                if (_claimedHireRequestIds.Contains(requestId)) continue;
+                if (requestId != requestedId || _claimedHireRequestIds.Contains(requestId)) continue;
 
                 long token = ++_nextHireClaimToken;
                 _activeHireClaims.Add(token, requestId);
                 _claimedHireRequestIds.Add(requestId);
                 claim = new ClerkHireDocumentClaim(_hireClaimEpoch, token, requestId);
+                NotifyDocumentOffersChanged();
                 return true;
             }
 
@@ -209,6 +249,7 @@ namespace Services {
             int pendingIndex = FindPendingHireIndex(claim.RequestId);
             if (pendingIndex < 0) {
                 ReleaseHireClaim(claim);
+                NotifyDocumentOffersChanged();
                 return false;
             }
 
@@ -219,6 +260,7 @@ namespace Services {
                 : 0d;
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 ReleaseHireClaim(claim);
@@ -240,12 +282,14 @@ namespace Services {
                 }
 
                 RequestChanged();
+                documentOffersChanged = true;
                 return true;
             } finally {
                 try {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
@@ -253,6 +297,7 @@ namespace Services {
         internal bool TryReleasePendingClerkHire(ClerkHireDocumentClaim claim) {
             if (!IsValidHireClaim(claim)) return false;
             ReleaseHireClaim(claim);
+            NotifyDocumentOffersChanged();
             return true;
         }
 
@@ -275,6 +320,7 @@ namespace Services {
             if (!_initialized || _isMutating || _isTicking) return false;
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 if (!CanStartSalaryReviewCore(clerkId, out Value cost)) return false;
@@ -299,12 +345,14 @@ namespace Services {
                 _nextSalaryReviewRequestId++;
                 if (debited) _wallet.NotifyBalanceChanged();
                 RequestChanged();
+                documentOffersChanged = true;
                 return true;
             } finally {
                 try {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
@@ -315,10 +363,11 @@ namespace Services {
             if (clerkIndex < 0) return false;
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 _clerks.RemoveAt(clerkIndex);
-                RemoveSalaryReviewForClerk(clerkId);
+                documentOffersChanged = RemoveSalaryReviewForClerk(clerkId);
 
                 if (_clerks.Count == 0) {
                     _nextProcessingClerkIndex = 0;
@@ -336,11 +385,44 @@ namespace Services {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
 
         internal bool TryClaimPendingSalaryReview(out SalaryReviewDocumentClaim claim) {
+            claim = default;
+            return TryPeekPendingSalaryReviewDocument(out DocumentOffer offer) &&
+                   long.TryParse(offer.Key.DomainId, out long requestId) &&
+                   TryClaimPendingSalaryReview(requestId, out claim);
+        }
+
+        internal bool TryPeekPendingSalaryReviewDocument(out DocumentOffer offer) {
+            offer = null;
+            if (!_initialized || _isMutating || _isTicking) return false;
+
+            for (int index = 0; index < _pendingSalaryReviews.Count; index++) {
+                PendingSalaryReviewRecord pending = _pendingSalaryReviews[index];
+                if (_claimedSalaryReviewRequestIds.Contains(pending.RequestId)) continue;
+                int clerkIndex = FindClerkIndex(pending.ClerkId);
+                if (clerkIndex < 0) continue;
+
+                OfficeClerkState clerk = _clerks[clerkIndex];
+                offer = new DocumentOffer(
+                    new DocumentOfferKey(
+                        DocumentKind.ClerkSalaryReview,
+                        pending.RequestId.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    true,
+                    personName: clerk.Name,
+                    personAge: clerk.Age,
+                    amount: pending.PaidCost);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryClaimPendingSalaryReview(long requestedId, out SalaryReviewDocumentClaim claim) {
             claim = default;
             if (!_initialized || _isMutating || _isTicking || _nextSalaryReviewClaimToken == long.MaxValue) {
                 return false;
@@ -348,12 +430,13 @@ namespace Services {
 
             for (int index = 0; index < _pendingSalaryReviews.Count; index++) {
                 long requestId = _pendingSalaryReviews[index].RequestId;
-                if (_claimedSalaryReviewRequestIds.Contains(requestId)) continue;
+                if (requestId != requestedId || _claimedSalaryReviewRequestIds.Contains(requestId)) continue;
 
                 long token = ++_nextSalaryReviewClaimToken;
                 _activeSalaryReviewClaims.Add(token, requestId);
                 _claimedSalaryReviewRequestIds.Add(requestId);
                 claim = new SalaryReviewDocumentClaim(_salaryReviewClaimEpoch, token, requestId);
+                NotifyDocumentOffersChanged();
                 return true;
             }
 
@@ -369,6 +452,7 @@ namespace Services {
             int pendingIndex = FindPendingSalaryReviewIndex(claim.RequestId);
             if (pendingIndex < 0) {
                 ReleaseSalaryReviewClaim(claim);
+                NotifyDocumentOffersChanged();
                 return false;
             }
 
@@ -381,6 +465,7 @@ namespace Services {
                                    out signatureMultiplier);
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 ReleaseSalaryReviewClaim(claim);
@@ -392,12 +477,14 @@ namespace Services {
                 }
 
                 RequestChanged();
+                documentOffersChanged = true;
                 return true;
             } finally {
                 try {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
@@ -405,6 +492,7 @@ namespace Services {
         internal bool TryReleasePendingSalaryReview(SalaryReviewDocumentClaim claim) {
             if (!IsValidSalaryReviewClaim(claim)) return false;
             ReleaseSalaryReviewClaim(claim);
+            NotifyDocumentOffersChanged();
             return true;
         }
 
@@ -563,16 +651,19 @@ namespace Services {
             }
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             BeginTransaction();
             try {
                 ApplyRestore(restored);
                 ReconcileClerkStatistic();
                 RequestChanged();
+                documentOffersChanged = true;
             } finally {
                 try {
                     EndTransaction();
                 } finally {
                     _isMutating = false;
+                    if (documentOffersChanged) NotifyDocumentOffersChanged();
                 }
             }
         }
@@ -580,6 +671,7 @@ namespace Services {
         public void Dispose() {
             _subscriptions.Dispose();
             _documentProcessed.Dispose();
+            _documentOffersChanged.Dispose();
             _changed.Dispose();
             InvalidateHireClaims();
             InvalidateSalaryReviewClaims();
@@ -794,9 +886,9 @@ namespace Services {
             _claimedSalaryReviewRequestIds.Clear();
         }
 
-        private void RemoveSalaryReviewForClerk(int clerkId) {
+        private bool RemoveSalaryReviewForClerk(int clerkId) {
             int pendingIndex = FindPendingSalaryReviewByClerk(clerkId);
-            if (pendingIndex < 0) return;
+            if (pendingIndex < 0) return false;
 
             long requestId = _pendingSalaryReviews[pendingIndex].RequestId;
             _pendingSalaryReviews.RemoveAt(pendingIndex);
@@ -810,6 +902,11 @@ namespace Services {
             }
 
             if (activeToken != 0) _activeSalaryReviewClaims.Remove(activeToken);
+            return true;
+        }
+
+        private void NotifyDocumentOffersChanged() {
+            _documentOffersChanged.OnNext(Unit.Default);
         }
 
         private void ApplyRestore(OfficeRestoreData restored) {

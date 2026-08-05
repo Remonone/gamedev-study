@@ -2,10 +2,12 @@ using System;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Documents;
 using Data.Enums;
 using Data.Results;
 using Data.Rules;
 using Services.Locator;
+using R3;
 using Utils;
 
 namespace Services {
@@ -15,18 +17,38 @@ namespace Services {
         private DocumentGeneratorService _generator;
         private IMoneyAggregator _aggregator;
         private IReadOnlyCacheData<IncomeEntries> _incomeData;
+        private Observable<Unit> _offersChanged;
 
         public int Priority => 0;
+        public Observable<Unit> OffersChanged => _offersChanged;
 
         public UniTask InitializeAsync(IServiceScope scope) {
             _generator = scope.Get<DocumentGeneratorService>();
             _aggregator = scope.Get<IMoneyAggregator>();
             _incomeData = scope.Get<PlayerStatStash>().IncomeData;
+            _offersChanged = _generator.DocumentCount.Select(_ => Unit.Default);
             return UniTask.CompletedTask;
         }
 
         public bool TryProduce(out IDocumentSession session) {
+            TryPeekOffer(out DocumentOffer offer);
+            return TryProduce(offer.Key, out session);
+        }
+
+        public bool TryPeekOffer(out DocumentOffer offer) {
+            offer = new DocumentOffer(
+                new DocumentOfferKey(DocumentKind.Normal, "normal"),
+                _generator.DocumentQuantity > 0);
+            return true;
+        }
+
+        public bool TryProduce(DocumentOfferKey offerKey, out IDocumentSession session) {
             session = null;
+            if (offerKey.Kind != DocumentKind.Normal ||
+                !string.Equals(offerKey.DomainId, "normal", StringComparison.Ordinal)) {
+                return false;
+            }
+
             if (!_generator.TryReserveDocument(out DocumentGeneratorService.DocumentReservation reservation)) {
                 return false;
             }

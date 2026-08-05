@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Modifier
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
   NumericModifiers:
-  - _operation: 0
+  - _id: token_per_second
+    _operation: 0
     _value:
       rid: 841080302622474241
     _parameter:

@@ -1,3 +1,4 @@
+using System;
 using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,12 +20,23 @@ namespace UI {
         private int _activePointerId;
         private Vector2 _pointerStartPosition;
         private Vector2 _anchoredStartPosition;
+        private Func<bool> _beginDragGate;
+        private bool _dragEnabled = true;
         
         private readonly Subject<bool> _isDraggingSubject = new();
         private readonly Subject<bool> _isPointerOverSubject = new();
         
         public Observable<bool> IsDragging => _isDraggingSubject;
         public Observable<bool> IsPointerOver => _isPointerOverSubject;
+
+        public void SetBeginDragGate(Func<bool> beginDragGate) {
+            _beginDragGate = beginDragGate;
+        }
+
+        public void SetDragEnabled(bool enabled) {
+            _dragEnabled = enabled;
+            if (!enabled) ResetDrag();
+        }
 
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
@@ -43,7 +55,7 @@ namespace UI {
         }
 
         public void OnBeginDrag(PointerEventData eventData) {
-            if (_isDragging || eventData.button != PointerEventData.InputButton.Left) return;
+            if (_isDragging || !_dragEnabled || eventData.button != PointerEventData.InputButton.Left) return;
 
             _parentRectTransform = transform.parent as RectTransform;
             if (_parentRectTransform == null) return;
@@ -53,6 +65,11 @@ namespace UI {
                     eventData.position,
                     eventData.pressEventCamera,
                     out _pointerStartPosition)) {
+                _parentRectTransform = null;
+                return;
+            }
+
+            if (_beginDragGate != null && !_beginDragGate()) {
                 _parentRectTransform = null;
                 return;
             }
@@ -91,6 +108,7 @@ namespace UI {
 
         private void OnDestroy() {
             ResetDrag();
+            _beginDragGate = null;
             _isPointerOverSubject.Dispose();
             _isDraggingSubject.Dispose();
         }

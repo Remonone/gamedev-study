@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Cache.OfficeReference
   Value:
     ClerkCapacity: 1
-    DocumentsPerSecondPerClerk: 1
+    DocumentsPerSecondPerClerk: 0.06667
     QualityCeiling: 1
     AcceptanceThreshold: 0.5
     RewardMultiplier: 0.5

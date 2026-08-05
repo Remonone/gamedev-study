@@ -9,6 +9,7 @@ namespace Presentation {
         public Vector2 Position { get; }
         public int CurrentLevel { get; }
         public int MaxLevel { get; }
+        public string LevelText { get; }
         public string Price { get; }
         public bool IsUnlocked { get; }
         public bool IsVisible { get; }
@@ -17,7 +18,7 @@ namespace Presentation {
         public bool CanPurchase { get; }
 
         public UpgradeNodePresentationModel(string id, string name, string description, Sprite icon,
-            Vector2 position, int currentLevel, int maxLevel, string price, bool isUnlocked, bool isVisible,
+            Vector2 position, int currentLevel, int maxLevel, string levelText, string price, bool isUnlocked, bool isVisible,
             bool isPending, float effectiveness, bool canPurchase) {
             Id = id;
             Name = name;
@@ -26,6 +27,7 @@ namespace Presentation {
             Position = position;
             CurrentLevel = currentLevel;
             MaxLevel = maxLevel;
+            LevelText = levelText;
             Price = price;
             IsUnlocked = isUnlocked;
             IsVisible = isVisible;

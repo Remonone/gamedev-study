@@ -15,28 +15,64 @@ namespace Presentation {
         [SerializeField] private Image _header;
         [SerializeField] private TextMeshProUGUI _text;
         [SerializeField] private DocumentTextSettings _textSettings;
+        [SerializeField] private TextMeshProUGUI _headerTitle;
+        [SerializeField] private Image _headerIcon;
+        [SerializeField] private TextMeshProUGUI _profileText;
+        [SerializeField] private TextMeshProUGUI _amountText;
+        [SerializeField] private TextMeshProUGUI _internalMultiplierText;
 
         private DocumentViewModel _viewModel;
+        private DispensedDocumentPresentation _presentation;
 
         public DocumentViewModel ViewModel => _viewModel;
 
-        public void Init(DocumentViewModel viewModel) {
-            DocumentViewModel nextViewModel = viewModel
-                ?? throw new ArgumentNullException(nameof(viewModel));
-            if (ReferenceEquals(_viewModel, nextViewModel))
-                throw new InvalidOperationException("DocumentView cannot be reinitialized with the same ViewModel instance.");
+        public void ShowPreview(DispensedDocumentPresentation presentation) {
+            if (presentation == null) throw new ArgumentNullException(nameof(presentation));
+            if (_viewModel != null) throw new InvalidOperationException("A bound document cannot become a preview again.");
 
             _field.Clear();
+            _presentation = presentation;
+            RefreshView();
+            gameObject.SetActive(true);
+        }
+
+        public void Init(DocumentViewModel viewModel, DispensedDocumentPresentation presentation) {
+            DocumentViewModel nextViewModel = viewModel
+                ?? throw new ArgumentNullException(nameof(viewModel));
+            if (presentation == null) throw new ArgumentNullException(nameof(presentation));
+            if (_viewModel != null) throw new InvalidOperationException("DocumentView can only be bound once.");
+
+            _field.Clear();
+            _presentation = presentation;
             _viewModel = nextViewModel;
             RefreshView();
             gameObject.SetActive(true);
         }
 
         private void RefreshView() {
-            ulong seed = _viewModel.TextSeed;
+            if (_presentation == null) throw new InvalidOperationException("Document presentation is required.");
+            ulong seed = _presentation.TextSeed;
             var document = DeterministicDocumentGenerator.Generate(seed, _textSettings);
             _text.text = TmpDocumentFormatter.Format(document);
-            _header.color = _viewModel.HeaderColor;
+            if (DocumentKind.Normal.Equals(_presentation.Kind))
+                _header.color = _presentation.HeaderColor;
+            SetOptionalText(_headerTitle, _presentation.HeaderText);
+            SetOptionalText(_profileText, _presentation.ProfileText);
+            SetOptionalText(_amountText, _presentation.AmountText);
+            SetOptionalText(_internalMultiplierText, _presentation.InternalMultiplierText);
+            if (_headerIcon != null) {
+                bool hasIcon = _presentation.HeaderIcon != null;
+                _headerIcon.sprite = _presentation.HeaderIcon;
+                _headerIcon.preserveAspect = true;
+                _headerIcon.gameObject.SetActive(hasIcon);
+            }
+        }
+
+        private static void SetOptionalText(TextMeshProUGUI target, string value) {
+            if (target == null) return;
+            bool hasValue = !string.IsNullOrWhiteSpace(value);
+            target.text = value ?? string.Empty;
+            target.gameObject.SetActive(hasValue);
         }
 
         public SignatureAttempt CollectSignature(float endTime) {
@@ -87,6 +123,7 @@ namespace Presentation {
         private void OnDestroy() {
             _viewModel?.Dispose();
             _viewModel = null;
+            _presentation = null;
         }
     }
 }

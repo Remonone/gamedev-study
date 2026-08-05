@@ -33,7 +33,7 @@ namespace Presentation {
             }
 
             if (_descriptionText != null) _descriptionText.text = model.Description;
-            if (_levelText != null) _levelText.text = $"{model.CurrentLevel}/{model.MaxLevel}";
+            if (_levelText != null) _levelText.text = model.LevelText;
             if (_priceText != null) _priceText.text = model.Price;
             if (_buyButton != null) {
                 UnbindBuyButton();

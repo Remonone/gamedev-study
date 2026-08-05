@@ -15,8 +15,8 @@ using Utils.Text.Generator;
 namespace Presentation {
     public class DispenseView : MonoBehaviour,
         IService,
-        IInitialize,
-        IPointerEnterHandler, 
+        IPostInitialize,
+        IPointerEnterHandler,
         IPointerExitHandler {
         [SerializeField] private Transform _shallowDocumentRest;
         [SerializeField] private Transform _shallowDocumentActive;
@@ -24,67 +24,19 @@ namespace Presentation {
         private DocumentView _activeDocument;
         private DocumentDispenser _dispenser;
         private DispenseViewModel _viewModel;
+        private DispensedDocumentPresentation _displayedPresentation;
+        private DispensedDocumentPresentation _deferredPresentation;
+        private IDisposable _viewModelObservation;
         private IDisposable _dragObservation;
         private IDisposable _documentHoverObservation;
         private bool _isPointerOverDispenseArea;
         private bool _isPointerOverDocument;
         private bool _isRetreatScheduled;
-        
+        private bool _isAcquiring;
+
         public void OnPointerEnter(PointerEventData eventData) {
             _isPointerOverDispenseArea = true;
             PresentDocument();
-        }
-
-        private void PresentDocument() {
-            if (_activeDocument == null && !TrySummonDocument()) return;
-
-            MoveActiveDocument(_shallowDocumentActive.position);
-        }
-
-        private bool TrySummonDocument() {
-            if (!_viewModel.TryCreateContext(out IDocumentContext context)) return false;
-
-            try {
-                _activeDocument = _dispenser.Spawn(context);
-                var dragView = _activeDocument.GetComponent<DocumentDragView>();
-                if (dragView == null) {
-                    throw new InvalidOperationException("A dispensed document requires DocumentDragView.");
-                }
-
-                _activeDocument.transform.position = _shallowDocumentRest.position;
-                _dragObservation = dragView.IsDragging.Where(dragging => dragging).Subscribe(OnDrag);
-                _documentHoverObservation = dragView.IsPointerOver.Subscribe(OnDocumentHoverChanged);
-                return true;
-            }
-            catch (Exception exception) {
-                ClearDocumentSubscriptions();
-                context.Dispose();
-                if (_activeDocument != null) {
-                    _activeDocument.ViewModel?.Dispose();
-                    Destroy(_activeDocument.gameObject);
-                    _activeDocument = null;
-                }
-
-                Debug.LogException(exception, this);
-                return false;
-            }
-        }
-        
-        private void OnDrag(bool dragging) {
-            ReleaseActiveDocument();
-        }
-
-        private void OnDocumentHoverChanged(bool isPointerOverDocument) {
-            _isPointerOverDocument = isPointerOverDocument;
-
-            if (isPointerOverDocument) PresentDocument();
-            else ScheduleRetreatIfPointerLeft();
-        }
-
-        private void ReleaseActiveDocument() {
-            ClearDocumentSubscriptions();
-            _isPointerOverDocument = false;
-            _activeDocument = null;
         }
 
         public void OnPointerExit(PointerEventData eventData) {
@@ -92,10 +44,173 @@ namespace Presentation {
             ScheduleRetreatIfPointerLeft();
         }
 
+        public UniTask PostInitializeAsync(IServiceScope scope) {
+            _dispenser = scope.Get<DocumentDispenser>();
+            var producers = new List<IDocumentProducer>();
+            for (int index = 0; scope.TryGet(out IDocumentProducer producer, index); index++) {
+                producers.Add(producer);
+            }
+
+            _viewModel = new DispenseViewModel(
+                producers,
+                scope.Get<PlayerStatStash>().Documents,
+                new StableRandom((ulong)Time.deltaTime));
+            _viewModelObservation = _viewModel.Changed.Subscribe(OnPresentationChanged);
+            ApplyPresentation(_viewModel.Current);
+            return UniTask.CompletedTask;
+        }
+
+        public void Dispose() {
+            _viewModelObservation?.Dispose();
+            _viewModelObservation = null;
+            _viewModel?.Dispose();
+            _viewModel = null;
+            DestroyOwnedDocument();
+            _deferredPresentation = null;
+        }
+
+        private void OnPresentationChanged(DispensedDocumentPresentation presentation) {
+            if (_isAcquiring) {
+                _deferredPresentation = presentation;
+                return;
+            }
+
+            ApplyPresentation(presentation);
+        }
+
+        private void ApplyPresentation(DispensedDocumentPresentation presentation) {
+            if (presentation == null) {
+                DestroyOwnedDocument();
+                return;
+            }
+
+            bool needsNewShell = _activeDocument == null ||
+                                 _displayedPresentation == null ||
+                                 _displayedPresentation.Kind != presentation.Kind;
+            if (needsNewShell) {
+                DestroyOwnedDocument();
+                SpawnOwnedDocument(presentation);
+            }
+            else {
+                _activeDocument.ShowPreview(presentation);
+                _displayedPresentation = presentation;
+                ConfigureDrag(_activeDocument, presentation.IsAvailable);
+            }
+
+            if (!presentation.IsAvailable) {
+                MoveActiveDocument(_shallowDocumentRest.position);
+            }
+            else if (_isPointerOverDispenseArea || _isPointerOverDocument) {
+                PresentDocument();
+            }
+        }
+
+        private void SpawnOwnedDocument(DispensedDocumentPresentation presentation) {
+            try {
+                _activeDocument = _dispenser.SpawnPreview(presentation);
+                _displayedPresentation = presentation;
+                _activeDocument.transform.position = _shallowDocumentRest.position;
+                DocumentDragView dragView = GetDragView(_activeDocument);
+                _dragObservation = dragView.IsDragging.Where(dragging => dragging).Subscribe(OnDragStarted);
+                _documentHoverObservation = dragView.IsPointerOver.Subscribe(OnDocumentHoverChanged);
+                ConfigureDrag(_activeDocument, presentation.IsAvailable);
+            }
+            catch (Exception exception) {
+                DestroyOwnedDocument();
+                Debug.LogException(exception, this);
+            }
+        }
+
+        private void ConfigureDrag(DocumentView document, bool available) {
+            DocumentDragView dragView = GetDragView(document);
+            dragView.SetBeginDragGate(TryAcquireDisplayedDocument);
+            dragView.SetDragEnabled(available);
+        }
+
+        private bool TryAcquireDisplayedDocument() {
+            if (_isAcquiring || _activeDocument == null || _displayedPresentation == null ||
+                !_displayedPresentation.IsAvailable) {
+                return false;
+            }
+
+            DocumentView document = _activeDocument;
+            DispensedDocumentPresentation presentation = _displayedPresentation;
+            bool bound = false;
+            _isAcquiring = true;
+            try {
+                if (!_viewModel.TryCreateContext(presentation, out IDocumentContext context)) {
+                    _viewModel.RefreshCurrent();
+                    return false;
+                }
+
+                _dispenser.Bind(document, context, presentation);
+                document.transform.DOKill();
+                bound = true;
+                return true;
+            }
+            catch (Exception exception) {
+                Debug.LogException(exception, this);
+                DestroyOwnedDocument();
+                _viewModel.RefreshCurrent();
+                return false;
+            }
+            finally {
+                _isAcquiring = false;
+                if (!bound) ApplyAfterFailedAcquisition();
+            }
+        }
+
+        private void ApplyAfterFailedAcquisition() {
+            DispensedDocumentPresentation latest = _deferredPresentation ?? _viewModel.Current;
+            _deferredPresentation = null;
+            ApplyPresentation(latest);
+            if (_displayedPresentation == null || !_displayedPresentation.IsAvailable) {
+                MoveActiveDocument(_shallowDocumentRest.position);
+            }
+        }
+
+        private void OnDragStarted(bool _) {
+            if (_activeDocument == null || _displayedPresentation == null) return;
+
+            DocumentView released = _activeDocument;
+            DocumentOfferKey claimedKey = _displayedPresentation.Key;
+            released.transform.DOKill();
+            GetDragView(released).SetBeginDragGate(null);
+            ClearDocumentSubscriptions();
+            _activeDocument = null;
+            _displayedPresentation = null;
+            _isPointerOverDocument = false;
+
+            _isAcquiring = true;
+            try {
+                _viewModel.AdvanceAfterClaim(claimedKey);
+            }
+            finally {
+                _isAcquiring = false;
+            }
+
+            DispensedDocumentPresentation next = _deferredPresentation ?? _viewModel.Current;
+            _deferredPresentation = null;
+            ApplyPresentation(next);
+        }
+
+        private void PresentDocument() {
+            if (_activeDocument == null || _displayedPresentation == null ||
+                !_displayedPresentation.IsAvailable) {
+                return;
+            }
+
+            MoveActiveDocument(_shallowDocumentActive.position);
+        }
+
+        private void OnDocumentHoverChanged(bool isPointerOverDocument) {
+            _isPointerOverDocument = isPointerOverDocument;
+            if (isPointerOverDocument) PresentDocument();
+            else ScheduleRetreatIfPointerLeft();
+        }
+
         private void ScheduleRetreatIfPointerLeft() {
-            if (_activeDocument == null ||
-                _isPointerOverDispenseArea ||
-                _isPointerOverDocument ||
+            if (_activeDocument == null || _isPointerOverDispenseArea || _isPointerOverDocument ||
                 _isRetreatScheduled) {
                 return;
             }
@@ -107,25 +222,36 @@ namespace Presentation {
         private async UniTaskVoid RetreatIfPointerStillLeftAsync() {
             try {
                 await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, this.GetCancellationTokenOnDestroy());
-            } catch (OperationCanceledException) {
+            }
+            catch (OperationCanceledException) {
                 return;
             }
 
             _isRetreatScheduled = false;
-
             if (_activeDocument == null || _isPointerOverDispenseArea || _isPointerOverDocument) return;
-
             MoveActiveDocument(_shallowDocumentRest.position);
         }
 
         private void MoveActiveDocument(Vector3 position) {
             if (_activeDocument == null) return;
-
             Transform documentTransform = _activeDocument.transform;
             documentTransform.DOKill();
-            documentTransform
-                .DOMove(position, 0.12f)
-                .SetEase(Ease.OutCubic);
+            documentTransform.DOMove(position, 0.12f).SetEase(Ease.OutCubic);
+        }
+
+        private void DestroyOwnedDocument() {
+            ClearDocumentSubscriptions();
+            _isPointerOverDocument = false;
+            if (_activeDocument != null) {
+                DocumentDragView dragView = _activeDocument.GetComponent<DocumentDragView>();
+                if (dragView != null) dragView.SetBeginDragGate(null);
+                _activeDocument.transform.DOKill();
+                _activeDocument.ViewModel?.Dispose();
+                Destroy(_activeDocument.gameObject);
+            }
+
+            _activeDocument = null;
+            _displayedPresentation = null;
         }
 
         private void ClearDocumentSubscriptions() {
@@ -134,28 +260,11 @@ namespace Presentation {
             _documentHoverObservation?.Dispose();
             _documentHoverObservation = null;
         }
-        
-        public void Dispose() {
-            ClearDocumentSubscriptions();
-            if (_activeDocument != null) {
-                _activeDocument.ViewModel?.Dispose();
-                Destroy(_activeDocument.gameObject);
-            }
-            _activeDocument = null;
-        }
 
-        public UniTask InitializeAsync(IServiceScope scope) {
-            _dispenser = scope.Get<DocumentDispenser>();
-            var producers = new List<IDocumentProducer>();
-            for (int index = 0; scope.TryGet(out IDocumentProducer producer, index); index++) {
-                producers.Add(producer);
-            }
-
-            _viewModel = new DispenseViewModel(
-                producers,
-                scope.Get<PlayerStatStash>().Documents,
-                new StableRandom((ulong)Time.deltaTime));
-            return UniTask.CompletedTask;
+        private static DocumentDragView GetDragView(DocumentView document) {
+            DocumentDragView dragView = document.GetComponent<DocumentDragView>();
+            if (dragView == null) throw new InvalidOperationException("A dispensed document requires DocumentDragView.");
+            return dragView;
         }
     }
 }

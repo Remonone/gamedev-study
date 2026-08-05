@@ -34,6 +34,7 @@ namespace Services {
         public string SaveId => "document_generator";
 
         public Observable<int> DocumentCount => _documentCount;
+        public int DocumentQuantity => _documentQuantity;
 
         public Observable<Unit> DocumentAdded => _documentAdded;
 

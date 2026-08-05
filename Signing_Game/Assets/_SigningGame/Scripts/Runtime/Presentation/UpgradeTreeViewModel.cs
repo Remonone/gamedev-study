@@ -62,17 +62,21 @@ namespace Presentation {
 
             var byId = new Dictionary<string, UpgradeNodePresentationModel>(StringComparer.Ordinal);
             foreach (UpgradeNodeState state in _treeService.Nodes) {
-                bool completed = state.Level >= state.Definition.MaxLevel;
+                bool completed = state.Definition.IsTerminalLevel(state.Level);
                 bool pending = state.CurrentState == UpgradeNodeState.State.Pending;
                 string price = pending ? "PENDING" : completed ? "MAX" : _treeService.ResolvePrice(state).ToString();
+                string levelText = state.Definition.HasLevelCap
+                    ? $"{state.Level}/{state.Definition.MaxLevel}"
+                    : $"{state.Level}/∞";
                 var node = new UpgradeNodePresentationModel(
                     state.Definition.Id,
                     state.Definition.Name,
-                    state.Definition.Description,
+                    UpgradeDescriptionFormatter.Format(state.Definition, state.Level),
                     state.Definition.Icon,
                     state.Definition.TreePosition,
                     state.Level,
                     state.Definition.MaxLevel,
+                    levelText,
                     price,
                     _treeService.IsUnlocked(state.Definition.Id),
                     _treeService.IsVisible(state.Definition.Id),

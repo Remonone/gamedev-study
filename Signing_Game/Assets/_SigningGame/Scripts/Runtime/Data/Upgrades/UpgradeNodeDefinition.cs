@@ -58,5 +58,15 @@ namespace Data.Upgrades {
         public StatisticRequirementMode StatisticRequirementMode = StatisticRequirementMode.All;
         public GameStatisticRequirement[] StatisticRequirements = Array.Empty<GameStatisticRequirement>();
         public UpgradeNodeLink[] Children = Array.Empty<UpgradeNodeLink>();
+
+        public bool HasLevelCap => MaxLevel > 0;
+
+        public bool IsTerminalLevel(int level) {
+            return level == int.MaxValue || HasLevelCap && level >= MaxLevel;
+        }
+
+        public int GetNextPreviewLevel(int level) {
+            return IsTerminalLevel(level) ? level : level + 1;
+        }
     }
 }

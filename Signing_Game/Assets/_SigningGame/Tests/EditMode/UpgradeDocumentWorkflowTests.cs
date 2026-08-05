@@ -7,7 +7,9 @@ using Data.Cache;
 using Data.Documents;
 using Data.Enums;
 using Data.Formulas;
+using Data.Modifiers;
 using Data.Modifiers.Calculation;
+using Data.Modifiers.Numeric;
 using Data.Results;
 using Data.Rules;
 using Data.Upgrades;
@@ -18,8 +20,10 @@ using Presentation;
 using R3;
 using Services;
 using Services.Locator;
+using UI;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Utils;
@@ -235,7 +239,7 @@ namespace Tests.EditMode {
             var cache = new StaticCache<DocumentEntries>(new DocumentEntries { SelectedDocumentQualityLevel = 2 });
             var viewModel = new DispenseViewModel(producers, cache, new StableRandom(123));
 
-            Assert.That(viewModel.TryCreateContext(out IDocumentContext context), Is.True);
+            Assert.That(viewModel.TryCreateContext(viewModel.Current, out IDocumentContext context), Is.True);
             IDocumentSession selected = context.TakeSession();
 
             Assert.That(selected, Is.SameAs(firstHighSession));
@@ -245,6 +249,139 @@ namespace Tests.EditMode {
             Assert.That(firstHighSession.DisposeCount, Is.EqualTo(1));
             Assert.That(lowSession.DisposeCount, Is.Zero);
             Assert.That(secondHighSession.DisposeCount, Is.Zero);
+        }
+
+        [Test]
+        public void DispenseViewModel_AdvancesNormalPresentationAfterEachSuccessfulClaim() {
+            var producer = new QueueProducer(new FakeSession(), new FakeSession());
+            var cache = new StaticCache<DocumentEntries>(default);
+            using var viewModel = new DispenseViewModel(
+                new IDocumentProducer[] { producer }, cache, new StableRandom(123));
+            DispensedDocumentPresentation first = viewModel.Current;
+
+            Assert.That(viewModel.TryCreateContext(first, out IDocumentContext firstContext), Is.True);
+            IDocumentSession firstSession = firstContext.TakeSession();
+            firstContext.Dispose();
+            viewModel.AdvanceAfterClaim(first.Key);
+            DispensedDocumentPresentation second = viewModel.Current;
+
+            Assert.That(second.Revision, Is.GreaterThan(first.Revision));
+            Assert.That(second.TextSeed, Is.Not.EqualTo(first.TextSeed));
+            firstSession.Dispose();
+        }
+
+        [Test]
+        public void UpgradeOffer_ExposesDefinitionIdentityHeaderAndIconAndReissuesAfterRelease() {
+            UpgradeNodeDefinition definition = CreateDefinition("upgrade");
+            definition.Name = "Visible Upgrade";
+            UpgradeService upgrades = CreateUpgradeService(new[] { definition }, out _);
+            SetAvailable(upgrades);
+            Assert.That(upgrades.TryUpgrade("upgrade"), Is.True);
+            var producer = new UpgradeDocumentProducer();
+            producer.InitializeAsync(GetScope(upgrades)).GetAwaiter().GetResult();
+
+            Assert.That(producer.TryPeekOffer(out DocumentOffer offer), Is.True);
+            Assert.That(offer.Key.Kind, Is.EqualTo(DocumentKind.Upgrade));
+            Assert.That(offer.Key.DomainId, Is.EqualTo("upgrade"));
+            Assert.That(offer.Header, Is.EqualTo("Visible Upgrade"));
+            Assert.That(offer.Icon, Is.SameAs(definition.Icon));
+            Assert.That(producer.TryProduce(offer.Key, out IDocumentSession session), Is.True);
+            Assert.That(producer.TryPeekOffer(out _), Is.False);
+            session.Dispose();
+            Assert.That(producer.TryPeekOffer(out DocumentOffer reissued), Is.True);
+            Assert.That(reissued.Key, Is.EqualTo(offer.Key));
+        }
+
+        [Test]
+        public void DocumentDragView_ValidatesGeometryBeforeGateAndRejectedGateDoesNotStartDrag() {
+            var eventSystemObject = TrackObject(new GameObject("EventSystem", typeof(EventSystem)));
+            var eventSystem = eventSystemObject.GetComponent<EventSystem>();
+            var orphan = TrackObject(new GameObject("Orphan", typeof(RectTransform), typeof(CanvasGroup),
+                typeof(DocumentDragView)));
+            var orphanDrag = orphan.GetComponent<DocumentDragView>();
+            int orphanGateCalls = 0;
+            orphanDrag.SetBeginDragGate(() => { orphanGateCalls++; return true; });
+            var eventData = new PointerEventData(eventSystem) {
+                button = PointerEventData.InputButton.Left,
+                position = Vector2.zero,
+                pointerId = 1
+            };
+
+            orphanDrag.OnBeginDrag(eventData);
+            Assert.That(orphanGateCalls, Is.Zero);
+
+            var parent = TrackObject(new GameObject("Parent", typeof(RectTransform)));
+            orphan.transform.SetParent(parent.transform, false);
+            int rejectedGateCalls = 0;
+            int dragStarts = 0;
+            orphanDrag.SetBeginDragGate(() => { rejectedGateCalls++; return false; });
+            using IDisposable subscription = orphanDrag.IsDragging.Where(value => value).Subscribe(_ => dragStarts++);
+            orphanDrag.OnBeginDrag(eventData);
+
+            Assert.That(rejectedGateCalls, Is.EqualTo(1));
+            Assert.That(dragStarts, Is.Zero);
+        }
+
+        [Test]
+        public void UpgradeDescriptionFormatter_ReplacesKnownTokensAndHandlesSignedAndTerminalDeltas() {
+            UpgradeNodeDefinition increasing = CreateDefinition("increasing", 0);
+            increasing.Description = "Generation ${generation}; unknown ${missing}";
+            increasing.Modifiers = new[] { CreateModifier("generation", new LevelValueDefinition()) };
+
+            Assert.That(UpgradeDescriptionFormatter.Format(increasing, 0),
+                Is.EqualTo("Generation 0(1); unknown ${missing}"));
+            Assert.That(UpgradeDescriptionFormatter.Format(increasing, 2),
+                Is.EqualTo("Generation 2(1); unknown ${missing}"));
+
+            increasing.MaxLevel = 2;
+            Assert.That(UpgradeDescriptionFormatter.Format(increasing, 2),
+                Is.EqualTo("Generation 2(0); unknown ${missing}"));
+
+            UpgradeNodeDefinition decreasing = CreateDefinition("decreasing", 0);
+            decreasing.Description = "Penalty ${penalty}";
+            decreasing.Modifiers = new[] { CreateModifier("penalty", new DescendingLevelValueDefinition()) };
+            Assert.That(UpgradeDescriptionFormatter.Format(decreasing, 5), Is.EqualTo("Penalty 5(-1)"));
+        }
+
+        [Test]
+        public void CatalogRejectsMissingAndDuplicateNumericModifierIds() {
+            UpgradeNodeDefinition missing = CreateDefinition("missing");
+            missing.Modifiers = new[] { CreateModifier(" ", new LevelValueDefinition()) };
+            Assert.Throws<InvalidOperationException>(() => CreateUpgradeService(new[] { missing }, out _));
+
+            UpgradeNodeDefinition duplicate = CreateDefinition("duplicate");
+            duplicate.Modifiers = new[] {
+                CreateModifier("same", new LevelValueDefinition()),
+                CreateModifier("same", new LevelValueDefinition())
+            };
+            Assert.Throws<InvalidOperationException>(() => CreateUpgradeService(new[] { duplicate }, out _));
+        }
+
+        [Test]
+        public void ZeroMaxLevel_IsUnlimitedUntilTechnicalIntegerLimit() {
+            UpgradeNodeDefinition definition = CreateDefinition("unlimited", 0);
+            UpgradeService upgrades = CreateUpgradeService(new[] { definition }, out _);
+            SetAvailable(upgrades);
+            Assert.That(upgrades.TryUpgrade("unlimited"), Is.True);
+            Assert.That(upgrades.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim), Is.True);
+            Assert.That(upgrades.TryCompletePendingUpgrade(claim,
+                Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+            Assert.That(upgrades.GetUpgrade("unlimited").CurrentState,
+                Is.EqualTo(UpgradeNodeState.State.InProgress));
+            Assert.That(upgrades.TryUpgrade("unlimited"), Is.True);
+            Assert.That(upgrades.GetUpgrade("unlimited").Level, Is.EqualTo(2));
+
+            upgrades.Deserialize(new JObject {
+                ["upgrades"] = new JArray(new JObject {
+                    ["id"] = "unlimited", ["level"] = int.MaxValue - 1, ["effectiveness"] = 1f
+                })
+            });
+            Assert.That(upgrades.GetUpgrade("unlimited").Level, Is.EqualTo(int.MaxValue - 1));
+            Assert.That(upgrades.TryUpgrade("unlimited"), Is.True);
+            Assert.That(upgrades.GetUpgrade("unlimited").Level, Is.EqualTo(int.MaxValue));
+            Assert.That(upgrades.GetUpgrade("unlimited").CurrentState,
+                Is.EqualTo(UpgradeNodeState.State.Completed));
+            Assert.That(upgrades.TryUpgrade("unlimited"), Is.False);
         }
 
         [Test]
@@ -267,7 +404,7 @@ namespace Tests.EditMode {
             SetField(view, "_panelRoot", root);
             SetField(view, "_buyButton", button);
             var model = new UpgradeNodePresentationModel(
-                "upgrade", "Upgrade", "", null, Vector2.zero, 0, 1, "1", true, true,
+                "upgrade", "Upgrade", "", null, Vector2.zero, 0, 1, "0/1", "1", true, true,
                 false, 0f, true);
             int purchaseCount = 0;
 
@@ -314,6 +451,17 @@ namespace Tests.EditMode {
             return definition;
         }
 
+        private ModifierDefinition CreateModifier(string id, NumericValueDefinition value) {
+            var numeric = new NumericModifierDefinition();
+            typeof(NumericModifierDefinition).GetField("_id", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, id);
+            typeof(NumericModifierDefinition).GetField("_value", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, value);
+            var definition = TrackObject(ScriptableObject.CreateInstance<ModifierDefinition>());
+            definition.NumericModifiers = new List<NumericModifierDefinition> { numeric };
+            return definition;
+        }
+
         private static void SetAvailable(UpgradeService upgrades) {
             var values = new Dictionary<string, bool>(StringComparer.Ordinal);
             foreach (UpgradeNodeState state in upgrades.Nodes) values.Add(state.Definition.Id, true);
@@ -356,17 +504,70 @@ namespace Tests.EditMode {
 
         private sealed class FakeProducer : IDocumentProducer {
             private IDocumentSession _session;
+            private readonly Subject<Unit> _changed = new();
             public int Priority { get; }
+            public Observable<Unit> OffersChanged => _changed;
+            private DocumentOfferKey Key { get; }
 
             public FakeProducer(int priority, IDocumentSession session) {
                 Priority = priority;
                 _session = session;
+                Key = new DocumentOfferKey(DocumentKind.Normal, Guid.NewGuid().ToString());
             }
 
-            public bool TryProduce(out IDocumentSession session) {
+            public bool TryPeekOffer(out DocumentOffer offer) {
+                offer = _session == null ? null : new DocumentOffer(Key, true);
+                return offer != null;
+            }
+
+            public bool TryProduce(DocumentOfferKey offerKey, out IDocumentSession session) {
+                if (offerKey != Key) {
+                    session = null;
+                    return false;
+                }
+
                 session = _session;
                 _session = null;
                 return session != null;
+            }
+        }
+
+        private sealed class QueueProducer : IDocumentProducer {
+            private readonly Queue<IDocumentSession> _sessions;
+            private readonly Subject<Unit> _changed = new();
+            private readonly DocumentOfferKey _key = new(DocumentKind.Normal, "normal");
+            public int Priority => 0;
+            public Observable<Unit> OffersChanged => _changed;
+
+            public QueueProducer(params IDocumentSession[] sessions) {
+                _sessions = new Queue<IDocumentSession>(sessions);
+            }
+
+            public bool TryPeekOffer(out DocumentOffer offer) {
+                offer = new DocumentOffer(_key, _sessions.Count > 0);
+                return true;
+            }
+
+            public bool TryProduce(DocumentOfferKey offerKey, out IDocumentSession session) {
+                if (offerKey != _key || _sessions.Count == 0) {
+                    session = null;
+                    return false;
+                }
+
+                session = _sessions.Dequeue();
+                return true;
+            }
+        }
+
+        private sealed class LevelValueDefinition : NumericValueDefinition {
+            public override Value Evaluate(IModifierContext context) {
+                return new Value(context.Require<LevelModifierCapability>().Level);
+            }
+        }
+
+        private sealed class DescendingLevelValueDefinition : NumericValueDefinition {
+            public override Value Evaluate(IModifierContext context) {
+                return new Value(10 - context.Require<LevelModifierCapability>().Level);
             }
         }
 

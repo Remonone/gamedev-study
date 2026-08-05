@@ -3,52 +3,108 @@ using Data.Documents;
 using Services;
 using Services.Locator;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Presentation {
     public sealed class DocumentDispenser : MonoBehaviour, IService {
-        [SerializeField] private DocumentView _documentPrefab;
+        [FormerlySerializedAs("_documentPrefab")]
+        [SerializeField] private DocumentView _normalDocumentPrefab;
+        [SerializeField] private DocumentView _upgradeDocumentPrefab;
+        [SerializeField] private DocumentView _clerkHireDocumentPrefab;
+        [SerializeField] private DocumentView _clerkSalaryReviewDocumentPrefab;
+        [SerializeField] private DocumentView _billDocumentPrefab;
         [SerializeField] private RectTransform _parent;
         [SerializeField] private Vector2 _anchoredSpawnPosition;
 
         private DocumentViewModel.DocumentViewModelBuilder _builder;
-        
+
         private void Awake() {
-             _builder = new DocumentViewModel.DocumentViewModelBuilder();
+            _builder = new DocumentViewModel.DocumentViewModelBuilder();
         }
 
-        [ContextMenu("Spawn")]
-        public DocumentView Spawn(IDocumentContext context = null) {
-            if (context == null) {
-                throw new ArgumentNullException(nameof(context), "A document context is required.");
+        public DocumentView SpawnPreview(DispensedDocumentPresentation presentation) {
+            if (presentation == null) throw new ArgumentNullException(nameof(presentation));
+            if (_parent == null) throw new InvalidOperationException("DocumentDispenser requires a parent RectTransform.");
+
+            DocumentView prefab = ResolvePrefab(presentation.Kind);
+            DocumentView document = Instantiate(prefab, _parent, false);
+            try {
+                ((RectTransform)document.transform).anchoredPosition = _anchoredSpawnPosition;
+                document.ShowPreview(presentation);
+                return document;
             }
-            if (_documentPrefab == null) {
-                throw new InvalidOperationException("DocumentDispenser requires a document prefab.");
+            catch {
+                Destroy(document.gameObject);
+                throw;
             }
-            if (_parent == null) {
-                throw new InvalidOperationException("DocumentDispenser requires a parent RectTransform.");
-            }
-            DocumentView document = null;
+        }
+
+        public void Bind(
+            DocumentView document,
+            IDocumentContext context,
+            DispensedDocumentPresentation presentation) {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (presentation == null) throw new ArgumentNullException(nameof(presentation));
+
             DocumentViewModel viewModel = null;
             try {
-                document = Instantiate(_documentPrefab, _parent, false);
-                ((RectTransform)document.transform).anchoredPosition = _anchoredSpawnPosition;
                 ServiceLocator.For(this).Get(out PlayerSignatureAcceptor acceptor);
                 viewModel = _builder
                     .SetContext(context)
                     .SetAcceptor(acceptor)
                     .Build();
-                document.Init(viewModel);
-                return document;
+                document.Init(viewModel, presentation);
             }
             catch {
                 viewModel?.Dispose();
                 _builder.Reset();
                 context.Dispose();
+                throw;
+            }
+        }
+
+        // Kept so the currently disabled DocumentSpawnerService continues to compile.
+        // A context-free call remains unsupported and throws, as it did before this flow was introduced.
+        [ContextMenu("Spawn")]
+        public DocumentView Spawn(IDocumentContext context = null) {
+            if (context == null) throw new ArgumentNullException(nameof(context), "A document context is required.");
+
+            var offer = new DocumentOffer(new DocumentOfferKey(DocumentKind.Normal, "legacy-normal"), true);
+            var presentation = new DispensedDocumentPresentation(
+                offer,
+                -1,
+                0,
+                unchecked((ulong)UnityEngine.Random.Range(int.MinValue, int.MaxValue)),
+                Color.HSVToRGB(1f - 0.225f, 0.8f, 0.8f));
+            DocumentView document = null;
+            try {
+                document = SpawnPreview(presentation);
+                Bind(document, context, presentation);
+                return document;
+            }
+            catch {
                 if (document != null) Destroy(document.gameObject);
                 throw;
             }
         }
 
         public void Dispose() { }
+
+        private DocumentView ResolvePrefab(DocumentKind kind) {
+            DocumentView prefab = kind switch {
+                DocumentKind.Normal => _normalDocumentPrefab,
+                DocumentKind.Upgrade => _upgradeDocumentPrefab,
+                DocumentKind.ClerkHire => _clerkHireDocumentPrefab,
+                DocumentKind.ClerkSalaryReview => _clerkSalaryReviewDocumentPrefab,
+                DocumentKind.Bill => _billDocumentPrefab,
+                _ => null
+            };
+            if (prefab == null) {
+                throw new InvalidOperationException($"DocumentDispenser has no prefab assigned for {kind} documents.");
+            }
+
+            return prefab;
+        }
     }
 }

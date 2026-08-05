@@ -240,6 +240,18 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void UnlimitedUpgradePresentation_UsesInfinityAndNeverTreatsZeroAsAuthoredMaximum() {
+            UpgradeNodeDefinition definition = CreateDefinition("unlimited", maxLevel: 0);
+            SetupTree(new[] { definition }, out UpgradeService upgrades, out _, out UpgradeTreeService tree);
+            using var viewModel = new UpgradeTreeViewModel(tree, upgrades, _lastWallet);
+
+            UpgradeNodePresentationModel node = viewModel.Nodes[0];
+            Assert.That(node.LevelText, Is.EqualTo("0/∞"));
+            Assert.That(node.Price, Is.Not.EqualTo("MAX"));
+            Assert.That(node.CanPurchase, Is.True);
+        }
+
+        [Test]
         public void AvailabilityBatch_PreservesExceptionalLevelZeroStatesWithoutSourceNotification() {
             UpgradeNodeDefinition inProgressDefinition = CreateDefinition("in_progress");
             UpgradeNodeDefinition completedDefinition = CreateDefinition("completed");
@@ -411,6 +423,8 @@ namespace Tests.EditMode {
             typeof(CacheParameterReference).GetField("_groupId", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.SetValue(parameter, "Generation");
             var numeric = new NumericModifierDefinition();
+            typeof(NumericModifierDefinition).GetField("_id", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, "generation");
             typeof(NumericModifierDefinition).GetField("_parameter", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.SetValue(numeric, parameter);
             var modifier = ScriptableObject.CreateInstance<ModifierDefinition>();

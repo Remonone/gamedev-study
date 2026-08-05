@@ -619,7 +619,7 @@ namespace Tests.EditMode {
                 new StaticCache<DocumentEntries>(default),
                 new StableRandom(123));
 
-            Assert.That(viewModel.TryCreateContext(out IDocumentContext context), Is.True);
+            Assert.That(viewModel.TryCreateContext(viewModel.Current, out IDocumentContext context), Is.True);
             IDocumentSession selected = context.TakeSession();
             context.Dispose();
             Assert.That(selected.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 0.4f, 0.4f)), Is.True);
@@ -629,6 +629,67 @@ namespace Tests.EditMode {
             Assert.That(harness.Upgrades.GetUpgrade("document_upgrade").CurrentState,
                 Is.EqualTo(UpgradeNodeState.State.Pending));
             Assert.That(harness.Documents.Serialize()["documentQuantity"]?.Value<int>(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void NormalOffer_DoesNotReserveUntilExactClaimAndLosingLastDocumentRejectsClaim() {
+            OfficeHarness harness = CreateHarness(CreateEntries());
+            SetDocumentCount(harness.Documents, 1);
+            var producer = new NormalDocumentProducer();
+            producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+
+            Assert.That(producer.TryPeekOffer(out DocumentOffer offer), Is.True);
+            Assert.That(offer.IsAvailable, Is.True);
+            Assert.That(harness.Documents.DocumentQuantity, Is.EqualTo(1));
+
+            Assert.That(harness.Documents.TryObtainDocument(), Is.True);
+            Assert.That(producer.TryProduce(offer.Key, out _), Is.False);
+            Assert.That(producer.TryPeekOffer(out DocumentOffer unavailable), Is.True);
+            Assert.That(unavailable.IsAvailable, Is.False);
+
+            SetDocumentCount(harness.Documents, 1);
+            Assert.That(producer.TryProduce(offer.Key, out IDocumentSession session), Is.True);
+            Assert.That(harness.Documents.DocumentQuantity, Is.Zero);
+            Assert.That(producer.TryProduce(offer.Key, out _), Is.False);
+            session.Dispose();
+            Assert.That(harness.Documents.DocumentQuantity, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void OfficeDocumentOffers_ExposeExactHireAndReviewPresentationDataAndReissueOnRelease() {
+            OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
+            harness.UnlockOffice();
+            Assert.That(harness.Office.TryStartClerkHire(Value.One), Is.True);
+            var hireProducer = new ClerkHireDocumentProducer();
+            hireProducer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+
+            Assert.That(hireProducer.TryPeekOffer(out DocumentOffer hire), Is.True);
+            Assert.That(hire.Key.Kind, Is.EqualTo(DocumentKind.ClerkHire));
+            Assert.That(hire.PersonName, Is.Not.Empty);
+            Assert.That(hire.PersonAge, Is.InRange(18, 65));
+            Assert.That(hire.Amount, Is.EqualTo(Value.One));
+            Assert.That(hire.InternalMultiplier, Is.Not.Null);
+            Assert.That(hireProducer.TryProduce(hire.Key, out IDocumentSession claimedHire), Is.True);
+            Assert.That(hireProducer.TryPeekOffer(out _), Is.False);
+            claimedHire.Dispose();
+            Assert.That(hireProducer.TryPeekOffer(out DocumentOffer reissuedHire), Is.True);
+            Assert.That(reissuedHire.Key, Is.EqualTo(hire.Key));
+
+            Assert.That(hireProducer.TryProduce(reissuedHire.Key, out IDocumentSession acceptedHire), Is.True);
+            Assert.That(acceptedHire.TryProcess(Evaluation(
+                SignatureEvaluationStatus.Accepted, 0.4f, 0.4f)), Is.True);
+            acceptedHire.Dispose();
+            int clerkId = harness.Office.Clerks[0].Id;
+            Assert.That(harness.Office.TryStartSalaryReview(clerkId), Is.True);
+            var reviewProducer = new ClerkSalaryReviewDocumentProducer();
+            reviewProducer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+
+            Assert.That(reviewProducer.TryPeekOffer(out DocumentOffer review), Is.True);
+            Assert.That(review.Key.Kind, Is.EqualTo(DocumentKind.ClerkSalaryReview));
+            Assert.That(review.PersonName, Is.EqualTo(harness.Office.Clerks[0].Name));
+            Assert.That(review.PersonAge, Is.EqualTo(harness.Office.Clerks[0].Age));
+            Assert.That(review.Amount, Is.EqualTo(harness.Office.GetSalaryReviewCost(clerkId)));
+            Assert.That(review.InternalMultiplier, Is.Null);
         }
 
         [Test]
@@ -655,7 +716,7 @@ namespace Tests.EditMode {
                 new IDocumentProducer[] { hireProducer, reviewProducer },
                 new StaticCache<DocumentEntries>(default),
                 new StableRandom(123));
-            Assert.That(viewModel.TryCreateContext(out IDocumentContext context), Is.True);
+            Assert.That(viewModel.TryCreateContext(viewModel.Current, out IDocumentContext context), Is.True);
             IDocumentSession selected = context.TakeSession();
             context.Dispose();
             Assert.That(selected.TryProcess(Evaluation(

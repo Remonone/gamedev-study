@@ -4,6 +4,7 @@ using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Documents;
 using Data.Enums;
 using Data.Modifiers;
 using Data.Results;
@@ -30,6 +31,7 @@ namespace Services {
         private int _claimEpoch;
         private long _nextClaimToken;
         private readonly Subject<Unit> _changed = new();
+        private readonly Subject<Unit> _documentOffersChanged = new();
 
         private WalletService _wallet;
         private IAssetListLease<UpgradeNodeDefinition> _lease;
@@ -38,6 +40,7 @@ namespace Services {
         public IReadOnlyCollection<UpgradeNodeState> OwnedUpgrades => _ownedUpgrades;
         public IReadOnlyCollection<UpgradeNodeState> Nodes => _states.Values;
         public Observable<Unit> Changed => _changed;
+        public Observable<Unit> DocumentOffersChanged => _documentOffersChanged;
 
         public UpgradeService() { }
 
@@ -58,6 +61,7 @@ namespace Services {
             if (_upgradeRestore == null) return;
             ApplyRestore(_upgradeRestore, false);
             _upgradeRestore = null;
+            NotifyDocumentOffersChanged();
         }
 
         internal void BuildDefinitions(IReadOnlyList<UpgradeNodeDefinition> assets) {
@@ -81,7 +85,8 @@ namespace Services {
         public bool CanUpgrade(string upgradeId) {
             UpgradeNodeState upgrade = GetUpgrade(upgradeId);
             if (upgrade == null || _wallet == null ||
-                upgrade.CurrentState is not (UpgradeNodeState.State.Available or UpgradeNodeState.State.InProgress)) {
+                upgrade.CurrentState is not (UpgradeNodeState.State.Available or UpgradeNodeState.State.InProgress) ||
+                upgrade.Definition.IsTerminalLevel(upgrade.Level)) {
                 return false;
             }
 
@@ -102,18 +107,20 @@ namespace Services {
             }
             else {
                 updated.Level++;
-                updated.CurrentState = updated.Level >= updated.Definition.MaxLevel
+                updated.CurrentState = updated.Definition.IsTerminalLevel(updated.Level)
                     ? UpgradeNodeState.State.Completed
                     : UpgradeNodeState.State.InProgress;
             }
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             try {
                 if (!_wallet.TryWithdrawWallet(price, false)) return false;
 
                 _states[upgradeId] = updated;
                 if (firstPurchase) {
                     _pendingUpgrades.Add(new PendingUpgradeRecord(upgradeId, price));
+                    documentOffersChanged = true;
                 }
                 else {
                     _ownedUpgrades.Remove(upgrade);
@@ -127,21 +134,54 @@ namespace Services {
             }
             finally {
                 _isMutating = false;
+                if (documentOffersChanged) NotifyDocumentOffersChanged();
             }
         }
 
         internal bool TryClaimPendingUpgrade(out UpgradeDocumentClaim claim) {
             claim = default;
+            return TryPeekPendingUpgradeDocument(out DocumentOffer offer) &&
+                   TryClaimPendingUpgrade(offer.Key.DomainId, out claim);
+        }
+
+        internal bool TryPeekPendingUpgradeDocument(out DocumentOffer offer) {
+            offer = null;
             if (_isMutating) return false;
 
             for (int index = 0; index < _pendingUpgrades.Count; index++) {
                 string upgradeId = _pendingUpgrades[index].UpgradeId;
                 if (_claimedUpgradeIds.Contains(upgradeId)) continue;
 
+                UpgradeNodeState upgrade = GetUpgrade(upgradeId);
+                if (upgrade == null) continue;
+
+                offer = new DocumentOffer(
+                    new DocumentOfferKey(DocumentKind.Upgrade, upgradeId),
+                    true,
+                    upgrade.Definition.Name,
+                    upgrade.Definition.Icon);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool TryClaimPendingUpgrade(string requestedUpgradeId, out UpgradeDocumentClaim claim) {
+            claim = default;
+            if (_isMutating || string.IsNullOrWhiteSpace(requestedUpgradeId)) return false;
+
+            for (int index = 0; index < _pendingUpgrades.Count; index++) {
+                string upgradeId = _pendingUpgrades[index].UpgradeId;
+                if (!string.Equals(upgradeId, requestedUpgradeId, StringComparison.Ordinal) ||
+                    _claimedUpgradeIds.Contains(upgradeId)) {
+                    continue;
+                }
+
                 long token = ++_nextClaimToken;
                 _activeClaims.Add(token, upgradeId);
                 _claimedUpgradeIds.Add(upgradeId);
                 claim = new UpgradeDocumentClaim(_claimEpoch, token, upgradeId);
+                NotifyDocumentOffersChanged();
                 return true;
             }
 
@@ -159,6 +199,7 @@ namespace Services {
             if (pendingIndex < 0 || upgrade == null ||
                 upgrade.Level != 0 || upgrade.CurrentState != UpgradeNodeState.State.Pending) {
                 ReleaseClaim(claim);
+                NotifyDocumentOffersChanged();
                 return false;
             }
 
@@ -166,11 +207,12 @@ namespace Services {
                 Level = 1,
                 Effectiveness = ResolveEffectiveness(result)
             };
-            updated.CurrentState = updated.Level >= updated.Definition.MaxLevel
+            updated.CurrentState = updated.Definition.IsTerminalLevel(updated.Level)
                 ? UpgradeNodeState.State.Completed
                 : UpgradeNodeState.State.InProgress;
 
             _isMutating = true;
+            bool documentOffersChanged = false;
             try {
                 ReleaseClaim(claim);
                 _pendingUpgrades.RemoveAt(pendingIndex);
@@ -178,16 +220,19 @@ namespace Services {
                 _ownedUpgrades.Add(updated);
                 InvalidateGroups(updated.Definition.Modifiers);
                 NotifyChanged();
+                documentOffersChanged = true;
                 return true;
             }
             finally {
                 _isMutating = false;
+                if (documentOffersChanged) NotifyDocumentOffersChanged();
             }
         }
 
         internal bool TryReleasePendingUpgrade(UpgradeDocumentClaim claim) {
             if (!IsValidClaim(claim)) return false;
             ReleaseClaim(claim);
+            NotifyDocumentOffersChanged();
             return true;
         }
 
@@ -224,6 +269,10 @@ namespace Services {
 
         private void NotifyChanged() {
             _changed.OnNext(Unit.Default);
+        }
+
+        private void NotifyDocumentOffersChanged() {
+            _documentOffersChanged.OnNext(Unit.Default);
         }
 
         private void InvalidateGroups(ModifierDefinition[] definitionModifiers) {
@@ -300,10 +349,12 @@ namespace Services {
             }
 
             ApplyRestore(restored, true);
+            NotifyDocumentOffersChanged();
         }
 
         public void Dispose() {
             _changed.Dispose();
+            _documentOffersChanged.Dispose();
             InvalidateAllClaims();
             _states.Clear();
             _ownedUpgrades.Clear();
@@ -329,7 +380,7 @@ namespace Services {
                 }
 
                 int level = pair.Value.Level;
-                if (level > state.Definition.MaxLevel) {
+                if (state.Definition.HasLevelCap && level > state.Definition.MaxLevel) {
                     Debug.LogWarning(
                         $"Saved level {level} for upgrade '{pair.Key}' exceeds its maximum and was clamped.");
                     level = state.Definition.MaxLevel;
@@ -337,7 +388,7 @@ namespace Services {
 
                 state.Level = level;
                 state.Effectiveness = pair.Value.Effectiveness;
-                state.CurrentState = level >= state.Definition.MaxLevel
+                state.CurrentState = state.Definition.IsTerminalLevel(level)
                     ? UpgradeNodeState.State.Completed
                     : UpgradeNodeState.State.InProgress;
                 nextOwned.Add(state);
@@ -511,12 +562,36 @@ namespace Services {
                 throw new InvalidOperationException($"Upgrade definition '{definition.name}' has an empty ID.");
             }
 
-            if (definition.MaxLevel <= 0) {
-                throw new InvalidOperationException($"Upgrade '{definition.Id}' must have a positive maximum level.");
+            if (definition.MaxLevel < 0) {
+                throw new InvalidOperationException($"Upgrade '{definition.Id}' cannot have a negative maximum level.");
             }
 
             if (definition.CostFormula == null) {
                 throw new InvalidOperationException($"Upgrade '{definition.Id}' has no cost formula.");
+            }
+
+            ValidateModifierIds(definition);
+        }
+
+        private static void ValidateModifierIds(UpgradeNodeDefinition definition) {
+            if (definition.Modifiers == null) return;
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            for (int definitionIndex = 0; definitionIndex < definition.Modifiers.Length; definitionIndex++) {
+                ModifierDefinition modifierDefinition = definition.Modifiers[definitionIndex];
+                if (modifierDefinition?.NumericModifiers == null) continue;
+                for (int modifierIndex = 0; modifierIndex < modifierDefinition.NumericModifiers.Count; modifierIndex++) {
+                    NumericModifierDefinition modifier = modifierDefinition.NumericModifiers[modifierIndex];
+                    if (modifier == null) continue;
+                    if (string.IsNullOrWhiteSpace(modifier.Id)) {
+                        throw new InvalidOperationException(
+                            $"Upgrade '{definition.Id}' has a numeric modifier without an ID.");
+                    }
+
+                    if (!ids.Add(modifier.Id)) {
+                        throw new InvalidOperationException(
+                            $"Upgrade '{definition.Id}' has duplicate numeric modifier ID '{modifier.Id}'.");
+                    }
+                }
             }
         }
 

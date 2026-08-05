@@ -33,7 +33,7 @@ namespace Presentation {
             }
 
             if (_nameText != null) _nameText.text = model.Name;
-            if (_levelText != null) _levelText.text = $"{model.CurrentLevel}/{model.MaxLevel}";
+            if (_levelText != null) _levelText.text = model.LevelText;
             if (_lockedOverlay != null) _lockedOverlay.SetActive(!model.IsUnlocked);
             _canvasGroup.alpha = model.IsUnlocked ? 1f : _lockedAlpha;
 
