@@ -18,12 +18,14 @@ namespace Services {
         private CachedData<GenerationEntries> _generationData;
         private CachedData<OfficeEntries> _officeData;
         private CachedData<DocumentEntries> _documents;
+        private CachedData<BillEntries> _bills;
         
         public IReadOnlyCacheData<IncomeEntries> IncomeData => _incomeData;
         public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
         public IReadOnlyCacheData<GenerationEntries> GenerationData => _generationData;
         public IReadOnlyCacheData<OfficeEntries> OfficeData => _officeData;
         public IReadOnlyCacheData<DocumentEntries> Documents => _documents;
+        public IReadOnlyCacheData<BillEntries> BillData => _bills;
         
         
         public void Dispose() {
@@ -49,12 +51,16 @@ namespace Services {
         }
 
         public UniTask PreInitializeAsync(IServiceScope scope) {
-            _dataFactory = new CachedDataFactory(scope, scope.Get<ICacheVersionProvider>());
+            ICacheVersionProvider versionProvider = scope.Get<ICacheVersionProvider>();
+            _dataFactory = new CachedDataFactory(scope, versionProvider);
             _incomeData = _dataFactory.Create<IncomeEntries>();
             _signatureData = _dataFactory.Create<SignatureEntries>();
             _generationData = _dataFactory.Create<GenerationEntries>();
             _officeData = _dataFactory.Create<OfficeEntries>();
             _documents = _dataFactory.Create<DocumentEntries>();
+            if (scope.TryGet(out ICacheCalculator<BillEntries> billCalculator)) {
+                _bills = new CachedData<BillEntries>(versionProvider, billCalculator);
+            }
             return UniTask.CompletedTask;
         }
     }

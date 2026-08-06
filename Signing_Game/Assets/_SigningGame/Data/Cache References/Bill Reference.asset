@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7391dd4a3ec662d5982d8f7120c39f2f, type: 3}
+  m_Name: Bill Reference
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Cache.BillReference
+  Value:
+    CatalogSize: 3
+    ActiveProjectLimit: 1
+    CostMultiplier: 1
+    OverallRewardMultiplier: 1
+    ActiveGenerationBonusMultiplier: 1
+    ActiveIncomePenaltyStrength: 1
+    MaximumSignatureRewardMultiplier: 1.5
+    RequirementRewardFactorMultiplier: 1
+    BaseSignatureThreshold: 0.5
+    MaximumThresholdAddition: 0.05
+    BaseActiveIncomeMultiplier: 0.9
+    MaximumPriorityWeight: 100

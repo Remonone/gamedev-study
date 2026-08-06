@@ -1,6 +1,7 @@
 using Contracts;
 using Data.Cache;
 using Data.Modifiers;
+using Data.Modifiers.Providers;
 using Services;
 using Services.Locator;
 
@@ -16,7 +17,10 @@ namespace Bootstrap.Installer {
             container.Register<ISignatureRulesResolver>(new RuleResolver());
             container.Register<ISignatureMatcher>(new SignatureMatcher());
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
-            container.Register(new ModifierStorage());
+            var modifierStorage = new ModifierStorage();
+            modifierStorage.RegisterProvider(new UpgradeModifierProvider());
+            modifierStorage.RegisterProvider(new BillModifierProvider());
+            container.Register(modifierStorage);
             container.Register<IModifierService>(new ModifierService());
             container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
             container.Register(new DocumentSpawnerService());
@@ -29,11 +33,14 @@ namespace Bootstrap.Installer {
             container.Register(new UpgradeTreeService());
             container.Register(new DifficultyProfileEvaluator());
             container.Register(new PlayerStatStash());
+            container.Register(new AcceptedNormalDocumentService());
             container.Register(new NormalDocumentProducer());
             container.Register(new UpgradeDocumentProducer());
             container.Register(new OfficeService());
             container.Register(new ClerkHireDocumentProducer());
             container.Register(new ClerkSalaryReviewDocumentProducer());
+            container.Register(new BillService());
+            container.Register(typeof(BillDocumentProducer), new BillDocumentProducer());
             container.Register(new PlayerSignatureAcceptor());
         }
 

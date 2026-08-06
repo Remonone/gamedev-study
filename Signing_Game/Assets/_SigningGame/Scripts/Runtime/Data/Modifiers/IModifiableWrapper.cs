@@ -19,6 +19,7 @@ namespace Data.Modifiers {
             string parameterId,
             NumericModifierOperation operation,
             double operand,
-            double effectiveness = 1d);
+            double effectiveness = 1d,
+            bool allowOverdrive = false);
     }
 }

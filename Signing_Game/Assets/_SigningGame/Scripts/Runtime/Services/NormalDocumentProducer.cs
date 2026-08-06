@@ -17,6 +17,8 @@ namespace Services {
         private DocumentGeneratorService _generator;
         private IMoneyAggregator _aggregator;
         private IReadOnlyCacheData<IncomeEntries> _incomeData;
+        private IReadOnlyCacheData<DocumentEntries> _documentData;
+        private AcceptedNormalDocumentService _acceptedDocuments;
         private Observable<Unit> _offersChanged;
 
         public int Priority => 0;
@@ -25,7 +27,10 @@ namespace Services {
         public UniTask InitializeAsync(IServiceScope scope) {
             _generator = scope.Get<DocumentGeneratorService>();
             _aggregator = scope.Get<IMoneyAggregator>();
-            _incomeData = scope.Get<PlayerStatStash>().IncomeData;
+            PlayerStatStash stash = scope.Get<PlayerStatStash>();
+            _incomeData = stash.IncomeData;
+            _documentData = stash.Documents;
+            scope.TryGet(out _acceptedDocuments);
             _offersChanged = _generator.DocumentCount.Select(_ => Unit.Default);
             return UniTask.CompletedTask;
         }
@@ -53,7 +58,13 @@ namespace Services {
                 return false;
             }
 
-            session = new NormalDocumentSession(_generator, reservation, _aggregator, _incomeData);
+            session = new NormalDocumentSession(
+                _generator,
+                reservation,
+                _aggregator,
+                _incomeData,
+                _documentData,
+                _acceptedDocuments);
             return true;
         }
 
@@ -72,6 +83,8 @@ namespace Services {
             private readonly DocumentGeneratorService.DocumentReservation _reservation;
             private readonly IMoneyAggregator _aggregator;
             private readonly IReadOnlyCacheData<IncomeEntries> _incomeData;
+            private readonly IReadOnlyCacheData<DocumentEntries> _documentData;
+            private readonly AcceptedNormalDocumentService _acceptedDocuments;
             private bool _finished;
 
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
@@ -80,11 +93,15 @@ namespace Services {
                 DocumentGeneratorService generator,
                 DocumentGeneratorService.DocumentReservation reservation,
                 IMoneyAggregator aggregator,
-                IReadOnlyCacheData<IncomeEntries> incomeData) {
+                IReadOnlyCacheData<IncomeEntries> incomeData,
+                IReadOnlyCacheData<DocumentEntries> documentData,
+                AcceptedNormalDocumentService acceptedDocuments) {
                 _generator = generator;
                 _reservation = reservation;
                 _aggregator = aggregator;
                 _incomeData = incomeData;
+                _documentData = documentData;
+                _acceptedDocuments = acceptedDocuments;
             }
 
             public bool TryProcess(SignatureEvaluationResult result) {
@@ -92,7 +109,14 @@ namespace Services {
                 if (_finished || !_generator.TryCommitReservation(_reservation)) return false;
 
                 _finished = true;
-                if (result.Status == SignatureEvaluationStatus.Accepted) SendReward(result);
+                if (result.Status == SignatureEvaluationStatus.Accepted) {
+                    int selectedQuality = Math.Clamp(
+                        _documentData.Value.SelectedDocumentQualityLevel,
+                        0,
+                        9) + 1;
+                    SendReward(result);
+                    _acceptedDocuments?.Report(NormalDocumentProcessingSource.Manual, selectedQuality);
+                }
                 return true;
             }
 

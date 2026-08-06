@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: SigningGame
   m_GUID: 3983ba293478c1fceb179ddd49f53f91
   m_SerializeEntries:
+  - m_GUID: 0664993f904408c87b35522b97c1ac47
+    m_Address: Assets/_SigningGame/Data/Cache References/Bill Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2a7bdc569ef3422b38610408a3a5dcf4
     m_Address: Assets/_SigningGame/Data/Upgrades/Test Upgrade/Upgrade Node.asset
     m_ReadOnly: 0
@@ -44,6 +50,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 96f86e4e5da51161bbcd8374178d8f54
+    m_Address: Assets/_SigningGame/Data/Bills/Bill Catalog.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bill_catalog
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bdaba90eb1534a3f0be70b578f091b7d
     m_Address: Assets/_SigningGame/Data/Difficulty.asset

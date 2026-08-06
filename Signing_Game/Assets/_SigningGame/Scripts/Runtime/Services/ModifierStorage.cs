@@ -6,7 +6,7 @@ using Data.Modifiers.Providers;
 using Services.Locator;
 
 namespace Services {
-    public class ModifierStorage : IService, IInitialize, IPostInitialize {
+    public class ModifierStorage : IService, IPostInitialize {
 
         private readonly Dictionary<Type, IModifierProvider> _providers;
 
@@ -41,11 +41,6 @@ namespace Services {
         
         public void Dispose() {
             
-        }
-
-        public UniTask InitializeAsync(IServiceScope scope) {
-            _providers.Add(typeof(UpgradeModifierProvider), new UpgradeModifierProvider());
-            return UniTask.CompletedTask;
         }
 
         public UniTask PostInitializeAsync(IServiceScope scope) {

@@ -55,6 +55,8 @@ namespace Services {
         private IMoneyAggregator _money;
         private IReadOnlyCacheData<OfficeEntries> _officeData;
         private IReadOnlyCacheData<IncomeEntries> _incomeData;
+        private IReadOnlyCacheData<DocumentEntries> _documentData;
+        private AcceptedNormalDocumentService _acceptedDocuments;
         private GameStatisticsService _statistics;
         private CacheVersionService _cacheVersions;
 
@@ -110,6 +112,8 @@ namespace Services {
                 PlayerStatStash stash = scope.Get<PlayerStatStash>();
                 _officeData = stash.OfficeData;
                 _incomeData = stash.IncomeData;
+                _documentData = stash.Documents;
+                scope.TryGet(out _acceptedDocuments);
                 _statistics = scope.Get<GameStatisticsService>();
                 _cacheVersions = scope.Get<CacheVersionService>();
                 _initialized = true;
@@ -512,7 +516,6 @@ namespace Services {
                 float speed = entries.DocumentsPerSecondPerClerk;
                 if (speed <= 0f) return;
 
-                Value incomePerDocument = _incomeData.Value.IncomePerDocument;
                 for (int index = 0; index < clerkCount; index++) {
                     double work = _clerks[index].Progress + (double)deltaTime * speed;
                     _work[index] = double.IsNaN(work) || double.IsInfinity(work)
@@ -539,7 +542,7 @@ namespace Services {
                         }
 
                         _work[index] -= 1d;
-                        bool wasAccepted = ProcessDocument(_clerks[index], entries, incomePerDocument);
+                        bool wasAccepted = ProcessDocument(_clerks[index], entries);
                         processed++;
                         if (wasAccepted) accepted++;
                         else rejected++;
@@ -731,7 +734,8 @@ namespace Services {
             return Math.Clamp((double)random, 0d, 1d);
         }
 
-        private bool ProcessDocument(OfficeClerkState clerk, OfficeEntries entries, Value incomePerDocument) {
+        private bool ProcessDocument(OfficeClerkState clerk, OfficeEntries entries) {
+            int selectedQuality = Math.Clamp(_documentData.Value.SelectedDocumentQualityLevel, 0, 9) + 1;
             float roll = _randomValue();
             if (float.IsNaN(roll) || float.IsInfinity(roll)) roll = 0f;
             roll = Math.Clamp(roll, 0f, 1f);
@@ -740,6 +744,7 @@ namespace Services {
             double rewardFactor = accepted
                 ? SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier)
                 : 0d;
+            Value incomePerDocument = _incomeData.Value.IncomePerDocument;
             Value requested = accepted ? MultiplyValueSafely(incomePerDocument, rewardFactor) : Value.Zero;
             Value credited = accepted ? _money.AddMoney(requested) : Value.Zero;
             _documentProcessed.OnNext(new OfficeDocumentResult(
@@ -748,6 +753,9 @@ namespace Services {
                 quality,
                 requested,
                 credited));
+            if (accepted) {
+                _acceptedDocuments?.Report(NormalDocumentProcessingSource.Office, selectedQuality);
+            }
             return accepted;
         }
 

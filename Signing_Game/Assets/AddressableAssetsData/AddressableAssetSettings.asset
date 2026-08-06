@@ -105,6 +105,7 @@ MonoBehaviour:
     - difficulty_profile
     - cache_reference
     - upgrades
+    - bill_catalog
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 144ec035697237a03a23d444b2eb5436, type: 2}

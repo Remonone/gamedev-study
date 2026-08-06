@@ -6,11 +6,11 @@ using Utils.Attributes;
 namespace Data.Cache {
     [Serializable, CacheEntryGroup("Income")]
     public struct IncomeEntries {
-        [ModifiableParameter("MaxMultiplicationScale")]
+        [ModifiableParameter("MaxMultiplicationScale", Minimum = 0d)]
         public float MaxMultiplicationScale;
-        [ModifiableParameter("MinMultiplyScale")]
+        [ModifiableParameter("MinMultiplyScale", Minimum = float.Epsilon)]
         public float MinMultiplyScale;
-        [ModifiableParameter("IncomePerDocument")]
+        [ModifiableParameter("IncomePerDocument", Minimum = 0d)]
         public Value IncomePerDocument;
         
         public IncomeEntries(float maxMultiplicationScale, float minMultiplyScale, Value incomePerDocument) {

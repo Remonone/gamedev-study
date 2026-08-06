@@ -134,8 +134,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c2f13592792c8ea1489a068407bc2fa4, type: 2}
+  m_sharedMaterial: {fileID: 3674301033697280540, guid: c2f13592792c8ea1489a068407bc2fa4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
-  m_wordSpacing: 0
+  m_wordSpacing: 30
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
@@ -301,6 +301,11 @@ MonoBehaviour:
   _header: {fileID: 7815490713029167353}
   _text: {fileID: 7302380785903320970}
   _textSettings: {fileID: 11400000, guid: cfd82d1df10bc54629d9008d286d59b3, type: 2}
+  _headerTitle: {fileID: 0}
+  _headerIcon: {fileID: 0}
+  _profileText: {fileID: 0}
+  _amountText: {fileID: 0}
+  _internalMultiplierText: {fileID: 0}
 --- !u!225 &5729941702007064736
 CanvasGroup:
   m_ObjectHideFlags: 0

@@ -13,16 +13,32 @@ MonoBehaviour:
   m_Name: Document Settings
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Documents.DocumentTextSettings
   _glyphs:
-  - "\u2571"
-  - "\u2572"
-  - "\u2022"
-  - "\u25CB"
-  - "\u25C7"
-  - "\u25B3"
-  - "\u2301"
-  - "\u2506"
-  - "\u2510"
-  - "\u2514"
+  - a
+  - b
+  - c
+  - d
+  - e
+  - f
+  - g
+  - h
+  - i
+  - j
+  - k
+  - l
+  - m
+  - n
+  - o
+  - p
+  - q
+  - r
+  - s
+  - t
+  - u
+  - v
+  - w
+  - x
+  - y
+  - z
   _paragraphCount: {x: 2, y: 6}
   _sentencesPerParagraph: {x: 2, y: 4}
   _wordsPerSentence: {x: 5, y: 10}

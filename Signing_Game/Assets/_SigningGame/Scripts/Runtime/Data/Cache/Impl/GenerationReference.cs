@@ -5,9 +5,9 @@ using Utils.Attributes;
 namespace Data.Cache {
     [Serializable, CacheEntryGroup("Generation")]
     public struct GenerationEntries {
-        [ModifiableParameter("TokenPerSecond")]
+        [ModifiableParameter("TokenPerSecond", Minimum = 0d)]
         public float TokenPerSecond;
-        [ModifiableParameter("DispenseCooldown")]
+        [ModifiableParameter("DispenseCooldown", Minimum = 0d)]
         public float DispenseCooldown;
         public GenerationEntries(float tokenPerSecond, float dispenseCooldown) {
             TokenPerSecond = tokenPerSecond;

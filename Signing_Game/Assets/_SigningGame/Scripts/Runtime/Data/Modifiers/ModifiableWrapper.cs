@@ -41,7 +41,8 @@ namespace Data.Modifiers {
             string parameterId,
             NumericModifierOperation operation,
             double operand,
-            double effectiveness = 1d) {
+            double effectiveness = 1d,
+            bool allowOverdrive = false) {
             if (!TryGetParameter(parameterId, out var parameter))
                 throw new KeyNotFoundException($"Parameter {parameterId} is not registered inside {GroupId}.");
             object boxed = source;
@@ -49,9 +50,27 @@ namespace Data.Modifiers {
             var rawValue = parameter.GetValue(boxed);
             // BUG: If Value-instance is applied and it is greater than 2^64 then it will be clamped to double.MaxValue 
             var currentValue = NumericTypeUtility.ToDouble(rawValue);
-            var modifiedValue = NumericModifierCalculator.Apply(currentValue, operation, operand, effectiveness);
+            if (double.IsNaN(currentValue) || double.IsInfinity(currentValue)) return source;
+            var modifiedValue = NumericModifierCalculator.Apply(
+                currentValue,
+                operation,
+                operand,
+                effectiveness,
+                allowOverdrive);
 
-            modifiedValue = Math.Clamp(modifiedValue, parameter.Minimum, parameter.Maximum);
+            NumericTypeUtility.GetFiniteRange(parameter.ValueType, out double typeMinimum, out double typeMaximum);
+            double minimum = Math.Max(parameter.Minimum, typeMinimum);
+            double maximum = Math.Min(parameter.Maximum, typeMaximum);
+            if (minimum > maximum) {
+                throw new InvalidOperationException(
+                    $"Parameter '{parameter.Key}' has no values inside the supported range of {parameter.ValueType}.");
+            }
+
+            if (double.IsNaN(modifiedValue)) modifiedValue = currentValue;
+            else if (double.IsPositiveInfinity(modifiedValue)) modifiedValue = maximum;
+            else if (double.IsNegativeInfinity(modifiedValue)) modifiedValue = minimum;
+
+            modifiedValue = Math.Clamp(modifiedValue, minimum, maximum);
             
             parameter.SetValue(boxed, NumericTypeUtility.FromDouble(modifiedValue, parameter.ValueType));
             return (T)boxed;
@@ -62,11 +81,12 @@ namespace Data.Modifiers {
             string parameterId,
             NumericModifierOperation operation,
             double operand,
-            double effectiveness) {
+            double effectiveness,
+            bool allowOverdrive) {
             if (source is not T entry) {
                 throw new ArgumentException($"Source {source} is not of type {typeof(T)}");
             }
-            return Apply(entry, parameterId, operation, operand, effectiveness);
+            return Apply(entry, parameterId, operation, operand, effectiveness, allowOverdrive);
         }
     }
 }

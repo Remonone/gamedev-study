@@ -21,9 +21,13 @@ namespace Services {
         }
         
         public bool ReplenishWallet(Value value) {
+            return ReplenishWallet(value, true);
+        }
+
+        internal bool ReplenishWallet(Value value, bool notify) {
             if (value.IsZero || !_balance.IsSignificant(value)) return false;
             _balance += value;
-            _balanceChanged.Value = _balance;
+            if (notify) NotifyBalanceChanged();
             return true;
         }
 

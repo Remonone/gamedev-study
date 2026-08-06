@@ -14,6 +14,7 @@ namespace Data.Modifiers {
         [SerializeField] private CacheParameterReference _parameter;
 
         public string Id => _id;
+        public NumericModifierOperation Operation => _operation;
 
         public Value EvaluateAtLevel(int level) {
             if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
@@ -35,7 +36,10 @@ namespace Data.Modifiers {
             return PredefinedMetadataWrapperStorage.Get(_parameter.GroupId).EntryType;
         }
 
-        public TValue Apply<TValue>(TValue value, IModifierContext context) {
+        public TValue Apply<TValue>(
+            TValue value,
+            IModifierContext context,
+            bool allowOverdrive = false) {
             var wrapper = PredefinedMetadataWrapperStorage.Get(_parameter.GroupId);
             if (!wrapper.IsApplicable(value)) return value;
             double effectiveness = context.TryGet(out ModifierEffectivenessCapability capability)
@@ -46,7 +50,8 @@ namespace Data.Modifiers {
                 _parameter.ParameterId,
                 _operation,
                 _value.Evaluate(context).ToDouble(),
-                effectiveness);
+                effectiveness,
+                allowOverdrive);
         }
         
     }
