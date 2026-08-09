@@ -55,6 +55,7 @@ namespace Services {
             private readonly UpgradeService.UpgradeDocumentClaim _claim;
             private bool _finished;
 
+            public DocumentKind Kind => DocumentKind.Upgrade;
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
 
             public UpgradeDocumentSession(

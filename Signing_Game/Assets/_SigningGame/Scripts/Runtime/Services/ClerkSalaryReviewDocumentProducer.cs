@@ -57,6 +57,7 @@ namespace Services {
             private readonly OfficeService.SalaryReviewDocumentClaim _claim;
             private bool _finished;
 
+            public DocumentKind Kind => DocumentKind.ClerkSalaryReview;
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
 
             public SalaryReviewDocumentSession(

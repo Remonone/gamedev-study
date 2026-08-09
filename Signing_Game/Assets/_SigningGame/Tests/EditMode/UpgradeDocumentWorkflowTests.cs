@@ -573,6 +573,7 @@ namespace Tests.EditMode {
 
         private sealed class FakeSession : IDocumentSession {
             public int DisposeCount { get; private set; }
+            public DocumentKind Kind => DocumentKind.Normal;
             public IDocumentEvaluationPolicy EvaluationPolicy { get; } = new PassthroughPolicy();
             public bool TryProcess(SignatureEvaluationResult result) => true;
             public void Dispose() => DisposeCount++;

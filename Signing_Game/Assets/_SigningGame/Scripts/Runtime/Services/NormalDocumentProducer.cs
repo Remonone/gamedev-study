@@ -87,6 +87,7 @@ namespace Services {
             private readonly AcceptedNormalDocumentService _acceptedDocuments;
             private bool _finished;
 
+            public DocumentKind Kind => DocumentKind.Normal;
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
 
             public NormalDocumentSession(

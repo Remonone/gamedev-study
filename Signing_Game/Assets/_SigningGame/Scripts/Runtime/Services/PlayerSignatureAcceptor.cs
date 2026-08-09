@@ -45,6 +45,7 @@ namespace Services {
             if (!session.TryProcess(evaluationResult)) return false;
 
             _documentResults.OnNext(new DocumentHandleResult(
+                session.Kind,
                 evaluationResult.Status == SignatureEvaluationStatus.Accepted
                     ? RewardStatus.RewardGranted
                     : RewardStatus.RewardRejected,

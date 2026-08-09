@@ -13,6 +13,7 @@ namespace Contracts {
     }
 
     public interface IDocumentSession : IDisposable {
+        DocumentKind Kind { get; }
         IDocumentEvaluationPolicy EvaluationPolicy { get; }
         bool TryProcess(SignatureEvaluationResult result);
     }

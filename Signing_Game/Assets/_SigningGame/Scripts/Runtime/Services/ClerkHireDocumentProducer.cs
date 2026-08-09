@@ -57,6 +57,7 @@ namespace Services {
             private readonly OfficeService.ClerkHireDocumentClaim _claim;
             private bool _finished;
 
+            public DocumentKind Kind => DocumentKind.ClerkHire;
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
 
             public ClerkHireDocumentSession(OfficeService office, OfficeService.ClerkHireDocumentClaim claim) {

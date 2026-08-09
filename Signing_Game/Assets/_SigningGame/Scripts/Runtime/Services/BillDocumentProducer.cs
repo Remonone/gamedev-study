@@ -42,6 +42,7 @@ namespace Services {
             private readonly IDocumentEvaluationPolicy _policy;
             private bool _finished;
 
+            public DocumentKind Kind => DocumentKind.Bill;
             public IDocumentEvaluationPolicy EvaluationPolicy => _policy;
 
             public BillDocumentSession(BillService bills, BillService.BillDocumentClaim claim) {
