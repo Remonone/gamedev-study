@@ -6,6 +6,11 @@ namespace Data.Bills {
         public string Id;
         public BillRequirementKind Kind;
 
+        [Header("Presentation")]
+        public string DisplayName;
+        [TextArea] public string ShortDescription;
+        public Color Color = Color.white;
+
         [Header("Numeric target")]
         public int MinimumTarget;
         public int MaximumTarget;

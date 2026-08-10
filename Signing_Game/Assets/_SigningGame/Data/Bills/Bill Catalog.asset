@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf3866dff7ab743dfad3ed4748954fce, type: 3}
   m_Name: Bill Catalog
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillCatalogDefinition
-  Rewards: []
-  RequirementTemplates: []
+  Rewards:
+  - {fileID: 11400000, guid: c273746bd12ddec1cb87ba6ad5576d87, type: 2}
+  - {fileID: 11400000, guid: b9c41574247d09cf0811b08000422ef9, type: 2}
+  RequirementTemplates:
+  - {fileID: 11400000, guid: 18dbc34109cf4c6198a04d4e5cb9a0c0, type: 2}

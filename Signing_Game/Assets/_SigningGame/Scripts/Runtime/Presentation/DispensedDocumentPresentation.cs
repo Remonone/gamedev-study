@@ -44,9 +44,11 @@ namespace Presentation {
                     ? $"{offer.PersonName}, {offer.PersonAge.Value}"
                     : offer.PersonName;
             AmountText = offer.Amount.HasValue
-                ? offer.Key.Kind == DocumentKind.ClerkHire
-                    ? $"Bid: {offer.Amount.Value}"
-                    : $"Review cost: {offer.Amount.Value}"
+                ? offer.Key.Kind switch {
+                    DocumentKind.ClerkHire => $"Bid: {offer.Amount.Value}",
+                    DocumentKind.Bill => $"Bill cost: {offer.Amount.Value}",
+                    _ => $"Review cost: {offer.Amount.Value}"
+                }
                 : string.Empty;
             InternalMultiplierText = offer.InternalMultiplier.HasValue
                 ? $"Internal multiplier: x{offer.InternalMultiplier.Value.ToString("0.##", CultureInfo.InvariantCulture)}"

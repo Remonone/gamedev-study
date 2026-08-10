@@ -14,6 +14,7 @@ using Data.Rules;
 using NUnit.Framework;
 using Newtonsoft.Json.Linq;
 using R3;
+using Presentation;
 using Services;
 using Services.Calculators;
 using Services.Locator;
@@ -184,7 +185,7 @@ namespace Tests.EditMode {
             Assert.That(environment.Bills.TryPurchase(first.OptionId), Is.True);
             Assert.That(environment.Wallet.CurrentBalance, Is.EqualTo(new Value(90d)));
             Assert.That(environment.Bills.Pending, Is.Not.Null);
-            Assert.That(environment.Bills.Catalog[0].OptionId, Is.Not.EqualTo(first.OptionId));
+            Assert.That(environment.Bills.Catalog, Is.Empty);
 
             var producer = new BillDocumentProducer();
             producer.InitializeAsync(environment.Scope).GetAwaiter().GetResult();
@@ -201,6 +202,7 @@ namespace Tests.EditMode {
             session.Dispose();
             Assert.That(environment.Bills.Pending, Is.Null);
             Assert.That(environment.Bills.ActiveBills, Is.Empty);
+            Assert.That(environment.Bills.Catalog, Is.Not.Empty);
             Assert.That(environment.Wallet.CurrentBalance, Is.EqualTo(new Value(90d)));
         }
 
@@ -213,11 +215,13 @@ namespace Tests.EditMode {
 
             StartBill(environment, environment.Bills.Catalog[0], 1f);
             Assert.That(environment.Bills.ActiveBills, Has.Count.EqualTo(1));
+            Assert.That(environment.Bills.Catalog, Is.Empty);
 
             environment.Accepted.Report(NormalDocumentProcessingSource.Manual, 1);
 
             Assert.That(environment.Bills.ActiveBills, Is.Empty);
             Assert.That(environment.Bills.CompletedBills, Has.Count.EqualTo(1));
+            Assert.That(environment.Bills.Catalog, Is.Not.Empty);
             Assert.That(environment.Wallet.CurrentBalance, Is.EqualTo(new Value(105d)));
             Assert.That(environment.Bills.CompletedBills[0].SavedBaseRewardStrength,
                 Is.EqualTo(1.5d).Within(0.0001d));
@@ -272,14 +276,80 @@ namespace Tests.EditMode {
         }
 
         [Test]
-        public void ConcreteProducerRegistration_DoesNotExposeCurrentUiProducerContract() {
+        public void ExplicitProducerRegistration_ExposesConcreteAndUiProducerContract() {
             var scope = new ServiceScope(null);
             var producer = new BillDocumentProducer();
-            scope.Register(typeof(BillDocumentProducer), producer);
+            scope.Register(producer, typeof(IDocumentProducer));
             Track(scope);
 
             Assert.That(scope.Get<BillDocumentProducer>(), Is.SameAs(producer));
-            Assert.That(scope.TryGet<IDocumentProducer>(out _), Is.False);
+            Assert.That(scope.Get<IDocumentProducer>(), Is.SameAs(producer));
+        }
+
+        [Test]
+        public void CompletedSaveRoundTrip_PreservesOptionWorkAndActualPayout() {
+            BillRewardDefinition reward = CreateReward("history", repeatable: true, cost: 10d);
+            reward.MoneyReward = new Value(4d);
+            reward.BaseRequiredProgress = 1d;
+            TestEnvironment source = CreateEnvironment(new[] { reward });
+            StartBill(source, source.Bills.Catalog[0], 1f);
+            source.Accepted.Report(NormalDocumentProcessingSource.Manual, 1);
+
+            JToken saved = source.Bills.Serialize();
+            TestEnvironment restored = CreateEnvironment(new[] { reward }, deferredRestore: saved);
+
+            Assert.That(restored.Bills.CompletedBills, Has.Count.EqualTo(1));
+            BillCompletionRecord completion = restored.Bills.CompletedBills[0];
+            Assert.That(completion.Option, Is.Not.Null);
+            Assert.That(completion.HasCompleteWorkStatistics, Is.True);
+            Assert.That(completion.ProcessedDocumentCount, Is.EqualTo(1));
+            Assert.That(completion.PaidCost, Is.EqualTo(new Value(10d)));
+            Assert.That(completion.HasCompletionPayout, Is.True);
+            Assert.That(completion.ActualCompletionPayout, Is.EqualTo(new Value(6d)));
+        }
+
+        [Test]
+        public void LegacyCompletedSave_RemainsAvailableButMarksHistoricalStatisticsUnavailable() {
+            BillRewardDefinition reward = CreateReward("legacy", repeatable: true, cost: 1d);
+            TestEnvironment source = CreateEnvironment(new[] { reward });
+            JObject saved = (JObject)source.Bills.Serialize();
+            ((JArray)saved["catalog"]).Clear();
+            saved["completed"] = new JArray(new JObject {
+                ["rewardId"] = reward.Id,
+                ["baseRewardStrength"] = 1d,
+                ["completionOrder"] = 1L
+            });
+            saved["nextCompletionOrder"] = 2L;
+
+            TestEnvironment restored = CreateEnvironment(new[] { reward }, deferredRestore: saved);
+
+            BillCompletionRecord completion = restored.Bills.CompletedBills[0];
+            Assert.That(completion.Option, Is.Null);
+            Assert.That(completion.HasCompleteWorkStatistics, Is.False);
+            Assert.That(completion.HasCompletionPayout, Is.False);
+        }
+
+        [Test]
+        public void DynamicDescription_UsesRequirementsThenSignatureAndFrozenPayout() {
+            BillRewardDefinition reward = CreateReward("description", repeatable: true, cost: 1d);
+            reward.Description = "Payout ${moneyReward}; generation ${activeGeneration}.";
+            reward.MoneyReward = new Value(10d);
+            reward.BaseActiveGenerationBonus = 0.1d;
+            reward.BaseRequiredProgress = 1d;
+            TestEnvironment environment = CreateEnvironment(new[] { reward });
+            GeneratedBillOption option = environment.Bills.Catalog[0];
+
+            Assert.That(BillDescriptionFormatter.FormatCatalog(environment.Bills, option),
+                Is.EqualTo("Payout 10$; generation +10%."));
+            StartBill(environment, option, 1f);
+            ActiveBillState active = environment.Bills.ActiveBills[0];
+            Assert.That(BillDescriptionFormatter.FormatActive(environment.Bills, active),
+                Is.EqualTo("Payout 15$; generation +15%."));
+
+            environment.Accepted.Report(NormalDocumentProcessingSource.Manual, 1);
+            BillCompletionRecord completed = environment.Bills.CompletedBills[0];
+            Assert.That(BillDescriptionFormatter.FormatCompleted(environment.Bills, completed),
+                Is.EqualTo("Payout 15$; generation +0%."));
         }
 
         [Test]

@@ -15,6 +15,8 @@ namespace Data.Modifiers {
 
         public string Id => _id;
         public NumericModifierOperation Operation => _operation;
+        public string ParameterGroupId => _parameter?.GroupId;
+        public string ParameterId => _parameter?.ParameterId;
 
         public Value EvaluateAtLevel(int level) {
             if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));

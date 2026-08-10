@@ -1,9 +1,47 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using UnityEngine;
 using Utils;
 
 namespace Data.Bills {
+    [Flags]
+    public enum BillPurchaseBlockerKind {
+        None = 0,
+        PendingSignature = 1 << 0,
+        ActiveLimitReached = 1 << 1,
+        RequirementNotMet = 1 << 2,
+        InsufficientFunds = 1 << 3,
+        Unavailable = 1 << 4
+    }
+
+    public readonly struct BillPurchaseBlocker {
+        public BillPurchaseBlockerKind Kind { get; }
+        public BillRequirementSnapshot Requirement { get; }
+        public Value MissingFunds { get; }
+
+        public BillPurchaseBlocker(
+            BillPurchaseBlockerKind kind,
+            BillRequirementSnapshot requirement = null,
+            Value missingFunds = default) {
+            Kind = kind;
+            Requirement = requirement;
+            MissingFunds = missingFunds;
+        }
+    }
+
+    public readonly struct BillRequirementPresentationInfo {
+        public string DisplayName { get; }
+        public string ShortDescription { get; }
+        public Color Color { get; }
+
+        public BillRequirementPresentationInfo(string displayName, string shortDescription, Color color) {
+            DisplayName = displayName ?? string.Empty;
+            ShortDescription = shortDescription ?? string.Empty;
+            Color = color;
+        }
+    }
+
     public sealed class BillRequirementSnapshot {
         public string TemplateId { get; }
         public BillRequirementKind Kind { get; }
@@ -72,6 +110,10 @@ namespace Data.Bills {
         public long SchedulerCurrentWeight { get; internal set; }
         public long ActivationOrder { get; }
         public double SavedBaseRewardStrength { get; }
+        public Value PaidCost { get; }
+        public double ElapsedWorkSeconds { get; internal set; }
+        public int ProcessedDocumentCount { get; internal set; }
+        public bool HasCompleteWorkStatistics { get; }
 
         public ActiveBillState(
             long instanceId,
@@ -88,6 +130,33 @@ namespace Data.Bills {
             SchedulerCurrentWeight = schedulerCurrentWeight;
             ActivationOrder = activationOrder;
             SavedBaseRewardStrength = savedBaseRewardStrength;
+            PaidCost = Value.Zero;
+            HasCompleteWorkStatistics = false;
+        }
+
+        public ActiveBillState(
+            long instanceId,
+            GeneratedBillOption option,
+            double progress,
+            int weight,
+            long schedulerCurrentWeight,
+            long activationOrder,
+            double savedBaseRewardStrength,
+            Value paidCost,
+            double elapsedWorkSeconds,
+            int processedDocumentCount,
+            bool hasCompleteWorkStatistics) {
+            InstanceId = instanceId;
+            Option = option ?? throw new ArgumentNullException(nameof(option));
+            Progress = progress;
+            Weight = weight;
+            SchedulerCurrentWeight = schedulerCurrentWeight;
+            ActivationOrder = activationOrder;
+            SavedBaseRewardStrength = savedBaseRewardStrength;
+            PaidCost = paidCost;
+            ElapsedWorkSeconds = elapsedWorkSeconds;
+            ProcessedDocumentCount = processedDocumentCount;
+            HasCompleteWorkStatistics = hasCompleteWorkStatistics;
         }
 
         internal ActiveBillState Clone() {
@@ -98,14 +167,27 @@ namespace Data.Bills {
                 Weight,
                 SchedulerCurrentWeight,
                 ActivationOrder,
-                SavedBaseRewardStrength);
+                SavedBaseRewardStrength,
+                PaidCost,
+                ElapsedWorkSeconds,
+                ProcessedDocumentCount,
+                HasCompleteWorkStatistics);
         }
     }
 
     public sealed class BillCompletionRecord {
+        public GeneratedBillOption Option { get; }
         public BillRewardDefinition Reward { get; }
         public double SavedBaseRewardStrength { get; }
         public long CompletionOrder { get; }
+        public Value PaidCost { get; }
+        public double ElapsedWorkSeconds { get; }
+        public int ProcessedDocumentCount { get; }
+        public bool HasCompleteWorkStatistics { get; }
+        public Value ActualCompletionPayout { get; }
+        public bool HasCompletionPayout { get; }
+        public double AdditionalGeneratedDocuments { get; internal set; }
+        public Value AdditionalIncome { get; internal set; }
 
         public BillCompletionRecord(
             BillRewardDefinition reward,
@@ -114,6 +196,35 @@ namespace Data.Bills {
             Reward = reward ?? throw new ArgumentNullException(nameof(reward));
             SavedBaseRewardStrength = savedBaseRewardStrength;
             CompletionOrder = completionOrder;
+            HasCompleteWorkStatistics = false;
+            HasCompletionPayout = false;
+        }
+
+        public BillCompletionRecord(
+            GeneratedBillOption option,
+            BillRewardDefinition reward,
+            double savedBaseRewardStrength,
+            long completionOrder,
+            Value paidCost,
+            double elapsedWorkSeconds,
+            int processedDocumentCount,
+            bool hasCompleteWorkStatistics,
+            Value actualCompletionPayout,
+            bool hasCompletionPayout,
+            double additionalGeneratedDocuments,
+            Value additionalIncome) {
+            Option = option;
+            Reward = reward ?? option?.Reward ?? throw new ArgumentNullException(nameof(reward));
+            SavedBaseRewardStrength = savedBaseRewardStrength;
+            CompletionOrder = completionOrder;
+            PaidCost = paidCost;
+            ElapsedWorkSeconds = elapsedWorkSeconds;
+            ProcessedDocumentCount = processedDocumentCount;
+            HasCompleteWorkStatistics = hasCompleteWorkStatistics;
+            ActualCompletionPayout = actualCompletionPayout;
+            HasCompletionPayout = hasCompletionPayout;
+            AdditionalGeneratedDocuments = additionalGeneratedDocuments;
+            AdditionalIncome = additionalIncome;
         }
     }
 }

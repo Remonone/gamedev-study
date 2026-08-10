@@ -26,11 +26,14 @@ namespace Services {
 
         private Dictionary<string, BillRewardDefinition> _rewards = new(StringComparer.Ordinal);
         private Dictionary<string, BillRequirementTemplateDefinition> _templates = new(StringComparer.Ordinal);
+        private Dictionary<string, BillRequirementPresentationInfo> _requirementPresentation =
+            new(StringComparer.Ordinal);
         private List<GeneratedBillOption> _catalog = new();
         private PendingBillState _pending;
         private List<ActiveBillState> _active = new();
         private List<BillCompletionRecord> _completed = new();
 
+        private UnlockService _unlocks;
         private IAssetProvider _assetProvider;
         private IAssetListLease<BillCatalogDefinition> _catalogLease;
         private IBillRandom _random;
@@ -42,7 +45,20 @@ namespace Services {
         private ICacheInvalidator _cacheInvalidator;
         private CacheVersionService _cacheVersions;
         private DocumentCacheCalculator _documentCalculator;
+        private GenerationCacheCalculator _generationCalculator;
+        private IncomeCacheCalculator _incomeCalculator;
         private AcceptedNormalDocumentService _acceptedDocuments;
+        private DocumentGeneratorService _documentGenerator;
+        private MoneyAggregator _moneyAggregator;
+
+        private double[] _generationAttributionShares = Array.Empty<double>();
+        private double[] _incomeAttributionShares = Array.Empty<double>();
+        private double _generationAttributionShareSum;
+        private double _incomeAttributionShareSum;
+        private double _pendingGeneratedDocumentEquivalents;
+        private Value _pendingCreditedIncome;
+        private bool _contributionDirty;
+        private float _contributionNotificationDelay;
 
         private RestoreData _deferredRestore;
         private bool _postInitialized;
@@ -64,6 +80,9 @@ namespace Services {
         public IReadOnlyList<BillCompletionRecord> CompletedBills => _completed;
         public Observable<Unit> Changed => _changed;
         public Observable<Unit> DocumentOffersChanged => _documentOffersChanged;
+        public int ActiveProjectLimit => _postInitialized ? ResolveActiveLimit(_billData.Value) : 1;
+        public int MaximumPriorityWeight => _postInitialized ? ResolveMaximumPriorityWeight(_billData.Value) : 1;
+        public bool IsUnlocked => _unlocks?.IsUnlocked(FeatureIds.BillCatalog) ?? false;
 
         internal IReadOnlyList<BillCompletionRecord> CompletionRecords => _completed;
         internal bool HasActiveBills => _active.Count > 0;
@@ -97,6 +116,11 @@ namespace Services {
             _cacheVersions = scope.Get<CacheVersionService>();
             _documentCalculator = scope.Get<DocumentCacheCalculator>();
             _acceptedDocuments = scope.Get<AcceptedNormalDocumentService>();
+            _unlocks = scope.Get<UnlockService>();
+            scope.TryGet(out _generationCalculator);
+            scope.TryGet(out _incomeCalculator);
+            scope.TryGet(out _documentGenerator);
+            scope.TryGet(out _moneyAggregator);
             _postInitialized = true;
 
             if (_deferredRestore != null) {
@@ -124,6 +148,7 @@ namespace Services {
             }).AddTo(_subscriptions);
             _upgrades.Changed.Subscribe(_ => ReconcileAfterExternalStateChange()).AddTo(_subscriptions);
             _observedClerkCount = _office.ClerkCount;
+            _unlocks.Changed.Where(_ => _unlocks.IsUnlocked(FeatureIds.BillCatalog)).Subscribe(_ => NotifyChanged()).AddTo(_subscriptions);
             _office.Changed.Subscribe(_ => {
                 int clerkCount = _office.ClerkCount;
                 if (clerkCount == _observedClerkCount) return;
@@ -131,6 +156,15 @@ namespace Services {
                 ReconcileAfterExternalStateChange();
             }).AddTo(_subscriptions);
             _cacheVersions.Invalidated.Subscribe(OnCacheInvalidated).AddTo(_subscriptions);
+            Observable.EveryUpdate().Select(_ => Time.deltaTime).Subscribe(OnUpdate).AddTo(_subscriptions);
+            if (_documentGenerator != null) {
+                _documentGenerator.WorkGenerated.Subscribe(AccumulateGenerationWork).AddTo(_subscriptions);
+                _documentGenerator.DocumentsGenerated.Subscribe(_ => MarkContributionDirty()).AddTo(_subscriptions);
+            }
+            if (_moneyAggregator != null) {
+                _moneyAggregator.MoneyAdded.Subscribe(AccumulateMoneyTransaction).AddTo(_subscriptions);
+            }
+            RebuildAttributionShares();
             return UniTask.CompletedTask;
         }
 
@@ -148,6 +182,7 @@ namespace Services {
             }
 
             var templates = new Dictionary<string, BillRequirementTemplateDefinition>(StringComparer.Ordinal);
+            var presentation = new Dictionary<string, BillRequirementPresentationInfo>(StringComparer.Ordinal);
             BillRequirementTemplateDefinition[] templateDefinitions =
                 catalog.RequirementTemplates ?? Array.Empty<BillRequirementTemplateDefinition>();
             for (int index = 0; index < templateDefinitions.Length; index++) {
@@ -156,6 +191,10 @@ namespace Services {
                 if (!templates.TryAdd(template.Id, template)) {
                     throw new InvalidOperationException($"Duplicate bill requirement template ID '{template.Id}'.");
                 }
+                presentation.Add(template.Id, new BillRequirementPresentationInfo(
+                    template.DisplayName,
+                    template.ShortDescription,
+                    template.Color));
             }
 
             if (rewards.Count > 0) {
@@ -175,6 +214,17 @@ namespace Services {
 
             _rewards = rewards;
             _templates = templates;
+            _requirementPresentation = presentation;
+        }
+
+        public bool TryGetRequirementPresentation(
+            string templateId,
+            out BillRequirementPresentationInfo presentation) {
+            if (string.IsNullOrWhiteSpace(templateId)) {
+                presentation = default;
+                return false;
+            }
+            return _requirementPresentation.TryGetValue(templateId, out presentation);
         }
 
         public Value ResolvePrice(GeneratedBillOption option) {
@@ -182,10 +232,90 @@ namespace Services {
             return ResolvePrice(option, _billData.Value);
         }
 
+        public double ResolveCatalogBaseRewardStrength(GeneratedBillOption option) {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            if (!_postInitialized) return 1d;
+            return ResolveRequirementStrength(option, _billData.Value);
+        }
+
+        public double ResolveCompletionEffectiveness(double savedBaseRewardStrength) {
+            if (!_postInitialized) return Math.Max(0d, savedBaseRewardStrength);
+            return SaturatingMultiplyPositive(
+                savedBaseRewardStrength,
+                Math.Max(0d, _billData.Value.OverallRewardMultiplier));
+        }
+
+        public double ResolveActiveGenerationBonus(GeneratedBillOption option, double baseRewardStrength) {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            if (!_postInitialized) return 0d;
+            BillEntries entries = _billData.Value;
+            double bonus = SaturatingMultiplyPositive(option.Reward.BaseActiveGenerationBonus, baseRewardStrength);
+            bonus = SaturatingMultiplyPositive(bonus, Math.Max(0d, entries.OverallRewardMultiplier));
+            return SaturatingMultiplyPositive(bonus, Math.Max(0d, entries.ActiveGenerationBonusMultiplier));
+        }
+
+        public Value ResolveExpectedCompletionPayout(GeneratedBillOption option, double baseRewardStrength) {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            if (option.Reward.MoneyReward.IsZero || !_postInitialized) return Value.Zero;
+            return MultiplyValueSafely(
+                option.Reward.MoneyReward,
+                ResolveCompletionEffectiveness(baseRewardStrength));
+        }
+
         public bool AreRequirementsSatisfied(GeneratedBillOption option) {
             if (option == null || !_postInitialized) return false;
             int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, _billData.Value);
             return AreRequirementsSatisfied(option, CaptureExternalState(unlockedQuality));
+        }
+
+        public bool IsRequirementSatisfied(GeneratedBillOption option, BillRequirementSnapshot requirement) {
+            if (option == null || requirement == null || !_postInitialized) return false;
+            bool belongsToOption = false;
+            for (int index = 0; index < option.Requirements.Count; index++) {
+                if (ReferenceEquals(option.Requirements[index], requirement)) {
+                    belongsToOption = true;
+                    break;
+                }
+            }
+            if (!belongsToOption) return false;
+            int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, _billData.Value);
+            return IsRequirementSatisfied(requirement, CaptureExternalState(unlockedQuality));
+        }
+
+        public IReadOnlyList<BillPurchaseBlocker> GetPurchaseBlockers(long optionId) {
+            var blockers = new List<BillPurchaseBlocker>();
+            if (!_postInitialized || _isMutating) {
+                blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.Unavailable));
+                return blockers;
+            }
+            GeneratedBillOption option = FindCatalogOption(optionId);
+            if (option == null) {
+                blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.Unavailable));
+                return blockers;
+            }
+            if (_pending != null) blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.PendingSignature));
+            BillEntries entries = _billData.Value;
+            if (_active.Count >= ResolveActiveLimit(entries)) {
+                blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.ActiveLimitReached));
+            }
+            int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, entries);
+            ExternalState external = CaptureExternalState(unlockedQuality);
+            for (int index = 0; index < option.Requirements.Count; index++) {
+                BillRequirementSnapshot requirement = option.Requirements[index];
+                if (!IsRequirementSatisfied(requirement, external)) {
+                    blockers.Add(new BillPurchaseBlocker(
+                        BillPurchaseBlockerKind.RequirementNotMet,
+                        requirement));
+                }
+            }
+            Value price = ResolvePrice(option, entries);
+            if (!_wallet.CanAfford(price)) {
+                Value missing = price > _wallet.CurrentBalance
+                    ? (price - _wallet.CurrentBalance).Value
+                    : Value.Zero;
+                blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.InsufficientFunds, missingFunds: missing));
+            }
+            return blockers;
         }
 
         public bool CanPurchase(long optionId) {
@@ -201,9 +331,7 @@ namespace Services {
             Value price = ResolvePrice(option, entries);
             if (!_wallet.CanAfford(price)) return false;
 
-            var pending = new PendingBillState(option, price);
-            StateView state = CreateStateView(pending, _active, _completed);
-            return TryPrepareCatalog(state, entries, true, out _);
+            return true;
         }
 
         public bool TryPurchase(long optionId) {
@@ -213,14 +341,12 @@ namespace Services {
             BillEntries entries = _billData.Value;
             Value price = ResolvePrice(option, entries);
             var pending = new PendingBillState(option, price);
-            StateView state = CreateStateView(pending, _active, _completed);
-            if (!TryPrepareCatalog(state, entries, true, out CatalogBuild build)) return false;
 
             _isMutating = true;
             try {
                 if (!_wallet.TryWithdrawWallet(price, false)) return false;
                 _pending = pending;
-                ReplaceCatalog(build);
+                ReplaceCatalog(CreateSuppressedCatalogBuild());
                 InvalidateClaims();
             }
             finally {
@@ -317,7 +443,11 @@ namespace Services {
                 1,
                 0L,
                 _nextActivationOrder,
-                baseStrength));
+                baseStrength,
+                _pending.PaidCost,
+                0d,
+                0,
+                true));
             StateView acceptedState = CreateStateView(null, nextActive, _completed);
             if (!TryPrepareCatalog(acceptedState, entries, false, out CatalogBuild acceptedBuild)) return false;
 
@@ -366,6 +496,7 @@ namespace Services {
             if (selectedIndex < 0) return;
 
             ActiveBillState selected = nextActive[selectedIndex];
+            if (selected.ProcessedDocumentCount < int.MaxValue) selected.ProcessedDocumentCount++;
             double increment = ResolveProgressIncrement(selected.Option, document.SelectedQuality);
             if (increment <= 0d || !IsFinite(increment)) {
                 _active = nextActive;
@@ -381,13 +512,6 @@ namespace Services {
                 return;
             }
 
-            nextActive.RemoveAt(selectedIndex);
-            var nextCompleted = new List<BillCompletionRecord>(_completed) {
-                new(selected.Option.Reward, selected.SavedBaseRewardStrength, _nextCompletionOrder)
-            };
-            StateView candidate = CreateStateView(_pending, nextActive, nextCompleted);
-            if (!TryPrepareCatalog(candidate, entries, false, out CatalogBuild build)) return;
-
             double moneyMultiplier = SaturatingMultiplyPositive(
                 selected.SavedBaseRewardStrength,
                 Math.Max(0d, entries.OverallRewardMultiplier));
@@ -395,16 +519,55 @@ namespace Services {
                 ? Value.Zero
                 : MultiplyValueSafely(selected.Option.Reward.MoneyReward, moneyMultiplier);
 
+            MaterializePendingContributions(false);
+            nextActive.RemoveAt(selectedIndex);
+            var provisional = new BillCompletionRecord(
+                selected.Option,
+                selected.Option.Reward,
+                selected.SavedBaseRewardStrength,
+                _nextCompletionOrder,
+                selected.PaidCost,
+                selected.ElapsedWorkSeconds,
+                selected.ProcessedDocumentCount,
+                selected.HasCompleteWorkStatistics,
+                money,
+                true,
+                0d,
+                Value.Zero);
+            var candidateCompleted = new List<BillCompletionRecord>(_completed) { provisional };
+            StateView candidate = CreateStateView(_pending, nextActive, candidateCompleted);
+            if (!TryPrepareCatalog(candidate, entries, false, out CatalogBuild build)) return;
+
             _isMutating = true;
             bool walletChanged = false;
             try {
+                Value before = _wallet.CurrentBalance;
                 walletChanged = !money.IsZero && _wallet.ReplenishWallet(money, false);
+                Value after = _wallet.CurrentBalance;
+                Value actualPayout = walletChanged && after > before
+                    ? (after - before).Value
+                    : Value.Zero;
+                var completedRecord = new BillCompletionRecord(
+                    selected.Option,
+                    selected.Option.Reward,
+                    selected.SavedBaseRewardStrength,
+                    _nextCompletionOrder,
+                    selected.PaidCost,
+                    selected.ElapsedWorkSeconds,
+                    selected.ProcessedDocumentCount,
+                    selected.HasCompleteWorkStatistics,
+                    actualPayout,
+                    true,
+                    0d,
+                    Value.Zero);
+                var nextCompleted = new List<BillCompletionRecord>(_completed) { completedRecord };
                 _nextCompletionOrder++;
                 _active = nextActive;
                 _completed = nextCompleted;
                 ReplaceCatalog(build);
                 InvalidateActiveCaches();
                 InvalidateCompletionGroups(selected.Option.Reward);
+                RebuildAttributionShares();
             }
             finally {
                 _isMutating = false;
@@ -458,14 +621,7 @@ namespace Services {
             GeneratedBillOption option,
             SignatureEvaluationResult result,
             BillEntries entries) {
-            double requirementStrength = 1d;
-            double requirementMultiplier = Math.Max(0d, entries.RequirementRewardFactorMultiplier);
-            for (int index = 0; index < option.Requirements.Count; index++) {
-                double contribution = SaturatingMultiplyPositive(
-                    option.Requirements[index].Balance.RewardFactor,
-                    requirementMultiplier);
-                requirementStrength = SaturatingAddPositive(requirementStrength, contribution);
-            }
+            double requirementStrength = ResolveRequirementStrength(option, entries);
 
             double maximum = Math.Max(1d, entries.MaximumSignatureRewardMultiplier);
             double threshold = option.SignatureThreshold;
@@ -478,6 +634,18 @@ namespace Services {
                 throw new InvalidOperationException("Bill reward strength is outside the supported range.");
             }
             return strength;
+        }
+
+        private static double ResolveRequirementStrength(GeneratedBillOption option, BillEntries entries) {
+            double requirementStrength = 1d;
+            double requirementMultiplier = Math.Max(0d, entries.RequirementRewardFactorMultiplier);
+            for (int index = 0; index < option.Requirements.Count; index++) {
+                double contribution = SaturatingMultiplyPositive(
+                    option.Requirements[index].Balance.RewardFactor,
+                    requirementMultiplier);
+                requirementStrength = SaturatingAddPositive(requirementStrength, contribution);
+            }
+            return requirementStrength;
         }
 
         private void ReconcileAfterExternalStateChange() {
@@ -498,14 +666,22 @@ namespace Services {
 
         private void OnCacheInvalidated(Type type) {
             if (!_postInitialized || _isMutating || _handlingInvalidation) return;
-            if (type != typeof(BillEntries) && type != typeof(DocumentEntries)) return;
+            if (type != typeof(BillEntries) && type != typeof(DocumentEntries) &&
+                type != typeof(GenerationEntries) && type != typeof(IncomeEntries)) return;
 
             _handlingInvalidation = true;
             try {
-                ReconcileAfterExternalStateChange();
+                if (type == typeof(BillEntries) || type == typeof(DocumentEntries)) {
+                    ReconcileAfterExternalStateChange();
+                }
                 if (type == typeof(BillEntries)) {
                     InvalidateActiveCaches();
                     InvalidateAllCompletionGroups();
+                }
+                if (type == typeof(BillEntries) || type == typeof(GenerationEntries) ||
+                    type == typeof(IncomeEntries)) {
+                    MaterializePendingContributions(false);
+                    RebuildAttributionShares();
                 }
             }
             finally {
@@ -519,6 +695,10 @@ namespace Services {
             bool forceReroll,
             out CatalogBuild build) {
             build = default;
+            if (ShouldSuppressCatalog(state, entries)) {
+                build = CreateSuppressedCatalogBuild();
+                return true;
+            }
             if (_rewards.Count == 0) {
                 build = new CatalogBuild(new List<GeneratedBillOption>(), _random.Fork(), _nextOptionId, true);
                 return true;
@@ -763,18 +943,23 @@ namespace Services {
         private static bool AreRequirementsSatisfied(GeneratedBillOption option, ExternalState external) {
             for (int index = 0; index < option.Requirements.Count; index++) {
                 BillRequirementSnapshot requirement = option.Requirements[index];
-                bool satisfied = requirement.Kind switch {
-                    BillRequirementKind.OwnedUpgrade =>
-                        external.OwnedUpgradeIds.Contains(requirement.UpgradeId),
-                    BillRequirementKind.MinimumClerkCount =>
-                        external.ClerkCount >= requirement.NumericTarget,
-                    BillRequirementKind.MinimumUnlockedDocumentQuality =>
-                        external.UnlockedQuality >= requirement.NumericTarget,
-                    _ => false
-                };
-                if (!satisfied) return false;
+                if (!IsRequirementSatisfied(requirement, external)) return false;
             }
             return true;
+        }
+
+        private static bool IsRequirementSatisfied(
+            BillRequirementSnapshot requirement,
+            ExternalState external) {
+            return requirement.Kind switch {
+                BillRequirementKind.OwnedUpgrade =>
+                    external.OwnedUpgradeIds.Contains(requirement.UpgradeId),
+                BillRequirementKind.MinimumClerkCount =>
+                    external.ClerkCount >= requirement.NumericTarget,
+                BillRequirementKind.MinimumUnlockedDocumentQuality =>
+                    external.UnlockedQuality >= requirement.NumericTarget,
+                _ => false
+            };
         }
 
         private Value ResolvePrice(GeneratedBillOption option, BillEntries entries) {
@@ -788,10 +973,25 @@ namespace Services {
             _nextOptionId = build.NextOptionId;
         }
 
+        private CatalogBuild CreateSuppressedCatalogBuild() {
+            return new CatalogBuild(new List<GeneratedBillOption>(), _random.Fork(), _nextOptionId, true);
+        }
+
+        private static bool ShouldSuppressCatalog(StateView state, BillEntries entries) {
+            return state.Pending != null || state.Active.Count >= ResolveActiveLimit(entries);
+        }
+
         private void ResetToDefaultState() {
             _pending = null;
             _active = new List<ActiveBillState>();
             _completed = new List<BillCompletionRecord>();
+            _generationAttributionShares = Array.Empty<double>();
+            _incomeAttributionShares = Array.Empty<double>();
+            _generationAttributionShareSum = 0d;
+            _incomeAttributionShareSum = 0d;
+            _pendingGeneratedDocumentEquivalents = 0d;
+            _pendingCreditedIncome = Value.Zero;
+            _contributionDirty = false;
             _catalog = new List<GeneratedBillOption>();
             InvalidateClaims();
             _nextOptionId = 1L;
@@ -803,6 +1003,7 @@ namespace Services {
             }
             InvalidateActiveCaches();
             InvalidateAllCompletionGroups();
+            RebuildAttributionShares();
         }
 
         private void InvalidateActiveCaches() {
@@ -897,6 +1098,161 @@ namespace Services {
             _ignoreWalletNotification = true;
             try { _wallet.NotifyBalanceChanged(); }
             finally { _ignoreWalletNotification = false; }
+        }
+
+        public IReadOnlyList<BillCompletionRecord> PrepareCompletionStatisticsSnapshot() {
+            MaterializePendingContributions(false);
+            return _completed;
+        }
+
+        internal void AccumulateGenerationWork(GenerationWork work) {
+            if (!_postInitialized || work.DeltaPoints <= 0d || double.IsNaN(work.DeltaPoints) ||
+                double.IsInfinity(work.DeltaPoints) || _generationAttributionShareSum <= 0d) return;
+            double documentEquivalents = work.DeltaPoints / DocumentGeneratorService.PointsPerDocument;
+            if (documentEquivalents <= 0d || double.IsNaN(documentEquivalents) ||
+                double.IsInfinity(documentEquivalents)) return;
+            _pendingGeneratedDocumentEquivalents = SaturatingAddPositive(
+                _pendingGeneratedDocumentEquivalents,
+                documentEquivalents);
+            MarkContributionDirty();
+        }
+
+        internal void AccumulateMoneyTransaction(MoneyTransaction transaction) {
+            if (!_postInitialized || transaction.Credited.IsZero || _incomeAttributionShareSum <= 0d) return;
+            _pendingCreditedIncome += transaction.Credited;
+            MarkContributionDirty();
+        }
+
+        private void OnUpdate(float deltaTime) {
+            if (deltaTime > 0f && !float.IsNaN(deltaTime) && !float.IsInfinity(deltaTime)) {
+                for (int index = 0; index < _active.Count; index++) {
+                    ActiveBillState active = _active[index];
+                    active.ElapsedWorkSeconds = SaturatingAddPositive(active.ElapsedWorkSeconds, deltaTime);
+                }
+            }
+
+            if (!_contributionDirty) return;
+            _contributionNotificationDelay += Math.Max(0f, deltaTime);
+            if (_contributionNotificationDelay < 1f) return;
+            MaterializePendingContributions(false);
+            NotifyChanged();
+        }
+
+        private void MarkContributionDirty() {
+            if (_pendingGeneratedDocumentEquivalents <= 0d && _pendingCreditedIncome.IsZero) return;
+            _contributionDirty = true;
+        }
+
+        private void MaterializePendingContributions(bool notify) {
+            if (_completed.Count > 0) {
+                if (_pendingGeneratedDocumentEquivalents > 0d) {
+                    int count = Math.Min(_completed.Count, _generationAttributionShares.Length);
+                    for (int index = 0; index < count; index++) {
+                        double share = _generationAttributionShares[index];
+                        if (share <= 0d) continue;
+                        double attributed = SaturatingMultiplyPositive(
+                            _pendingGeneratedDocumentEquivalents,
+                            share);
+                        _completed[index].AdditionalGeneratedDocuments = SaturatingAddPositive(
+                            _completed[index].AdditionalGeneratedDocuments,
+                            attributed);
+                    }
+                }
+
+                if (!_pendingCreditedIncome.IsZero) {
+                    int count = Math.Min(_completed.Count, _incomeAttributionShares.Length);
+                    for (int index = 0; index < count; index++) {
+                        double share = _incomeAttributionShares[index];
+                        if (share <= 0d) continue;
+                        _completed[index].AdditionalIncome += MultiplyValueSafely(_pendingCreditedIncome, share);
+                    }
+                }
+            }
+
+            bool changed = _pendingGeneratedDocumentEquivalents > 0d || !_pendingCreditedIncome.IsZero;
+            _pendingGeneratedDocumentEquivalents = 0d;
+            _pendingCreditedIncome = Value.Zero;
+            _contributionDirty = false;
+            _contributionNotificationDelay = 0f;
+            if (notify && changed) NotifyChanged();
+        }
+
+        private void RebuildAttributionShares() {
+            _generationAttributionShares = BuildGenerationAttributionShares();
+            _incomeAttributionShares = BuildIncomeAttributionShares();
+            _generationAttributionShareSum = SumShares(_generationAttributionShares);
+            _incomeAttributionShareSum = SumShares(_incomeAttributionShares);
+        }
+
+        private double[] BuildGenerationAttributionShares() {
+            var shares = new double[_completed.Count];
+            if (_completed.Count == 0 || _generationCalculator == null || !_postInitialized) return shares;
+
+            GenerationEntries current = _generationCalculator.CalculateUpgradeOnly();
+            var marginals = new double[_completed.Count];
+            double positiveTotal = 0d;
+            for (int index = 0; index < _completed.Count; index++) {
+                GenerationEntries next = BillCompletionModifierEvaluator.ApplySingle(
+                    current,
+                    _completed[index],
+                    _billData.Value);
+                double marginal = Math.Max(0d, (double)next.TokenPerSecond - current.TokenPerSecond);
+                if (!double.IsNaN(marginal) && !double.IsInfinity(marginal)) {
+                    marginals[index] = marginal;
+                    positiveTotal = SaturatingAddPositive(positiveTotal, marginal);
+                }
+                current = next;
+            }
+
+            double denominator = Math.Max(positiveTotal, Math.Max(0d, current.TokenPerSecond));
+            if (denominator <= 0d || double.IsInfinity(denominator)) return shares;
+            for (int index = 0; index < shares.Length; index++) shares[index] = marginals[index] / denominator;
+            return shares;
+        }
+
+        private double[] BuildIncomeAttributionShares() {
+            var shares = new double[_completed.Count];
+            if (_completed.Count == 0 || _incomeCalculator == null || !_postInitialized) return shares;
+
+            IncomeEntries current = _incomeCalculator.CalculateUpgradeOnly();
+            var marginals = new Value[_completed.Count];
+            Value positiveTotal = Value.Zero;
+            for (int index = 0; index < _completed.Count; index++) {
+                IncomeEntries next = BillCompletionModifierEvaluator.ApplySingle(
+                    current,
+                    _completed[index],
+                    _billData.Value);
+                if (next.IncomePerDocument > current.IncomePerDocument) {
+                    Value marginal = (next.IncomePerDocument - current.IncomePerDocument).Value;
+                    marginals[index] = marginal;
+                    positiveTotal += marginal;
+                }
+                current = next;
+            }
+
+            Value denominator = positiveTotal > current.IncomePerDocument
+                ? positiveTotal
+                : current.IncomePerDocument;
+            if (denominator.IsZero) return shares;
+            for (int index = 0; index < shares.Length; index++) {
+                shares[index] = ResolveValueRatio(marginals[index], denominator);
+            }
+            return shares;
+        }
+
+        private static double ResolveValueRatio(Value numerator, Value denominator) {
+            if (numerator.IsZero || denominator.IsZero || numerator > denominator) return numerator > denominator ? 1d : 0d;
+            double logarithm = numerator.ToLog10() - denominator.ToLog10();
+            if (double.IsNaN(logarithm)) return 0d;
+            if (logarithm >= 0d) return 1d;
+            if (logarithm < -324d) return 0d;
+            return Math.Clamp(Math.Pow(10d, logarithm), 0d, 1d);
+        }
+
+        private static double SumShares(double[] shares) {
+            double result = 0d;
+            for (int index = 0; index < shares.Length; index++) result += Math.Max(0d, shares[index]);
+            return Math.Min(1d, result);
         }
 
         private void NotifyChanged() => _changed.OnNext(Unit.Default);
@@ -1026,6 +1382,13 @@ namespace Services {
             _completed.Clear();
             _pending = null;
             _deferredRestore = null;
+            _requirementPresentation.Clear();
+            _generationAttributionShares = Array.Empty<double>();
+            _incomeAttributionShares = Array.Empty<double>();
+            _generationAttributionShareSum = 0d;
+            _incomeAttributionShareSum = 0d;
+            _pendingGeneratedDocumentEquivalents = 0d;
+            _pendingCreditedIncome = Value.Zero;
         }
 
         internal readonly struct BillDocumentClaim {

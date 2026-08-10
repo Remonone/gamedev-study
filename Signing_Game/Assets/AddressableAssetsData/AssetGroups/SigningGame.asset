@@ -57,6 +57,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - bill_catalog
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b490b4446562efae5ba5231c4c4ded7b
+    m_Address: Assets/_SigningGame/Data/Upgrades/Bill/Bill.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bdaba90eb1534a3f0be70b578f091b7d
     m_Address: Assets/_SigningGame/Data/Difficulty.asset
     m_ReadOnly: 0

@@ -4,6 +4,13 @@ using UnityEngine;
 using Utils;
 
 namespace Data.Bills {
+    [Serializable]
+    public struct BillModifierPresentation {
+        public string ModifierId;
+        public string Label;
+        [TextArea] public string Description;
+    }
+
     [CreateAssetMenu(menuName = "Bills/Reward", fileName = "Bill Reward")]
     public sealed class BillRewardDefinition : ScriptableObject {
         public string Id;
@@ -24,5 +31,6 @@ namespace Data.Bills {
         [Header("On completion")]
         public Value MoneyReward;
         public ModifierDefinition[] CompletionModifiers = Array.Empty<ModifierDefinition>();
+        public BillModifierPresentation[] ModifierPresentations = Array.Empty<BillModifierPresentation>();
     }
 }

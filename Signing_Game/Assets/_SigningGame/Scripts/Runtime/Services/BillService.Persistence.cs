@@ -9,6 +9,7 @@ using Utils;
 namespace Services {
     public sealed partial class BillService {
         public JToken Serialize() {
+            MaterializePendingContributions(false);
             var catalog = new JArray();
             for (int index = 0; index < _catalog.Count; index++) catalog.Add(SerializeOption(_catalog[index]));
 
@@ -22,18 +23,38 @@ namespace Services {
                     ["weight"] = bill.Weight,
                     ["schedulerCurrentWeight"] = bill.SchedulerCurrentWeight,
                     ["activationOrder"] = bill.ActivationOrder,
-                    ["baseRewardStrength"] = bill.SavedBaseRewardStrength
+                    ["baseRewardStrength"] = bill.SavedBaseRewardStrength,
+                    ["paidStored"] = bill.PaidCost.Stored,
+                    ["paidDegree"] = bill.PaidCost.Base.Degree,
+                    ["elapsedWorkSeconds"] = bill.ElapsedWorkSeconds,
+                    ["processedDocumentCount"] = bill.ProcessedDocumentCount,
+                    ["hasCompleteWorkStatistics"] = bill.HasCompleteWorkStatistics
                 });
             }
 
             var completed = new JArray();
             for (int index = 0; index < _completed.Count; index++) {
                 BillCompletionRecord completion = _completed[index];
-                completed.Add(new JObject {
+                var data = new JObject {
                     ["rewardId"] = completion.Reward.Id,
                     ["baseRewardStrength"] = completion.SavedBaseRewardStrength,
-                    ["completionOrder"] = completion.CompletionOrder
-                });
+                    ["completionOrder"] = completion.CompletionOrder,
+                    ["additionalGeneratedDocuments"] = completion.AdditionalGeneratedDocuments,
+                    ["additionalIncomeStored"] = completion.AdditionalIncome.Stored,
+                    ["additionalIncomeDegree"] = completion.AdditionalIncome.Base.Degree
+                };
+                if (completion.Option != null) {
+                    data["option"] = SerializeOption(completion.Option);
+                    data["paidStored"] = completion.PaidCost.Stored;
+                    data["paidDegree"] = completion.PaidCost.Base.Degree;
+                    data["elapsedWorkSeconds"] = completion.ElapsedWorkSeconds;
+                    data["processedDocumentCount"] = completion.ProcessedDocumentCount;
+                    data["hasCompleteWorkStatistics"] = completion.HasCompleteWorkStatistics;
+                    data["payoutStored"] = completion.ActualCompletionPayout.Stored;
+                    data["payoutDegree"] = completion.ActualCompletionPayout.Base.Degree;
+                    data["hasCompletionPayout"] = completion.HasCompletionPayout;
+                }
+                completed.Add(data);
             }
 
             JObject pending = null;
@@ -85,7 +106,21 @@ namespace Services {
                 if (!completedOrders.Add(data.CompletionOrder)) {
                     throw new JsonSerializationException("Duplicate bill completion order.");
                 }
-                nextCompleted.Add(new BillCompletionRecord(reward, data.BaseRewardStrength, data.CompletionOrder));
+                GeneratedBillOption option = data.Option == null ? null : MaterializeOption(data.Option);
+                if (data.Option != null && (option == null || option.Reward != reward)) continue;
+                nextCompleted.Add(new BillCompletionRecord(
+                    option,
+                    reward,
+                    data.BaseRewardStrength,
+                    data.CompletionOrder,
+                    data.PaidCost,
+                    data.ElapsedWorkSeconds,
+                    data.ProcessedDocumentCount,
+                    data.HasCompleteWorkStatistics,
+                    data.ActualCompletionPayout,
+                    data.HasCompletionPayout,
+                    data.AdditionalGeneratedDocuments,
+                    data.AdditionalIncome));
             }
             nextCompleted.Sort((left, right) => left.CompletionOrder.CompareTo(right.CompletionOrder));
 
@@ -109,7 +144,11 @@ namespace Services {
                     Math.Clamp(data.Weight, 1, ResolveMaximumPriorityWeight(entries)),
                     data.SchedulerCurrentWeight,
                     data.ActivationOrder,
-                    data.BaseRewardStrength));
+                    data.BaseRewardStrength,
+                    data.PaidCost,
+                    data.ElapsedWorkSeconds,
+                    data.ProcessedDocumentCount,
+                    data.HasCompleteWorkStatistics));
             }
 
             PendingBillState nextPending = null;
@@ -138,13 +177,17 @@ namespace Services {
             int unlockedQuality = ResolveCandidateUnlockedQuality(nextCompleted, entries);
             ExternalState external = CaptureExternalState(unlockedQuality);
             int desiredCount = Math.Min(ResolveCatalogSize(entries), CountEligibleRewards(candidate));
-            bool restoredCatalogValid = _rewards.Count == 0
+            bool suppressed = ShouldSuppressCatalog(candidate, entries);
+            bool restoredCatalogValid = suppressed
                 ? nextCatalog.Count == 0
-                : nextCatalog.Count == desiredCount &&
-                  IsCatalogValidForState(nextCatalog, candidate, entries, external);
+                : _rewards.Count == 0
+                    ? nextCatalog.Count == 0
+                    : nextCatalog.Count == desiredCount &&
+                      IsCatalogValidForState(nextCatalog, candidate, entries, external);
 
             CatalogBuild build;
-            if (restoredCatalogValid) {
+            if (restoredCatalogValid || suppressed) {
+                if (suppressed) nextCatalog.Clear();
                 build = new CatalogBuild(nextCatalog, random, restored.NextOptionId, true);
             }
             else if (_rewards.Count == 0) {
@@ -171,6 +214,10 @@ namespace Services {
                     InvalidateCompletionGroups(reward);
                 }
                 InvalidateAllCompletionGroups();
+                _pendingGeneratedDocumentEquivalents = 0d;
+                _pendingCreditedIncome = Value.Zero;
+                _contributionDirty = false;
+                RebuildAttributionShares();
             }
             finally {
                 _isMutating = false;
@@ -304,6 +351,25 @@ namespace Services {
                     !TryReadNumber(data["baseRewardStrength"], out double strength) || strength <= 0d) {
                     throw new JsonSerializationException("Active bill state is invalid.");
                 }
+                bool hasAnyWorkField = HasAnyProperty(data,
+                    "paidStored", "paidDegree", "elapsedWorkSeconds", "processedDocumentCount",
+                    "hasCompleteWorkStatistics");
+                Value paidCost = Value.Zero;
+                double elapsedWorkSeconds = 0d;
+                int processedDocumentCount = 0;
+                bool hasCompleteWorkStatistics = false;
+                if (hasAnyWorkField &&
+                    (!TryReadValue(data["paidStored"], data["paidDegree"], true, out paidCost) ||
+                     !TryReadNumber(data["elapsedWorkSeconds"], out elapsedWorkSeconds) ||
+                     elapsedWorkSeconds < 0d ||
+                     data["processedDocumentCount"]?.Type != JTokenType.Integer ||
+                     (processedDocumentCount = data["processedDocumentCount"].Value<int>()) < 0 ||
+                     data["hasCompleteWorkStatistics"]?.Type != JTokenType.Boolean)) {
+                    throw new JsonSerializationException("Active bill work statistics are incomplete or invalid.");
+                }
+                if (hasAnyWorkField) {
+                    hasCompleteWorkStatistics = data["hasCompleteWorkStatistics"].Value<bool>();
+                }
                 int weight = data["weight"].Value<int>();
                 if (weight < 1 || !instanceIds.Add(instanceId)) {
                     throw new JsonSerializationException("Active bill IDs and weights must be valid and unique.");
@@ -316,7 +382,8 @@ namespace Services {
                 if (!optionIds.Add(option.OptionId)) throw new JsonSerializationException("Duplicate bill option ID.");
                 restored.Active.Add(new ActiveRestore(
                     instanceId, option, progress, weight, schedulerCurrentWeight,
-                    activationOrder, strength));
+                    activationOrder, strength, paidCost, elapsedWorkSeconds,
+                    processedDocumentCount, hasCompleteWorkStatistics));
             }
 
             var completionOrders = new HashSet<long>();
@@ -333,7 +400,67 @@ namespace Services {
                 if (!completionOrders.Add(completionOrder)) {
                     throw new JsonSerializationException("Duplicate bill completion order.");
                 }
-                restored.Completed.Add(new CompletionRestore(rewardId, strength, completionOrder));
+
+                bool hasAnyHistoryField = HasAnyProperty(data,
+                    "option", "paidStored", "paidDegree", "elapsedWorkSeconds",
+                    "processedDocumentCount", "hasCompleteWorkStatistics", "payoutStored",
+                    "payoutDegree", "hasCompletionPayout");
+                OptionRestore completionOption = null;
+                Value paidCost = Value.Zero;
+                double elapsedWorkSeconds = 0d;
+                int processedDocumentCount = 0;
+                bool hasCompleteWorkStatistics = false;
+                Value payout = Value.Zero;
+                bool hasCompletionPayout = false;
+                if (hasAnyHistoryField) {
+                    if (data["option"] == null ||
+                        !TryReadValue(data["paidStored"], data["paidDegree"], true, out paidCost) ||
+                        !TryReadNumber(data["elapsedWorkSeconds"], out elapsedWorkSeconds) ||
+                        elapsedWorkSeconds < 0d ||
+                        data["processedDocumentCount"]?.Type != JTokenType.Integer ||
+                        (processedDocumentCount = data["processedDocumentCount"].Value<int>()) < 0 ||
+                        data["hasCompleteWorkStatistics"]?.Type != JTokenType.Boolean ||
+                        !TryReadValue(data["payoutStored"], data["payoutDegree"], true, out payout) ||
+                        data["hasCompletionPayout"]?.Type != JTokenType.Boolean) {
+                        throw new JsonSerializationException(
+                            "Completed bill historical statistics are incomplete or invalid.");
+                    }
+                    completionOption = ParseOption(data["option"]);
+                    if (!string.Equals(completionOption.RewardId, rewardId, StringComparison.Ordinal) ||
+                        !optionIds.Add(completionOption.OptionId)) {
+                        throw new JsonSerializationException(
+                            "Completed bill option is duplicated or does not match its reward.");
+                    }
+                    hasCompleteWorkStatistics = data["hasCompleteWorkStatistics"].Value<bool>();
+                    hasCompletionPayout = data["hasCompletionPayout"].Value<bool>();
+                }
+
+                bool hasAnyContributionField = HasAnyProperty(data,
+                    "additionalGeneratedDocuments", "additionalIncomeStored", "additionalIncomeDegree");
+                double additionalGeneratedDocuments = 0d;
+                Value additionalIncome = Value.Zero;
+                if (hasAnyContributionField &&
+                    (!TryReadNumber(data["additionalGeneratedDocuments"], out additionalGeneratedDocuments) ||
+                     additionalGeneratedDocuments < 0d ||
+                     !TryReadValue(data["additionalIncomeStored"], data["additionalIncomeDegree"], true,
+                         out additionalIncome))) {
+                    throw new JsonSerializationException(
+                        "Completed bill contribution statistics are incomplete or invalid.");
+                }
+
+                restored.Completed.Add(new CompletionRestore(
+                    rewardId,
+                    strength,
+                    completionOrder,
+                    completionOption,
+                    paidCost,
+                    elapsedWorkSeconds,
+                    processedDocumentCount,
+                    hasCompleteWorkStatistics,
+                    payout,
+                    hasCompletionPayout,
+                    additionalGeneratedDocuments,
+                    additionalIncome));
             }
             ValidateRestoreCounters(restored);
             return restored;
@@ -358,6 +485,9 @@ namespace Services {
 
             long maximumCompletionOrder = 0L;
             for (int index = 0; index < restored.Completed.Count; index++) {
+                if (restored.Completed[index].Option != null) {
+                    maximumOptionId = Math.Max(maximumOptionId, restored.Completed[index].Option.OptionId);
+                }
                 maximumCompletionOrder = Math.Max(maximumCompletionOrder, restored.Completed[index].CompletionOrder);
             }
 
@@ -435,6 +565,13 @@ namespace Services {
             if (candidate.Stored != stored || candidate.Base.Degree != degree) return false;
             value = candidate;
             return true;
+        }
+
+        private static bool HasAnyProperty(JObject data, params string[] names) {
+            for (int index = 0; index < names.Length; index++) {
+                if (data.Property(names[index]) != null) return true;
+            }
+            return false;
         }
 
         private static bool TryReadNumber(JToken token, out double value) {
@@ -532,6 +669,10 @@ namespace Services {
             public long SchedulerCurrentWeight { get; }
             public long ActivationOrder { get; }
             public double BaseRewardStrength { get; }
+            public Value PaidCost { get; }
+            public double ElapsedWorkSeconds { get; }
+            public int ProcessedDocumentCount { get; }
+            public bool HasCompleteWorkStatistics { get; }
 
             public ActiveRestore(
                 long instanceId,
@@ -540,7 +681,11 @@ namespace Services {
                 int weight,
                 long schedulerCurrentWeight,
                 long activationOrder,
-                double baseRewardStrength) {
+                double baseRewardStrength,
+                Value paidCost,
+                double elapsedWorkSeconds,
+                int processedDocumentCount,
+                bool hasCompleteWorkStatistics) {
                 InstanceId = instanceId;
                 Option = option;
                 Progress = progress;
@@ -548,6 +693,10 @@ namespace Services {
                 SchedulerCurrentWeight = schedulerCurrentWeight;
                 ActivationOrder = activationOrder;
                 BaseRewardStrength = baseRewardStrength;
+                PaidCost = paidCost;
+                ElapsedWorkSeconds = elapsedWorkSeconds;
+                ProcessedDocumentCount = processedDocumentCount;
+                HasCompleteWorkStatistics = hasCompleteWorkStatistics;
             }
         }
 
@@ -572,14 +721,45 @@ namespace Services {
             }
         }
 
-        private readonly struct CompletionRestore {
+        private sealed class CompletionRestore {
             public string RewardId { get; }
             public double BaseRewardStrength { get; }
             public long CompletionOrder { get; }
-            public CompletionRestore(string rewardId, double baseRewardStrength, long completionOrder) {
+            public OptionRestore Option { get; }
+            public Value PaidCost { get; }
+            public double ElapsedWorkSeconds { get; }
+            public int ProcessedDocumentCount { get; }
+            public bool HasCompleteWorkStatistics { get; }
+            public Value ActualCompletionPayout { get; }
+            public bool HasCompletionPayout { get; }
+            public double AdditionalGeneratedDocuments { get; }
+            public Value AdditionalIncome { get; }
+
+            public CompletionRestore(
+                string rewardId,
+                double baseRewardStrength,
+                long completionOrder,
+                OptionRestore option,
+                Value paidCost,
+                double elapsedWorkSeconds,
+                int processedDocumentCount,
+                bool hasCompleteWorkStatistics,
+                Value actualCompletionPayout,
+                bool hasCompletionPayout,
+                double additionalGeneratedDocuments,
+                Value additionalIncome) {
                 RewardId = rewardId;
                 BaseRewardStrength = baseRewardStrength;
                 CompletionOrder = completionOrder;
+                Option = option;
+                PaidCost = paidCost;
+                ElapsedWorkSeconds = elapsedWorkSeconds;
+                ProcessedDocumentCount = processedDocumentCount;
+                HasCompleteWorkStatistics = hasCompleteWorkStatistics;
+                ActualCompletionPayout = actualCompletionPayout;
+                HasCompletionPayout = hasCompletionPayout;
+                AdditionalGeneratedDocuments = additionalGeneratedDocuments;
+                AdditionalIncome = additionalIncome;
             }
         }
     }

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd96d47082b3c283fb781b11f1127e4c, type: 3}
+  m_Name: Income
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRewardDefinition
+  Id: income_bill
+  Name: Income bill
+  Description: Increase income by ${incomeBill}%
+  Icon: {fileID: 0}
+  BaseCost:
+    _stored: 150
+    _base:
+      Degree: 0
+  BaseRequiredProgress: 250
+  MinimumRequirementCount: 1
+  MaximumRequirementCount: 1
+  Repeatable: 1
+  BaseActiveGenerationBonus: 0.3
+  MoneyReward:
+    _stored: 0
+    _base:
+      Degree: 0
+  CompletionModifiers:
+  - {fileID: 11400000, guid: 99a527bee5ba7743fb7ca8bbf096a9ff, type: 2}
+  ModifierPresentations:
+  - ModifierId: numeric_income_bill
+    Label: incomeBill
+    Description: 

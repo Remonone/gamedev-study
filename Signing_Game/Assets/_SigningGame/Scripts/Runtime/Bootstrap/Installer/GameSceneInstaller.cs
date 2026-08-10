@@ -40,7 +40,8 @@ namespace Bootstrap.Installer {
             container.Register(new ClerkHireDocumentProducer());
             container.Register(new ClerkSalaryReviewDocumentProducer());
             container.Register(new BillService());
-            container.Register(typeof(BillDocumentProducer), new BillDocumentProducer());
+            var billDocumentProducer = new BillDocumentProducer();
+            container.Register(billDocumentProducer, typeof(IDocumentProducer));
             container.Register(new PlayerSignatureAcceptor());
         }
 

@@ -10,11 +10,21 @@ using Services.Locator;
 using UnityEngine;
 
 namespace Services {
+    public readonly struct GenerationWork {
+        public double DeltaPoints { get; }
+        public double TokenPerSecond { get; }
+
+        public GenerationWork(double deltaPoints, double tokenPerSecond) {
+            DeltaPoints = deltaPoints;
+            TokenPerSecond = tokenPerSecond;
+        }
+    }
+
     public class DocumentGeneratorService : IService, IInitialize, IPostInitialize, ISaveable {
 
         private PlayerStatStash _stash;
 
-        private const float RequiredPointsForDocument = 10f;
+        public const float PointsPerDocument = 10f;
 
         private float _currentPoint;
         private int _documentQuantity = 1;
@@ -30,6 +40,8 @@ namespace Services {
 
         private readonly ReactiveProperty<int> _documentCount = new(1);
         private readonly Subject<Unit> _documentAdded = new();
+        private readonly Subject<GenerationWork> _generationWork = new();
+        private readonly Subject<int> _documentsGenerated = new();
 
         public string SaveId => "document_generator";
 
@@ -37,6 +49,8 @@ namespace Services {
         public int DocumentQuantity => _documentQuantity;
 
         public Observable<Unit> DocumentAdded => _documentAdded;
+        public Observable<GenerationWork> WorkGenerated => _generationWork;
+        public Observable<int> DocumentsGenerated => _documentsGenerated;
 
         private readonly CompositeDisposable _disposables = new();
 
@@ -45,6 +59,8 @@ namespace Services {
             _currentProgress.Dispose();
             _documentCount.Dispose();
             _documentAdded.Dispose();
+            _generationWork.Dispose();
+            _documentsGenerated.Dispose();
             _disposables.Dispose();
         }
 
@@ -61,18 +77,23 @@ namespace Services {
 
         private void OnUpdate(float dt) {
             var tokenPerSecond = _generatorCache.Value.TokenPerSecond;
-            _currentPoint += dt * tokenPerSecond;
+            double deltaPoints = Math.Max(0d, (double)dt * tokenPerSecond);
+            if (deltaPoints > 0d && !double.IsInfinity(deltaPoints) && !double.IsNaN(deltaPoints)) {
+                _generationWork.OnNext(new GenerationWork(deltaPoints, tokenPerSecond));
+            }
+            _currentPoint += (float)deltaPoints;
 
-            int generatedDocuments = Mathf.FloorToInt(_currentPoint / RequiredPointsForDocument);
+            int generatedDocuments = Mathf.FloorToInt(_currentPoint / PointsPerDocument);
 
             if (generatedDocuments > 0) {
-                _currentPoint -= generatedDocuments * RequiredPointsForDocument;
+                _currentPoint -= generatedDocuments * PointsPerDocument;
                 _documentQuantity += generatedDocuments;
                 _documentCount.Value = _documentQuantity;
                 _documentAdded.OnNext(Unit.Default);
+                _documentsGenerated.OnNext(generatedDocuments);
             }
 
-            _currentProgress.Value = _currentPoint / RequiredPointsForDocument;
+            _currentProgress.Value = _currentPoint / PointsPerDocument;
         }
 
         public bool TryObtainDocument() {
@@ -124,7 +145,7 @@ namespace Services {
 
             int documentQuantity = data["documentQuantity"].Value<int>();
             bool invalidPoints = float.IsNaN(currentPoints) || float.IsInfinity(currentPoints) ||
-                                 currentPoints < 0f || currentPoints >= RequiredPointsForDocument;
+                                  currentPoints < 0f || currentPoints >= PointsPerDocument;
             if (documentQuantity < 0 || invalidPoints) {
                 throw new JsonSerializationException("Document generator save data contains values outside valid ranges.");
             }
@@ -133,7 +154,7 @@ namespace Services {
             _documentQuantity = documentQuantity;
             _currentPoint = currentPoints;
             _documentCount.Value = _documentQuantity;
-            _currentProgress.Value = _currentPoint / RequiredPointsForDocument;
+            _currentProgress.Value = _currentPoint / PointsPerDocument;
         }
 
         private static bool TryReadNumber(JToken token, out float value) {
