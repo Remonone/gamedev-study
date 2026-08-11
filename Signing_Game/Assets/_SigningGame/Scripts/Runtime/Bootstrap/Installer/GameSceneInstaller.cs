@@ -23,7 +23,6 @@ namespace Bootstrap.Installer {
             container.Register(modifierStorage);
             container.Register<IModifierService>(new ModifierService());
             container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
-            container.Register(new DocumentSpawnerService());
             container.Register(new MoneyAggregator());
             container.Register(new DocumentGeneratorService());
             container.Register(new WalletService());

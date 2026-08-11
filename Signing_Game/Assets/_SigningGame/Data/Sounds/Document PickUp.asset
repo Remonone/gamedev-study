@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463e0c7bb2424725b60138f3d592c6ba, type: 3}
+  m_Name: Document PickUp
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Sound.AudioCue
+  _clips:
+  - {fileID: 8300000, guid: 74343ab2aed4444f9a9fc4e4715d14c0, type: 3}
+  - {fileID: 8300000, guid: 08ed07b516f8c4495a9d6eb16976b7ff, type: 3}
+  - {fileID: 8300000, guid: 55e7b3c04a6e440beafbe477b86ec00f, type: 3}
+  - {fileID: 8300000, guid: 9faa99a919650491f8e55281fe0115d1, type: 3}
+  - {fileID: 8300000, guid: 422352be018cf406bbe29b77a9810134, type: 3}
+  _volume: 1
+  _pitchRange: {x: 0.9, y: 1.1}

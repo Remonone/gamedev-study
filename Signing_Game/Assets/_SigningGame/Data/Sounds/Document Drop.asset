@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463e0c7bb2424725b60138f3d592c6ba, type: 3}
+  m_Name: Document Drop
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Sound.AudioCue
+  _clips:
+  - {fileID: 8300000, guid: 31b2a49f532124a4a98fc665bcf81c09, type: 3}
+  - {fileID: 8300000, guid: d423a61702f96423da5b296a6a1729e2, type: 3}
+  - {fileID: 8300000, guid: 8f0d23ef3504a4b6e91fa44b1a38611e, type: 3}
+  - {fileID: 8300000, guid: 0906ae61d28ff40329fe2def38a0c867, type: 3}
+  - {fileID: 8300000, guid: 128be2b592c764246b6d0af400894526, type: 3}
+  _volume: 1
+  _pitchRange: {x: 0.9, y: 1.1}

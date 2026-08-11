@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463e0c7bb2424725b60138f3d592c6ba, type: 3}
+  m_Name: Slide Out
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Sound.AudioCue
+  _clips:
+  - {fileID: 8300000, guid: 62484df57fcb44688b8ca93f5d7021eb, type: 3}
+  - {fileID: 8300000, guid: 6d3fd7c7d4ffb4e1d92814d8480a21c2, type: 3}
+  - {fileID: 8300000, guid: dd5d3199072aa42b2acaec1a7881d67b, type: 3}
+  - {fileID: 8300000, guid: cc9c14c3bfaf74a7ebe3d3e600cd479f, type: 3}
+  - {fileID: 8300000, guid: b953a5fec0c364997bee08c989f5ff69, type: 3}
+  _volume: 1
+  _pitchRange: {x: 0.9, y: 1.2}

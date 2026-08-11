@@ -1,7 +1,10 @@
 using System;
 using Data.Documents;
 using Data.Input;
+using Data.Sound;
 using R3;
+using Services;
+using Services.Locator;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -20,9 +23,15 @@ namespace Presentation {
         [SerializeField] private TextMeshProUGUI _profileText;
         [SerializeField] private TextMeshProUGUI _amountText;
         [SerializeField] private TextMeshProUGUI _internalMultiplierText;
+        [SerializeField] private AudioCue _pickupCue;
+        [SerializeField] private AudioCue _dropCue;
+        [SerializeField] private AudioCue _drawCue;
 
         private DocumentViewModel _viewModel;
         private DispensedDocumentPresentation _presentation;
+        private AudioService _audioService;
+
+        private double _soundCooldown;
 
         public DocumentViewModel ViewModel => _viewModel;
 
@@ -89,7 +98,16 @@ namespace Presentation {
         }
 
         private void Awake() {
+            ServiceLocator.For(this).TryGet(out _audioService);
             _field.OnInput.Subscribe(OnDraw).AddTo(this);
+
+            if (TryGetComponent(out DocumentDragView dragView)) {
+                dragView.IsDragging.Subscribe(OnDraggingChanged).AddTo(this);
+            }
+        }
+
+        private void OnDraggingChanged(bool isDragging) {
+            _audioService?.PlaySfx(isDragging ? _pickupCue : _dropCue);
         }
 
         private void OnDraw(SignatureInputEvent e) {
@@ -109,6 +127,10 @@ namespace Presentation {
                 }
                 case SignatureInputEventType.PointAdded: {
                     _viewModel.AddPoint(point);
+                    if (_soundCooldown < Time.timeAsDouble) {
+                        _audioService?.PlaySfx(_drawCue);
+                        _soundCooldown = Time.timeAsDouble + (_drawCue.Clips.Length > 0 ? _drawCue.Clips[0].length : 0) * 0.85d;
+                    }
                     break;
                 }
                 case SignatureInputEventType.StrokeEnded: {

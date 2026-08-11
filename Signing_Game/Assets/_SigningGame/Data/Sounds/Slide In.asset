@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463e0c7bb2424725b60138f3d592c6ba, type: 3}
+  m_Name: Slide In
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Sound.AudioCue
+  _clips:
+  - {fileID: 8300000, guid: 428791a73274247a8895a62389f371b3, type: 3}
+  - {fileID: 8300000, guid: 66d2e742072e8468b832962221d72717, type: 3}
+  - {fileID: 8300000, guid: c8c186e1bb52d487c8a66edbf8b37e7f, type: 3}
+  - {fileID: 8300000, guid: 92ba36b63ff864b2285f17b070b3250e, type: 3}
+  - {fileID: 8300000, guid: 5de95d23bb68c495ab4e4bb84423c845, type: 3}
+  _volume: 0.956
+  _pitchRange: {x: 0.9, y: 1.2}

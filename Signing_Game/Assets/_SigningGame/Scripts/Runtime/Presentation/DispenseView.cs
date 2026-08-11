@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Documents;
+using Data.Sound;
 using DG.Tweening;
 using R3;
 using Services;
@@ -20,10 +21,13 @@ namespace Presentation {
         IPointerExitHandler {
         [SerializeField] private Transform _shallowDocumentRest;
         [SerializeField] private Transform _shallowDocumentActive;
+        [SerializeField] private AudioCue _documentSlideOut;
+        [SerializeField] private AudioCue _documentSlideIn;
 
         private DocumentView _activeDocument;
         private DocumentDispenser _dispenser;
         private DispenseViewModel _viewModel;
+        private AudioService _audioService;
         private DispensedDocumentPresentation _displayedPresentation;
         private DispensedDocumentPresentation _deferredPresentation;
         private IDisposable _viewModelObservation;
@@ -33,6 +37,7 @@ namespace Presentation {
         private bool _isPointerOverDocument;
         private bool _isRetreatScheduled;
         private bool _isAcquiring;
+        private bool _shouldPlayHideSound;
 
         public void OnPointerEnter(PointerEventData eventData) {
             _isPointerOverDispenseArea = true;
@@ -46,6 +51,7 @@ namespace Presentation {
 
         public UniTask PostInitializeAsync(IServiceScope scope) {
             _dispenser = scope.Get<DocumentDispenser>();
+            _audioService = scope.Get<AudioService>();
             var producers = new List<IDocumentProducer>();
             for (int index = 0; scope.TryGet(out IDocumentProducer producer, index); index++) {
                 producers.Add(producer);
@@ -108,6 +114,7 @@ namespace Presentation {
         private void SpawnOwnedDocument(DispensedDocumentPresentation presentation) {
             try {
                 _activeDocument = _dispenser.SpawnPreview(presentation);
+                _shouldPlayHideSound = true;
                 _displayedPresentation = presentation;
                 _activeDocument.transform.position = _shallowDocumentRest.position;
                 DocumentDragView dragView = GetDragView(_activeDocument);
@@ -178,6 +185,7 @@ namespace Presentation {
             GetDragView(released).SetBeginDragGate(null);
             ClearDocumentSubscriptions();
             _activeDocument = null;
+            _shouldPlayHideSound = false;
             _displayedPresentation = null;
             _isPointerOverDocument = false;
 
@@ -199,7 +207,7 @@ namespace Presentation {
                 !_displayedPresentation.IsAvailable) {
                 return;
             }
-
+            _audioService.PlayUI(_documentSlideOut);
             MoveActiveDocument(_shallowDocumentActive.position);
         }
 
@@ -214,7 +222,7 @@ namespace Presentation {
                 _isRetreatScheduled) {
                 return;
             }
-
+            if(_shouldPlayHideSound) _audioService.PlayUI(_documentSlideIn);
             _isRetreatScheduled = true;
             RetreatIfPointerStillLeftAsync().Forget();
         }

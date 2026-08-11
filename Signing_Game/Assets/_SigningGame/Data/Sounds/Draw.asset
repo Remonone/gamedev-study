@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463e0c7bb2424725b60138f3d592c6ba, type: 3}
+  m_Name: Draw
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Sound.AudioCue
+  _clips:
+  - {fileID: 8300000, guid: e99ba3ee1124b42ee93a5fe3208f5f98, type: 3}
+  - {fileID: 8300000, guid: b2dd4a6c555934de9ba1e86837e693ab, type: 3}
+  - {fileID: 8300000, guid: 37dd1c864fc4040a7a6868d49697891b, type: 3}
+  - {fileID: 8300000, guid: 329b83184454c4a569bca14847001005, type: 3}
+  - {fileID: 8300000, guid: 83ecb66aa96a54d6d99dd721829e75f0, type: 3}
+  _volume: 1
+  _pitchRange: {x: 0.8, y: 1}
