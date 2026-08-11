@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
+using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Bills;
 using Data.Cache;
 using Data.Documents;
 using Data.Enums;
+using Data.Formulas;
 using Data.Modifiers;
 using Data.Modifiers.Calculation;
 using Data.Modifiers.Numeric;
 using Data.Results;
 using Data.Rules;
+using Data.Upgrades;
 using NUnit.Framework;
 using Newtonsoft.Json.Linq;
 using R3;
@@ -376,12 +379,35 @@ namespace Tests.EditMode {
                 Is.EqualTo(-50d));
         }
 
+        [Test]
+        public void BankCompensation_RefundsActualPurchaseDebitWithoutChangingFrozenPrice() {
+            BillRewardDefinition reward = CreateReward("bank_compensation", repeatable: true, cost: 20d);
+            TestEnvironment environment = CreateEnvironment(
+                new[] { reward },
+                bankCompensationRatio: 0.25d);
+            CompleteUpgrade(environment.Upgrades, "bank_unlock");
+            Value balanceBefore = environment.Wallet.CurrentBalance;
+            int walletChanges = 0;
+            using IDisposable subscription = environment.Wallet.BalanceChanged.Subscribe(_ => walletChanges++);
+            walletChanges = 0;
+
+            bool purchased = environment.Bills.TryPurchase(environment.Bills.Catalog[0].OptionId);
+
+            Assert.That(purchased, Is.True);
+            Assert.That(environment.Bills.Pending, Is.Not.Null);
+            Assert.That(environment.Bills.Pending.PaidCost.ToDouble(), Is.EqualTo(20d).Within(0.0001d));
+            Assert.That(environment.Bills.Catalog, Is.Empty);
+            Assert.That(environment.Wallet.CurrentBalance, Is.EqualTo(balanceBefore - new Value(15d)));
+            Assert.That(walletChanges, Is.EqualTo(1));
+        }
+
         private TestEnvironment CreateEnvironment(
             IReadOnlyList<BillRewardDefinition> rewards,
             BillEntries? configuredEntries = null,
             IReadOnlyList<BillRequirementTemplateDefinition> templates = null,
             DocumentEntries? configuredDocuments = null,
-            JToken deferredRestore = null) {
+            JToken deferredRestore = null,
+            double bankCompensationRatio = 0d) {
             var catalog = TrackObject(ScriptableObject.CreateInstance<BillCatalogDefinition>());
             catalog.Rewards = ToArray(rewards);
             catalog.RequirementTemplates = templates == null
@@ -392,7 +418,8 @@ namespace Tests.EditMode {
                 DocumentQualityLevel = 0,
                 SelectedDocumentQualityLevel = 0
             };
-            var provider = new FakeAssetProvider(catalog, documentReference);
+            UpgradeNodeDefinition bankUnlock = CreateUpgrade("bank_unlock", FeatureIds.Bank);
+            var provider = new FakeAssetProvider(catalog, documentReference, new[] { bankUnlock });
             var locatorObject = TrackObject(new GameObject("BillTestLocator", typeof(ServiceLocator)));
             var locator = locatorObject.GetComponent<ServiceLocator>();
             locator.Register<IAssetProvider>(provider);
@@ -402,6 +429,7 @@ namespace Tests.EditMode {
             var wallet = new WalletService();
             wallet.ReplenishWallet(new Value(100d));
             var upgrades = new UpgradeService(provider);
+            var unlocks = new UnlockService();
             var office = new OfficeService(() => 1f, Observable.Empty<float>());
             var accepted = new AcceptedNormalDocumentService();
             var storage = new ModifierStorage();
@@ -409,21 +437,32 @@ namespace Tests.EditMode {
             var modifierService = new ModifierService();
             var documentCalculator = new DocumentCacheCalculator();
             var stash = new PlayerStatStash();
+            var bank = new BankService(null, Observable.Empty<float>());
             var bills = new BillService(provider, new BillRandom(12345UL));
 
             BillEntries entries = configuredEntries ?? DefaultBillEntries();
-            Register(scope, cache, wallet, upgrades, office, accepted, storage, modifierService,
-                documentCalculator, stash, bills, entries);
+            var bankEntries = new BankEntries {
+                PayoutAmount = Value.One,
+                PayoutIntervalSeconds = 10f,
+                CriticalChance = 0f,
+                CriticalMultiplier = 2d,
+                BillCostCompensationRatio = bankCompensationRatio
+            };
+            Register(scope, cache, wallet, upgrades, unlocks, office, accepted, storage, modifierService,
+                documentCalculator, stash, bank, bills, entries, bankEntries);
             modifierService.InitializeAsync(scope).GetAwaiter().GetResult();
             upgrades.InitializeAsync(scope).GetAwaiter().GetResult();
+            SetAllAvailable(upgrades);
+            unlocks.InitializeAsync(scope).GetAwaiter().GetResult();
             documentCalculator.PreInitializeAsync(scope).GetAwaiter().GetResult();
             stash.PreInitializeAsync(scope).GetAwaiter().GetResult();
+            bank.InitializeAsync(scope).GetAwaiter().GetResult();
             storage.PostInitializeAsync(scope).GetAwaiter().GetResult();
             if (deferredRestore != null) bills.Deserialize(deferredRestore);
             bills.InitializeAsync(scope).GetAwaiter().GetResult();
             bills.PostInitializeAsync(scope).GetAwaiter().GetResult();
 
-            var environment = new TestEnvironment(scope, wallet, accepted, bills);
+            var environment = new TestEnvironment(scope, wallet, accepted, upgrades, bank, bills);
             _disposables.Add(environment);
             return environment;
         }
@@ -433,17 +472,21 @@ namespace Tests.EditMode {
             CacheVersionService cache,
             WalletService wallet,
             UpgradeService upgrades,
+            UnlockService unlocks,
             OfficeService office,
             AcceptedNormalDocumentService accepted,
             ModifierStorage storage,
             ModifierService modifierService,
             DocumentCacheCalculator documentCalculator,
             PlayerStatStash stash,
+            BankService bank,
             BillService bills,
-            BillEntries entries) {
+            BillEntries entries,
+            BankEntries bankEntries) {
             scope.Register(cache, typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
             scope.Register(wallet);
             scope.Register(upgrades);
+            scope.Register(unlocks);
             scope.Register(office);
             scope.Register(accepted);
             scope.Register(storage);
@@ -457,9 +500,12 @@ namespace Tests.EditMode {
                 typeof(ICacheCalculator<SignatureEntries>));
             scope.Register(new StaticCalculator<OfficeEntries>(default),
                 typeof(ICacheCalculator<OfficeEntries>));
+            scope.Register(new StaticCalculator<BankEntries>(bankEntries),
+                typeof(ICacheCalculator<BankEntries>));
             scope.Register(new StaticCalculator<BillEntries>(entries),
                 typeof(ICacheCalculator<BillEntries>));
             scope.Register(stash);
+            scope.Register(bank);
             scope.Register(bills);
         }
 
@@ -514,6 +560,19 @@ namespace Tests.EditMode {
             return definition;
         }
 
+        private UpgradeNodeDefinition CreateUpgrade(string id, params string[] featureIds) {
+            var definition = TrackObject(ScriptableObject.CreateInstance<UpgradeNodeDefinition>());
+            definition.Id = id;
+            definition.Name = id;
+            definition.MaxLevel = 1;
+            definition.CostFormula = new ConstantValue { Value = Value.One };
+            definition.Modifiers = Array.Empty<ModifierDefinition>();
+            definition.FeatureUnlockIds = featureIds;
+            definition.StatisticRequirements = Array.Empty<GameStatisticRequirement>();
+            definition.Children = Array.Empty<UpgradeNodeLink>();
+            return definition;
+        }
+
         private static BillEntries DefaultBillEntries() {
             return new BillEntries {
                 CatalogSize = 3,
@@ -543,6 +602,21 @@ namespace Tests.EditMode {
                 similarity,
                 minimum,
                 null);
+        }
+
+        private static void SetAllAvailable(UpgradeService upgrades) {
+            var availability = new Dictionary<string, bool>(StringComparer.Ordinal);
+            foreach (UpgradeNodeState state in upgrades.Nodes) availability.Add(state.Definition.Id, true);
+            upgrades.ApplyAvailabilityBatch(availability);
+        }
+
+        private static void CompleteUpgrade(UpgradeService upgrades, string id) {
+            Assert.That(upgrades.TryUpgrade(id), Is.True);
+            Assert.That(upgrades.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim), Is.True);
+            Assert.That(upgrades.TryCompletePendingUpgrade(claim, Evaluation(
+                SignatureEvaluationStatus.Accepted,
+                1f,
+                0.4f)), Is.True);
         }
 
         private static BillRewardDefinition[] ToArray(IReadOnlyList<BillRewardDefinition> values) {
@@ -579,16 +653,22 @@ namespace Tests.EditMode {
             public ServiceScope Scope { get; }
             public WalletService Wallet { get; }
             public AcceptedNormalDocumentService Accepted { get; }
+            public UpgradeService Upgrades { get; }
+            public BankService Bank { get; }
             public BillService Bills { get; }
 
             public TestEnvironment(
                 ServiceScope scope,
                 WalletService wallet,
                 AcceptedNormalDocumentService accepted,
+                UpgradeService upgrades,
+                BankService bank,
                 BillService bills) {
                 Scope = scope;
                 Wallet = wallet;
                 Accepted = accepted;
+                Upgrades = upgrades;
+                Bank = bank;
                 Bills = bills;
             }
 
@@ -605,10 +685,13 @@ namespace Tests.EditMode {
         private sealed class FakeAssetProvider : IAssetProvider, IService {
             private readonly BillCatalogDefinition _catalog;
             private readonly DocumentReference _documentReference;
+            private readonly IReadOnlyList<UpgradeNodeDefinition> _upgrades;
 
-            public FakeAssetProvider(BillCatalogDefinition catalog, DocumentReference documentReference) {
+            public FakeAssetProvider(BillCatalogDefinition catalog, DocumentReference documentReference,
+                IReadOnlyList<UpgradeNodeDefinition> upgrades) {
                 _catalog = catalog;
                 _documentReference = documentReference;
+                _upgrades = upgrades;
             }
 
             public UniTask<IAssetLease<T>> LoadAsync<T>(AssetReferenceT<T> reference) where T : UnityEngine.Object {
@@ -626,8 +709,12 @@ namespace Tests.EditMode {
                         new FakeAssetListLease<T>(new[] { (T)(object)_documentReference }));
                 }
                 if (typeof(T) == typeof(Data.Upgrades.UpgradeNodeDefinition)) {
+                    var upgrades = new T[_upgrades.Count];
+                    for (int index = 0; index < upgrades.Length; index++) {
+                        upgrades[index] = (T)(object)_upgrades[index];
+                    }
                     return UniTask.FromResult<IAssetListLease<T>>(
-                        new FakeAssetListLease<T>(Array.Empty<T>()));
+                        new FakeAssetListLease<T>(upgrades));
                 }
                 throw new NotSupportedException(typeof(T).FullName);
             }

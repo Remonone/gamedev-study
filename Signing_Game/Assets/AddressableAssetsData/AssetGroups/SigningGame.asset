@@ -93,6 +93,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18c94e4e41a2b46cbb09ea9e017a03b9
+    m_Address: Assets/_SigningGame/Data/Cache References/Bank Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab2642e70a6829cf5a50b90d3ac7b204
+    m_Address: Assets/_SigningGame/Data/Upgrades/Bank/Bank Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: f348fdc5e02b8f9058f94dda1c0b8b38, type: 2}
   m_SchemaSet:

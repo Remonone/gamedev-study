@@ -17,6 +17,7 @@ namespace Services {
         private CachedData<SignatureEntries> _signatureData;
         private CachedData<GenerationEntries> _generationData;
         private CachedData<OfficeEntries> _officeData;
+        private CachedData<BankEntries> _bankData;
         private CachedData<DocumentEntries> _documents;
         private CachedData<BillEntries> _bills;
         
@@ -24,6 +25,7 @@ namespace Services {
         public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
         public IReadOnlyCacheData<GenerationEntries> GenerationData => _generationData;
         public IReadOnlyCacheData<OfficeEntries> OfficeData => _officeData;
+        public IReadOnlyCacheData<BankEntries> BankData => _bankData;
         public IReadOnlyCacheData<DocumentEntries> Documents => _documents;
         public IReadOnlyCacheData<BillEntries> BillData => _bills;
         
@@ -57,6 +59,9 @@ namespace Services {
             _signatureData = _dataFactory.Create<SignatureEntries>();
             _generationData = _dataFactory.Create<GenerationEntries>();
             _officeData = _dataFactory.Create<OfficeEntries>();
+            if (scope.TryGet(out ICacheCalculator<BankEntries> bankCalculator)) {
+                _bankData = new CachedData<BankEntries>(versionProvider, bankCalculator);
+            }
             _documents = _dataFactory.Create<DocumentEntries>();
             if (scope.TryGet(out ICacheCalculator<BillEntries> billCalculator)) {
                 _bills = new CachedData<BillEntries>(versionProvider, billCalculator);

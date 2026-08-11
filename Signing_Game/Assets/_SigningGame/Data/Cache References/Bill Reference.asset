@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bill Reference
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Cache.BillReference
   Value:
-    CatalogSize: 3
+    CatalogSize: 2
     ActiveProjectLimit: 1
     CostMultiplier: 1
     OverallRewardMultiplier: 1

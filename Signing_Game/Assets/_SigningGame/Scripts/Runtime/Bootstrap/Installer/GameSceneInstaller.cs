@@ -33,6 +33,7 @@ namespace Bootstrap.Installer {
             container.Register(new UpgradeTreeService());
             container.Register(new DifficultyProfileEvaluator());
             container.Register(new PlayerStatStash());
+            container.Register(new BankService());
             container.Register(new AcceptedNormalDocumentService());
             container.Register(new NormalDocumentProducer());
             container.Register(new UpgradeDocumentProducer());

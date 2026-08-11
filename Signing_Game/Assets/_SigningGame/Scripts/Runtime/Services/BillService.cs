@@ -50,6 +50,7 @@ namespace Services {
         private AcceptedNormalDocumentService _acceptedDocuments;
         private DocumentGeneratorService _documentGenerator;
         private MoneyAggregator _moneyAggregator;
+        private BankService _bank;
 
         private double[] _generationAttributionShares = Array.Empty<double>();
         private double[] _incomeAttributionShares = Array.Empty<double>();
@@ -121,6 +122,7 @@ namespace Services {
             scope.TryGet(out _incomeCalculator);
             scope.TryGet(out _documentGenerator);
             scope.TryGet(out _moneyAggregator);
+            scope.TryGet(out _bank);
             _postInitialized = true;
 
             if (_deferredRestore != null) {
@@ -344,7 +346,13 @@ namespace Services {
 
             _isMutating = true;
             try {
+                Value balanceBefore = _wallet.CurrentBalance;
                 if (!_wallet.TryWithdrawWallet(price, false)) return false;
+                Value balanceAfterDebit = _wallet.CurrentBalance;
+                Value actuallyDebited = balanceBefore > balanceAfterDebit
+                    ? (balanceBefore - balanceAfterDebit).Value
+                    : Value.Zero;
+                _bank?.ApplyBillCostCompensation(actuallyDebited);
                 _pending = pending;
                 ReplaceCatalog(CreateSuppressedCatalogBuild());
                 InvalidateClaims();
