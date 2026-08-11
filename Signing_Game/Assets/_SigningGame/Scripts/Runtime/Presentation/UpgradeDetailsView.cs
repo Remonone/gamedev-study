@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Presentation {
@@ -13,9 +16,20 @@ namespace Presentation {
         [SerializeField] private TextMeshProUGUI _levelText;
         [SerializeField] private TextMeshProUGUI _priceText;
         [SerializeField] private Button _buyButton;
+        private readonly List<RaycastResult> _raycastResults = new();
         private UnityAction _buyAction;
 
         private void Awake() {
+            Hide();
+        }
+
+        private void Update() {
+            if (_panelRoot == null || !_panelRoot.activeInHierarchy || Pointer.current == null ||
+                !Pointer.current.press.wasPressedThisFrame) return;
+
+            Vector2 pointerPosition = Pointer.current.position.ReadValue();
+            if (IsPointerInsideDetails(pointerPosition) || IsPointerOverUpgrade(pointerPosition)) return;
+
             Hide();
         }
 
@@ -52,6 +66,28 @@ namespace Presentation {
 
         private void OnDestroy() {
             UnbindBuyButton();
+        }
+
+        private bool IsPointerInsideDetails(Vector2 pointerPosition) {
+            if (_panelRoot.transform is not RectTransform panelRect) return false;
+            Canvas canvas = panelRect.GetComponentInParent<Canvas>();
+            Camera eventCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+            return RectTransformUtility.RectangleContainsScreenPoint(panelRect, pointerPosition, eventCamera);
+        }
+
+        private bool IsPointerOverUpgrade(Vector2 pointerPosition) {
+            EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null) return false;
+
+            _raycastResults.Clear();
+            eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = pointerPosition }, _raycastResults);
+            for (int index = 0; index < _raycastResults.Count; index++) {
+                if (_raycastResults[index].gameObject.GetComponentInParent<UpgradeNodeView>() != null) return true;
+            }
+
+            return false;
         }
 
         private void UnbindBuyButton() {

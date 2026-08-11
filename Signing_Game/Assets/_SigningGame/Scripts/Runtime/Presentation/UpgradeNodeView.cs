@@ -9,7 +9,6 @@ namespace Presentation {
     public sealed class UpgradeNodeView : MonoBehaviour {
         [SerializeField] private Button _button;
         [SerializeField] private Image _icon;
-        [SerializeField] private TextMeshProUGUI _nameText;
         [SerializeField] private TextMeshProUGUI _levelText;
         [SerializeField] private GameObject _lockedOverlay;
         [SerializeField, Range(0f, 1f)] private float _lockedAlpha = 0.55f;
@@ -31,8 +30,7 @@ namespace Presentation {
                 _icon.sprite = model.Icon;
                 _icon.preserveAspect = true;
             }
-
-            if (_nameText != null) _nameText.text = model.Name;
+            
             if (_levelText != null) _levelText.text = model.LevelText;
             if (_lockedOverlay != null) _lockedOverlay.SetActive(!model.IsUnlocked);
             _canvasGroup.alpha = model.IsUnlocked ? 1f : _lockedAlpha;
