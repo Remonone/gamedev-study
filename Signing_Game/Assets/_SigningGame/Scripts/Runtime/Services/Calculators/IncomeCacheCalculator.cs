@@ -14,19 +14,22 @@ namespace Services.Calculators {
         private IAssetListLease<IncomeReference> _referenceLease;
         private IncomeReference _reference;
         private UpgradeModifierProvider _upgradeModifierProvider;
+        private PracticeModifierProvider _practiceModifierProvider;
         
         public IncomeEntries Calculate() {
             var income = _reference.Value;
             return _modifierService.Apply(income);
         }
 
-        internal IncomeEntries CalculateUpgradeOnly() {
-            return _upgradeModifierProvider.Collect(_reference.Value);
+        internal IncomeEntries CalculateWithoutBill() {
+            IncomeEntries result = _upgradeModifierProvider.Collect(_reference.Value);
+            return _practiceModifierProvider != null ? _practiceModifierProvider.Collect(result) : result;
         }
         
         public async UniTask PreInitializeAsync(IServiceScope scope) {
             _modifierService = scope.Get<IModifierService>();
             _upgradeModifierProvider = scope.Get<ModifierStorage>().GetProvider<UpgradeModifierProvider>();
+            scope.Get<ModifierStorage>().TryGetProvider(out _practiceModifierProvider);
             _assetProvider = scope.Container.Get<IAssetProvider>();
             _referenceLease = await _assetProvider.LoadAssetsByLabelAsync<IncomeReference>(AddressableConstants.CACHE_REFERENCE_LABEL);
             _reference = _referenceLease.Assets[0];

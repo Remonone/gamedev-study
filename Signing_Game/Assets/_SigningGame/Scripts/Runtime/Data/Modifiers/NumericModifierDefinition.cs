@@ -38,6 +38,28 @@ namespace Data.Modifiers {
             return PredefinedMetadataWrapperStorage.Get(_parameter.GroupId).EntryType;
         }
 
+        internal void ValidateConfiguration() {
+            if (string.IsNullOrWhiteSpace(_id)) {
+                throw new InvalidOperationException("A numeric modifier requires a non-empty ID.");
+            }
+            if (_value == null) {
+                throw new InvalidOperationException($"Numeric modifier '{_id}' has no value definition.");
+            }
+            if (!Enum.IsDefined(typeof(NumericModifierOperation), _operation)) {
+                throw new InvalidOperationException($"Numeric modifier '{_id}' has an unsupported operation value.");
+            }
+            if (_parameter == null || string.IsNullOrWhiteSpace(_parameter.GroupId) ||
+                string.IsNullOrWhiteSpace(_parameter.ParameterId)) {
+                throw new InvalidOperationException($"Numeric modifier '{_id}' has no target parameter.");
+            }
+            IModifiableWrapper wrapper = PredefinedMetadataWrapperStorage.Get(_parameter.GroupId);
+            if (!wrapper.TryGetParameter(_parameter.ParameterId, out _)) {
+                throw new InvalidOperationException(
+                    $"Numeric modifier '{_id}' targets unknown parameter '{_parameter.ParameterId}' " +
+                    $"in group '{_parameter.GroupId}'.");
+            }
+        }
+
         public TValue Apply<TValue>(
             TValue value,
             IModifierContext context,

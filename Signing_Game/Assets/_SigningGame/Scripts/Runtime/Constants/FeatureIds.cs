@@ -3,5 +3,6 @@ namespace Constants {
         public const string Office = "office";
         public const string BillCatalog = "bill_catalog";
         public const string Bank = "bank";
+        public const string Archive = "archive";
     }
 }

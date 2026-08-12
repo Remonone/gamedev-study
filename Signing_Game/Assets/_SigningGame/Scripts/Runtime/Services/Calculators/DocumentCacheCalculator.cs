@@ -25,8 +25,11 @@ namespace Services.Calculators {
             return _modifierService.Apply(income);
         }
 
-        internal DocumentEntries CalculateUpgradeOnly() {
-            return _modifierStorage.GetProvider<UpgradeModifierProvider>().Collect(_reference.Value);
+        internal DocumentEntries CalculateWithoutBill() {
+            DocumentEntries result = _modifierStorage.GetProvider<UpgradeModifierProvider>().Collect(_reference.Value);
+            return _modifierStorage.TryGetProvider(out PracticeModifierProvider practice)
+                ? practice.Collect(result)
+                : result;
         }
 
         public async UniTask PreInitializeAsync(IServiceScope scope) {

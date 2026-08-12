@@ -4,6 +4,7 @@ namespace Data.Documents {
         Upgrade = 1,
         ClerkHire = 2,
         ClerkSalaryReview = 3,
-        Bill = 4
+        Bill = 4,
+        Practice = 5
     }
 }

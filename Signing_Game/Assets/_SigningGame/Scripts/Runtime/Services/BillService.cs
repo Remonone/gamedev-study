@@ -937,8 +937,8 @@ namespace Services {
         private int ResolveCandidateUnlockedQuality(
             IReadOnlyList<BillCompletionRecord> completions,
             BillEntries entries) {
-            DocumentEntries upgradeOnly = _documentCalculator.CalculateUpgradeOnly();
-            DocumentEntries candidate = BillCompletionModifierEvaluator.Apply(upgradeOnly, completions, entries);
+            DocumentEntries baseline = _documentCalculator.CalculateWithoutBill();
+            DocumentEntries candidate = BillCompletionModifierEvaluator.Apply(baseline, completions, entries);
             return Math.Clamp(candidate.DocumentQualityLevel, 0, 9) + 1;
         }
 
@@ -1196,7 +1196,7 @@ namespace Services {
             var shares = new double[_completed.Count];
             if (_completed.Count == 0 || _generationCalculator == null || !_postInitialized) return shares;
 
-            GenerationEntries current = _generationCalculator.CalculateUpgradeOnly();
+            GenerationEntries current = _generationCalculator.CalculateWithoutBill();
             var marginals = new double[_completed.Count];
             double positiveTotal = 0d;
             for (int index = 0; index < _completed.Count; index++) {
@@ -1222,7 +1222,7 @@ namespace Services {
             var shares = new double[_completed.Count];
             if (_completed.Count == 0 || _incomeCalculator == null || !_postInitialized) return shares;
 
-            IncomeEntries current = _incomeCalculator.CalculateUpgradeOnly();
+            IncomeEntries current = _incomeCalculator.CalculateWithoutBill();
             var marginals = new Value[_completed.Count];
             Value positiveTotal = Value.Zero;
             for (int index = 0; index < _completed.Count; index++) {

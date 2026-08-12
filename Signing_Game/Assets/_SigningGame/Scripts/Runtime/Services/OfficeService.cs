@@ -754,7 +754,7 @@ namespace Services {
                 requested,
                 credited));
             if (accepted) {
-                _acceptedDocuments?.Report(NormalDocumentProcessingSource.Office, selectedQuality);
+                _acceptedDocuments?.Report(NormalDocumentProcessingSource.Office, selectedQuality, quality);
             }
             return accepted;
         }

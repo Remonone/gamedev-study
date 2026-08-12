@@ -20,6 +20,7 @@ namespace Services {
         private CachedData<BankEntries> _bankData;
         private CachedData<DocumentEntries> _documents;
         private CachedData<BillEntries> _bills;
+        private CachedData<ResearchEntries> _research;
         
         public IReadOnlyCacheData<IncomeEntries> IncomeData => _incomeData;
         public IReadOnlyCacheData<SignatureEntries> SignatureData => _signatureData;
@@ -28,6 +29,7 @@ namespace Services {
         public IReadOnlyCacheData<BankEntries> BankData => _bankData;
         public IReadOnlyCacheData<DocumentEntries> Documents => _documents;
         public IReadOnlyCacheData<BillEntries> BillData => _bills;
+        public IReadOnlyCacheData<ResearchEntries> ResearchData => _research;
         
         
         public void Dispose() {
@@ -65,6 +67,9 @@ namespace Services {
             _documents = _dataFactory.Create<DocumentEntries>();
             if (scope.TryGet(out ICacheCalculator<BillEntries> billCalculator)) {
                 _bills = new CachedData<BillEntries>(versionProvider, billCalculator);
+            }
+            if (scope.TryGet(out ICacheCalculator<ResearchEntries> researchCalculator)) {
+                _research = new CachedData<ResearchEntries>(versionProvider, researchCalculator);
             }
             return UniTask.CompletedTask;
         }

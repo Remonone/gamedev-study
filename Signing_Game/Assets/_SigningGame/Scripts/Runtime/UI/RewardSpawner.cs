@@ -150,6 +150,7 @@ namespace UI {
                 DocumentKind.Upgrade => "Upgraded",
                 DocumentKind.ClerkHire => "Hired",
                 DocumentKind.Bill => "Initiated",
+                DocumentKind.Practice => "Applied",
                 _ => "Approved"
             };
         }

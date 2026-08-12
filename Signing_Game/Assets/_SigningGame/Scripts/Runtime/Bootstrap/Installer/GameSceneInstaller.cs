@@ -19,6 +19,7 @@ namespace Bootstrap.Installer {
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
             var modifierStorage = new ModifierStorage();
             modifierStorage.RegisterProvider(new UpgradeModifierProvider());
+            modifierStorage.RegisterProvider(new PracticeModifierProvider());
             modifierStorage.RegisterProvider(new BillModifierProvider());
             container.Register(modifierStorage);
             container.Register<IModifierService>(new ModifierService());
@@ -42,6 +43,9 @@ namespace Bootstrap.Installer {
             container.Register(new BillService());
             var billDocumentProducer = new BillDocumentProducer();
             container.Register(billDocumentProducer, typeof(IDocumentProducer));
+            container.Register(new ResearchService());
+            var practiceDocumentProducer = new PracticeDocumentProducer();
+            container.Register(practiceDocumentProducer, typeof(IDocumentProducer));
             container.Register(new PlayerSignatureAcceptor());
         }
 

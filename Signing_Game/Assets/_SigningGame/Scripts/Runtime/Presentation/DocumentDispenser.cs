@@ -13,6 +13,7 @@ namespace Presentation {
         [SerializeField] private DocumentView _clerkHireDocumentPrefab;
         [SerializeField] private DocumentView _clerkSalaryReviewDocumentPrefab;
         [SerializeField] private DocumentView _billDocumentPrefab;
+        [SerializeField] private DocumentView _practiceDocumentPrefab;
         [SerializeField] private RectTransform _parent;
         [SerializeField] private Vector2 _anchoredSpawnPosition;
 
@@ -98,6 +99,7 @@ namespace Presentation {
                 DocumentKind.ClerkHire => _clerkHireDocumentPrefab,
                 DocumentKind.ClerkSalaryReview => _clerkSalaryReviewDocumentPrefab,
                 DocumentKind.Bill => _billDocumentPrefab,
+                DocumentKind.Practice => _practiceDocumentPrefab,
                 _ => null
             };
             if (prefab == null) {

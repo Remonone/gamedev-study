@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - cache_reference
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18c94e4e41a2b46cbb09ea9e017a03b9
+    m_Address: Assets/_SigningGame/Data/Cache References/Bank Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2a7bdc569ef3422b38610408a3a5dcf4
     m_Address: Assets/_SigningGame/Data/Upgrades/Test Upgrade/Upgrade Node.asset
     m_ReadOnly: 0
@@ -51,11 +57,35 @@ MonoBehaviour:
     m_SerializedLabels:
     - cache_reference
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 62b27d10280a9fab7bcd36713bcb5d7c
+    m_Address: Assets/_SigningGame/Data/Research/Research Catalog.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - research_catalog
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 75a64c9b8485661f18f5485d8ce6106f
+    m_Address: Assets/_SigningGame/Data/Upgrades/Archive/Archive Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96f86e4e5da51161bbcd8374178d8f54
     m_Address: Assets/_SigningGame/Data/Bills/Bill Catalog.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - bill_catalog
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 98f33e0939b7fd92e9dc1da7809dc0d7
+    m_Address: Assets/_SigningGame/Data/Research/Research Reference.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab2642e70a6829cf5a50b90d3ac7b204
+    m_Address: Assets/_SigningGame/Data/Upgrades/Bank/Bank Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b490b4446562efae5ba5231c4c4ded7b
     m_Address: Assets/_SigningGame/Data/Upgrades/Bill/Bill.asset
@@ -89,18 +119,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ee8077b5d710293fab66e0c40ecb1179
     m_Address: Assets/_SigningGame/Data/Upgrades/Office/Office Unlock.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - upgrades
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 18c94e4e41a2b46cbb09ea9e017a03b9
-    m_Address: Assets/_SigningGame/Data/Cache References/Bank Reference.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - cache_reference
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ab2642e70a6829cf5a50b90d3ac7b204
-    m_Address: Assets/_SigningGame/Data/Upgrades/Bank/Bank Unlock.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades

@@ -11,6 +11,7 @@ namespace Bootstrap.Installer {
             container.Register(new BankCacheCalculator());
             container.Register(new DocumentCacheCalculator());
             container.Register(new BillCacheCalculator());
+            container.Register(new ResearchCacheCalculator());
         }
     }
 }

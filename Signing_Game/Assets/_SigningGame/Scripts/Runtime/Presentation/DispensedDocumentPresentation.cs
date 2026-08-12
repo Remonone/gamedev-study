@@ -36,6 +36,7 @@ namespace Presentation {
                 DocumentKind.ClerkHire => "CLERK HIRE",
                 DocumentKind.ClerkSalaryReview => "SALARY REVIEW",
                 DocumentKind.Bill => offer.Header ?? "BILL",
+                DocumentKind.Practice => offer.Header ?? "PRACTICE",
                 _ => string.Empty
             };
             ProfileText = string.IsNullOrWhiteSpace(offer.PersonName)
@@ -47,6 +48,7 @@ namespace Presentation {
                 ? offer.Key.Kind switch {
                     DocumentKind.ClerkHire => $"Bid: {offer.Amount.Value}",
                     DocumentKind.Bill => $"Bill cost: {offer.Amount.Value}",
+                    DocumentKind.Practice => $"Practice value: {offer.Amount.Value}",
                     _ => $"Review cost: {offer.Amount.Value}"
                 }
                 : string.Empty;

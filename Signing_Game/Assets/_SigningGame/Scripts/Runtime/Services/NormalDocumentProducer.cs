@@ -116,7 +116,10 @@ namespace Services {
                         0,
                         9) + 1;
                     SendReward(result);
-                    _acceptedDocuments?.Report(NormalDocumentProcessingSource.Manual, selectedQuality);
+                    _acceptedDocuments?.Report(
+                        NormalDocumentProcessingSource.Manual,
+                        selectedQuality,
+                        result.Similarity);
                 }
                 return true;
             }
