@@ -12,17 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
-  Id: test_upgrade
-  Name: Test Upgrade
-  Description: 'Document generation: ${token_per_second}'
-  MaxLevel: 3
+  Id: income_upgrade
+  Name: 
+  Description: 
+  MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080302622474240
-  Modifiers:
-  - {fileID: 11400000, guid: a8a878f1935f0f75fa8a18a898d26672, type: 2}
+    rid: 841080497494818982
+  Modifiers: []
   FeatureUnlockIds: []
-  TreePosition: {x: 150, y: 150}
+  TreePosition: {x: 200, y: 240}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
@@ -31,14 +30,10 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 841080302622474240
-      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080497494818982
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        BaseValue:
-          _stored: 1
-          _base:
-            Degree: 0
-        Slope:
-          _stored: 1
+        Value:
+          _stored: 0
           _base:
             Degree: 0

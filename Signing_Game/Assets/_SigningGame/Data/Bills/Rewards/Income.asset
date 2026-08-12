@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRewardDefinition
   Id: income_bill
   Name: Income bill
-  Description: Increase income by ${incomeBill}%
+  Description: Increase income by ${numeric_income_bill}%
   Icon: {fileID: 0}
   BaseCost:
     _stored: 150

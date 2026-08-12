@@ -2,7 +2,8 @@
     "name": "SigningGame.Scripts.Editor",
     "rootNamespace": "",
     "references": [
-        "SigningGame.Scripts.Runtime"
+        "SigningGame.Scripts.Runtime",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

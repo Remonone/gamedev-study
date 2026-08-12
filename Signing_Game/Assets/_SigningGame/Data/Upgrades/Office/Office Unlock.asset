@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds:
   - office
-  TreePosition: {x: 0, y: 0}
+  TreePosition: {x: 280, y: 480}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

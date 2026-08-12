@@ -23,7 +23,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds:
   - bill_catalog
-  TreePosition: {x: 0, y: 150}
+  TreePosition: {x: 360, y: 480}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

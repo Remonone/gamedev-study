@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds:
   - archive
-  TreePosition: {x: 150, y: 300}
+  TreePosition: {x: 520, y: 480}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

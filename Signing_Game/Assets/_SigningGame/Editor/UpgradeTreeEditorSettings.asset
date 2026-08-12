@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c9941cc81c595cb0acdf565bf946f5e, type: 3}
+  m_Name: UpgradeTreeEditorSettings
+  m_EditorClassIdentifier: SigningGame.Scripts.Editor::SigningGame.Editor.UpgradeTree.UpgradeTreeEditorSettings
+  NodeSize: 72
+  IdFontSize: 12
+  GridSize: 40
+  NormalPathColor: {r: 0.3, g: 0.8, b: 1, a: 1}
+  HiddenPathColor: {r: 0.65, g: 0.5, b: 0.85, a: 1}
+  PhantomPathColor: {r: 1, g: 0.8, b: 0.25, a: 0.9}
+  UpgradeRootSuffix: _SigningGame/Data/Upgrades
+  AddressablesGroup: SigningGame
+  ExtraLabels: []
