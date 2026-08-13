@@ -66,9 +66,11 @@ namespace Data.Modifiers {
             bool allowOverdrive = false) {
             var wrapper = PredefinedMetadataWrapperStorage.Get(_parameter.GroupId);
             if (!wrapper.IsApplicable(value)) return value;
-            double effectiveness = context.TryGet(out ModifierEffectivenessCapability capability)
-                ? capability.Effectiveness
-                : 1d;
+            double effectiveness = _value.IncludesEffectiveness
+                ? 1d
+                : context.TryGet(out ModifierEffectivenessCapability capability)
+                    ? capability.Effectiveness
+                    : 1d;
             return (TValue)wrapper.Apply(
                 value,
                 _parameter.ParameterId,

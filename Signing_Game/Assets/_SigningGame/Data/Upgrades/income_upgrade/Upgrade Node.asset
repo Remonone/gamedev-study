@@ -13,15 +13,16 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: income_upgrade
-  Name: 
-  Description: 
-  MaxLevel: 0
+  Name: Processing Fee
+  Description: Increase income for processed documents by ${income_addition_upgrade}.
+  MaxLevel: 10
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080497494818982
-  Modifiers: []
+    rid: 841080518039568459
+  Modifiers:
+  - {fileID: 11400000, guid: 421118ca47f6d4b18a922c8bd1f31086, type: 2}
   FeatureUnlockIds: []
-  TreePosition: {x: 200, y: 240}
+  TreePosition: {x: 200, y: 640}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
@@ -30,10 +31,14 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 841080497494818982
-      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080518039568459
+      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        Value:
-          _stored: 0
+        BaseValue:
+          _stored: 20
+          _base:
+            Degree: 0
+        Slope:
+          _stored: 5
           _base:
             Degree: 0
