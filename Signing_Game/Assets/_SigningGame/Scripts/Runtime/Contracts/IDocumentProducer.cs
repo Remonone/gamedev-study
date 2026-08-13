@@ -19,9 +19,19 @@ namespace Contracts {
     }
 
     public interface IDocumentEvaluationPolicy {
-        DocumentEvaluationInputs Resolve(
-            SignatureDifficultyRules baseDifficulty,
-            SignatureRuleModifiers playerModifiers);
+        DocumentEvaluationInputs Resolve(SignatureDifficultyContext difficulty);
+    }
+
+    public readonly struct SignatureDifficultyContext {
+        public SignatureDifficultyRules ConfiguredDifficulty { get; }
+        public SignatureDifficultyRules EffectiveDifficulty { get; }
+
+        public SignatureDifficultyContext(
+            SignatureDifficultyRules configuredDifficulty,
+            SignatureDifficultyRules effectiveDifficulty) {
+            ConfiguredDifficulty = configuredDifficulty ?? throw new ArgumentNullException(nameof(configuredDifficulty));
+            EffectiveDifficulty = effectiveDifficulty ?? throw new ArgumentNullException(nameof(effectiveDifficulty));
+        }
     }
 
     public readonly struct DocumentEvaluationInputs {

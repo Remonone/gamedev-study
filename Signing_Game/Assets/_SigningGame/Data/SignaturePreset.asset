@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Authoring.SignaturePresetDefinition
   _id: signature_simple
   _strokeMatchMode: 0
+  _baseDifficultyProfile: {fileID: 11400000, guid: bdaba90eb1534a3f0be70b578f091b7d, type: 2}
   _alignment:
     _maximumTranslation: 0.1
     _minimumScale: 0.85

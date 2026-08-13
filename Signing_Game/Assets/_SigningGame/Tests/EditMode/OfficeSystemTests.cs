@@ -292,8 +292,9 @@ namespace Tests.EditMode {
             producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
             Assert.That(producer.TryProduce(out IDocumentSession first), Is.True);
             var baseRules = new SignatureDifficultyRules("base", 0.4f, 1f, 1f, 1f, null);
-            var playerModifiers = new SignatureRuleModifiers(2f, -0.2f, 2f, 2f, 2f);
-            DocumentEvaluationInputs inputs = first.EvaluationPolicy.Resolve(baseRules, playerModifiers);
+            var effectiveRules = baseRules with { MinimumSimilarity = 0.2f, CorridorWidthMultiplier = 2f };
+            DocumentEvaluationInputs inputs = first.EvaluationPolicy.Resolve(
+                new SignatureDifficultyContext(baseRules, effectiveRules));
             Assert.That(inputs.Difficulty, Is.SameAs(baseRules));
             Assert.That(inputs.Modifiers.MinimumSimilarityOffset, Is.Zero);
             first.Dispose();
@@ -707,8 +708,10 @@ namespace Tests.EditMode {
             reviewProducer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
             Assert.That(reviewProducer.TryProduce(out IDocumentSession released), Is.True);
             var baseRules = new SignatureDifficultyRules("base", 0.4f, 1f, 1f, 1f, null);
-            var playerModifiers = new SignatureRuleModifiers(2f, -0.2f, 2f, 2f, 2f);
-            DocumentEvaluationInputs inputs = released.EvaluationPolicy.Resolve(baseRules, playerModifiers);
+            var effectiveRules = baseRules with { MinimumSimilarity = 0.2f, CorridorWidthMultiplier = 2f };
+            DocumentEvaluationInputs inputs = released.EvaluationPolicy.Resolve(
+                new SignatureDifficultyContext(baseRules, effectiveRules));
+            Assert.That(inputs.Difficulty, Is.SameAs(baseRules));
             Assert.That(inputs.Modifiers.MinimumSimilarityOffset, Is.Zero);
             released.Dispose();
 

@@ -126,9 +126,10 @@ namespace Tests.EditMode {
             producer.InitializeAsync(GetScope(upgrades)).GetAwaiter().GetResult();
             Assert.That(producer.TryProduce(out IDocumentSession session), Is.True);
             var baseRules = new SignatureDifficultyRules("base", 0.4f, 1f, 1f, 1f, null);
-            var playerModifiers = new SignatureRuleModifiers(2f, -0.2f, 2f, 2f, 2f);
+            var effectiveRules = baseRules with { MinimumSimilarity = 0.2f, CorridorWidthMultiplier = 2f };
 
-            DocumentEvaluationInputs inputs = session.EvaluationPolicy.Resolve(baseRules, playerModifiers);
+            DocumentEvaluationInputs inputs = session.EvaluationPolicy.Resolve(
+                new SignatureDifficultyContext(baseRules, effectiveRules));
 
             Assert.That(inputs.Difficulty, Is.SameAs(baseRules));
             Assert.That(inputs.Modifiers.MinimumSimilarityOffset, Is.Zero);
@@ -580,10 +581,8 @@ namespace Tests.EditMode {
         }
 
         private sealed class PassthroughPolicy : IDocumentEvaluationPolicy {
-            public DocumentEvaluationInputs Resolve(
-                SignatureDifficultyRules baseDifficulty,
-                SignatureRuleModifiers playerModifiers) {
-                return new DocumentEvaluationInputs(baseDifficulty, playerModifiers);
+            public DocumentEvaluationInputs Resolve(SignatureDifficultyContext difficulty) {
+                return new DocumentEvaluationInputs(difficulty.EffectiveDifficulty, SignatureRuleModifiers.None);
             }
         }
 

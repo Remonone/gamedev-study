@@ -71,10 +71,8 @@ namespace Services {
         public void Dispose() { }
 
         private sealed class PlayerDocumentEvaluationPolicy : IDocumentEvaluationPolicy {
-            public DocumentEvaluationInputs Resolve(
-                SignatureDifficultyRules baseDifficulty,
-                SignatureRuleModifiers playerModifiers) {
-                return new DocumentEvaluationInputs(baseDifficulty, playerModifiers);
+            public DocumentEvaluationInputs Resolve(SignatureDifficultyContext difficulty) {
+                return new DocumentEvaluationInputs(difficulty.EffectiveDifficulty, SignatureRuleModifiers.None);
             }
         }
 

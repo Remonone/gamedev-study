@@ -73,9 +73,8 @@ namespace Services {
                 _threshold = threshold;
             }
 
-            public DocumentEvaluationInputs Resolve(
-                SignatureDifficultyRules baseDifficulty,
-                SignatureRuleModifiers playerModifiers) {
+            public DocumentEvaluationInputs Resolve(SignatureDifficultyContext difficulty) {
+                SignatureDifficultyRules baseDifficulty = difficulty.ConfiguredDifficulty;
                 if (baseDifficulty == null) throw new ArgumentNullException(nameof(baseDifficulty));
                 return new DocumentEvaluationInputs(
                     baseDifficulty with { MinimumSimilarity = _threshold },

@@ -13,7 +13,6 @@ namespace Services {
 
         private ISignatureEvaluator _evaluator;
         private PlayerStatStash _stash;
-        private DifficultyProfileEvaluator _difficultyEvaluator;
         
         private Subject<DocumentHandleResult> _documentResults = new();
         
@@ -25,7 +24,6 @@ namespace Services {
 
         public UniTask InitializeAsync(IServiceScope scope) {
             _evaluator = scope.Get<ISignatureEvaluator>();
-            _difficultyEvaluator = scope.Get<DifficultyProfileEvaluator>();
             _stash = scope.Get<PlayerStatStash>();
             return UniTask.CompletedTask;
         }
@@ -34,9 +32,10 @@ namespace Services {
             if (attempt == null) throw new ArgumentNullException(nameof(attempt));
             if (session == null) throw new ArgumentNullException(nameof(session));
 
-            DocumentEvaluationInputs inputs = session.EvaluationPolicy.Resolve(
-                _difficultyEvaluator.GetDifficultyProfile(),
-                _stash.GetSignatureModifiers());
+            var difficulty = new SignatureDifficultyContext(
+                _stash.GetConfiguredSignatureDifficulty(),
+                _stash.GetEffectiveSignatureDifficulty());
+            DocumentEvaluationInputs inputs = session.EvaluationPolicy.Resolve(difficulty);
             SignatureEvaluationResult evaluationResult = _evaluator.Evaluate(
                 attempt,
                 _stash.GetActivePreset(),

@@ -44,7 +44,7 @@ namespace Data.Upgrades {
     public class UpgradeNodeDefinition : ScriptableObject {
         public string Id;
         public string Name;
-        public string Description;
+        [TextArea] public string Description;
         public int MaxLevel;
         public Sprite Icon;
         [SerializeReference] public IFormula CostFormula;

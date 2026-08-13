@@ -6,11 +6,9 @@ using Data.Rules;
 using Services.Locator;
 
 namespace Services {
-    public class PlayerStatStash : IService, IPreInitialize, IInitialize, IPostInitialize {
+    public class PlayerStatStash : IService, IPreInitialize, IInitialize {
 
-        private ISignaturePresetRepository _signaturePresetRepository;
-        
-        private SignaturePresetDefinition _signaturePreset;
+        private SelectedSignatureLoader _signatureLoader;
         private ICacheDataFactory _dataFactory;
 
         private CachedData<IncomeEntries> _incomeData;
@@ -35,23 +33,21 @@ namespace Services {
         public void Dispose() {
         }
 
-        public SignatureRuleModifiers GetSignatureModifiers() {
-            return SignatureRuleModifiers.None;
-        }
-
         public float GetIncomeModifiers() {
             return 1;
         }
 
-        public SignaturePresetDefinition GetActivePreset() => _signaturePreset;
+        public SignaturePresetDefinition GetActivePreset() => _signatureLoader.GetActivePreset();
+
+        public SignatureDifficultyRules GetConfiguredSignatureDifficulty() => _signatureLoader.GetBaseDifficulty();
+
+        public SignatureDifficultyRules GetEffectiveSignatureDifficulty() {
+            return _signatureData.Value.ToRules(GetConfiguredSignatureDifficulty().Id);
+        }
         
         public UniTask InitializeAsync(IServiceScope scope) {
-            _signaturePresetRepository = scope.Get<ISignaturePresetRepository>();
+            _signatureLoader = scope.Get<SelectedSignatureLoader>();
             return UniTask.CompletedTask;
-        }
-
-        public async UniTask PostInitializeAsync(IServiceScope scope) {
-            _signaturePreset = await _signaturePresetRepository.RequestPreset(_signatureData.Value.SignatureId);
         }
 
         public UniTask PreInitializeAsync(IServiceScope scope) {

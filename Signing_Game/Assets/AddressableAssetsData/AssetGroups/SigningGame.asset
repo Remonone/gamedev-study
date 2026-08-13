@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - cache_reference
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f513b18718cf69e6a1e95811cc486d2
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_start/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e11a5975676314e6a8e9a11f8f70a9c
     m_Address: Assets/_SigningGame/Data/SignaturePreset.asset
     m_ReadOnly: 0
@@ -41,12 +47,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4affc12de63de6f3d9594820847715c7
     m_Address: Assets/_SigningGame/Data/Cache References/Generation Reference.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - cache_reference
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 59621308983250653b27210859a7db92
-    m_Address: Assets/_SigningGame/Data/Cache References/Signature Reference.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - cache_reference

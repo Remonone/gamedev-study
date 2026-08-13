@@ -337,10 +337,12 @@ namespace Tests.EditMode {
             PracticeDocumentProducer restoredProducer = InitializeProducer(restored);
             Assert.That(restoredProducer.TryPeekOffer(out DocumentOffer offer), Is.True);
             Assert.That(restoredProducer.TryProduce(offer.Key, out IDocumentSession session), Is.True);
+            var configured = new Data.Rules.SignatureDifficultyRules("base", 0.1f, 1f, 1f, 1f, null);
+            var effective = configured with { MinimumSimilarity = 0.2f, CorridorWidthMultiplier = 2f };
             var inputs = session.EvaluationPolicy.Resolve(
-                new Data.Rules.SignatureDifficultyRules("base", 0.1f, 1f, 1f, 1f, null),
-                Data.Rules.SignatureRuleModifiers.None);
+                new SignatureDifficultyContext(configured, effective));
             Assert.That(inputs.Difficulty.MinimumSimilarity, Is.EqualTo(0.5f));
+            Assert.That(inputs.Difficulty.CorridorWidthMultiplier, Is.EqualTo(1f));
             Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.5f)), Is.True);
             Assert.That(restored.Wallet.CurrentBalance, Is.EqualTo(new Value(119d)));
             session.Dispose();

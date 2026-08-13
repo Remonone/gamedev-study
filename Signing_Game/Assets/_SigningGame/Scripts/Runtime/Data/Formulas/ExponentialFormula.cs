@@ -3,7 +3,7 @@ using Utils;
 
 namespace Data.Formulas {
     [Serializable]
-    public class ExponentialFormula {
+    public class ExponentialFormula : IFormula {
 
         public Value StartValue;
         public Value Pattern;

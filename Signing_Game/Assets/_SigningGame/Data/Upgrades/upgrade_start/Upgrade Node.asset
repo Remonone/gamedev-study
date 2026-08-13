@@ -12,33 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
-  Id: income_upgrade
-  Name: Processing Fee
-  Description: Increase income for processed documents by ${income_addition_upgrade}.
-  MaxLevel: 10
+  Id: upgrade_start
+  Name: Taking Office
+  Description: 'Start your journey as a mayor of this small city.
+
+
+    Will unlock
+    upgrades and from now on your work will affect on efficiency of your administration.'
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080518039568479
+    rid: 841080518039568480
   Modifiers:
-  - {fileID: 11400000, guid: 421118ca47f6d4b18a922c8bd1f31086, type: 2}
+  - {fileID: 11400000, guid: 5ecf8a2f05c265493aed3e50455a765b, type: 2}
   FeatureUnlockIds: []
-  TreePosition: {x: 200, y: 640}
-  LockedDisplayMode: 1
+  TreePosition: {x: 80, y: 800}
+  LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
-  Children: []
+  Children:
+  - Child: {fileID: 11400000, guid: cec20290ff12cbd89b3f2c094fdd8ac9, type: 2}
+    DrawEdge: 0
   references:
     version: 2
     RefIds:
-    - rid: 841080518039568479
-      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080518039568480
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        StartValue:
-          _stored: 20
-          _base:
-            Degree: 0
-        Pattern:
-          _stored: 1.2
+        Value:
+          _stored: 10
           _base:
             Degree: 0

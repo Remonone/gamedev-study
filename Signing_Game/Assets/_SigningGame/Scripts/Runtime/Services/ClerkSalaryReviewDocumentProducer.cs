@@ -45,10 +45,8 @@ namespace Services {
         public void Dispose() { }
 
         private sealed class SalaryReviewDocumentEvaluationPolicy : IDocumentEvaluationPolicy {
-            public DocumentEvaluationInputs Resolve(
-                SignatureDifficultyRules baseDifficulty,
-                SignatureRuleModifiers playerModifiers) {
-                return new DocumentEvaluationInputs(baseDifficulty, SignatureRuleModifiers.None);
+            public DocumentEvaluationInputs Resolve(SignatureDifficultyContext difficulty) {
+                return new DocumentEvaluationInputs(difficulty.ConfiguredDifficulty, SignatureRuleModifiers.None);
             }
         }
 

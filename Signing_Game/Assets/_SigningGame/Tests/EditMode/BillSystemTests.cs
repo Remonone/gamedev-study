@@ -195,10 +195,12 @@ namespace Tests.EditMode {
             Assert.That(producer.Priority, Is.EqualTo(300));
             Assert.That(producer.TryPeekOffer(out DocumentOffer offer), Is.True);
             Assert.That(producer.TryProduce(offer.Key, out IDocumentSession session), Is.True);
+            var configured = new SignatureDifficultyRules("base", 0.1f, 1f, 1f, 1f, null);
+            var effective = configured with { MinimumSimilarity = 0.2f, CorridorWidthMultiplier = 2f };
             DocumentEvaluationInputs inputs = session.EvaluationPolicy.Resolve(
-                new SignatureDifficultyRules("base", 0.1f, 1f, 1f, 1f, null),
-                new SignatureRuleModifiers(2f, -0.2f, 2f, 2f, 2f));
+                new SignatureDifficultyContext(configured, effective));
             Assert.That(inputs.Difficulty.MinimumSimilarity, Is.EqualTo(0.5f));
+            Assert.That(inputs.Difficulty.CorridorWidthMultiplier, Is.EqualTo(1f));
             Assert.That(inputs.Modifiers.MinimumSimilarityOffset, Is.Zero);
 
             Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Rejected, 0.2f, 0.5f)), Is.True);
