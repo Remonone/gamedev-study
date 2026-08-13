@@ -131,7 +131,7 @@ namespace Services {
             private void SendReward(SignatureEvaluationResult result) {
                 IncomeEntries income = _incomeData.Value;
                 double accuracyBonus = Math.Min(
-                    Math.Min(result.Similarity / income.MinMultiplyScale, 1d),
+                    Math.Max(result.Similarity / income.MinMultiplyScale, 1d),
                     income.MaxMultiplicationScale);
                 Value reward = income.IncomePerDocument * accuracyBonus;
                 _aggregator.AddMoney(reward);

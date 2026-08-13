@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Data.Formulas;
 using Data.Modifiers;
+using Data.Modifiers.Numeric;
 using Data.Upgrades;
 using NUnit.Framework;
+using SigningGame.Editor.Modifiers;
 using SigningGame.Editor.UpgradeTree;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
@@ -57,6 +59,65 @@ namespace SigningGame.Tests.EditMode {
             AssetDatabase.SaveAssetIfDirty(_settings);
             _operations = new UpgradeTreeEditorOperations(_settings, _addressables);
             UpgradeTreeEditorOperations.TestFaultPoint = UpgradeTreeFaultPoint.None;
+        }
+
+        [Test]
+        public void NewNumericModifier_DoesNotReusePreviousManagedValue() {
+            var modifier = ScriptableObject.CreateInstance<ModifierDefinition>();
+            modifier.NumericModifiers = new List<NumericModifierDefinition> { new() };
+            try {
+                var serialized = new SerializedObject(modifier);
+                SerializedProperty modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value").managedReferenceValue =
+                    new ConstantNumericValueDefinition();
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+
+                serialized.Update();
+                modifiers.InsertArrayElementAtIndex(1);
+                UpgradeTreeEditorWindow.InitializeNewNumericModifiers(modifiers, 1);
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+
+                serialized.Update();
+                Assert.That(modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value").managedReferenceValue,
+                    Is.Not.Null);
+                Assert.That(modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value").managedReferenceValue,
+                    Is.Null);
+            } finally {
+                UnityEngine.Object.DestroyImmediate(modifier);
+            }
+        }
+
+        [Test]
+        public void NumericValueDrawer_DetachesSharedManagedValueReference() {
+            var modifier = ScriptableObject.CreateInstance<ModifierDefinition>();
+            modifier.NumericModifiers = new List<NumericModifierDefinition> { new(), new() };
+            try {
+                var serialized = new SerializedObject(modifier);
+                SerializedProperty modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                var sharedValue = new ConstantNumericValueDefinition();
+                SerializedProperty firstValue = modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value");
+                SerializedProperty secondValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+                firstValue.managedReferenceValue = sharedValue;
+                secondValue.managedReferenceValue = sharedValue;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                serialized.Update();
+
+                modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                secondValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+                Assert.That(NumericValueDefinitionPropertyDrawer.EnsureUniqueArrayReference(secondValue), Is.True);
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+
+                serialized.Update();
+                modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                firstValue = modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value");
+                secondValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+
+                Assert.That(firstValue.managedReferenceValue, Is.Not.Null);
+                Assert.That(secondValue.managedReferenceValue, Is.Not.Null);
+                Assert.That(secondValue.managedReferenceId, Is.Not.EqualTo(firstValue.managedReferenceId));
+            } finally {
+                UnityEngine.Object.DestroyImmediate(modifier);
+            }
         }
 
         [TearDown]

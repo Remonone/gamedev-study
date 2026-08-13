@@ -6,5 +6,7 @@ namespace Data.Rules {
         float CoverageRequirementMultiplier,
         float AlignmentToleranceMultiplier,
         SignatureScoreWeights ScoreWeights
-    );
+    ) {
+        public float DocumentQualityMinimumSimilarityAddition { get; init; }
+    }
 }

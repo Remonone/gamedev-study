@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Authoring.SignatureDifficultyProfileDefinition
   _id: 
   _minimumSimilarity: 0.4
+  _documentQualityMinimumSimilarityAddition: 0.15
   _corridorWidthMultiplier: 1
   _coverageRequirementMultiplier: 1
   _alignmentToleranceMultiplier: 1

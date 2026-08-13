@@ -10,6 +10,7 @@ using Data.Formulas;
 using Data.Modifiers;
 using Data.Modifiers.Calculation;
 using Data.Modifiers.Numeric;
+using Data.Modifiers.Providers;
 using Data.Results;
 using Data.Rules;
 using Data.Upgrades;
@@ -27,6 +28,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Utils;
+using Utils.Metadata;
 using Utils.Text.Generator;
 
 namespace Tests.EditMode {
@@ -397,6 +399,70 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void DeferredRestore_AppliesSavedEffectivenessWithCurrentModifierValues() {
+            UpgradeNodeDefinition savedDefinition = CreateIncomeDefinition("income", 10d);
+            UpgradeService source = CreateUpgradeService(new[] { savedDefinition }, out _);
+            SetAvailable(source);
+            Assert.That(source.TryUpgrade("income"), Is.True);
+            Assert.That(source.TryClaimPendingUpgrade(out UpgradeService.UpgradeDocumentClaim claim), Is.True);
+            Assert.That(source.TryCompletePendingUpgrade(claim,
+                Evaluation(SignatureEvaluationStatus.Rejected, 0.2f, 0.4f)), Is.True);
+            JObject save = (JObject)source.Serialize();
+
+            UpgradeNodeDefinition restoredDefinition = CreateIncomeDefinition("income", 20d);
+            var restored = new UpgradeService(new FakeAssetProvider(new[] { restoredDefinition }));
+            var storage = new ModifierStorage();
+            storage.RegisterProvider(new UpgradeModifierProvider());
+            ServiceScope scope = CreateModifierScope(restored, storage);
+            Track(scope);
+
+            restored.Deserialize(save);
+            restored.InitializeAsync(scope).GetAwaiter().GetResult();
+            storage.PostInitializeAsync(scope).GetAwaiter().GetResult();
+
+            IncomeEntries modified = storage.GetProvider<UpgradeModifierProvider>().Collect(
+                new IncomeEntries(1f, 0.5f, new Value(10d)));
+            Assert.That(restored.GetUpgrade("income").Effectiveness, Is.EqualTo(0.5f).Within(0.0001f));
+            Assert.That(modified.IncomePerDocument, Is.EqualTo(new Value(20d)));
+        }
+
+        [Test]
+        public void RuntimeRestore_InvalidatesExistingCachesWhenModifierDefinitionChanged() {
+            var modifierDefinition = TrackObject(ScriptableObject.CreateInstance<ModifierDefinition>());
+            modifierDefinition.NumericModifiers = new List<NumericModifierDefinition>();
+            modifierDefinition.GetAffectedTypes();
+            UpgradeNodeDefinition definition = CreateDefinition("income");
+            definition.Modifiers = new[] { modifierDefinition };
+
+            var upgrades = new UpgradeService(new FakeAssetProvider(new[] { definition }));
+            var storage = new ModifierStorage();
+            storage.RegisterProvider(new UpgradeModifierProvider());
+            var modifierService = new ModifierService();
+            ServiceScope scope = CreateModifierScope(upgrades, storage, modifierService);
+            Track(scope);
+            modifierService.InitializeAsync(scope).GetAwaiter().GetResult();
+            upgrades.InitializeAsync(scope).GetAwaiter().GetResult();
+            storage.PostInitializeAsync(scope).GetAwaiter().GetResult();
+            var cache = scope.Get<ICacheVersionProvider>();
+            var cachedIncome = new CachedData<IncomeEntries>(
+                cache,
+                new ModifierBackedIncomeCalculator(
+                    modifierService,
+                    new IncomeEntries(1f, 0.5f, new Value(10d))));
+
+            Assert.That(cachedIncome.Value.IncomePerDocument, Is.EqualTo(new Value(10d)));
+            modifierDefinition.NumericModifiers.Add(CreateIncomeNumericModifier("income_per_document", 20d));
+
+            upgrades.Deserialize(new JObject {
+                ["upgrades"] = new JArray(new JObject {
+                    ["id"] = "income", ["level"] = 1, ["effectiveness"] = 0.5f
+                })
+            });
+
+            Assert.That(cachedIncome.Value.IncomePerDocument, Is.EqualTo(new Value(20d)));
+        }
+
+        [Test]
         public void UpgradeDetailsView_RebindDoesNotDuplicateOwnedButtonListener() {
             var root = TrackObject(new GameObject("UpgradeDetailsTest"));
             var buttonObject = TrackObject(new GameObject("BuyButton"));
@@ -409,8 +475,8 @@ namespace Tests.EditMode {
                 false, 0f, true);
             int purchaseCount = 0;
 
-            view.Show(model, _ => { purchaseCount++; return true; });
-            view.Show(model, _ => { purchaseCount++; return true; });
+            view.Show(model, _ => { purchaseCount++; return true; }, () => { });
+            view.Show(model, _ => { purchaseCount++; return true; }, () => { });
             button.onClick.Invoke();
 
             Assert.That(purchaseCount, Is.EqualTo(1));
@@ -463,6 +529,62 @@ namespace Tests.EditMode {
             return definition;
         }
 
+        private UpgradeNodeDefinition CreateIncomeDefinition(string id, double modifierBaseValue) {
+            UpgradeNodeDefinition definition = CreateDefinition(id);
+            definition.Modifiers = new[] { CreateIncomeModifier("income_per_document", modifierBaseValue) };
+            return definition;
+        }
+
+        private ModifierDefinition CreateIncomeModifier(string id, double baseValue) {
+            var definition = TrackObject(ScriptableObject.CreateInstance<ModifierDefinition>());
+            definition.NumericModifiers = new List<NumericModifierDefinition> {
+                CreateIncomeNumericModifier(id, baseValue)
+            };
+            return definition;
+        }
+
+        private NumericModifierDefinition CreateIncomeNumericModifier(string id, double baseValue) {
+            var parameter = new CacheParameterReference();
+            typeof(CacheParameterReference).GetField("_groupId", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(parameter, "Income");
+            typeof(CacheParameterReference).GetField("_parameterId", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(parameter, nameof(IncomeEntries.IncomePerDocument));
+
+            var value = new UpgradeNumericValueDefinition();
+            typeof(UpgradeNumericValueDefinition).GetField("_baseValue", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(value, new Value(baseValue));
+            typeof(UpgradeNumericValueDefinition).GetField("_formula", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(value, new ConstantValue { Value = Value.One });
+
+            var numeric = new NumericModifierDefinition();
+            typeof(NumericModifierDefinition).GetField("_id", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, id);
+            typeof(NumericModifierDefinition).GetField("_operation", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, NumericModifierOperation.Add);
+            typeof(NumericModifierDefinition).GetField("_value", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, value);
+            typeof(NumericModifierDefinition).GetField("_parameter", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.SetValue(numeric, parameter);
+
+            return numeric;
+        }
+
+        private static ServiceScope CreateModifierScope(
+            UpgradeService restored,
+            ModifierStorage storage,
+            ModifierService modifierService = null) {
+            var scope = new ServiceScope(null);
+            var wallet = new WalletService();
+            wallet.ReplenishWallet(new Value(100));
+            var cache = new CacheVersionService();
+            scope.Register(wallet)
+                .Register(cache, typeof(ICacheInvalidator), typeof(ICacheVersionProvider))
+                .Register(storage);
+            if (modifierService != null) scope.Register<IModifierService>(modifierService);
+            scope.Register(restored);
+            return scope;
+        }
+
         private static void SetAvailable(UpgradeService upgrades) {
             var values = new Dictionary<string, bool>(StringComparer.Ordinal);
             foreach (UpgradeNodeState state in upgrades.Nodes) values.Add(state.Definition.Id, true);
@@ -501,6 +623,20 @@ namespace Tests.EditMode {
         private sealed class StaticCache<T> : IReadOnlyCacheData<T> {
             public T Value { get; }
             public StaticCache(T value) => Value = value;
+        }
+
+        private sealed class ModifierBackedIncomeCalculator : ICacheCalculator<IncomeEntries> {
+            private readonly IModifierService _modifierService;
+            private readonly IncomeEntries _baseValue;
+
+            public ModifierBackedIncomeCalculator(IModifierService modifierService, IncomeEntries baseValue) {
+                _modifierService = modifierService;
+                _baseValue = baseValue;
+            }
+
+            public IncomeEntries Calculate() {
+                return _modifierService.Apply(_baseValue);
+            }
         }
 
         private sealed class FakeProducer : IDocumentProducer {

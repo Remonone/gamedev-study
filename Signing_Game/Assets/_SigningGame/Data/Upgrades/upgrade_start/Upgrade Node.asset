@@ -26,7 +26,7 @@ MonoBehaviour:
   Modifiers:
   - {fileID: 11400000, guid: 5ecf8a2f05c265493aed3e50455a765b, type: 2}
   FeatureUnlockIds: []
-  TreePosition: {x: 80, y: 800}
+  TreePosition: {x: 120, y: 1680}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

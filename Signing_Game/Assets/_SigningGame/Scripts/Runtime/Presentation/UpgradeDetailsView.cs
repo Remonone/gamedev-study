@@ -18,6 +18,7 @@ namespace Presentation {
         [SerializeField] private Button _buyButton;
         private readonly List<RaycastResult> _raycastResults = new();
         private UnityAction _buyAction;
+        private Action _dismissAction;
 
         private void Awake() {
             Hide();
@@ -30,15 +31,16 @@ namespace Presentation {
             Vector2 pointerPosition = Pointer.current.position.ReadValue();
             if (IsPointerInsideDetails(pointerPosition) || IsPointerOverUpgrade(pointerPosition)) return;
 
-            Hide();
+            Dismiss();
         }
 
-        public void Show(UpgradeNodePresentationModel model, Func<string, bool> purchase) {
+        public void Show(UpgradeNodePresentationModel model, Func<string, bool> purchase, Action dismiss) {
             if (model == null) {
                 Hide();
                 return;
             }
             if (purchase == null) throw new ArgumentNullException(nameof(purchase));
+            if (dismiss == null) throw new ArgumentNullException(nameof(dismiss));
 
             if (_nameText != null) _nameText.text = model.Name;
             if (_icon != null) {
@@ -56,12 +58,20 @@ namespace Presentation {
                 _buyButton.interactable = model.CanPurchase;
                 _buyButton.gameObject.SetActive(true);
             }
+            _dismissAction = dismiss;
             if (_panelRoot != null) _panelRoot.SetActive(true);
         }
 
         public void Hide() {
             UnbindBuyButton();
+            _dismissAction = null;
             if (_panelRoot != null) _panelRoot.SetActive(false);
+        }
+
+        private void Dismiss() {
+            Action dismiss = _dismissAction;
+            Hide();
+            dismiss?.Invoke();
         }
 
         private void OnDestroy() {

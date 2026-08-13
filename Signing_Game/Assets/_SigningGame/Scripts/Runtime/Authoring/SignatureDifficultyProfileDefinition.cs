@@ -14,6 +14,9 @@ namespace Authoring {
         [SerializeField, Range(0f, 1f)]
         private float _minimumSimilarity = 0.4f;
 
+        [SerializeField, Min(0f)]
+        private float _documentQualityMinimumSimilarityAddition = 0.15f;
+
         [SerializeField, Min(0.1f)]
         private float _corridorWidthMultiplier = 1f;
 
@@ -28,6 +31,7 @@ namespace Authoring {
 
         public string Id => _id;
         public float MinimumSimilarity => _minimumSimilarity;
+        public float DocumentQualityMinimumSimilarityAddition => _documentQualityMinimumSimilarityAddition;
 
         public float CorridorWidthMultiplier =>
             _corridorWidthMultiplier;
@@ -46,7 +50,9 @@ namespace Authoring {
             return new SignatureDifficultyRules(_id, _minimumSimilarity, _corridorWidthMultiplier,
                 _coverageRequirementMultiplier, _alignmentToleranceMultiplier,
                 weights == null ? null : new SignatureScoreWeights(weights.CorridorFit, weights.Coverage,
-                    weights.Direction, weights.StrokeStructure));
+                    weights.Direction, weights.StrokeStructure)) {
+                DocumentQualityMinimumSimilarityAddition = _documentQualityMinimumSimilarityAddition
+            };
         }
     }
 }

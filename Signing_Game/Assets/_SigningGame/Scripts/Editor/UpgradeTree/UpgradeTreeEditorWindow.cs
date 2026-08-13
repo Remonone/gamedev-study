@@ -380,7 +380,13 @@ namespace SigningGame.Editor.UpgradeTree {
                 while (iterator.NextVisible(enter)) {
                     enter = false;
                     if (iterator.propertyPath == "m_Script") continue;
+                    int previousArraySize = iterator.propertyPath == nameof(ModifierDefinition.NumericModifiers)
+                        ? iterator.arraySize
+                        : -1;
                     EditorGUILayout.PropertyField(iterator, true);
+                    if (previousArraySize >= 0 && iterator.arraySize > previousArraySize) {
+                        InitializeNewNumericModifiers(iterator, previousArraySize);
+                    }
                 }
                 serialized.ApplyModifiedProperties();
                 EditorGUILayout.EndScrollView();
@@ -766,6 +772,25 @@ namespace SigningGame.Editor.UpgradeTree {
         private void DrawProperty(SerializedObject serialized, string name) {
             SerializedProperty property = serialized.FindProperty(name);
             if (property != null) EditorGUILayout.PropertyField(property, true);
+        }
+
+        internal static void InitializeNewNumericModifiers(SerializedProperty modifiers, int firstNewIndex) {
+            if (modifiers == null || !modifiers.isArray) return;
+            for (int index = Mathf.Max(0, firstNewIndex); index < modifiers.arraySize; index++) {
+                SerializedProperty modifier = modifiers.GetArrayElementAtIndex(index);
+                SerializedProperty id = modifier.FindPropertyRelative("_id");
+                SerializedProperty operation = modifier.FindPropertyRelative("_operation");
+                SerializedProperty value = modifier.FindPropertyRelative("_value");
+                SerializedProperty parameter = modifier.FindPropertyRelative("_parameter");
+                if (id != null) id.stringValue = string.Empty;
+                if (operation != null) operation.enumValueIndex = 0;
+                if (value != null) value.managedReferenceValue = null;
+                if (parameter == null) continue;
+                SerializedProperty groupId = parameter.FindPropertyRelative("_groupId");
+                SerializedProperty parameterId = parameter.FindPropertyRelative("_parameterId");
+                if (groupId != null) groupId.stringValue = string.Empty;
+                if (parameterId != null) parameterId.stringValue = string.Empty;
+            }
         }
 
         private void SaveObjects(IEnumerable<UnityEngine.Object> objects) {

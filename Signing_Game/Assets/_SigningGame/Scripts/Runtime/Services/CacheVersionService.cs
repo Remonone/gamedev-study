@@ -5,6 +5,9 @@ using R3;
 
 namespace Services {
     public class CacheVersionService : ICacheVersionProvider, IService, ICacheInvalidator {
+        private static readonly Dictionary<Type, Type[]> DependentTypes = new() {
+            [typeof(DocumentEntries)] = new[] { typeof(SignatureEntries) }
+        };
         
         private readonly Dictionary<Type, int> _versions = new();
         private readonly Subject<Type> _invalidated = new();
@@ -25,21 +28,35 @@ namespace Services {
         }
 
         void ICacheInvalidator.Invalidate<T>() {
-            if (!_versions.ContainsKey(typeof(T))) return;
-            _versions[typeof(T)]++;
-            _invalidated.OnNext(typeof(T));
+            InvalidateType(typeof(T));
         }
         
         void ICacheInvalidator.InvalidateAll() {
-            foreach (var type in _versions.Keys) {
+            var knownTypes = new List<Type>(_versions.Keys);
+            foreach (var type in knownTypes) {
                 _versions[type]++;
                 _invalidated.OnNext(type);
             }
         }
         void ICacheInvalidator.Invalidate(Type type) {
-            if (!_versions.ContainsKey(type)) return;
-            _versions[type]++;
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            InvalidateType(type);
+        }
+
+        private void InvalidateType(Type type) {
+            InvalidateType(type, new HashSet<Type>());
+        }
+
+        private void InvalidateType(Type type, HashSet<Type> visited) {
+            if (!visited.Add(type)) return;
+            if (!_versions.TryGetValue(type, out int version)) version = 0;
+            _versions[type] = version + 1;
             _invalidated.OnNext(type);
+
+            if (!DependentTypes.TryGetValue(type, out Type[] dependents)) return;
+            foreach (Type dependent in dependents) {
+                InvalidateType(dependent, visited);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Data.Modifiers.Numeric;
 using UnityEditor;
 using UnityEditor.Compilation;
@@ -24,6 +25,7 @@ namespace SigningGame.Editor.Modifiers {
         private static readonly GUIContent[] _SelectorGuiOptions = BuildSelectorGuiOptions();
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property) {
+            property = PrepareProperty(property);
             var serializedObject = property.serializedObject;
             var propertyPath = property.propertyPath;
             var fieldLabel = property.displayName;
@@ -39,12 +41,22 @@ namespace SigningGame.Editor.Modifiers {
 
             void RequestRebuild() {
                 if (!TryGetLiveProperty(serializedObject, propertyPath, out var liveProperty)) return;
+                if (EnsureUniqueArrayReference(liveProperty)) {
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                    if (!TryGetLiveProperty(serializedObject, propertyPath, out liveProperty)) return;
+                }
                 if (GetStructuralState(liveProperty).Key == structuralKey || rebuildQueued) return;
 
                 rebuildQueued = true;
                 root.schedule.Execute(() => {
                     rebuildQueued = false;
                     if (!TryGetLiveProperty(serializedObject, propertyPath, out var deferredProperty)) return;
+                    if (EnsureUniqueArrayReference(deferredProperty)) {
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
+                        if (!TryGetLiveProperty(serializedObject, propertyPath, out deferredProperty)) return;
+                    }
 
                     var deferredKey = GetStructuralState(deferredProperty).Key;
                     if (deferredKey == structuralKey) return;
@@ -60,6 +72,7 @@ namespace SigningGame.Editor.Modifiers {
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            property = PrepareProperty(property);
             EditorGUI.BeginProperty(position, label, property);
 
             var state = GetStructuralState(property);
@@ -287,7 +300,11 @@ namespace SigningGame.Editor.Modifiers {
             }));
             root.Add(header);
 
-            VisitDirectVisibleChildren(property, (child, _) => root.Add(new PropertyField(child)));
+            VisitDirectVisibleChildren(property, (child, _) => {
+                var childField = new PropertyField(child);
+                childField.BindProperty(child);
+                root.Add(childField);
+            });
         }
 
         private static void BuildMissingVisualTree(
@@ -475,6 +492,52 @@ namespace SigningGame.Editor.Modifiers {
             return null;
         }
 
+        private static SerializedProperty PrepareProperty(SerializedProperty property) {
+            var serializedObject = property.serializedObject;
+            var propertyPath = property.propertyPath;
+            if (!EnsureUniqueArrayReference(property)) return property;
+
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+            return serializedObject.FindProperty(propertyPath) ?? property;
+        }
+
+        internal static bool EnsureUniqueArrayReference(SerializedProperty property) {
+            if (property == null
+                || property.serializedObject.isEditingMultipleObjects
+                || property.propertyType != SerializedPropertyType.ManagedReference
+                || property.managedReferenceValue is not NumericValueDefinition value
+                || !TryGetArrayElementInfo(property.propertyPath, out var arrayPath, out var index, out var suffix)
+                || index <= 0) {
+                return false;
+            }
+
+            long referenceId = property.managedReferenceId;
+            for (var i = 0; i < index; i++) {
+                SerializedProperty sibling =
+                    property.serializedObject.FindProperty($"{arrayPath}.Array.data[{i}]{suffix}");
+                if (sibling?.propertyType != SerializedPropertyType.ManagedReference) continue;
+                bool sameAssignedId = referenceId > 0L && sibling.managedReferenceId == referenceId;
+                bool sameObject = ReferenceEquals(sibling.managedReferenceValue, value);
+                if (!sameAssignedId && !sameObject) continue;
+
+                try {
+                    Undo.RecordObjects(property.serializedObject.targetObjects, "Detach Numeric Value Reference");
+                    property.managedReferenceValue = CloneValue(value);
+                    return true;
+                } catch (Exception exception) {
+                    Debug.LogException(exception);
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        internal static NumericValueDefinition CloneValue(NumericValueDefinition value) {
+            return CloneObject(value, new Dictionary<object, object>(ReferenceComparer.Instance)) as NumericValueDefinition;
+        }
+
         private static bool TryAssignCandidate(SerializedObject serializedObject, string propertyPath,
             Candidate candidate) {
             object instance;
@@ -575,6 +638,83 @@ namespace SigningGame.Editor.Modifiers {
             }
         }
 
+        private static bool TryGetArrayElementInfo(string propertyPath, out string arrayPath, out int index,
+            out string suffix) {
+            const string arrayToken = ".Array.data[";
+            arrayPath = null;
+            index = -1;
+            suffix = null;
+
+            var tokenIndex = propertyPath.LastIndexOf(arrayToken, StringComparison.Ordinal);
+            if (tokenIndex < 0) return false;
+
+            var indexStart = tokenIndex + arrayToken.Length;
+            var indexEnd = propertyPath.IndexOf(']', indexStart);
+            if (indexEnd < 0 || !int.TryParse(propertyPath.Substring(indexStart, indexEnd - indexStart), out index)) {
+                return false;
+            }
+
+            arrayPath = propertyPath.Substring(0, tokenIndex);
+            suffix = propertyPath.Substring(indexEnd + 1);
+            return true;
+        }
+
+        private static object CloneObject(object value, Dictionary<object, object> visited) {
+            if (value == null) return null;
+
+            var type = value.GetType();
+            if (type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal) || type.IsValueType) {
+                return value;
+            }
+
+            if (value is UnityEngine.Object) return value;
+            if (visited.TryGetValue(value, out var knownClone)) return knownClone;
+
+            if (value is AnimationCurve curve) {
+                var curveClone = new AnimationCurve(curve.keys) {
+                    preWrapMode = curve.preWrapMode,
+                    postWrapMode = curve.postWrapMode
+                };
+                visited[value] = curveClone;
+                return curveClone;
+            }
+
+            if (type.IsArray) {
+                var sourceArray = (Array)value;
+                Type elementType = type.GetElementType();
+                var arrayClone = Array.CreateInstance(elementType, sourceArray.Length);
+                visited[value] = arrayClone;
+
+                for (var i = 0; i < sourceArray.Length; i++) {
+                    arrayClone.SetValue(CloneObject(sourceArray.GetValue(i), visited), i);
+                }
+
+                return arrayClone;
+            }
+
+            object clone = Activator.CreateInstance(type);
+            visited[value] = clone;
+            foreach (FieldInfo field in GetSerializedFields(type)) {
+                field.SetValue(clone, CloneObject(field.GetValue(value), visited));
+            }
+
+            return clone;
+        }
+
+        private static IEnumerable<FieldInfo> GetSerializedFields(Type type) {
+            for (var current = type; current != null && current != typeof(object); current = current.BaseType) {
+                FieldInfo[] fields = current.GetFields(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+                foreach (FieldInfo field in fields) {
+                    if (field.IsStatic || field.IsInitOnly || field.IsNotSerialized) continue;
+                    if (field.IsPublic || field.GetCustomAttribute<SerializeField>() != null ||
+                        field.GetCustomAttribute<SerializeReference>() != null) {
+                        yield return field;
+                    }
+                }
+            }
+        }
+
         private static string GetTypeDisplayName(Type type) {
             return ObjectNames.NicifyVariableName(type.Name);
         }
@@ -606,6 +746,18 @@ namespace SigningGame.Editor.Modifiers {
                 Type = type;
                 DisplayName = displayName;
                 OptionName = displayName;
+            }
+        }
+
+        private sealed class ReferenceComparer : IEqualityComparer<object> {
+            public static readonly ReferenceComparer Instance = new();
+
+            public new bool Equals(object x, object y) {
+                return ReferenceEquals(x, y);
+            }
+
+            public int GetHashCode(object obj) {
+                return RuntimeHelpers.GetHashCode(obj);
             }
         }
     }

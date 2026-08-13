@@ -42,6 +42,11 @@ namespace Presentation {
             }
         }
 
+        public void ClearSelection() {
+            if (_selectedNode.CurrentValue == null) return;
+            _selectedNode.Value = null;
+        }
+
         public bool Purchase(string upgradeId) {
             if (string.IsNullOrWhiteSpace(upgradeId)) return false;
             return _upgradeService.TryUpgrade(upgradeId);

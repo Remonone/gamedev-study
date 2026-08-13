@@ -34,12 +34,16 @@ namespace Tests.EditMode {
 
         [Test]
         public void SignatureEntriesRoundTripAllDifficultyParameters() {
-            SignatureDifficultyRules source = Rules("profile", 0.35f, 1.2f, 0.8f, 1.4f, 4f, 3f, 2f, 1f);
+            SignatureDifficultyRules source = Rules("profile", 0.35f, 1.2f, 0.8f, 1.4f, 4f, 3f, 2f, 1f)
+                with {
+                    DocumentQualityMinimumSimilarityAddition = 0.15f
+                };
 
             SignatureDifficultyRules result = new SignatureEntries(source).ToRules(source.Id);
 
             Assert.That(result.Id, Is.EqualTo("profile"));
             Assert.That(result.MinimumSimilarity, Is.EqualTo(0.35f));
+            Assert.That(result.DocumentQualityMinimumSimilarityAddition, Is.EqualTo(0.15f));
             Assert.That(result.CorridorWidthMultiplier, Is.EqualTo(1.2f));
             Assert.That(result.CoverageRequirementMultiplier, Is.EqualTo(0.8f));
             Assert.That(result.AlignmentToleranceMultiplier, Is.EqualTo(1.4f));
@@ -92,6 +96,26 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void CalculatorAddsSelectedDocumentQualityBeforeThresholdModifiers() {
+            SelectedSignatureLoader loader = CreateLoader(CreatePreset(CreateProfile(
+                minimumSimilarity: 0.35f,
+                documentQualityMinimumSimilarityAddition: 0.15f)));
+            var modifier = new ThresholdMultiplierModifierService(0.5f);
+            var calculator = new SignatureCacheCalculator();
+            var scope = new ServiceScope(null);
+            scope.Register(loader)
+                .Register<IModifierService>(modifier)
+                .Register<IReadOnlyCacheData<DocumentEntries>>(new StaticCache<DocumentEntries>(
+                    new DocumentEntries { SelectedDocumentQualityLevel = 4 }));
+            calculator.PreInitializeAsync(scope).GetAwaiter().GetResult();
+
+            SignatureEntries result = calculator.Calculate();
+
+            Assert.That(result.MinimumSimilarity, Is.EqualTo(0.55f).Within(0.0001f));
+            scope.Dispose();
+        }
+
+        [Test]
         public void InvalidatingSignatureCacheRecalculatesStashValue() {
             var cache = new CacheVersionService();
             var signatureCalculator = new CountingSignatureCalculator();
@@ -114,6 +138,17 @@ namespace Tests.EditMode {
             Assert.That(second, Is.EqualTo(2f));
             Assert.That(signatureCalculator.Count, Is.EqualTo(2));
             scope.Dispose();
+        }
+
+        [Test]
+        public void InvalidatingDocumentCacheInvalidatesSignatureCache() {
+            var cache = new CacheVersionService();
+
+            ((ICacheInvalidator)cache).Invalidate<DocumentEntries>();
+
+            Assert.That(cache.GetVersion<DocumentEntries>(), Is.EqualTo(1));
+            Assert.That(cache.GetVersion<SignatureEntries>(), Is.EqualTo(1));
+            cache.Dispose();
         }
 
         [Test]
@@ -191,10 +226,16 @@ namespace Tests.EditMode {
             scope.Dispose();
         }
 
-        private SignatureDifficultyProfileDefinition CreateProfile(string id = "profile") {
+        private SignatureDifficultyProfileDefinition CreateProfile(
+            string id = "profile",
+            float minimumSimilarity = 0.4f,
+            float documentQualityMinimumSimilarityAddition = 0.15f) {
             SignatureDifficultyProfileDefinition profile = Track(ScriptableObject.CreateInstance<SignatureDifficultyProfileDefinition>());
             var serialized = new SerializedObject(profile);
             serialized.FindProperty("_id").stringValue = id;
+            serialized.FindProperty("_minimumSimilarity").floatValue = minimumSimilarity;
+            serialized.FindProperty("_documentQualityMinimumSimilarityAddition").floatValue =
+                documentQualityMinimumSimilarityAddition;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             return profile;
         }
@@ -247,10 +288,27 @@ namespace Tests.EditMode {
             public void Dispose() { }
         }
 
+        private sealed class ThresholdMultiplierModifierService : IModifierService, IService {
+            private readonly float _multiplier;
+            public ThresholdMultiplierModifierService(float multiplier) => _multiplier = multiplier;
+            public T Apply<T>(T value) where T : struct {
+                if (value is not SignatureEntries entries) return value;
+                entries.MinimumSimilarity *= _multiplier;
+                return (T)(object)entries;
+            }
+            public void Dispose() { }
+        }
+
         private sealed class StaticCalculator<T> : ICacheCalculator<T>, IService where T : struct {
             private readonly T _value;
             public StaticCalculator(T value) => _value = value;
             public T Calculate() => _value;
+            public void Dispose() { }
+        }
+
+        private sealed class StaticCache<T> : IReadOnlyCacheData<T>, IService {
+            public T Value { get; }
+            public StaticCache(T value) => Value = value;
             public void Dispose() { }
         }
 

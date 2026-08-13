@@ -8,6 +8,7 @@ namespace Data.Cache {
     public struct SignatureEntries {
         [ModifiableParameter("Minimum Similarity", Minimum = 0d, Maximum = 1d)]
         public float MinimumSimilarity;
+        public float DocumentQualityMinimumSimilarityAddition;
         [ModifiableParameter("Corridor Width Multiplier", Minimum = float.Epsilon)]
         public float CorridorWidthMultiplier;
         [ModifiableParameter("Coverage Requirement Multiplier", Minimum = 0d)]
@@ -28,6 +29,7 @@ namespace Data.Cache {
             if (rules.ScoreWeights == null) throw new ArgumentException("Difficulty score weights are required.", nameof(rules));
 
             MinimumSimilarity = rules.MinimumSimilarity;
+            DocumentQualityMinimumSimilarityAddition = rules.DocumentQualityMinimumSimilarityAddition;
             CorridorWidthMultiplier = rules.CorridorWidthMultiplier;
             CoverageRequirementMultiplier = rules.CoverageRequirementMultiplier;
             AlignmentToleranceMultiplier = rules.AlignmentToleranceMultiplier;
@@ -43,6 +45,8 @@ namespace Data.Cache {
             CorridorWidthMultiplier,
             CoverageRequirementMultiplier,
             AlignmentToleranceMultiplier,
-            new SignatureScoreWeights(CorridorFitWeight, CoverageWeight, DirectionWeight, StrokeStructureWeight));
+            new SignatureScoreWeights(CorridorFitWeight, CoverageWeight, DirectionWeight, StrokeStructureWeight)) {
+            DocumentQualityMinimumSimilarityAddition = DocumentQualityMinimumSimilarityAddition
+        };
     }
 }

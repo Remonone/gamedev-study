@@ -59,7 +59,7 @@ namespace Services {
 
         private void RestoreOnPresent() {
             if (_upgradeRestore == null) return;
-            ApplyRestore(_upgradeRestore, false);
+            ApplyRestore(_upgradeRestore, true);
             _upgradeRestore = null;
             NotifyDocumentOffersChanged();
         }
@@ -409,17 +409,13 @@ namespace Services {
                 nextPending.Add(pending);
             }
 
-            var affectedGroups = new HashSet<Type>();
-            CollectAffectedGroups(_ownedUpgrades, affectedGroups);
-            CollectAffectedGroups(nextOwned, affectedGroups);
-
             _isMutating = true;
             try {
                 InvalidateAllClaims();
                 _states = nextStates;
                 _ownedUpgrades = nextOwned;
                 _pendingUpgrades = nextPending;
-                InvalidateGroups(affectedGroups);
+                _cacheInvalidator?.InvalidateAll();
 
                 for (int index = 0; index < refunds.Count; index++) {
                     PendingUpgradeRecord refund = refunds[index];
@@ -531,23 +527,6 @@ namespace Services {
 
             value = default;
             return false;
-        }
-
-        private static void CollectAffectedGroups(
-            IEnumerable<UpgradeNodeState> upgrades,
-            HashSet<Type> affectedGroups) {
-            foreach (UpgradeNodeState upgrade in upgrades) {
-                ModifierDefinition[] modifiers = upgrade.Definition.Modifiers;
-                if (modifiers == null) continue;
-                foreach (ModifierDefinition modifier in modifiers) {
-                    if (modifier != null) affectedGroups.UnionWith(modifier.GetAffectedTypes());
-                }
-            }
-        }
-
-        private void InvalidateGroups(HashSet<Type> affectedGroups) {
-            if (_cacheInvalidator == null) return;
-            foreach (Type group in affectedGroups) _cacheInvalidator.Invalidate(group);
         }
 
         private void InvalidateAllClaims() {

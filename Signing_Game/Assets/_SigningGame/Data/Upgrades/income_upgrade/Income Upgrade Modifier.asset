@@ -18,8 +18,8 @@ MonoBehaviour:
     _value:
       rid: 841080506226049024
     _parameter:
-      _groupId: Income
-      _parameterId: IncomePerDocument
+      _groupId: Document
+      _parameterId: DocumentQualityLevel
   references:
     version: 2
     RefIds:

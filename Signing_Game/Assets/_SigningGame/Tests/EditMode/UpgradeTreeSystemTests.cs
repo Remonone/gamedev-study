@@ -121,6 +121,21 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Selection_CanSelectSameNodeAgainAfterClear() {
+            UpgradeNodeDefinition definition = CreateDefinition("selectable");
+            SetupTree(new[] { definition }, out UpgradeService upgrades, out _, out UpgradeTreeService tree);
+            using var viewModel = new UpgradeTreeViewModel(tree, upgrades, _lastWallet);
+            var selectedIds = new List<string>();
+            using IDisposable subscription = viewModel.SelectedNode.Subscribe(node => selectedIds.Add(node?.Id));
+
+            viewModel.SelectNode("selectable");
+            viewModel.ClearSelection();
+            viewModel.SelectNode("selectable");
+
+            Assert.That(selectedIds, Is.EqualTo(new string[] { null, "selectable", null, "selectable" }));
+        }
+
+        [Test]
         public void Tree_EvaluatesAnyAndAllStatisticRequirements() {
             UpgradeNodeDefinition node = CreateDefinition("statistics");
             node.StatisticRequirementMode = StatisticRequirementMode.Any;

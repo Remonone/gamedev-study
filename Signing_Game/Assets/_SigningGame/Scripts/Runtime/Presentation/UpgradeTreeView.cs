@@ -79,7 +79,7 @@ namespace Presentation {
 
         private void OnSelectedNodeChanged(UpgradeNodePresentationModel node) {
             if (node == null) _detailsView.Hide();
-            else _detailsView.Show(node, _viewModel.Purchase);
+            else _detailsView.Show(node, _viewModel.Purchase, _viewModel.ClearSelection);
         }
 
         private void OnDestroy() {
