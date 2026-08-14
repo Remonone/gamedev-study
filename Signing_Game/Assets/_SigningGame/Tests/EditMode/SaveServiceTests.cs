@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Contracts;
 using Data.Persistence;
 using Newtonsoft.Json;
@@ -156,6 +158,47 @@ namespace Tests.EditMode {
             Assert.That(saveService.SaveToFile(), Is.False);
             Assert.That(File.ReadAllText(_filePath), Is.EqualTo(originalJson));
             Assert.That(File.Exists(_filePath + ".tmp"), Is.False);
+        }
+
+        [Test]
+        public void SaveSnapshotToFile_WritesOnlySuppliedSectionsAtomically() {
+            using var scope = new ServiceScope(null);
+            var saveService = new SaveService(_filePath, loadExistingOnInitialize: false);
+            scope.Register(saveService).Register(new FakeSaveable("ordinary", 3));
+            saveService.PreInitializeAsync(scope).GetAwaiter().GetResult();
+            Assert.That(saveService.SaveToFile(), Is.True);
+
+            var reset = new SaveSnapshot(SaveSnapshot.CurrentVersion, new Dictionary<string, JToken> {
+                ["signature_progression"] = new JObject { ["activePresetId"] = "starter" },
+                [MetaProgressionService.SaveSectionId] = new JObject { ["bankedPoints"] = 4 }
+            });
+
+            Assert.That(saveService.SaveSnapshotToFile(reset), Is.True);
+            JObject written = JObject.Parse(File.ReadAllText(_filePath));
+            Assert.That(((JObject)written["sections"]).Properties().Count(), Is.EqualTo(2));
+            Assert.That(written["sections"]?["ordinary"], Is.Null);
+            Assert.That(written["sections"]?[MetaProgressionService.SaveSectionId]?["bankedPoints"]?.Value<int>(),
+                Is.EqualTo(4));
+            Assert.That(File.Exists(_filePath + ".tmp"), Is.False);
+        }
+
+        [Test]
+        public void SuspendedAutoSave_DoesNotOverwriteCommittedFileOnQuit() {
+            using var scope = new ServiceScope(null);
+            var saveService = new SaveService(_filePath, loadExistingOnInitialize: false);
+            var saveable = new FakeSaveable("state", 1);
+            var autoSave = new AutoSaveService(saveService);
+            scope.Register(saveService).Register(saveable).Register(autoSave);
+            saveService.PreInitializeAsync(scope).GetAwaiter().GetResult();
+            Assert.That(saveService.SaveToFile(), Is.True);
+            string committed = File.ReadAllText(_filePath);
+            saveable.State = 2;
+
+            autoSave.Suspend();
+            typeof(AutoSaveService).GetMethod("OnApplicationQuitting", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.Invoke(autoSave, null);
+
+            Assert.That(File.ReadAllText(_filePath), Is.EqualTo(committed));
         }
 
         [Test]

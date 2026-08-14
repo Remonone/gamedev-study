@@ -87,7 +87,7 @@ namespace Services {
 
             if (generatedDocuments > 0) {
                 _currentPoint -= generatedDocuments * PointsPerDocument;
-                _documentQuantity += generatedDocuments;
+                _documentQuantity += (generatedDocuments * _generatorCache.Value.TokenPerIncome);
                 _documentCount.Value = _documentQuantity;
                 _documentAdded.OnNext(Unit.Default);
                 _documentsGenerated.OnNext(generatedDocuments);

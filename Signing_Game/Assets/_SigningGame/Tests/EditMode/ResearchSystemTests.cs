@@ -213,7 +213,7 @@ namespace Tests.EditMode {
             Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Rejected, 0.25f, 0.5f)), Is.True);
             Assert.That(environment.Research.ActivePractices, Has.Count.EqualTo(1));
             GenerationEntries modified = environment.Storage.GetProvider<PracticeModifierProvider>()
-                .Collect(new GenerationEntries(1f, 0f));
+                .Collect(new GenerationEntries(1f, 1));
             Assert.That(modified.TokenPerSecond, Is.EqualTo(2f));
 
             environment.Accepted.Report(NormalDocumentProcessingSource.Manual, 1, 1f);
@@ -264,14 +264,14 @@ namespace Tests.EditMode {
             Assert.That(restored.Research.ActivePractices, Has.Count.EqualTo(1));
             double remaining = restored.Research.ActivePractices[0].RemainingSeconds;
             GenerationEntries dormant = restored.Storage.GetProvider<PracticeModifierProvider>()
-                .Collect(new GenerationEntries(1f, 0f));
+                .Collect(new GenerationEntries(1f, 1));
             Assert.That(dormant.TokenPerSecond, Is.EqualTo(1f));
             restored.Research.Tick(5f);
             Assert.That(restored.Research.ActivePractices[0].RemainingSeconds, Is.EqualTo(remaining));
 
             UnlockArchive(restored);
             GenerationEntries active = restored.Storage.GetProvider<PracticeModifierProvider>()
-                .Collect(new GenerationEntries(1f, 0f));
+                .Collect(new GenerationEntries(1f, 1));
             Assert.That(active.TokenPerSecond, Is.EqualTo(2f));
             sourceSession.Dispose();
         }
@@ -391,10 +391,11 @@ namespace Tests.EditMode {
             locatorObject.GetComponent<GameSceneInstaller>().Install(locator);
             IReadOnlyList<IModifierProvider> providers = locator.Get<ModifierStorage>().Providers;
 
-            Assert.That(providers, Has.Count.EqualTo(3));
+            Assert.That(providers, Has.Count.EqualTo(4));
             Assert.That(providers[0], Is.TypeOf<UpgradeModifierProvider>());
-            Assert.That(providers[1], Is.TypeOf<PracticeModifierProvider>());
-            Assert.That(providers[2], Is.TypeOf<BillModifierProvider>());
+            Assert.That(providers[1], Is.TypeOf<MetaUpgradeModifierProvider>());
+            Assert.That(providers[2], Is.TypeOf<PracticeModifierProvider>());
+            Assert.That(providers[3], Is.TypeOf<BillModifierProvider>());
         }
 
         private TestEnvironment CreateEnvironment(
@@ -462,7 +463,7 @@ namespace Tests.EditMode {
             scope.Register(storage);
             scope.Register<Data.Modifiers.IModifierService>(modifierService);
             scope.Register(new StaticCalculator<IncomeEntries>(new IncomeEntries(1f, 0.5f, Value.One)), typeof(ICacheCalculator<IncomeEntries>));
-            scope.Register(new StaticCalculator<GenerationEntries>(new GenerationEntries(1f, 0f)), typeof(ICacheCalculator<GenerationEntries>));
+            scope.Register(new StaticCalculator<GenerationEntries>(new GenerationEntries(1f, 1)), typeof(ICacheCalculator<GenerationEntries>));
             scope.Register(new StaticCalculator<SignatureEntries>(default), typeof(ICacheCalculator<SignatureEntries>));
             scope.Register(new StaticCalculator<OfficeEntries>(default), typeof(ICacheCalculator<OfficeEntries>));
             scope.Register(new StaticCalculator<DocumentEntries>(new DocumentEntries()), typeof(ICacheCalculator<DocumentEntries>));

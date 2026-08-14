@@ -35,6 +35,11 @@ namespace Presentation {
             Effectiveness = effectiveness;
             CanPurchase = canPurchase;
         }
+
+        public static Vector2 ToRuntimePosition(Vector2 treePosition) {
+            // Editor graph coordinates use GUI Y-down; RectTransform anchored positions use Y-up.
+            return new Vector2(treePosition.x, -treePosition.y);
+        }
     }
 
     public sealed class UpgradeEdgePresentationModel {

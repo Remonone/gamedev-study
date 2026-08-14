@@ -78,7 +78,7 @@ namespace Presentation {
                     state.Definition.Name,
                     UpgradeDescriptionFormatter.Format(state.Definition, state.Level),
                     state.Definition.Icon,
-                    state.Definition.TreePosition,
+                    UpgradeNodePresentationModel.ToRuntimePosition(state.Definition.TreePosition),
                     state.Level,
                     state.Definition.MaxLevel,
                     levelText,

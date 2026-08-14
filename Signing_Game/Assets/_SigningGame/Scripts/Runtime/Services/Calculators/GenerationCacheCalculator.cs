@@ -15,6 +15,7 @@ namespace Services.Calculators {
         private IAssetListLease<GenerationReference> _referenceLease;
         private GenerationReference _reference;
         private UpgradeModifierProvider _upgradeModifierProvider;
+        private MetaUpgradeModifierProvider _metaModifierProvider;
         private PracticeModifierProvider _practiceModifierProvider;
 
         public void Dispose() {
@@ -30,12 +31,14 @@ namespace Services.Calculators {
 
         internal GenerationEntries CalculateWithoutBill() {
             GenerationEntries result = _upgradeModifierProvider.Collect(_reference.Value);
+            if (_metaModifierProvider != null) result = _metaModifierProvider.Collect(result);
             return _practiceModifierProvider != null ? _practiceModifierProvider.Collect(result) : result;
         }
 
         public async UniTask PreInitializeAsync(IServiceScope scope) {
             _modifierService = scope.Get<IModifierService>();
             _upgradeModifierProvider = scope.Get<ModifierStorage>().GetProvider<UpgradeModifierProvider>();
+            scope.Get<ModifierStorage>().TryGetProvider(out _metaModifierProvider);
             scope.Get<ModifierStorage>().TryGetProvider(out _practiceModifierProvider);
             _assetProvider = scope.Container.Get<IAssetProvider>();
             _referenceLease = await _assetProvider.LoadAssetsByLabelAsync<GenerationReference>(AddressableConstants.CACHE_REFERENCE_LABEL);

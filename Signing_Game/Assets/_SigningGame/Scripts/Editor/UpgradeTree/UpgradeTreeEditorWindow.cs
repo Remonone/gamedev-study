@@ -22,6 +22,8 @@ namespace SigningGame.Editor.UpgradeTree {
         private readonly Dictionary<UpgradeNodeDefinition, Vector2> _dragStarts = new();
         private readonly HashSet<UpgradeNodeDefinition> _selectionBase = new();
 
+        [SerializeField] private UpgradeTreeEditorMode _mode;
+
         private UpgradeTreeEditorSettings _settings;
         private UpgradeTreeEditorOperations _operations;
         private Vector2 _pan = new(320f, 220f);
@@ -55,14 +57,20 @@ namespace SigningGame.Editor.UpgradeTree {
         private SettingsDraft _settingsDraft;
 
         [MenuItem("Tools/Signing Game/Upgrade Tree")]
-        private static void Open() {
+        private static void OpenOrdinary() => Open(UpgradeTreeEditorMode.Ordinary);
+
+        [MenuItem("Tools/Signing Game/Meta Upgrade Tree")]
+        private static void OpenMeta() => Open(UpgradeTreeEditorMode.Meta);
+
+        private static void Open(UpgradeTreeEditorMode mode) {
             var window = GetWindow<UpgradeTreeEditorWindow>();
-            window.titleContent = new GUIContent("Upgrade Tree");
+            window.SwitchMode(mode);
             window.minSize = new Vector2(720f, 420f);
             window.Show();
         }
 
         private void OnEnable() {
+            titleContent = new GUIContent(_mode == UpgradeTreeEditorMode.Meta ? "Meta Upgrade Tree" : "Upgrade Tree");
             _pan = new Vector2(EditorPrefs.GetFloat(Pref("PanX"), 320f), EditorPrefs.GetFloat(Pref("PanY"), 220f));
             _zoom = EditorPrefs.GetFloat(Pref("Zoom"), 1f);
             _gridEnabled = EditorPrefs.GetBool(Pref("Grid"), true);
@@ -288,11 +296,16 @@ namespace SigningGame.Editor.UpgradeTree {
             DrawProperty(serialized, nameof(UpgradeNodeDefinition.MaxLevel));
             DrawProperty(serialized, nameof(UpgradeNodeDefinition.Icon));
             DrawProperty(serialized, nameof(UpgradeNodeDefinition.CostFormula));
-            DrawProperty(serialized, nameof(UpgradeNodeDefinition.FeatureUnlockIds));
+            if (_mode == UpgradeTreeEditorMode.Ordinary) {
+                DrawProperty(serialized, nameof(UpgradeNodeDefinition.FeatureUnlockIds));
+                DrawProperty(serialized, nameof(UpgradeNodeDefinition.GrantsMetaCurrencyPoint));
+            }
             DrawProperty(serialized, nameof(UpgradeNodeDefinition.LockedDisplayMode));
             DrawProperty(serialized, nameof(UpgradeNodeDefinition.ParentUnlockMode));
-            DrawProperty(serialized, nameof(UpgradeNodeDefinition.StatisticRequirementMode));
-            DrawProperty(serialized, nameof(UpgradeNodeDefinition.StatisticRequirements));
+            if (_mode == UpgradeTreeEditorMode.Ordinary) {
+                DrawProperty(serialized, nameof(UpgradeNodeDefinition.StatisticRequirementMode));
+                DrawProperty(serialized, nameof(UpgradeNodeDefinition.StatisticRequirements));
+            }
             serialized.ApplyModifiedProperties();
 
             EditorGUILayout.Space(5f);
@@ -317,7 +330,9 @@ namespace SigningGame.Editor.UpgradeTree {
                     continue;
                 }
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.ObjectField(link.Child, typeof(UpgradeNodeDefinition), false);
+                EditorGUILayout.ObjectField(link.Child,
+                    _mode == UpgradeTreeEditorMode.Meta ? typeof(MetaUpgradeNodeDefinition) : typeof(UpgradeNodeDefinition),
+                    false);
                 bool visible = GUILayout.Toggle(link.DrawEdge, "Visible", GUILayout.Width(60f));
                 if (visible != link.DrawEdge) ShowResult(_operations.SetEdgeVisibility(node, link.Child, visible));
                 if (GUILayout.Button("x", GUILayout.Width(22f))) {
@@ -405,8 +420,8 @@ namespace SigningGame.Editor.UpgradeTree {
             EditorGUI.DrawRect(new Rect(0f, _ToolbarHeight, position.width, position.height - _ToolbarHeight),
                 new Color(0f, 0f, 0f, 0.35f));
             string title = _popup switch {
-                PopupMode.Settings => "Upgrade Tree Settings",
-                PopupMode.Node => "New Upgrade Node",
+                PopupMode.Settings => _mode == UpgradeTreeEditorMode.Meta ? "Meta Upgrade Tree Settings" : "Upgrade Tree Settings",
+                PopupMode.Node => _mode == UpgradeTreeEditorMode.Meta ? "New Meta Upgrade Node" : "New Upgrade Node",
                 PopupMode.Modifier => "New Modifier Asset",
                 _ => string.Empty
             };
@@ -436,7 +451,7 @@ namespace SigningGame.Editor.UpgradeTree {
         }
 
         private void DrawSettingsPopup() {
-            if (_settingsDraft == null) _settingsDraft = new SettingsDraft(_settings);
+            if (_settingsDraft == null) _settingsDraft = new SettingsDraft(_settings, _mode);
             _settingsDraft.NodeSize = EditorGUILayout.FloatField("Node size", _settingsDraft.NodeSize);
             _settingsDraft.IdFontSize = EditorGUILayout.IntField("ID font size", _settingsDraft.IdFontSize);
             _settingsDraft.GridSize = EditorGUILayout.FloatField("Grid size", _settingsDraft.GridSize);
@@ -452,7 +467,7 @@ namespace SigningGame.Editor.UpgradeTree {
             EditorGUILayout.Space(5f);
             GUILayout.Label("Addressables", EditorStyles.boldLabel);
             _settingsDraft.Group = EditorGUILayout.TextField("Group", _settingsDraft.Group);
-            EditorGUILayout.LabelField("Mandatory label", UpgradeTreeEditorSettings.MandatoryLabel);
+            EditorGUILayout.LabelField("Mandatory label", UpgradeTreeEditorSettings.GetMandatoryLabel(_mode));
             _settingsDraft.ExtraLabels = EditorGUILayout.TextField("Extra labels", _settingsDraft.ExtraLabels);
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
@@ -646,7 +661,7 @@ namespace SigningGame.Editor.UpgradeTree {
         }
 
         private void OpenSettingsPopup() {
-            _settingsDraft = new SettingsDraft(_settings);
+            _settingsDraft = new SettingsDraft(_settings, _mode);
             _popup = PopupMode.Settings;
             Repaint();
         }
@@ -699,7 +714,8 @@ namespace SigningGame.Editor.UpgradeTree {
             _settings.NormalPathColor = _settingsDraft.Normal;
             _settings.HiddenPathColor = _settingsDraft.Hidden;
             _settings.PhantomPathColor = _settingsDraft.Phantom;
-            _settings.UpgradeRootSuffix = root;
+            if (_mode == UpgradeTreeEditorMode.Meta) _settings.MetaUpgradeRootSuffix = root;
+            else _settings.UpgradeRootSuffix = root;
             _settings.AddressablesGroup = _settingsDraft.Group?.Trim() ?? string.Empty;
             _settings.ExtraLabels = (_settingsDraft.ExtraLabels ?? string.Empty)
                 .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -707,7 +723,7 @@ namespace SigningGame.Editor.UpgradeTree {
             _settings.ClampValues();
             EditorUtility.SetDirty(_settings);
             AssetDatabase.SaveAssetIfDirty(_settings);
-            _operations = new UpgradeTreeEditorOperations(_settings, AddressableAssetSettingsDefaultObject.Settings);
+            _operations = new UpgradeTreeEditorOperations(_settings, AddressableAssetSettingsDefaultObject.Settings, _mode);
             ClosePopup();
             ReloadNodes();
         }
@@ -829,8 +845,23 @@ namespace SigningGame.Editor.UpgradeTree {
                 SetStatus(error, MessageType.Error);
                 return;
             }
-            _operations = new UpgradeTreeEditorOperations(_settings, AddressableAssetSettingsDefaultObject.Settings);
+            _operations = new UpgradeTreeEditorOperations(_settings, AddressableAssetSettingsDefaultObject.Settings, _mode);
             ReloadNodes();
+        }
+
+        private void SwitchMode(UpgradeTreeEditorMode mode) {
+            if (_mode == mode && _settings != null) {
+                titleContent = new GUIContent(mode == UpgradeTreeEditorMode.Meta ? "Meta Upgrade Tree" : "Upgrade Tree");
+                return;
+            }
+            CancelGesture();
+            ClosePopup();
+            _mode = mode;
+            titleContent = new GUIContent(mode == UpgradeTreeEditorMode.Meta ? "Meta Upgrade Tree" : "Upgrade Tree");
+            _selection.Clear();
+            _selectedModifier = null;
+            _settingsDraft = null;
+            LoadSettings();
         }
 
         private void ReloadNodes() {
@@ -965,7 +996,7 @@ namespace SigningGame.Editor.UpgradeTree {
 
         private static bool IsActionKey(Event evt) => evt.control || evt.command;
 
-        private static string Pref(string key) => $"SigningGame.UpgradeTree.{key}";
+        private string Pref(string key) => $"SigningGame.{_mode}.UpgradeTree.{key}";
 
         private enum Gesture {
             None,
@@ -995,14 +1026,14 @@ namespace SigningGame.Editor.UpgradeTree {
             internal string Group;
             internal string ExtraLabels;
 
-            internal SettingsDraft(UpgradeTreeEditorSettings source) {
+            internal SettingsDraft(UpgradeTreeEditorSettings source, UpgradeTreeEditorMode mode = UpgradeTreeEditorMode.Ordinary) {
                 NodeSize = source.NodeSize;
                 IdFontSize = source.IdFontSize;
                 GridSize = source.GridSize;
                 Normal = source.NormalPathColor;
                 Hidden = source.HiddenPathColor;
                 Phantom = source.PhantomPathColor;
-                RootSuffix = source.UpgradeRootSuffix;
+                RootSuffix = source.GetRootSuffix(mode);
                 Group = source.AddressablesGroup;
                 ExtraLabels = string.Join(", ", source.ExtraLabels ?? Array.Empty<string>());
             }

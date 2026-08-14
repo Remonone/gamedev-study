@@ -28,6 +28,7 @@ namespace Bootstrap.Installer {
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
             var modifierStorage = new ModifierStorage();
             modifierStorage.RegisterProvider(new UpgradeModifierProvider());
+            modifierStorage.RegisterProvider(new MetaUpgradeModifierProvider());
             modifierStorage.RegisterProvider(new PracticeModifierProvider());
             modifierStorage.RegisterProvider(new BillModifierProvider());
             container.Register(modifierStorage);
@@ -36,9 +37,12 @@ namespace Bootstrap.Installer {
             container.Register(new DocumentGeneratorService());
             container.Register(new WalletService());
             container.Register(new UpgradeService());
+            container.Register(new MetaProgressionService());
             container.Register(new GameStatisticsService());
             container.Register(new UnlockService());
             container.Register(new UpgradeTreeService());
+            container.Register(new MetaUpgradeTreeService());
+            container.Register(new MetaPurchaseService());
             container.Register(new PlayerStatStash());
             container.Register(new BankService());
             container.Register(new AcceptedNormalDocumentService());

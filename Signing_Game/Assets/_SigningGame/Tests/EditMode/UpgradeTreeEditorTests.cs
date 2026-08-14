@@ -12,12 +12,15 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SigningGame.Tests.EditMode {
     public sealed class UpgradeTreeEditorTests {
         private const string _Root = "Assets/__UpgradeTreeEditorTests";
         private const string _UpgradeRoot = _Root + "/Upgrades";
+        private const string _MetaUpgradeRoot = _Root + "/MetaUpgrades";
         private const string _AddressablesRoot = _Root + "/Addressables";
 
         private UpgradeTreeEditorSettings _settings;
@@ -36,16 +39,19 @@ namespace SigningGame.Tests.EditMode {
             AssetDatabase.DeleteAsset(_Root);
             AssetDatabase.CreateFolder("Assets", "__UpgradeTreeEditorTests");
             AssetDatabase.CreateFolder(_Root, "Upgrades");
+            AssetDatabase.CreateFolder(_Root, "MetaUpgrades");
             AssetDatabase.CreateFolder(_Root, "Addressables");
 
             _settings = ScriptableObject.CreateInstance<UpgradeTreeEditorSettings>();
             _settings.UpgradeRootSuffix = "__UpgradeTreeEditorTests/Upgrades";
+            _settings.MetaUpgradeRootSuffix = "__UpgradeTreeEditorTests/MetaUpgrades";
             _settings.AddressablesGroup = "Test Upgrades";
             _settings.ExtraLabels = Array.Empty<string>();
             AssetDatabase.CreateAsset(_settings, _Root + "/Settings.asset");
 
             _addressables = AddressableAssetSettings.Create(_AddressablesRoot, "TestAddressables", false, true);
             _addressables.AddLabel(UpgradeTreeEditorSettings.MandatoryLabel, false);
+            _addressables.AddLabel(UpgradeTreeEditorSettings.MetaMandatoryLabel, false);
             _group = _addressables.CreateGroup(
                 _settings.AddressablesGroup,
                 true,
@@ -177,6 +183,71 @@ namespace SigningGame.Tests.EditMode {
             Assert.That(entry, Is.Not.Null);
             Assert.That(entry.labels, Does.Contain(UpgradeTreeEditorSettings.MandatoryLabel));
             Assert.That(entry.address, Is.EqualTo(path));
+        }
+
+        [Test]
+        public void MetaMode_UsesExactTypeRootAndLabelAndRejectsCrossTreeLinks() {
+            var metaOperations = new UpgradeTreeEditorOperations(
+                _settings, _addressables, UpgradeTreeEditorMode.Meta);
+            UpgradeTreeOperationResult<UpgradeNodeDefinition> metaResult =
+                metaOperations.CreateNode("meta_first", new Vector2(20f, 40f));
+            UpgradeNodeDefinition ordinary = Create("ordinary_first");
+
+            Assert.That(metaResult.Success, Is.True, metaResult.Error);
+            Assert.That(metaResult.Value.GetType(), Is.EqualTo(typeof(MetaUpgradeNodeDefinition)));
+            Assert.That(AssetDatabase.GetAssetPath(metaResult.Value), Does.StartWith(_MetaUpgradeRoot));
+            AddressableAssetEntry entry = _addressables.FindAssetEntry(
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(metaResult.Value)));
+            Assert.That(entry.labels, Does.Contain(UpgradeTreeEditorSettings.MetaMandatoryLabel));
+            Assert.That(_operations.DiscoverNodes().Contains(metaResult.Value), Is.False,
+                "Ordinary discovery included a meta subtype.");
+            Assert.That(metaOperations.DiscoverNodes().Contains(metaResult.Value), Is.True,
+                "Meta discovery did not find the newly created exact meta type.");
+            Assert.That(_operations.AddEdge(ordinary, metaResult.Value).Success, Is.False,
+                "Ordinary mode accepted a meta child.");
+            Assert.That(metaOperations.AddEdge(metaResult.Value, ordinary).Success, Is.False,
+                "Meta mode accepted an ordinary child.");
+            Assert.That(_operations.CreateModifier(metaResult.Value, "wrong_tree_modifier").Success, Is.False,
+                "Ordinary mode created a modifier for a meta node.");
+            Assert.That(metaOperations.CreateModifier(ordinary, "wrong_tree_modifier").Success, Is.False,
+                "Meta mode created a modifier for an ordinary node.");
+        }
+
+        [Test]
+        public void MetaPrefabAndScene_HaveRequiredReferencesAndFifthTab() {
+            const string prefabPath = "Assets/_SigningGame/Prefabs/MetaUpgradeUI.prefab";
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            Assert.That(prefab, Is.Not.Null);
+            var view = prefab.GetComponentInChildren<Presentation.MetaUpgradeTreeView>(true);
+            var confirmation = prefab.GetComponent<Presentation.MetaPurchaseConfirmationView>();
+            var pull = prefab.GetComponentInChildren<UI.PullTabView>(true);
+            Assert.That(view, Is.Not.Null);
+            Assert.That(confirmation, Is.Not.Null);
+            Assert.That(pull, Is.Not.Null);
+            var viewState = new SerializedObject(view);
+            foreach (string field in new[] { "_pullTab", "_content", "_edgeGraphic", "_nodePrefab", "_detailsView",
+                         "_confirmation", "_currencyText", "_iterationText" }) {
+                Assert.That(viewState.FindProperty(field).objectReferenceValue, Is.Not.Null, field);
+            }
+            var pullState = new SerializedObject(pull);
+            Assert.That(pullState.FindProperty("_initiallyAvailable").boolValue, Is.False);
+
+            Scene scene = EditorSceneManager.OpenScene(
+                "Assets/_SigningGame/Scenes/SampleScene.unity", OpenSceneMode.Additive);
+            try {
+                Transform metaRoot = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<Transform>(true))
+                    .FirstOrDefault(transform => transform.name == "MetaUpgradeUI");
+                Assert.That(metaRoot, Is.Not.Null);
+                UI.PullTabGroupView group = scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<UI.PullTabGroupView>(true)).First();
+                var groupState = new SerializedObject(group);
+                SerializedProperty tabs = groupState.FindProperty("_tabs");
+                Assert.That(tabs.arraySize, Is.EqualTo(5));
+                Assert.That(tabs.GetArrayElementAtIndex(4).objectReferenceValue, Is.Not.Null);
+            } finally {
+                EditorSceneManager.CloseScene(scene, true);
+            }
         }
 
         [Test]

@@ -136,6 +136,26 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Presentation_InvertsTreeYForRuntimeRectTransformCoordinates() {
+            UpgradeNodeDefinition parent = CreateDefinition("parent");
+            UpgradeNodeDefinition child = CreateDefinition("child");
+            parent.TreePosition = new Vector2(20f, 100f);
+            child.TreePosition = new Vector2(20f, 0f);
+            parent.Children = new[] { new UpgradeNodeLink { Child = child, DrawEdge = true } };
+            SetupTree(new[] { parent, child }, out UpgradeService upgrades, out _, out UpgradeTreeService tree);
+            using var viewModel = new UpgradeTreeViewModel(tree, upgrades, _lastWallet);
+
+            UpgradeNodePresentationModel parentModel = FindNode(viewModel.Nodes, parent.Id);
+            UpgradeNodePresentationModel childModel = FindNode(viewModel.Nodes, child.Id);
+
+            Assert.That(parentModel.Position, Is.EqualTo(new Vector2(20f, -100f)));
+            Assert.That(childModel.Position, Is.EqualTo(new Vector2(20f, 0f)));
+            Assert.That(childModel.Position.y, Is.GreaterThan(parentModel.Position.y));
+            Assert.That(viewModel.Edges[0].Start, Is.EqualTo(parentModel.Position));
+            Assert.That(viewModel.Edges[0].End, Is.EqualTo(childModel.Position));
+        }
+
+        [Test]
         public void Tree_EvaluatesAnyAndAllStatisticRequirements() {
             UpgradeNodeDefinition node = CreateDefinition("statistics");
             node.StatisticRequirementMode = StatisticRequirementMode.Any;
@@ -431,6 +451,17 @@ namespace Tests.EditMode {
             definition.Children = Array.Empty<UpgradeNodeLink>();
             _definitions.Add(definition);
             return definition;
+        }
+
+        private static UpgradeNodePresentationModel FindNode(
+            IReadOnlyList<UpgradeNodePresentationModel> nodes,
+            string id) {
+            for (int index = 0; index < nodes.Count; index++) {
+                if (nodes[index].Id == id) return nodes[index];
+            }
+
+            Assert.Fail($"Node '{id}' was not present in the view model.");
+            return null;
         }
 
         private ModifierDefinition CreateGenerationModifier() {

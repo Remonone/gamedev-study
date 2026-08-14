@@ -69,6 +69,13 @@ namespace Services {
 
             var states = new Dictionary<string, UpgradeNodeState>(StringComparer.Ordinal);
             foreach (UpgradeNodeDefinition asset in assets) {
+                if (asset == null) ValidateDefinition(asset);
+                if (asset.GetType() != typeof(UpgradeNodeDefinition)) {
+                    Debug.LogWarning(
+                        $"Upgrade subtype '{asset.GetType().Name}' with ID '{asset.Id}' was assigned the ordinary " +
+                        "upgrade label and was excluded.");
+                    continue;
+                }
                 ValidateDefinition(asset);
                 if (!states.TryAdd(asset.Id, new UpgradeNodeState(asset))) {
                     throw new InvalidOperationException($"Duplicate upgrade ID '{asset.Id}'.");

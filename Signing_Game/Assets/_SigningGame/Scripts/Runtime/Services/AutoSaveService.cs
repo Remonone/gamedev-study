@@ -14,6 +14,9 @@ namespace Services {
 
         private float _elapsedSeconds;
         private bool _subscribedToQuitting;
+        private bool _suspended;
+
+        public bool IsSuspended => _suspended;
 
         public AutoSaveService(SaveService saveService, float intervalSeconds = DefaultIntervalSeconds) {
             _saveService = saveService ?? throw new ArgumentNullException(nameof(saveService));
@@ -40,7 +43,12 @@ namespace Services {
             _disposables.Dispose();
         }
 
+        public void Suspend() => _suspended = true;
+
+        public void Resume() => _suspended = false;
+
         private void OnUpdate(Unit _) {
+            if (_suspended) return;
             _elapsedSeconds += Time.unscaledDeltaTime;
             if (_elapsedSeconds < _intervalSeconds) return;
 
@@ -49,6 +57,7 @@ namespace Services {
         }
 
         private void OnApplicationQuitting() {
+            if (_suspended) return;
             _saveService.SaveToFile();
         }
     }

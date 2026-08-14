@@ -27,6 +27,7 @@ namespace Services.Calculators {
 
         internal DocumentEntries CalculateWithoutBill() {
             DocumentEntries result = _modifierStorage.GetProvider<UpgradeModifierProvider>().Collect(_reference.Value);
+            if (_modifierStorage.TryGetProvider(out MetaUpgradeModifierProvider meta)) result = meta.Collect(result);
             return _modifierStorage.TryGetProvider(out PracticeModifierProvider practice)
                 ? practice.Collect(result)
                 : result;

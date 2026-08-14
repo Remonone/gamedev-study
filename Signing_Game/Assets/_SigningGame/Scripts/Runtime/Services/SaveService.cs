@@ -96,10 +96,22 @@ namespace Services {
         }
 
         public bool SaveToFile() {
+            try {
+                return SaveSnapshotToFile(CreateSnapshot());
+            } catch (Exception exception) {
+                Debug.LogWarning($"Failed to create save data for '{_filePath}'.\n{exception}");
+                return false;
+            }
+        }
+
+        public bool SaveSnapshotToFile(SaveSnapshot snapshot) {
             string temporaryPath = _filePath + ".tmp";
 
             try {
-                SaveSnapshot snapshot = CreateSnapshot();
+                if (snapshot == null || snapshot.Version != SaveSnapshot.CurrentVersion || snapshot.Sections == null) {
+                    throw new ArgumentException("A supplied save snapshot must have the current version and a sections map.",
+                        nameof(snapshot));
+                }
                 string json = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
                 string directory = Path.GetDirectoryName(_filePath);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);

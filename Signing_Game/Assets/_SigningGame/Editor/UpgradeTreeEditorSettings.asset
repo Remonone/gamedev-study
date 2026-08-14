@@ -19,5 +19,6 @@ MonoBehaviour:
   HiddenPathColor: {r: 0.65, g: 0.5, b: 0.85, a: 1}
   PhantomPathColor: {r: 1, g: 0.8, b: 0.25, a: 0.9}
   UpgradeRootSuffix: _SigningGame/Data/Upgrades
+  MetaUpgradeRootSuffix: _SigningGame/Data/MetaUpgrades
   AddressablesGroup: SigningGame
   ExtraLabels: []

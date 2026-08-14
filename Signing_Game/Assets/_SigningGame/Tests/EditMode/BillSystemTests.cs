@@ -105,7 +105,7 @@ namespace Tests.EditMode {
             Assert.That(environment.Wallet.CurrentBalance.Base.Degree, Is.GreaterThan(0));
 
             GenerationEntries modified = BillCompletionModifierEvaluator.Apply(
-                new GenerationEntries(1f, 0f),
+                new GenerationEntries(1f, 1),
                 environment.Bills.CompletedBills,
                 entries);
             Assert.That(modified.TokenPerSecond, Is.EqualTo(float.MaxValue));
@@ -496,7 +496,7 @@ namespace Tests.EditMode {
             scope.Register(documentCalculator, typeof(ICacheCalculator<DocumentEntries>));
             scope.Register(new StaticCalculator<IncomeEntries>(new IncomeEntries(1f, 0.5f, Value.One)),
                 typeof(ICacheCalculator<IncomeEntries>));
-            scope.Register(new StaticCalculator<GenerationEntries>(new GenerationEntries(1f, 0f)),
+            scope.Register(new StaticCalculator<GenerationEntries>(new GenerationEntries(1f, 1)),
                 typeof(ICacheCalculator<GenerationEntries>));
             scope.Register(new StaticCalculator<SignatureEntries>(default),
                 typeof(ICacheCalculator<SignatureEntries>));

@@ -36,21 +36,31 @@ namespace SigningGame.Editor.UpgradeTree {
 
         private readonly UpgradeTreeEditorSettings _settings;
         private readonly AddressableAssetSettings _addressables;
+        private readonly UpgradeTreeEditorMode _mode;
+        private string RootPath => _settings.GetRootPath(_mode);
+        private string RootSuffix => _settings.GetRootSuffix(_mode);
+        private string MandatoryLabel => UpgradeTreeEditorSettings.GetMandatoryLabel(_mode);
 
-        internal UpgradeTreeEditorOperations(UpgradeTreeEditorSettings settings, AddressableAssetSettings addressables) {
+        internal UpgradeTreeEditorOperations(UpgradeTreeEditorSettings settings, AddressableAssetSettings addressables,
+            UpgradeTreeEditorMode mode = UpgradeTreeEditorMode.Ordinary) {
             _settings = settings;
             _addressables = addressables;
+            _mode = mode;
         }
 
         internal IReadOnlyList<UpgradeNodeDefinition> DiscoverNodes() {
-            if (_settings == null || !AssetDatabase.IsValidFolder(_settings.UpgradeRootPath)) {
+            if (_settings == null || !AssetDatabase.IsValidFolder(RootPath)) {
                 return Array.Empty<UpgradeNodeDefinition>();
             }
 
-            return AssetDatabase.FindAssets("t:UpgradeNodeDefinition", new[] { _settings.UpgradeRootPath })
-                .Select(AssetDatabase.GUIDToAssetPath)
+            Type exactType = _mode == UpgradeTreeEditorMode.Meta
+                ? typeof(MetaUpgradeNodeDefinition)
+                : typeof(UpgradeNodeDefinition);
+            string prefix = RootPath + "/";
+            return AssetDatabase.GetAllAssetPaths()
+                .Where(path => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 .Select(AssetDatabase.LoadAssetAtPath<UpgradeNodeDefinition>)
-                .Where(node => node != null)
+                .Where(node => node != null && node.GetType() == exactType)
                 .OrderBy(node => node.Id ?? string.Empty, StringComparer.Ordinal)
                 .ThenBy(AssetDatabase.GetAssetPath, StringComparer.Ordinal)
                 .ToArray();
@@ -67,20 +77,25 @@ namespace SigningGame.Editor.UpgradeTree {
             if (source != null && !TryRequireCleanEditable(source, out error)) {
                 return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail(error);
             }
+            if (source != null && !IsNodeForMode(source)) {
+                return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail("The source node belongs to another tree mode.");
+            }
 
             string nodePath = $"{folderPath}/Upgrade Node.asset";
             UpgradeNodeDefinition node = null;
             string guid = null;
             UpgradeNodeLink[] sourceSnapshot = source?.Children ?? Array.Empty<UpgradeNodeLink>();
             try {
-                EnsureFolder(_settings.UpgradeRootPath);
+                EnsureFolder(RootPath);
                 string parent = GetParentPath(folderPath);
                 string folderName = GetName(folderPath);
                 if (string.IsNullOrEmpty(AssetDatabase.CreateFolder(parent, folderName))) {
                     throw new InvalidOperationException($"Failed to create folder '{folderPath}'.");
                 }
 
-                node = ScriptableObject.CreateInstance<UpgradeNodeDefinition>();
+                node = _mode == UpgradeTreeEditorMode.Meta
+                    ? ScriptableObject.CreateInstance<MetaUpgradeNodeDefinition>()
+                    : ScriptableObject.CreateInstance<UpgradeNodeDefinition>();
                 node.Id = id;
                 node.Name = id;
                 node.CostFormula = new ConstantValue();
@@ -108,7 +123,10 @@ namespace SigningGame.Editor.UpgradeTree {
                 AssetDatabase.ImportAsset(nodePath, ImportAssetOptions.ForceUpdate);
                 node = AssetDatabase.LoadAssetAtPath<UpgradeNodeDefinition>(nodePath);
                 AddressableAssetEntry verified = _addressables.FindAssetEntry(guid);
-                if (node == null || verified == null || !verified.labels.Contains(AddressableConstants.UPGRADE_LABEL)) {
+                if (node == null || node.GetType() != (_mode == UpgradeTreeEditorMode.Meta
+                        ? typeof(MetaUpgradeNodeDefinition)
+                        : typeof(UpgradeNodeDefinition)) ||
+                    verified == null || !verified.labels.Contains(MandatoryLabel)) {
                     throw new InvalidOperationException("Created node failed persistence verification.");
                 }
 
@@ -131,6 +149,9 @@ namespace SigningGame.Editor.UpgradeTree {
             string fileStem
         ) {
             if (node == null) return UpgradeTreeOperationResult<ModifierDefinition>.Fail("Select one node first.");
+            if (!IsNodeForMode(node)) {
+                return UpgradeTreeOperationResult<ModifierDefinition>.Fail("The node belongs to another tree mode.");
+            }
             if (!UpgradeTreeEditorValidation.TryValidateSegment(fileStem, "Modifier filename", out string error)) {
                 return UpgradeTreeOperationResult<ModifierDefinition>.Fail(error);
             }
@@ -179,6 +200,9 @@ namespace SigningGame.Editor.UpgradeTree {
             bool drawEdge = true
         ) {
             if (source == null || child == null) return UpgradeTreeOperationResult<bool>.Fail("Both nodes are required.");
+            if (!IsNodeForMode(source) || !IsNodeForMode(child)) {
+                return UpgradeTreeOperationResult<bool>.Fail("Cross-tree links are not allowed.");
+            }
             if (source == child) return UpgradeTreeOperationResult<bool>.Fail("A node cannot link to itself.");
             if (GetChildren(source).Any(link => link.Child == child)) {
                 return UpgradeTreeOperationResult<bool>.Fail("This direct edge already exists.");
@@ -319,6 +343,15 @@ namespace SigningGame.Editor.UpgradeTree {
             }
 
             foreach (UpgradeNodeDefinition source in sources) {
+                if (!IsNodeForMode(source)) {
+                    return UpgradeTreeOperationResult<IReadOnlyList<UpgradeNodeDefinition>>.Fail(
+                        "Clipboard nodes must belong to the active tree mode.");
+                }
+                if ((source.Children ?? Array.Empty<UpgradeNodeLink>()).Any(link =>
+                        link.Child != null && !IsNodeForMode(link.Child))) {
+                    return UpgradeTreeOperationResult<IReadOnlyList<UpgradeNodeDefinition>>.Fail(
+                        $"Node '{source.Id}' contains a cross-tree child reference.");
+                }
                 if (!TryRequireCleanEditable(source, out string sourceError)) {
                     return UpgradeTreeOperationResult<IReadOnlyList<UpgradeNodeDefinition>>.Fail(sourceError);
                 }
@@ -347,7 +380,7 @@ namespace SigningGame.Editor.UpgradeTree {
                 string folder;
                 do {
                     id = $"{source.Id}_{copyNumber++}";
-                    folder = $"{_settings.UpgradeRootPath}/{id}";
+                    folder = $"{RootPath}/{id}";
                 } while (allocatedIds.Contains(id) || allocatedPaths.Contains(folder));
                 if (!UpgradeTreeEditorValidation.TryValidateSegment(id, "Copied node ID", out error)) {
                     return UpgradeTreeOperationResult<IReadOnlyList<UpgradeNodeDefinition>>.Fail(error);
@@ -363,7 +396,7 @@ namespace SigningGame.Editor.UpgradeTree {
             try {
                 var sourceToCopy = new Dictionary<UpgradeNodeDefinition, UpgradeNodeDefinition>();
                 foreach (var plan in plans) {
-                    if (string.IsNullOrEmpty(AssetDatabase.CreateFolder(_settings.UpgradeRootPath, plan.id))) {
+                    if (string.IsNullOrEmpty(AssetDatabase.CreateFolder(RootPath, plan.id))) {
                         throw new InvalidOperationException($"Failed to create '{plan.folder}'.");
                     }
                     createdFolders.Add(plan.folder);
@@ -448,6 +481,7 @@ namespace SigningGame.Editor.UpgradeTree {
             string newId
         ) {
             if (node == null) return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail("Select one node.");
+            if (!IsNodeForMode(node)) return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail("The node belongs to another tree mode.");
             if (!UpgradeTreeEditorValidation.TryValidateSegment(newId, "Upgrade ID", out string error)) {
                 return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail(error);
             }
@@ -458,12 +492,12 @@ namespace SigningGame.Editor.UpgradeTree {
             if (GetAllNodes().Any(other => other != node && string.Equals(other.Id, newId, StringComparison.Ordinal))) {
                 return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail($"Upgrade ID '{newId}' already exists.");
             }
-            if (FindBillReferences(node.Id).Count > 0) {
+            if (_mode == UpgradeTreeEditorMode.Ordinary && FindBillReferences(node.Id).Count > 0) {
                 return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail(
                     $"Upgrade ID is referenced by bill requirements:\n{string.Join("\n", FindBillReferences(node.Id))}");
             }
 
-            string newFolder = $"{_settings.UpgradeRootPath}/{newId}";
+            string newFolder = $"{RootPath}/{newId}";
             if (PathExistsCaseInsensitive(newFolder)) {
                 return UpgradeTreeOperationResult<UpgradeNodeDefinition>.Fail($"Folder '{newFolder}' already exists.");
             }
@@ -530,10 +564,13 @@ namespace SigningGame.Editor.UpgradeTree {
 
         internal UpgradeTreeOperationResult<bool> DeleteNode(UpgradeNodeDefinition node) {
             if (node == null) return UpgradeTreeOperationResult<bool>.Fail("Select exactly one node.");
+            if (!IsNodeForMode(node)) return UpgradeTreeOperationResult<bool>.Fail("The node belongs to another tree mode.");
             if (!TryPreflightOwnedFolder(node, false, out string folder, out string[] ownedPaths, out string error)) {
                 return UpgradeTreeOperationResult<bool>.Fail(error);
             }
-            List<string> billReferences = FindBillReferences(node.Id);
+            List<string> billReferences = _mode == UpgradeTreeEditorMode.Ordinary
+                ? FindBillReferences(node.Id)
+                : new List<string>();
             if (billReferences.Count > 0) {
                 return UpgradeTreeOperationResult<bool>.Fail(
                     $"Upgrade ID is referenced by bill requirements:\n{string.Join("\n", billReferences)}");
@@ -605,23 +642,23 @@ namespace SigningGame.Editor.UpgradeTree {
             folderPath = null;
             group = null;
             if (!UpgradeTreeEditorValidation.TryValidateSegment(id, "Upgrade ID", out error)) return false;
-            if (!UpgradeTreeEditorValidation.TryValidateRootSuffix(_settings.UpgradeRootSuffix, out _, out error)) return false;
+            if (!UpgradeTreeEditorValidation.TryValidateRootSuffix(RootSuffix, out _, out error)) return false;
             if (GetAllNodes().Any(node => string.Equals(node.Id, id, StringComparison.Ordinal))) {
                 error = $"Upgrade ID '{id}' already exists.";
                 return false;
             }
-            folderPath = $"{_settings.UpgradeRootPath}/{id}";
+            folderPath = $"{RootPath}/{id}";
             if (PathExistsCaseInsensitive(folderPath)) {
                 error = $"Folder '{folderPath}' already exists.";
                 return false;
             }
             if (!TryGetAddressablesContext(out group, out error)) return false;
-            if (!AssetDatabase.CanOpenForEdit(_settings.UpgradeRootPath, out string editMessage) &&
-                AssetDatabase.IsValidFolder(_settings.UpgradeRootPath)) {
+            if (!AssetDatabase.CanOpenForEdit(RootPath, out string editMessage) &&
+                AssetDatabase.IsValidFolder(RootPath)) {
                 error = $"Upgrade root is not editable: {editMessage}";
                 return false;
             }
-            string editableParent = _settings.UpgradeRootPath;
+            string editableParent = RootPath;
             while (!AssetDatabase.IsValidFolder(editableParent) && !string.IsNullOrEmpty(editableParent)) {
                 editableParent = GetParentPath(editableParent);
             }
@@ -701,7 +738,7 @@ namespace SigningGame.Editor.UpgradeTree {
             if (!TryRequireCleanEditable(node, out error)) return false;
             string nodePath = AssetDatabase.GetAssetPath(node);
             folder = GetParentPath(nodePath);
-            if (!string.Equals(GetParentPath(folder), _settings.UpgradeRootPath, StringComparison.OrdinalIgnoreCase)) {
+            if (!string.Equals(GetParentPath(folder), RootPath, StringComparison.OrdinalIgnoreCase)) {
                 error = "Rename/delete requires a dedicated direct child folder of the configured upgrade root.";
                 return false;
             }
@@ -787,19 +824,28 @@ namespace SigningGame.Editor.UpgradeTree {
             return node?.Children ?? Array.Empty<UpgradeNodeLink>();
         }
 
-        private static UpgradeNodeDefinition[] GetAllNodes() {
-            return AssetDatabase.FindAssets("t:UpgradeNodeDefinition")
-                .Select(AssetDatabase.GUIDToAssetPath)
+        private UpgradeNodeDefinition[] GetAllNodes() {
+            Type exactType = _mode == UpgradeTreeEditorMode.Meta
+                ? typeof(MetaUpgradeNodeDefinition)
+                : typeof(UpgradeNodeDefinition);
+            return AssetDatabase.GetAllAssetPaths()
                 .Select(AssetDatabase.LoadAssetAtPath<UpgradeNodeDefinition>)
-                .Where(node => node != null)
+                .Where(node => node != null && node.GetType() == exactType)
                 .ToArray();
         }
 
         private IEnumerable<string> EnumerateLabels() {
-            yield return AddressableConstants.UPGRADE_LABEL;
+            yield return MandatoryLabel;
             foreach (string label in _settings.ExtraLabels ?? Array.Empty<string>()) {
-                if (!string.IsNullOrWhiteSpace(label) && label != AddressableConstants.UPGRADE_LABEL) yield return label;
+                if (!string.IsNullOrWhiteSpace(label) && label != MandatoryLabel) yield return label;
             }
+        }
+
+        private bool IsNodeForMode(UpgradeNodeDefinition node) {
+            if (node == null) return false;
+            return _mode == UpgradeTreeEditorMode.Meta
+                ? node.GetType() == typeof(MetaUpgradeNodeDefinition)
+                : node.GetType() == typeof(UpgradeNodeDefinition);
         }
 
         private void RestoreEntry(string guid, AddressableAssetGroup group, string address, IEnumerable<string> labels) {

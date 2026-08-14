@@ -22,5 +22,19 @@ namespace Tests.EditMode {
             Assert.That(session.TryConsume(out _), Is.False);
             Assert.DoesNotThrow(() => session.Prepare(GameLaunchMode.NewGame));
         }
+
+        [Test]
+        public void SceneFlow_ReservesReloadSynchronouslyAndCanCancelBeforeDiskCommit() {
+            using var session = new GameSessionService();
+            using var flow = new SceneFlowService(session);
+
+            Assert.That(flow.TryReserveGameReload(GameLaunchMode.Continue, out int reservation), Is.True);
+            Assert.That(reservation, Is.GreaterThan(0));
+            Assert.That(flow.IsTransitionInProgress, Is.True);
+            Assert.That(flow.TryReserveGameReload(GameLaunchMode.Continue, out _), Is.False);
+            Assert.That(flow.CancelReservedGameReload(reservation), Is.True);
+            Assert.That(flow.IsTransitionInProgress, Is.False);
+            Assert.That(session.HasPendingLaunch, Is.False);
+        }
     }
 }

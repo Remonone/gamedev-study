@@ -14,19 +14,66 @@ namespace Services {
         private readonly ReactiveProperty<string> _lastError = new(string.Empty);
 
         private bool _transitionInProgress;
+        private int _nextReloadReservation;
+        private int _activeReloadReservation;
 
         public Observable<bool> Loading => _loading;
         public Observable<float> Progress => _progress;
         public Observable<string> LastError => _lastError;
         public bool IsLoading => _loading.Value;
+        public bool IsTransitionInProgress => _transitionInProgress;
 
         public SceneFlowService(GameSessionService session) {
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         public void OpenMainMenu() => LoadMainMenuAsync().Forget();
-        public void Play() => LoadGameAsync().Forget();
+        public void Play() {
+            GameLaunchMode mode = SaveService.HasValidSave()
+                ? GameLaunchMode.Continue
+                : GameLaunchMode.NewGame;
+            if (TryReserveGameReload(mode, out int reservation)) StartReservedGameReload(reservation);
+        }
         public void Quit() => Application.Quit();
+
+        public bool TryReserveGameReload(GameLaunchMode mode, out int reservation) {
+            reservation = 0;
+            if (_transitionInProgress || _session.HasPendingLaunch) return false;
+            _transitionInProgress = true;
+            try {
+                _session.Prepare(mode);
+                _activeReloadReservation = ++_nextReloadReservation;
+                reservation = _activeReloadReservation;
+                return true;
+            } catch {
+                _transitionInProgress = false;
+                _activeReloadReservation = 0;
+                throw;
+            }
+        }
+
+        public bool StartReservedGameReload(int reservation) {
+            if (!_transitionInProgress || reservation == 0 || reservation != _activeReloadReservation) return false;
+            _activeReloadReservation = 0;
+            BeginLoading();
+            LoadReservedGameAsync().Forget();
+            return true;
+        }
+
+        public bool CancelReservedGameReload(int reservation) {
+            if (!_transitionInProgress || reservation == 0 || reservation != _activeReloadReservation) return false;
+            _activeReloadReservation = 0;
+            _session.ClearPending();
+            _transitionInProgress = false;
+            return true;
+        }
+
+        public void RecoverCommittedReloadToMainMenu() {
+            _activeReloadReservation = 0;
+            _session.ClearPending();
+            _transitionInProgress = false;
+            OpenMainMenu();
+        }
 
         public void Dispose() {
             _loading.Dispose();
@@ -48,16 +95,8 @@ namespace Services {
             }
         }
 
-        private async UniTaskVoid LoadGameAsync() {
-            if (_transitionInProgress) return;
-            _transitionInProgress = true;
-            BeginLoading();
-            GameLaunchMode mode = SaveService.HasValidSave()
-                ? GameLaunchMode.Continue
-                : GameLaunchMode.NewGame;
-
+        private async UniTaskVoid LoadReservedGameAsync() {
             try {
-                _session.Prepare(mode);
                 await LoadSceneAsync(InternalConstants.GAME_SCENE, true);
                 FinishLoading();
             } catch (Exception exception) {

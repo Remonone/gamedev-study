@@ -3,9 +3,15 @@ using UnityEditor;
 using UnityEngine;
 
 namespace SigningGame.Editor.UpgradeTree {
+    internal enum UpgradeTreeEditorMode {
+        Ordinary,
+        Meta
+    }
+
     internal sealed class UpgradeTreeEditorSettings : ScriptableObject {
         internal const string AssetPath = "Assets/_SigningGame/Editor/UpgradeTreeEditorSettings.asset";
         internal const string MandatoryLabel = "upgrades";
+        internal const string MetaMandatoryLabel = "meta_upgrades";
 
         [Header("Graph")]
         [Min(24f)] public float NodeSize = 72f;
@@ -17,12 +23,23 @@ namespace SigningGame.Editor.UpgradeTree {
 
         [Header("Storage")]
         public string UpgradeRootSuffix = "_SigningGame/Data/Upgrades";
+        public string MetaUpgradeRootSuffix = "_SigningGame/Data/MetaUpgrades";
 
         [Header("Addressables")]
         public string AddressablesGroup = "SigningGame";
         public string[] ExtraLabels = Array.Empty<string>();
 
         internal string UpgradeRootPath => $"Assets/{UpgradeRootSuffix}";
+        internal string MetaUpgradeRootPath => $"Assets/{MetaUpgradeRootSuffix}";
+
+        internal string GetRootSuffix(UpgradeTreeEditorMode mode) =>
+            mode == UpgradeTreeEditorMode.Meta ? MetaUpgradeRootSuffix : UpgradeRootSuffix;
+
+        internal string GetRootPath(UpgradeTreeEditorMode mode) =>
+            mode == UpgradeTreeEditorMode.Meta ? MetaUpgradeRootPath : UpgradeRootPath;
+
+        internal static string GetMandatoryLabel(UpgradeTreeEditorMode mode) =>
+            mode == UpgradeTreeEditorMode.Meta ? MetaMandatoryLabel : MandatoryLabel;
 
         internal void ClampValues() {
             NodeSize = Mathf.Clamp(NodeSize, 24f, 240f);

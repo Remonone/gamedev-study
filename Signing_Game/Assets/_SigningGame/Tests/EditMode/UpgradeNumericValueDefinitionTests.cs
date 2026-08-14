@@ -36,7 +36,7 @@ namespace Tests.EditMode {
                 .Add(new LevelModifierCapability(3))
                 .Add(new ModifierEffectivenessCapability(0.5f));
 
-            GenerationEntries result = modifier.Apply(new GenerationEntries(10f, 0f), context);
+            GenerationEntries result = modifier.Apply(new GenerationEntries(10f, 1), context);
 
             Assert.That(result.TokenPerSecond, Is.EqualTo(17f).Within(0.0001f));
         }

@@ -7,11 +7,11 @@ namespace Data.Cache {
     public struct GenerationEntries {
         [ModifiableParameter("TokenPerSecond", Minimum = 0d)]
         public float TokenPerSecond;
-        [ModifiableParameter("DispenseCooldown", Minimum = 0d)]
-        public float DispenseCooldown;
-        public GenerationEntries(float tokenPerSecond, float dispenseCooldown) {
+        [ModifiableParameter("TokenPerIncome", Minimum = 0d)]
+        public int TokenPerIncome;
+        public GenerationEntries(float tokenPerSecond, int tokenPerIncome) {
             TokenPerSecond = tokenPerSecond;
-            DispenseCooldown = dispenseCooldown;
+            TokenPerIncome = tokenPerIncome;
         }
     }
     [CreateAssetMenu(menuName = "References/Generation Reference")]

@@ -50,6 +50,8 @@ namespace Data.Upgrades {
         [SerializeReference] public IFormula CostFormula;
         [SerializeReference] public ModifierDefinition[] Modifiers;
         public string[] FeatureUnlockIds = Array.Empty<string>();
+        [Tooltip("Each purchased level contributes one point to the current meta-progression iteration.")]
+        public bool GrantsMetaCurrencyPoint;
 
         [Header("Tree")]
         public Vector2 TreePosition;
