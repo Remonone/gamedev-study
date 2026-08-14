@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Test Preset
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Authoring.SignaturePresetDefinition
   _id: test_preset
+  _displayName: "\u0421\u0442\u0440\u043E\u0433\u0430\u044F \u043F\u043E\u0434\u043F\u0438\u0441\u044C"
+  _tags:
+  - "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0435"
   _strokeMatchMode: 0
   _baseDifficultyProfile: {fileID: 11400000, guid: bdaba90eb1534a3f0be70b578f091b7d, type: 2}
   _alignment:

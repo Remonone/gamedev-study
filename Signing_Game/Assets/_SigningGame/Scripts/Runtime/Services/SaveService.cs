@@ -11,28 +11,38 @@ using UnityEngine;
 
 namespace Services {
     public sealed class SaveService : IService, IPreInitialize {
-        private const string DefaultFileName = "save.json";
+        public const string DefaultFileName = "save.json";
 
         private readonly string _filePath;
+        private readonly bool _loadExistingOnInitialize;
         private readonly List<ISaveable> _saveables = new();
         private bool _saveablesDiscovered;
 
         public string FilePath => _filePath;
+        public static string DefaultFilePath => Path.Combine(Application.persistentDataPath, DefaultFileName);
 
-        public SaveService() : this(Path.Combine(Application.persistentDataPath, DefaultFileName)) { }
+        public SaveService(bool loadExistingOnInitialize = true) : this(DefaultFilePath, loadExistingOnInitialize) { }
 
-        public SaveService(string filePath) {
+        public SaveService(string filePath, bool loadExistingOnInitialize = true) {
             if (string.IsNullOrWhiteSpace(filePath)) {
                 throw new ArgumentException("Save file path cannot be empty.", nameof(filePath));
             }
 
             _filePath = filePath;
+            _loadExistingOnInitialize = loadExistingOnInitialize;
         }
 
         public UniTask PreInitializeAsync(IServiceScope scope) {
             DiscoverSaveables(scope);
-            TryLoadFromFile();
+            if (_loadExistingOnInitialize) TryLoadFromFile();
             return UniTask.CompletedTask;
+        }
+
+        public static bool HasValidSave() => HasValidSave(DefaultFilePath);
+
+        public static bool HasValidSave(string filePath) {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath)) return false;
+            return TryReadSnapshot(filePath, false, out _);
         }
 
         public SaveSnapshot CreateSnapshot() {
@@ -117,16 +127,7 @@ namespace Services {
         }
 
         public bool TryLoadFromFile() {
-            if (!File.Exists(_filePath)) return false;
-
-            try {
-                string json = File.ReadAllText(_filePath);
-                if (!TryDeserializeSnapshot(json, out SaveSnapshot snapshot)) return false;
-                return LoadSnapshot(snapshot);
-            } catch (Exception exception) {
-                Debug.LogWarning($"Failed to load game from '{_filePath}'. The default state will be used.\n{exception}");
-                return false;
-            }
+            return TryReadSnapshot(_filePath, true, out SaveSnapshot snapshot) && LoadSnapshot(snapshot);
         }
 
         public void Dispose() { }
@@ -151,32 +152,51 @@ namespace Services {
             _saveablesDiscovered = true;
         }
 
-        private bool TryDeserializeSnapshot(string json, out SaveSnapshot snapshot) {
+        private static bool TryReadSnapshot(string filePath, bool logWarnings, out SaveSnapshot snapshot) {
+            snapshot = null;
+            if (!File.Exists(filePath)) return false;
+
+            try {
+                string json = File.ReadAllText(filePath);
+                return TryDeserializeSnapshot(json, filePath, logWarnings, out snapshot);
+            } catch (Exception exception) {
+                if (logWarnings) {
+                    Debug.LogWarning($"Failed to load game from '{filePath}'. The default state will be used.\n{exception}");
+                }
+                return false;
+            }
+        }
+
+        private static bool TryDeserializeSnapshot(
+            string json,
+            string filePath,
+            bool logWarnings,
+            out SaveSnapshot snapshot) {
             snapshot = null;
             JObject root;
 
             try {
                 root = JObject.Parse(json);
             } catch (JsonException exception) {
-                Debug.LogWarning($"Save file '{_filePath}' contains invalid JSON.\n{exception}");
+                if (logWarnings) Debug.LogWarning($"Save file '{filePath}' contains invalid JSON.\n{exception}");
                 return false;
             }
 
             JToken versionToken = root["version"];
             if (versionToken?.Type != JTokenType.Integer) {
-                Debug.LogWarning($"Save file '{_filePath}' has no valid schema version.");
+                if (logWarnings) Debug.LogWarning($"Save file '{filePath}' has no valid schema version.");
                 return false;
             }
 
             int version = versionToken.Value<int>();
             if (version != SaveSnapshot.CurrentVersion) {
-                Debug.LogWarning(
-                    $"Unsupported save version '{version}' in '{_filePath}'. Expected '{SaveSnapshot.CurrentVersion}'.");
+                if (logWarnings) Debug.LogWarning(
+                    $"Unsupported save version '{version}' in '{filePath}'. Expected '{SaveSnapshot.CurrentVersion}'.");
                 return false;
             }
 
             if (root["sections"] is not JObject sectionsObject) {
-                Debug.LogWarning($"Save file '{_filePath}' has no valid sections object.");
+                if (logWarnings) Debug.LogWarning($"Save file '{filePath}' has no valid sections object.");
                 return false;
             }
 

@@ -19,6 +19,8 @@ namespace Services.Locator {
         private ServiceScope _scope;
 
         public bool IsReady { get; private set; }
+        public bool IsInitializationComplete { get; private set; }
+        public Exception InitializationException { get; private set; }
 
         public static ServiceLocator Application {
             get {
@@ -120,10 +122,27 @@ namespace Services.Locator {
         }
 
         internal async UniTask InitializeScopeAsync() {
+            if (_scope == null) throw new InvalidOperationException("Cannot initialize an empty service scope.");
             await _scope.PreInitializeAsync(_scope);
             await _scope.InitializeAsync(_scope);
             await _scope.PostInitializeAsync(_scope);
+        }
+
+        internal void BeginInitialization() {
+            IsReady = false;
+            IsInitializationComplete = false;
+            InitializationException = null;
+        }
+
+        internal void CompleteInitialization() {
             IsReady = true;
+            IsInitializationComplete = true;
+        }
+
+        internal void FailInitialization(Exception exception) {
+            IsReady = false;
+            InitializationException = exception ?? throw new ArgumentNullException(nameof(exception));
+            IsInitializationComplete = true;
         }
 
         internal void ConfigureAsGlobal(bool dontDestroyOnLoad) {
@@ -149,7 +168,7 @@ namespace Services.Locator {
         }
         
         void OnDestroy() {
-            _scope.Dispose();
+            _scope?.Dispose();
 
             if (this == _applicationLocator) {
                 _applicationLocator = null;

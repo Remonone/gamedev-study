@@ -93,6 +93,37 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void HasValidSave_RequiresSupportedSectionedSnapshot() {
+            Assert.That(SaveService.HasValidSave(_filePath), Is.False);
+            Directory.CreateDirectory(_directory);
+            File.WriteAllText(_filePath, "not json");
+            Assert.That(SaveService.HasValidSave(_filePath), Is.False);
+            File.WriteAllText(_filePath, "{\"version\":2,\"sections\":{}}");
+            Assert.That(SaveService.HasValidSave(_filePath), Is.False);
+            File.WriteAllText(_filePath, JsonConvert.SerializeObject(new SaveSnapshot()));
+            Assert.That(SaveService.HasValidSave(_filePath), Is.True);
+        }
+
+        [Test]
+        public void PreInitialize_WhenLoadDisabled_DoesNotRestoreExistingState() {
+            using (var writeScope = new ServiceScope(null)) {
+                var writer = new SaveService(_filePath);
+                var source = new FakeSaveable("state", 42);
+                writeScope.Register(writer).Register(source);
+                writer.PreInitializeAsync(writeScope).GetAwaiter().GetResult();
+                Assert.That(writer.SaveToFile(), Is.True);
+            }
+
+            using var readScope = new ServiceScope(null);
+            var reader = new SaveService(_filePath, loadExistingOnInitialize: false);
+            var state = new FakeSaveable("state", 7);
+            readScope.Register(reader).Register(state);
+            reader.PreInitializeAsync(readScope).GetAwaiter().GetResult();
+
+            Assert.That(state.State, Is.EqualTo(7));
+        }
+
+        [Test]
         public void LoadSnapshot_MalformedSectionDoesNotBlockValidSection() {
             using var scope = new ServiceScope(null);
             var saveService = new SaveService(_filePath);

@@ -385,6 +385,9 @@ namespace Tests.EditMode {
             var locatorObject = TrackObject(new GameObject(
                 "InstallerOrder", typeof(ServiceLocator), typeof(GameSceneInstaller)));
             var locator = locatorObject.GetComponent<ServiceLocator>();
+            var session = new GameSessionService();
+            session.Prepare(GameLaunchMode.NewGame);
+            locator.Register(session);
             locatorObject.GetComponent<GameSceneInstaller>().Install(locator);
             IReadOnlyList<IModifierProvider> providers = locator.Get<ModifierStorage>().Providers;
 

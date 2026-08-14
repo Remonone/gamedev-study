@@ -15,9 +15,12 @@ namespace Services {
         private ISignaturePresetCompiler _compiler;
         private IAssetListLease<SignaturePresetDefinition> _presetLease;
         private readonly Dictionary<string, SignaturePresetDefinition> _presetsById = new(StringComparer.Ordinal);
+        private readonly List<SignaturePresetDefinition> _presets = new();
         private readonly Dictionary<SignaturePresetDefinition, CompiledSignaturePreset> _cache =
             new(ReferenceIdentityComparer.Instance);
         private bool _initialized;
+
+        public IReadOnlyList<SignaturePresetDefinition> Presets => _presets;
         
         public async UniTask PreInitializeAsync(IServiceScope scope) {
             IAssetProvider provider = scope.Container.Get<IAssetProvider>();
@@ -25,6 +28,7 @@ namespace Services {
                 AddressableConstants.SIGNATURE_PRESET_LABEL);
 
             _presetsById.Clear();
+            _presets.Clear();
             foreach (SignaturePresetDefinition preset in _presetLease.Assets) {
                 RegisterPreset(preset);
             }
@@ -51,6 +55,15 @@ namespace Services {
             }
 
             return UniTask.FromResult(preset);
+        }
+
+        public bool TryGetPreset(string id, out SignaturePresetDefinition preset) {
+            if (!_initialized) throw new InvalidOperationException("SignaturePresetRepository must be initialized before use.");
+            if (string.IsNullOrWhiteSpace(id)) {
+                preset = null;
+                return false;
+            }
+            return _presetsById.TryGetValue(id, out preset);
         }
 
         public CompiledSignaturePreset GetOrCompile(SignaturePresetDefinition preset) {
@@ -82,6 +95,7 @@ namespace Services {
             _presetLease?.Dispose();
             _presetLease = null;
             _presetsById.Clear();
+            _presets.Clear();
         }
 
         private void RegisterPreset(SignaturePresetDefinition preset) {
@@ -99,6 +113,7 @@ namespace Services {
                 throw new SignaturePresetConfigurationException(
                     $"Duplicate signature preset Id '{preset.Id}' in Addressables label '{AddressableConstants.SIGNATURE_PRESET_LABEL}'.");
             }
+            _presets.Add(preset);
         }
 
         private sealed class ReferenceIdentityComparer : IEqualityComparer<SignaturePresetDefinition> {

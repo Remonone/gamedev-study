@@ -4,16 +4,25 @@ using Data.Modifiers;
 using Data.Modifiers.Providers;
 using Services;
 using Services.Locator;
+using System;
 
 namespace Bootstrap.Installer {
     public class GameSceneInstaller : MonoInstaller {
         public override void Install(ServiceLocator container) {
-            var saveService = new SaveService();
+            if (!container.TryGet(out GameSessionService session) || !session.TryConsume(out GameLaunchMode launchMode)) {
+                throw new InvalidOperationException(
+                    "Gameplay requires a prepared application session. Start Play Mode from the Bootstrap scene.");
+            }
+
+            var saveService = new SaveService(loadExistingOnInitialize: launchMode == GameLaunchMode.Continue);
             container.Register(saveService);
             container.Register(new AutoSaveService(saveService));
             container.Register<ISignaturePreprocessor>(new SignaturePreprocessor());
             container.Register<ISignaturePresetCompiler>(new SignaturePresetCompiler());
             container.Register<ISignaturePresetRepository>(new SignaturePresetRepository());
+            container.Register(new SignatureProgressionService(launchMode));
+            container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
+            container.Register(new SelectedSignatureLoader());
             container.Register<ISignatureRulesResolver>(new RuleResolver());
             container.Register<ISignatureMatcher>(new SignatureMatcher());
             container.Register<ISignatureEvaluator>(new SignatureEvaluator());
@@ -23,7 +32,6 @@ namespace Bootstrap.Installer {
             modifierStorage.RegisterProvider(new BillModifierProvider());
             container.Register(modifierStorage);
             container.Register<IModifierService>(new ModifierService());
-            container.Register(new CacheVersionService(), typeof(ICacheVersionProvider), typeof(ICacheInvalidator));
             container.Register(new MoneyAggregator());
             container.Register(new DocumentGeneratorService());
             container.Register(new WalletService());

@@ -33,6 +33,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c7be7cea962d1ff899267fc1ca55038
+    m_Address: Assets/_SigningGame/Data/Starter Signature Three.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - signature_preset
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e11a5975676314e6a8e9a11f8f70a9c
     m_Address: Assets/_SigningGame/Data/SignaturePreset.asset
     m_ReadOnly: 0

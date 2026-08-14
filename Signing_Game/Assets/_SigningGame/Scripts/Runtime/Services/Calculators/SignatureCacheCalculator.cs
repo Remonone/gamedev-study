@@ -41,7 +41,7 @@ namespace Services.Calculators {
             IReadOnlyCacheData<DocumentEntries> documentData = _documentData ?? _stash?.Documents;
             if (documentData == null) return;
 
-            int selectedQualityLevel = Math.Clamp(documentData.Value.SelectedDocumentQualityLevel, 0, 9) + 1;
+            int selectedQualityLevel = Math.Clamp(documentData.Value.SelectedDocumentQualityLevel, 0, 9);
             entries.MinimumSimilarity += selectedQualityLevel * addition;
         }
 

@@ -51,7 +51,7 @@ namespace Presentation {
 
         public UniTask PostInitializeAsync(IServiceScope scope) {
             _dispenser = scope.Get<DocumentDispenser>();
-            _audioService = scope.Get<AudioService>();
+            _audioService = scope.Container.Get<AudioService>();
             var producers = new List<IDocumentProducer>();
             for (int index = 0; scope.TryGet(out IDocumentProducer producer, index); index++) {
                 producers.Add(producer);

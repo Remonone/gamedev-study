@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Services.Locator;
@@ -14,22 +15,38 @@ namespace Bootstrap {
 
         public ServiceLocator Container => _container ??= GetComponent<ServiceLocator>();
 
-        bool _hasBeenBootstrapped;
+        private bool _hasBeenBootstrapped;
+        private bool _isBootstrapping;
 
         private async void Awake() => await BootstrapOnDemand();
 
         public async UniTask BootstrapOnDemand() {
             if (_hasBeenBootstrapped) return;
-            _hasBeenBootstrapped = true;
-
-            // Registration runs synchronously (before the first await), so callers
-            // that ignore the returned Awaitable still get a fully populated scope.
-            Configure();
-            foreach (var installer in _installers) {
-                installer.Install(Container);
+            if (_isBootstrapping) {
+                await UniTask.WaitUntil(() => !_isBootstrapping);
+                return;
             }
 
-            await Container.InitializeScopeAsync();
+            _isBootstrapping = true;
+            Container.BeginInitialization();
+            try {
+                // Registration runs synchronously (before the first await), so callers
+                // that ignore the returned Awaitable still get a fully populated scope.
+                Configure();
+                foreach (MonoInstaller installer in _installers) {
+                    if (installer == null) throw new InvalidOperationException("Bootstrapper contains a missing installer reference.");
+                    installer.Install(Container);
+                }
+
+                await Container.InitializeScopeAsync();
+                Container.CompleteInitialization();
+            } catch (Exception exception) {
+                Container.FailInitialization(exception);
+                Debug.LogException(exception, this);
+            } finally {
+                _hasBeenBootstrapped = true;
+                _isBootstrapping = false;
+            }
         }
 
         protected abstract void Configure();

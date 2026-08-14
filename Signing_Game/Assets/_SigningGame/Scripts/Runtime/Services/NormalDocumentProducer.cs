@@ -112,7 +112,7 @@ namespace Services {
                     int selectedQuality = Math.Clamp(
                         _documentData.Value.SelectedDocumentQualityLevel,
                         0,
-                        9) + 1;
+                        9);
                     SendReward(result);
                     _acceptedDocuments?.Report(
                         NormalDocumentProcessingSource.Manual,

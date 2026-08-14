@@ -111,7 +111,7 @@ namespace Tests.EditMode {
 
             SignatureEntries result = calculator.Calculate();
 
-            Assert.That(result.MinimumSimilarity, Is.EqualTo(0.55f).Within(0.0001f));
+            Assert.That(result.MinimumSimilarity, Is.EqualTo(0.475f).Within(0.0001f));
             scope.Dispose();
         }
 
@@ -250,12 +250,7 @@ namespace Tests.EditMode {
         }
 
         private SelectedSignatureLoader CreateLoader(SignaturePresetDefinition preset) {
-            GameObject gameObject = Track(new GameObject("SelectedSignatureLoader"));
-            SelectedSignatureLoader loader = gameObject.AddComponent<SelectedSignatureLoader>();
-            var serialized = new SerializedObject(loader);
-            serialized.FindProperty("_signaturePreset").objectReferenceValue = preset;
-            serialized.ApplyModifiedPropertiesWithoutUndo();
-            return loader;
+            return new SelectedSignatureLoader(preset);
         }
 
         private T Track<T>(T value) where T : UnityEngine.Object {

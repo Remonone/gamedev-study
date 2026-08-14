@@ -2,13 +2,25 @@ using Data.Sound;
 using UnityEngine;
 
 namespace Services {
-    public class AudioService: MonoBehaviour, IService {
+    public sealed class AudioService : MonoBehaviour, IService {
         [SerializeField] private AudioSource _uiSource;
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _sfxSource;
         
-        public void Dispose() {
-            
+        public float MusicVolume { get; private set; } = 1f;
+        public float SoundVolume { get; private set; } = 1f;
+
+        public void Dispose() { }
+
+        public void SetMusicVolume(float volume) {
+            MusicVolume = Mathf.Clamp01(volume);
+            if (_musicSource != null) _musicSource.volume = MusicVolume;
+        }
+
+        public void SetSoundVolume(float volume) {
+            SoundVolume = Mathf.Clamp01(volume);
+            if (_uiSource != null) _uiSource.volume = SoundVolume;
+            if (_sfxSource != null) _sfxSource.volume = SoundVolume;
         }
         
         public void PlayUI(AudioCue cue) {
