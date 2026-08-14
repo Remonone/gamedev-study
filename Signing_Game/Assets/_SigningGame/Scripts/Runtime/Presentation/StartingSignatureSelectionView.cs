@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Services;
 using Services.Locator;
 using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -12,12 +14,15 @@ namespace Presentation {
         [SerializeField] private GameObject _panel;
         [SerializeField] private Button[] _buttons = new Button[3];
         [SerializeField] private TextMeshProUGUI[] _labels = new TextMeshProUGUI[3];
+        [SerializeField] private Color _previewColor = Color.white;
+        [SerializeField, Range(0f, 0.45f)] private float _previewPadding = 0.1f;
 
         private readonly UnityAction[] _actions = new UnityAction[3];
+        private readonly SignatureGraphic[] _previews = new SignatureGraphic[3];
         private StartingSignatureSelectionViewModel _viewModel;
 
         private async void Start() {
-            if (_panel == null || _buttons == null || _labels == null || _buttons.Length != 3 || _labels.Length != 3) {
+            if (!HasRequiredReferences()) {
                 Debug.LogError("StartingSignatureSelectionView requires a panel and exactly three button/label pairs.", this);
                 enabled = false;
                 return;
@@ -35,6 +40,7 @@ namespace Presentation {
             _viewModel = new StartingSignatureSelectionViewModel(locator.Get<SignatureProgressionService>());
             _panel.SetActive(_viewModel.IsSelectionRequired);
             if (!_viewModel.IsSelectionRequired) return;
+            Canvas.ForceUpdateCanvases();
             if (_viewModel.Options.Count != 3) {
                 Debug.LogError("Starting signature selection requires exactly three options.", this);
                 return;
@@ -42,7 +48,7 @@ namespace Presentation {
 
             for (int index = 0; index < 3; index++) {
                 int capturedIndex = index;
-                _labels[index].text = _viewModel.Options[index].DisplayName;
+                RenderOption(index, _viewModel.Options[index]);
                 _actions[index] = () => Select(capturedIndex);
                 _buttons[index].onClick.AddListener(_actions[index]);
             }
@@ -60,6 +66,87 @@ namespace Presentation {
             }
             _viewModel?.Dispose();
             _viewModel = null;
+        }
+
+        private bool HasRequiredReferences() {
+            if (_panel == null || _buttons == null || _labels == null || _buttons.Length != 3 || _labels.Length != 3)
+                return false;
+
+            for (int index = 0; index < 3; index++) {
+                if (_buttons[index] == null || _labels[index] == null) return false;
+            }
+
+            return true;
+        }
+
+        private void RenderOption(int index, StartingSignatureOption option) {
+            _labels[index].text = option.DisplayName;
+
+            SignatureGraphic preview = GetOrCreatePreview(index);
+            if (option.HasPreview && TryBuildLocalStrokes(preview.rectTransform.rect, option.PreviewStrokes,
+                    out List<IReadOnlyList<Vector2>> localStrokes)) {
+                _labels[index].enabled = false;
+                preview.enabled = true;
+                preview.color = _previewColor;
+                preview.SetStrokes(localStrokes);
+                return;
+            }
+
+            _labels[index].enabled = true;
+            preview.Clear();
+            preview.enabled = false;
+        }
+
+        private SignatureGraphic GetOrCreatePreview(int index) {
+            if (_previews[index] != null) return _previews[index];
+
+            RectTransform labelRect = _labels[index].rectTransform;
+            var previewObject = new GameObject("Signature Preview", typeof(RectTransform), typeof(CanvasRenderer),
+                typeof(SignatureGraphic));
+            previewObject.layer = _labels[index].gameObject.layer;
+
+            var previewRect = (RectTransform)previewObject.transform;
+            previewRect.SetParent(labelRect, false);
+            previewRect.anchorMin = Vector2.zero;
+            previewRect.anchorMax = Vector2.one;
+            previewRect.offsetMin = Vector2.zero;
+            previewRect.offsetMax = Vector2.zero;
+            previewRect.pivot = labelRect.pivot;
+
+            SignatureGraphic preview = previewObject.GetComponent<SignatureGraphic>();
+            preview.raycastTarget = false;
+            preview.color = _previewColor;
+            _previews[index] = preview;
+            return preview;
+        }
+
+        private bool TryBuildLocalStrokes(Rect targetRect, IReadOnlyList<IReadOnlyList<Vector2>> normalizedStrokes,
+            out List<IReadOnlyList<Vector2>> localStrokes) {
+            localStrokes = new List<IReadOnlyList<Vector2>>();
+            if (normalizedStrokes == null || normalizedStrokes.Count == 0 || targetRect.width <= 0f ||
+                targetRect.height <= 0f) return false;
+
+            float padding = Mathf.Clamp(_previewPadding, 0f, 0.45f);
+            float xMin = Mathf.Lerp(targetRect.xMin, targetRect.xMax, padding);
+            float xMax = Mathf.Lerp(targetRect.xMin, targetRect.xMax, 1f - padding);
+            float yMin = Mathf.Lerp(targetRect.yMin, targetRect.yMax, padding);
+            float yMax = Mathf.Lerp(targetRect.yMin, targetRect.yMax, 1f - padding);
+
+            for (int strokeIndex = 0; strokeIndex < normalizedStrokes.Count; strokeIndex++) {
+                IReadOnlyList<Vector2> normalizedStroke = normalizedStrokes[strokeIndex];
+                if (normalizedStroke == null || normalizedStroke.Count == 0) continue;
+
+                var localStroke = new List<Vector2>(normalizedStroke.Count);
+                for (int pointIndex = 0; pointIndex < normalizedStroke.Count; pointIndex++) {
+                    Vector2 normalizedPoint = normalizedStroke[pointIndex];
+                    localStroke.Add(new Vector2(
+                        Mathf.Lerp(xMin, xMax, normalizedPoint.x),
+                        Mathf.Lerp(yMin, yMax, normalizedPoint.y)));
+                }
+                localStrokes.Add(localStroke);
+            }
+
+            return localStrokes.Count > 0;
         }
     }
 }

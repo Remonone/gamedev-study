@@ -1786,6 +1786,8 @@ MonoBehaviour:
   - {fileID: 57085694}
   - {fileID: 425819675}
   - {fileID: 362288702}
+  _previewColor: {r: 1, g: 1, b: 1, a: 1}
+  _previewPadding: 0.1
 --- !u!114 &1112937373
 MonoBehaviour:
   m_ObjectHideFlags: 0

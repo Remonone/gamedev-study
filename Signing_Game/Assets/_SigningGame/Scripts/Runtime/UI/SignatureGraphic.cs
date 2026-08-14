@@ -37,6 +37,26 @@ namespace UI {
             _activeStroke = null;
         }
 
+        public void SetStrokes(IReadOnlyList<IReadOnlyList<Vector2>> strokes) {
+            _activeStroke = null;
+            _strokes.Clear();
+
+            if (strokes != null) {
+                for (int strokeIndex = 0; strokeIndex < strokes.Count; strokeIndex++) {
+                    IReadOnlyList<Vector2> sourceStroke = strokes[strokeIndex];
+                    if (sourceStroke == null || sourceStroke.Count == 0) continue;
+
+                    var stroke = new List<Vector2>(sourceStroke.Count);
+                    for (int pointIndex = 0; pointIndex < sourceStroke.Count; pointIndex++) {
+                        stroke.Add(sourceStroke[pointIndex]);
+                    }
+                    _strokes.Add(stroke);
+                }
+            }
+
+            SetVerticesDirty();
+        }
+
         public void Clear() {
             _activeStroke = null;
             _strokes.Clear();
