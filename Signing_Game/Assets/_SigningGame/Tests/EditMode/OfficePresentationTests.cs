@@ -144,6 +144,8 @@ namespace Tests.EditMode {
                 QualityCeiling = 1f,
                 AcceptanceThreshold = 0.5f,
                 RewardMultiplier = 0.5f,
+                OfficeSignatureCriticalChance = 0f,
+                OfficeSignatureCriticalMultiplier = 1d,
                 BaseClerkMultiplierMedian = 2d,
                 ClerkMultiplierRangeStep = 0d,
                 MinimumClerkMultiplier = 1d,

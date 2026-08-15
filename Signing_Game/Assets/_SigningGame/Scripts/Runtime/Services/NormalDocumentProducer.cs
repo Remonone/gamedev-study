@@ -9,16 +9,21 @@ using Data.Rules;
 using Services.Locator;
 using R3;
 using Utils;
+using Utils.Text.Generator;
 
 namespace Services {
     public sealed class NormalDocumentProducer : IService, IInitialize, IDocumentProducer {
         private static readonly IDocumentEvaluationPolicy Policy = new PlayerDocumentEvaluationPolicy();
+        private static readonly ulong FallbackCriticalRandomSeed =
+            SeedUtility.FromString(nameof(NormalDocumentProducer));
+        private const double MaximumValueLog10 = (double)int.MaxValue * 3d;
 
         private DocumentGeneratorService _generator;
         private IMoneyAggregator _aggregator;
         private IReadOnlyCacheData<IncomeEntries> _incomeData;
         private IReadOnlyCacheData<DocumentEntries> _documentData;
         private AcceptedNormalDocumentService _acceptedDocuments;
+        private SignatureCriticalRandomService _criticalRandom;
         private Observable<Unit> _offersChanged;
 
         public int Priority => 0;
@@ -31,6 +36,9 @@ namespace Services {
             _incomeData = stash.IncomeData;
             _documentData = stash.Documents;
             scope.TryGet(out _acceptedDocuments);
+            if (!scope.TryGet(out _criticalRandom)) {
+                _criticalRandom = new SignatureCriticalRandomService(FallbackCriticalRandomSeed);
+            }
             _offersChanged = _generator.DocumentCount.Select(_ => Unit.Default);
             return UniTask.CompletedTask;
         }
@@ -64,7 +72,8 @@ namespace Services {
                 _aggregator,
                 _incomeData,
                 _documentData,
-                _acceptedDocuments);
+                _acceptedDocuments,
+                _criticalRandom);
             return true;
         }
 
@@ -83,6 +92,7 @@ namespace Services {
             private readonly IReadOnlyCacheData<IncomeEntries> _incomeData;
             private readonly IReadOnlyCacheData<DocumentEntries> _documentData;
             private readonly AcceptedNormalDocumentService _acceptedDocuments;
+            private readonly SignatureCriticalRandomService _criticalRandom;
             private bool _finished;
 
             public DocumentKind Kind => DocumentKind.Normal;
@@ -94,13 +104,15 @@ namespace Services {
                 IMoneyAggregator aggregator,
                 IReadOnlyCacheData<IncomeEntries> incomeData,
                 IReadOnlyCacheData<DocumentEntries> documentData,
-                AcceptedNormalDocumentService acceptedDocuments) {
+                AcceptedNormalDocumentService acceptedDocuments,
+                SignatureCriticalRandomService criticalRandom) {
                 _generator = generator;
                 _reservation = reservation;
                 _aggregator = aggregator;
                 _incomeData = incomeData;
                 _documentData = documentData;
                 _acceptedDocuments = acceptedDocuments;
+                _criticalRandom = criticalRandom ?? throw new ArgumentNullException(nameof(criticalRandom));
             }
 
             public bool TryProcess(SignatureEvaluationResult result) {
@@ -131,10 +143,29 @@ namespace Services {
             private void SendReward(SignatureEvaluationResult result) {
                 IncomeEntries income = _incomeData.Value;
                 double accuracyBonus = Math.Min(
-                    Math.Max(result.Similarity / income.MinMultiplyScale, 1d),
+                    Math.Max(result.Similarity * income.MinMultiplyScale, 1d),
                     income.MaxMultiplicationScale);
-                Value reward = income.IncomePerDocument * accuracyBonus;
+                Value reward = MultiplyValueSafely(income.IncomePerDocument, accuracyBonus);
+                if (_criticalRandom.RollManual(income.ManualSignatureCriticalChance)) {
+                    reward = MultiplyValueSafely(
+                        reward,
+                        SignatureCriticalRandomService.NormalizeMultiplier(
+                            income.ManualSignatureCriticalMultiplier));
+                }
                 _aggregator.AddMoney(reward);
+            }
+
+            private static Value MultiplyValueSafely(Value value, double multiplier) {
+                if (value.IsZero || multiplier <= 0d) return Value.Zero;
+                if (value.Base.Degree == int.MaxValue) return Value.Infinity;
+
+                double resultLog10 = value.ToLog10() + Math.Log10(multiplier);
+                if (double.IsNaN(resultLog10)) return Value.Zero;
+                if (double.IsPositiveInfinity(resultLog10) || resultLog10 >= MaximumValueLog10) {
+                    return Value.Infinity;
+                }
+
+                return Value.FromLog10(resultLog10);
             }
         }
     }

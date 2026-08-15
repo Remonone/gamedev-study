@@ -27,15 +27,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5ecf8a2f05c265493aed3e50455a765b, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: -80, y: 1520}
+  TreePosition: {x: -320, y: 80}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
   Children:
   - Child: {fileID: 11400000, guid: cec20290ff12cbd89b3f2c094fdd8ac9, type: 2}
-    DrawEdge: 0
-  - Child: {fileID: 11400000, guid: 0af89e822c1705becb6ef667f7cd6d9d, type: 2}
     DrawEdge: 0
   references:
     version: 2

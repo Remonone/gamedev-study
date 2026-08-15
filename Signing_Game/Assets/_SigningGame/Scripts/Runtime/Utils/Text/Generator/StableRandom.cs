@@ -5,6 +5,8 @@ namespace Utils.Text.Generator {
     public struct StableRandom {
         private ulong _state;
 
+        public ulong State => _state;
+
         public StableRandom(ulong seed) {
             _state = seed;
         }

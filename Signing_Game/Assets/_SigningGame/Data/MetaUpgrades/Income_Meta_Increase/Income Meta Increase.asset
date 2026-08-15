@@ -12,7 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
   m_Name: Income Meta Increase
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
-  NumericModifiers: []
+  NumericModifiers:
+  - _id: increase_income_meta
+    _operation: 1
+    _value:
+      rid: 841080539992817848
+    _parameter:
+      _groupId: Signature
+      _parameterId: MinimumSimilarity
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 841080539992817848
+      type: {class: UpgradeNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
+      data:
+        _baseValue:
+          _stored: 1
+          _base:
+            Degree: 0
+        _formula:
+          rid: 841080539992817849
+    - rid: 841080539992817849
+      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+      data:
+        StartValue:
+          _stored: 0
+          _base:
+            Degree: 0
+        Pattern:
+          _stored: 0
+          _base:
+            Degree: 0

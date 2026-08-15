@@ -128,6 +128,34 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Tree_HidesVisibleLockedDescendantWhenParentIsHidden() {
+            MetaUpgradeNodeDefinition root = CreateMetaNode("root", 1d);
+            MetaUpgradeNodeDefinition hiddenParent = CreateMetaNode("hidden_parent", 1d);
+            MetaUpgradeNodeDefinition visibleChild = CreateMetaNode("visible_child", 1d);
+            root.Children = new[] { new UpgradeNodeLink { Child = hiddenParent, DrawEdge = true } };
+            hiddenParent.Children = new[] { new UpgradeNodeLink { Child = visibleChild, DrawEdge = true } };
+            hiddenParent.LockedDisplayMode = LockedNodeDisplayMode.Hidden;
+            visibleChild.LockedDisplayMode = LockedNodeDisplayMode.VisibleLocked;
+
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { root, hiddenParent, visibleChild });
+            using var scope = new ServiceScope(null);
+            using var tree = new MetaUpgradeTreeService();
+            scope.Register(meta).Register(tree);
+            tree.InitializeAsync(scope).GetAwaiter().GetResult();
+
+            Assert.That(tree.IsVisible(hiddenParent.Id), Is.False);
+            Assert.That(tree.IsVisible(visibleChild.Id), Is.False);
+
+            JObject state = CreateState(10, 0, Value.Zero);
+            ((JArray)state["upgrades"]).Add(new JObject { ["id"] = root.Id, ["level"] = 1 });
+            meta.Deserialize(state);
+
+            Assert.That(tree.IsVisible(hiddenParent.Id), Is.True);
+            Assert.That(tree.IsVisible(visibleChild.Id), Is.True);
+        }
+
+        [Test]
         public void RuntimeCatalogs_ExcludeCrossLabeledTypesAndCrossTreeLinks() {
             MetaUpgradeNodeDefinition metaNode = CreateMetaNode("meta", 1d);
             UpgradeNodeDefinition ordinaryNode = CreateOrdinaryNode("ordinary", 1d);

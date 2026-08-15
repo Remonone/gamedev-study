@@ -28,6 +28,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 132266efdd3f60c628324309864b7d57
+    m_Address: Assets/_SigningGame/Data/Upgrades/document_quality_1/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 18c94e4e41a2b46cbb09ea9e017a03b9
     m_Address: Assets/_SigningGame/Data/Cache References/Bank Reference.asset
     m_ReadOnly: 0
@@ -59,6 +65,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - signature_preset
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31e928a8931be91f18d975fa5e325371
+    m_Address: Assets/_SigningGame/Data/Upgrades/office_income/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 388055ddf9dff9002a4bf8d5f1ca595c
     m_Address: Assets/_SigningGame/Data/Upgrades/token_generator_income_upgrade/Upgrade
       Node.asset
@@ -84,8 +96,28 @@ MonoBehaviour:
     m_SerializedLabels:
     - research_catalog
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71ef9a146ea8237e4ae647c3f174db17
+    m_Address: Assets/_SigningGame/Data/Upgrades/office_staff_efficiency/Upgrade
+      Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73ae2c3d4080562ab9edb1d2d514494d
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_minimum_similarity/Upgrade
+      Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75a64c9b8485661f18f5485d8ce6106f
     m_Address: Assets/_SigningGame/Data/Upgrades/Archive/Archive Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86d2807084bac4ec4840c50f7705b9d9
+    m_Address: Assets/_SigningGame/Data/Upgrades/minimum_scale_upgrade/Upgrade Node.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades
@@ -114,11 +146,31 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b519ef1a5d74fb4d3b51ba3b2644ac3f
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_sign_crit_chance/Upgrade
+      Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bdaba90eb1534a3f0be70b578f091b7d
     m_Address: Assets/_SigningGame/Data/Difficulty.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - difficulty_profile
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4ec3b668269c743da2259dcc036c5dc
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_income_mult/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd1faf3ef66ee3dcc8217ed1e92f2953
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_sign_crit_multiplier/Upgrade
+      Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cec20290ff12cbd89b3f2c094fdd8ac9
     m_Address: Assets/_SigningGame/Data/Upgrades/income_upgrade/Upgrade Node.asset

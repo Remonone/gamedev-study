@@ -121,6 +121,8 @@ namespace Tests.EditMode {
             unsafeValues.QualityCeiling = float.PositiveInfinity;
             unsafeValues.AcceptanceThreshold = float.NaN;
             unsafeValues.RewardMultiplier = float.NegativeInfinity;
+            unsafeValues.OfficeSignatureCriticalChance = float.PositiveInfinity;
+            unsafeValues.OfficeSignatureCriticalMultiplier = double.NaN;
             unsafeValues.BaseClerkMultiplierMedian = double.NaN;
             unsafeValues.ClerkMultiplierRangeStep = double.PositiveInfinity;
             unsafeValues.MinimumClerkMultiplier = -1d;
@@ -133,6 +135,9 @@ namespace Tests.EditMode {
             Assert.That(safe.QualityCeiling, Is.Zero);
             Assert.That(safe.AcceptanceThreshold, Is.EqualTo(1f));
             Assert.That(safe.RewardMultiplier, Is.Zero);
+            Assert.That(safe.OfficeSignatureCriticalChance, Is.Zero);
+            Assert.That(safe.OfficeSignatureCriticalMultiplier,
+                Is.EqualTo(OfficeCacheCalculator.DefaultOfficeSignatureCriticalMultiplier));
             Assert.That(safe.BaseClerkMultiplierMedian,
                 Is.EqualTo(OfficeCacheCalculator.DefaultBaseClerkMultiplierMedian));
             Assert.That(safe.ClerkMultiplierRangeStep,
@@ -142,6 +147,20 @@ namespace Tests.EditMode {
                 Is.EqualTo(OfficeCacheCalculator.DefaultMaximumHireSignatureMultiplier));
             Assert.That(safe.SalaryReviewCostRatio,
                 Is.EqualTo(OfficeCacheCalculator.DefaultSalaryReviewCostRatio));
+        }
+
+        [Test]
+        public void SignatureCriticalRandom_RestoresManualAndOfficeStreams() {
+            var source = new SignatureCriticalRandomService(123UL);
+            source.RollManual(0.5f);
+            source.RollOffice(0.5f);
+            JToken saved = source.Serialize();
+            var restored = new SignatureCriticalRandomService(999UL);
+
+            restored.Deserialize(saved);
+
+            Assert.That(restored.RollManual(0.5f), Is.EqualTo(source.RollManual(0.5f)));
+            Assert.That(restored.RollOffice(0.5f), Is.EqualTo(source.RollOffice(0.5f)));
         }
 
         [Test]
@@ -657,6 +676,24 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void NormalDocumentReward_AppliesManualCriticalMultiplier() {
+            OfficeHarness harness = CreateHarness(
+                CreateEntries(),
+                incomeEntries: new IncomeEntries(1f, 0.4f, Value.One, 1f, 3d));
+            SetDocumentCount(harness.Documents, 1);
+            var producer = new NormalDocumentProducer();
+            producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+            Assert.That(producer.TryProduce(new DocumentOfferKey(DocumentKind.Normal, "normal"),
+                out IDocumentSession session), Is.True);
+            double before = harness.Wallet.CurrentBalance.ToDouble();
+
+            Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 3d).Within(0.0001d));
+            session.Dispose();
+        }
+
+        [Test]
         public void OfficeDocumentOffers_ExposeExactHireAndReviewPresentationDataAndReissueOnRelease() {
             OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
             harness.UnlockOffice();
@@ -873,6 +910,27 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Tick_AppliesOfficeCriticalMultiplierToAcceptedReward() {
+            OfficeEntries entries = CreateEntries();
+            entries.OfficeSignatureCriticalChance = 1f;
+            entries.OfficeSignatureCriticalMultiplier = 4d;
+            OfficeHarness harness = CreateHarness(entries, () => 1f);
+            harness.UnlockOffice();
+            HireClerk(harness);
+            SetDocumentCount(harness.Documents, 1);
+            OfficeDocumentResult result = default;
+            using IDisposable subscription = harness.Office.DocumentProcessed.Subscribe(value => result = value);
+            double before = harness.Wallet.CurrentBalance.ToDouble();
+
+            harness.Office.Tick(1f);
+
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(result.RequestedReward.ToDouble(), Is.EqualTo(4d).Within(0.0001d));
+            Assert.That(result.CreditedReward.ToDouble(), Is.EqualTo(4d).Within(0.0001d));
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 4d).Within(0.0001d));
+        }
+
+        [Test]
         public void Tick_StarvationStoresReadyStateAndInvalidDeltaDoesNotMutate() {
             OfficeHarness harness = CreateHarness(CreateEntries(speed: 1f));
             harness.UnlockOffice();
@@ -978,7 +1036,7 @@ namespace Tests.EditMode {
         }
 
         private OfficeHarness CreateHarness(OfficeEntries entries, Func<float> random = null,
-            Observable<float> updates = null, Value? income = null) {
+            Observable<float> updates = null, Value? income = null, IncomeEntries? incomeEntries = null) {
             UpgradeNodeDefinition officeUnlock = CreateUpgrade("office_unlock", FeatureIds.Office);
             UpgradeNodeDefinition documentUpgrade = CreateUpgrade("document_upgrade");
             var provider = new FakeAssetProvider(new[] { officeUnlock, documentUpgrade });
@@ -993,7 +1051,9 @@ namespace Tests.EditMode {
             var officeCalculator = new StaticCalculator<OfficeEntries>(entries);
             var stash = new PlayerStatStash();
             var money = new TestMoneyAggregator(wallet);
+            var criticalRandom = new SignatureCriticalRandomService(123UL);
             var office = new OfficeService(random, updates);
+            IncomeEntries configuredIncome = incomeEntries ?? new IncomeEntries(1f, 0.4f, income ?? Value.One);
 
             scope.Register(wallet)
                 .Register(cache, typeof(ICacheInvalidator), typeof(ICacheVersionProvider))
@@ -1001,8 +1061,8 @@ namespace Tests.EditMode {
                 .Register(unlocks)
                 .Register(documents)
                 .Register(statistics)
-                .Register<ICacheCalculator<IncomeEntries>>(new StaticCalculator<IncomeEntries>(
-                    new IncomeEntries(1f, 0.4f, income ?? Value.One)))
+                .Register(criticalRandom)
+                .Register<ICacheCalculator<IncomeEntries>>(new StaticCalculator<IncomeEntries>(configuredIncome))
                 .Register<ICacheCalculator<SignatureEntries>>(new StaticCalculator<SignatureEntries>(default))
                 .Register<ICacheCalculator<GenerationEntries>>(new StaticCalculator<GenerationEntries>(default))
                 .Register<ICacheCalculator<OfficeEntries>>(officeCalculator)
@@ -1061,6 +1121,8 @@ namespace Tests.EditMode {
                 QualityCeiling = 1f,
                 AcceptanceThreshold = 0.5f,
                 RewardMultiplier = 0.5f,
+                OfficeSignatureCriticalChance = 0f,
+                OfficeSignatureCriticalMultiplier = 1d,
                 BaseClerkMultiplierMedian = 2d,
                 ClerkMultiplierRangeStep = 0d,
                 MinimumClerkMultiplier = 1d,

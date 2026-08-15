@@ -12,7 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
   m_Name: upgrade_document_per_income
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
-  NumericModifiers: []
+  NumericModifiers:
+  - _id: document_per_income
+    _operation: 0
+    _value:
+      rid: 841080539992817854
+    _parameter:
+      _groupId: Generation
+      _parameterId: TokenPerIncome
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 841080539992817854
+      type: {class: UpgradeNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
+      data:
+        _baseValue:
+          _stored: 0
+          _base:
+            Degree: 0
+        _formula:
+          rid: 841080539992817855
+    - rid: 841080539992817855
+      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+      data:
+        BaseValue:
+          _stored: 0
+          _base:
+            Degree: 0
+        Slope:
+          _stored: 1
+          _base:
+            Degree: 0

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
+  m_Name: Upgrade Node
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
+  Id: office_staff_efficiency
+  Name: office_staff_efficiency
+  Description: 
+  MaxLevel: 0
+  Icon: {fileID: 0}
+  CostFormula:
+    rid: 841080570608353357
+  Modifiers:
+  - {fileID: 11400000, guid: 61c3e74d8c6d1d6f593a8d26a7207b48, type: 2}
+  FeatureUnlockIds: []
+  GrantsMetaCurrencyPoint: 0
+  TreePosition: {x: 1073.1648, y: 300.47504}
+  LockedDisplayMode: 0
+  ParentUnlockMode: 0
+  StatisticRequirementMode: 0
+  StatisticRequirements: []
+  Children: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 841080570608353357
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+      data:
+        Value:
+          _stored: 0
+          _base:
+            Degree: 0

@@ -12,11 +12,23 @@ namespace Data.Cache {
         public float MinMultiplyScale;
         [ModifiableParameter("IncomePerDocument", Minimum = 0d)]
         public Value IncomePerDocument;
+
+        [ModifiableParameter("ManualSignatureCriticalChance", Minimum = 0d, Maximum = 1d)]
+        public float ManualSignatureCriticalChance;
+
+        [ModifiableParameter("ManualSignatureCriticalMultiplier", Minimum = 1d)]
+        public double ManualSignatureCriticalMultiplier;
         
-        public IncomeEntries(float maxMultiplicationScale, float minMultiplyScale, Value incomePerDocument) {
+        public IncomeEntries(float maxMultiplicationScale, float minMultiplyScale, Value incomePerDocument)
+            : this(maxMultiplicationScale, minMultiplyScale, incomePerDocument, 0f, 1d) { }
+
+        public IncomeEntries(float maxMultiplicationScale, float minMultiplyScale, Value incomePerDocument,
+            float manualSignatureCriticalChance, double manualSignatureCriticalMultiplier) {
             MaxMultiplicationScale = maxMultiplicationScale;
             MinMultiplyScale = minMultiplyScale;
             IncomePerDocument = incomePerDocument;
+            ManualSignatureCriticalChance = manualSignatureCriticalChance;
+            ManualSignatureCriticalMultiplier = manualSignatureCriticalMultiplier;
         }
     }
     

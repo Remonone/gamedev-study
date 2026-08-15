@@ -34,7 +34,7 @@ MonoBehaviour:
       type: {class: ConstantNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
       data:
         _value:
-          _stored: 0.4
+          _stored: 2.5
           _base:
             Degree: 0
     - rid: 841080518039568482

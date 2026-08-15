@@ -70,18 +70,22 @@ namespace Services {
 
         internal void Reevaluate() {
             if (_meta == null) return;
+            var ownVisibility = new Dictionary<string, bool>(_meta.Nodes.Count, StringComparer.Ordinal);
             _unlocked.Clear();
             _visible.Clear();
 
             foreach (UpgradeNodeState state in _meta.Nodes) {
                 string id = state.Definition.Id;
                 bool unlocked = !_invalid.Contains(id) && (state.Level > 0 || EvaluateParents(id));
-                bool visible = unlocked || state.Definition.LockedDisplayMode != LockedNodeDisplayMode.Hidden;
                 _unlocked[id] = unlocked;
-                _visible[id] = visible;
+                ownVisibility[id] = unlocked || state.Definition.LockedDisplayMode != LockedNodeDisplayMode.Hidden;
                 if (state.Level == 0) {
                     state.CurrentState = unlocked ? UpgradeNodeState.State.Available : UpgradeNodeState.State.Locked;
                 }
+            }
+
+            foreach (UpgradeNodeState state in _meta.Nodes) {
+                ResolveEffectiveVisibility(state.Definition.Id, ownVisibility, new HashSet<string>(StringComparer.Ordinal));
             }
 
             _changed.OnNext(Unit.Default);
@@ -101,6 +105,57 @@ namespace Services {
             for (int index = 0; index < parents.Count; index++) {
                 if (!_invalid.Contains(parents[index]) && _meta.GetUpgrade(parents[index])?.Level > 0) return true;
             }
+            return false;
+        }
+
+        private bool ResolveEffectiveVisibility(
+            string id,
+            Dictionary<string, bool> ownVisibility,
+            HashSet<string> visiting) {
+            if (_visible.TryGetValue(id, out bool cached)) return cached;
+            if (!ownVisibility.TryGetValue(id, out bool ownVisible) || !ownVisible) {
+                _visible[id] = false;
+                return false;
+            }
+
+            if (!_parents.TryGetValue(id, out List<string> parents)) {
+                _visible[id] = false;
+                return false;
+            }
+
+            UpgradeNodeState state = _meta.GetUpgrade(id);
+            if (state == null || !visiting.Add(id)) {
+                _visible[id] = false;
+                return false;
+            }
+
+            bool visible = EvaluateParentVisibility(state.Definition, parents, ownVisibility, visiting);
+            visiting.Remove(id);
+            _visible[id] = visible;
+            return visible;
+        }
+
+        private bool EvaluateParentVisibility(
+            UpgradeNodeDefinition definition,
+            List<string> parents,
+            Dictionary<string, bool> ownVisibility,
+            HashSet<string> visiting) {
+            if (parents.Count == 0) return true;
+
+            if (definition.ParentUnlockMode == ParentUnlockMode.All) {
+                for (int index = 0; index < parents.Count; index++) {
+                    if (!ResolveEffectiveVisibility(parents[index], ownVisibility, visiting)) return false;
+                }
+
+                return true;
+            }
+
+            if (definition.ParentUnlockMode == ParentUnlockMode.Any) {
+                for (int index = 0; index < parents.Count; index++) {
+                    if (ResolveEffectiveVisibility(parents[index], ownVisibility, visiting)) return true;
+                }
+            }
+
             return false;
         }
 

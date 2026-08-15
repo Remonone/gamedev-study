@@ -16,12 +16,14 @@ using Services.Calculators;
 using Services.Locator;
 using UnityEngine;
 using Utils;
+using Utils.Text.Generator;
 
 namespace Services {
     public sealed class OfficeService : IService, IInitialize, IPostInitialize, ISaveable {
         public const int MaxDocumentsProcessedPerTick = 256;
 
         private const double MaximumValueLog10 = (double)int.MaxValue * 3d;
+        private static readonly ulong FallbackCriticalRandomSeed = SeedUtility.FromString(nameof(OfficeService));
         private const int MinimumClerkAge = 18;
         private const int MaximumClerkAge = 65;
         private const int MaximumClerkNameLength = 64;
@@ -57,6 +59,7 @@ namespace Services {
         private IReadOnlyCacheData<IncomeEntries> _incomeData;
         private IReadOnlyCacheData<DocumentEntries> _documentData;
         private AcceptedNormalDocumentService _acceptedDocuments;
+        private SignatureCriticalRandomService _criticalRandom;
         private GameStatisticsService _statistics;
         private CacheVersionService _cacheVersions;
 
@@ -114,6 +117,9 @@ namespace Services {
                 _incomeData = stash.IncomeData;
                 _documentData = stash.Documents;
                 scope.TryGet(out _acceptedDocuments);
+                if (!scope.TryGet(out _criticalRandom)) {
+                    _criticalRandom = new SignatureCriticalRandomService(FallbackCriticalRandomSeed);
+                }
                 _statistics = scope.Get<GameStatisticsService>();
                 _cacheVersions = scope.Get<CacheVersionService>();
                 _initialized = true;
@@ -744,6 +750,10 @@ namespace Services {
             double rewardFactor = accepted
                 ? SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier)
                 : 0d;
+            if (accepted && _criticalRandom.RollOffice(entries.OfficeSignatureCriticalChance)) {
+                rewardFactor = SaturatingMultiply(rewardFactor,
+                    SignatureCriticalRandomService.NormalizeMultiplier(entries.OfficeSignatureCriticalMultiplier));
+            }
             Value incomePerDocument = _incomeData.Value.IncomePerDocument;
             Value requested = accepted ? MultiplyValueSafely(incomePerDocument, rewardFactor) : Value.Zero;
             Value credited = accepted ? _money.AddMoney(requested) : Value.Zero;

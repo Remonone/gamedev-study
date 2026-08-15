@@ -12,7 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
   m_Name: Token generation Upgrade
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
-  NumericModifiers: []
+  NumericModifiers:
+  - _id: token_generation_
+    _operation: 0
+    _value:
+      rid: 841080539992817853
+    _parameter:
+      _groupId: Bank
+      _parameterId: PayoutAmount
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 841080539992817853
+      type: {class: UpgradeNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
+      data:
+        _baseValue:
+          _stored: 0
+          _base:
+            Degree: 0
+        _formula:
+          rid: -2

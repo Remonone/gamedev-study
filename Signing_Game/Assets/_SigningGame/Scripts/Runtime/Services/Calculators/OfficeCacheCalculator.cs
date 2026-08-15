@@ -16,6 +16,7 @@ namespace Services.Calculators {
         public const double DefaultMinimumClerkMultiplier = 1d;
         public const double DefaultMaximumHireSignatureMultiplier = 2d;
         public const double DefaultSalaryReviewCostRatio = 0.5d;
+        public const double DefaultOfficeSignatureCriticalMultiplier = 1d;
 
         private IModifierService _modifierService;
         private IAssetProvider _assetProvider;
@@ -72,9 +73,10 @@ namespace Services.Calculators {
 
             if (!IsFiniteInRange(value.QualityCeiling, 0f, 1f) ||
                 !IsFiniteInRange(value.AcceptanceThreshold, 0f, 1f) ||
-                !IsFiniteInRange(value.RewardMultiplier, 0f, 1f)) {
+                !IsFiniteInRange(value.RewardMultiplier, 0f, 1f) ||
+                !IsFiniteInRange(value.OfficeSignatureCriticalChance, 0f, 1f)) {
                 throw new InvalidOperationException(
-                    "Office quality, acceptance threshold, and reward multiplier must be finite values between 0 and 1.");
+                    "Office quality, acceptance threshold, reward multiplier, and critical chance must be finite values between 0 and 1.");
             }
 
             if (!IsFiniteInRange(value.BaseClerkMultiplierMedian, double.Epsilon, double.MaxValue)) {
@@ -83,10 +85,11 @@ namespace Services.Calculators {
 
             if (!IsFiniteInRange(value.ClerkMultiplierRangeStep, 0d, double.MaxValue) ||
                 !IsFiniteInRange(value.MinimumClerkMultiplier, 0d, double.MaxValue) ||
+                !IsFiniteInRange(value.OfficeSignatureCriticalMultiplier, 1d, double.MaxValue) ||
                 !IsFiniteInRange(value.MaximumHireSignatureMultiplier, 1d, double.MaxValue) ||
                 !IsFiniteInRange(value.SalaryReviewCostRatio, 0d, 1d)) {
                 throw new InvalidOperationException(
-                    "Office clerk multiplier range step and minimum must be finite and non-negative, the maximum hire signature multiplier must be finite and at least 1, and the salary review cost ratio must be between 0 and 1.");
+                    "Office clerk multiplier range step and minimum must be finite and non-negative, critical and maximum hire signature multipliers must be finite and at least 1, and the salary review cost ratio must be between 0 and 1.");
             }
         }
 
@@ -102,6 +105,10 @@ namespace Services.Calculators {
             value.QualityCeiling = Normalize(value.QualityCeiling, 0f, 1f, 0f, ref normalized);
             value.AcceptanceThreshold = Normalize(value.AcceptanceThreshold, 0f, 1f, 1f, ref normalized);
             value.RewardMultiplier = Normalize(value.RewardMultiplier, 0f, 1f, 0f, ref normalized);
+            value.OfficeSignatureCriticalChance = Normalize(value.OfficeSignatureCriticalChance, 0f, 1f, 0f,
+                ref normalized);
+            value.OfficeSignatureCriticalMultiplier = Normalize(value.OfficeSignatureCriticalMultiplier, 1d,
+                double.MaxValue, DefaultOfficeSignatureCriticalMultiplier, ref normalized);
             value.BaseClerkMultiplierMedian = Normalize(value.BaseClerkMultiplierMedian, double.Epsilon,
                 double.MaxValue, DefaultBaseClerkMultiplierMedian, ref normalized);
             value.ClerkMultiplierRangeStep = Normalize(value.ClerkMultiplierRangeStep, 0d, double.MaxValue,

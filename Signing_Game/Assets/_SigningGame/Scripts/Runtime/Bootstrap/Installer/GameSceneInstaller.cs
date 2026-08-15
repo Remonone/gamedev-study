@@ -34,6 +34,7 @@ namespace Bootstrap.Installer {
             container.Register(modifierStorage);
             container.Register<IModifierService>(new ModifierService());
             container.Register(new MoneyAggregator());
+            container.Register(new SignatureCriticalRandomService());
             container.Register(new DocumentGeneratorService());
             container.Register(new WalletService());
             container.Register(new UpgradeService());

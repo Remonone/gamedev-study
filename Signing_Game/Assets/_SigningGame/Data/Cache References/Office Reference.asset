@@ -18,6 +18,8 @@ MonoBehaviour:
     QualityCeiling: 1
     AcceptanceThreshold: 0.5
     RewardMultiplier: 0.5
+    OfficeSignatureCriticalChance: 0
+    OfficeSignatureCriticalMultiplier: 1
     BaseClerkMultiplierMedian: 2
     ClerkMultiplierRangeStep: 1
     MinimumClerkMultiplier: 1

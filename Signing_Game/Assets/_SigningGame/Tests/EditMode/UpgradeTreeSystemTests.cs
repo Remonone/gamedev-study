@@ -121,6 +121,28 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Tree_HidesVisibleLockedDescendantWhenParentIsHidden() {
+            UpgradeNodeDefinition root = CreateDefinition("root");
+            UpgradeNodeDefinition hiddenParent = CreateDefinition("hidden_parent");
+            UpgradeNodeDefinition visibleChild = CreateDefinition("visible_child");
+            root.Children = new[] { new UpgradeNodeLink { Child = hiddenParent, DrawEdge = true } };
+            hiddenParent.Children = new[] { new UpgradeNodeLink { Child = visibleChild, DrawEdge = true } };
+            hiddenParent.LockedDisplayMode = LockedNodeDisplayMode.Hidden;
+            visibleChild.LockedDisplayMode = LockedNodeDisplayMode.VisibleLocked;
+
+            SetupTree(new[] { root, hiddenParent, visibleChild }, out UpgradeService upgrades,
+                out _, out UpgradeTreeService tree);
+
+            Assert.That(tree.IsVisible("hidden_parent"), Is.False);
+            Assert.That(tree.IsVisible("visible_child"), Is.False);
+
+            PurchaseAndComplete(upgrades, "root");
+
+            Assert.That(tree.IsVisible("hidden_parent"), Is.True);
+            Assert.That(tree.IsVisible("visible_child"), Is.True);
+        }
+
+        [Test]
         public void Selection_CanSelectSameNodeAgainAfterClear() {
             UpgradeNodeDefinition definition = CreateDefinition("selectable");
             SetupTree(new[] { definition }, out UpgradeService upgrades, out _, out UpgradeTreeService tree);
