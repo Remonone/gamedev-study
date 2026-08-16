@@ -22,12 +22,14 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 440, y: -40}
+  TreePosition: {x: 480, y: -40}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
-  Children: []
+  Children:
+  - Child: {fileID: 11400000, guid: 132266efdd3f60c628324309864b7d57, type: 2}
+    DrawEdge: 1
   references:
     version: 2
     RefIds:

@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds:
   - office
-  GrantsMetaCurrencyPoint: 0
+  GrantsMetaCurrencyPoint: 1
   TreePosition: {x: 760, y: 440}
   LockedDisplayMode: 1
   ParentUnlockMode: 0

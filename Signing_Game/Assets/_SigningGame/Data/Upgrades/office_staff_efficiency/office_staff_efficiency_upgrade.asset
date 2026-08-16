@@ -12,7 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
   m_Name: office_staff_efficiency_upgrade
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
-  NumericModifiers: []
+  NumericModifiers:
+  - _id: office_staff_efficiency_upgrade
+    _operation: 0
+    _value:
+      rid: -2
+    _parameter:
+      _groupId: Office
+      _parameterId: DocumentsPerSecondPerClerk
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
