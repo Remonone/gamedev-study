@@ -21,3 +21,4 @@ MonoBehaviour:
     CriticalChance: 0
     CriticalMultiplier: 2
     BillCostCompensationRatio: 0
+    MultiPayChance: 0

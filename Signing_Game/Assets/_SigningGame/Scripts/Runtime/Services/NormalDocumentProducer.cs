@@ -145,14 +145,24 @@ namespace Services {
                 double accuracyBonus = Math.Min(
                     Math.Max(result.Similarity * income.MinMultiplyScale, 1d),
                     income.MaxMultiplicationScale);
-                Value reward = MultiplyValueSafely(income.IncomePerDocument, accuracyBonus);
-                if (_criticalRandom.RollManual(income.ManualSignatureCriticalChance)) {
-                    reward = MultiplyValueSafely(
-                        reward,
-                        SignatureCriticalRandomService.NormalizeMultiplier(
-                            income.ManualSignatureCriticalMultiplier));
+                Value baseReward = MultiplyValueSafely(income.IncomePerDocument, accuracyBonus);
+                int guaranteedExtra = MultiPayUtility.SplitChance(
+                    income.ManualSignatureMultiPayChance,
+                    out float extraChance);
+                int paymentCount = 1 + guaranteedExtra;
+                if (extraChance > 0f && _criticalRandom.RollManual(extraChance)) paymentCount++;
+
+                for (int paymentIndex = 0; paymentIndex < paymentCount; paymentIndex++) {
+                    Value reward = baseReward;
+                    if (_criticalRandom.RollManual(income.ManualSignatureCriticalChance)) {
+                        reward = MultiplyValueSafely(
+                            reward,
+                            SignatureCriticalRandomService.NormalizeMultiplier(
+                                income.ManualSignatureCriticalMultiplier));
+                    }
+
+                    _aggregator.AddMoney(reward);
                 }
-                _aggregator.AddMoney(reward);
             }
 
             private static Value MultiplyValueSafely(Value value, double multiplier) {

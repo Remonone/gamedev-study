@@ -20,6 +20,9 @@ namespace Data.Cache {
 
         [ModifiableParameter("BillCostCompensationRatio", Minimum = 0d, Maximum = 1d)]
         public double BillCostCompensationRatio;
+
+        [ModifiableParameter("MultiPayChance", Minimum = 0d, Maximum = 100d)]
+        public float MultiPayChance;
     }
 
     [CreateAssetMenu(menuName = "References/Bank Reference", fileName = "Bank Reference")]

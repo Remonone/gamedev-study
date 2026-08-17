@@ -95,6 +95,48 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Tick_MultiPayChanceGrantsSeparatePaymentsWithIndependentCriticalRolls() {
+            BankEntries entries = DefaultEntries();
+            entries.PayoutAmount = new Value(2d);
+            entries.CriticalChance = 0.5f;
+            entries.CriticalMultiplier = 3d;
+            entries.MultiPayChance = 1.24f;
+            float[] samples = { 0.1f, 0.1f, 0.9f, 0.1f, 0.9f, 0.9f, 0.9f };
+            int sampleIndex = 0;
+            BankHarness harness = CreateHarness(entries, () => samples[sampleIndex++]);
+            harness.UnlockBank();
+            Value before = harness.Wallet.CurrentBalance;
+
+            harness.Bank.Tick(25f);
+
+            // Interval 1: multi-pay roll 0.1 < 0.24 -> 3 payments; crit rolls 0.1(crit), 0.9, 0.1(crit) -> 6 + 2 + 6.
+            // Interval 2: multi-pay roll 0.9 >= 0.24 -> 2 payments; crit rolls 0.9, 0.9 -> 2 + 2.
+            Assert.That(sampleIndex, Is.EqualTo(7));
+            Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo(before + new Value(18d)));
+            Assert.That(harness.Bank.ElapsedSeconds, Is.EqualTo(5d).Within(0.0001d));
+        }
+
+        [Test]
+        public void Tick_MultiPayChanceGuaranteedWholePartAlwaysPaysExtra() {
+            BankEntries entries = DefaultEntries();
+            entries.PayoutAmount = new Value(2d);
+            entries.CriticalChance = 0f;
+            entries.MultiPayChance = 1f;
+            float[] samples = { 0.9f, 0.9f, 0.9f, 0.9f };
+            int sampleIndex = 0;
+            BankHarness harness = CreateHarness(entries, () => samples[sampleIndex++]);
+            harness.UnlockBank();
+            Value before = harness.Wallet.CurrentBalance;
+
+            harness.Bank.Tick(25f);
+
+            // Whole multi-pay chance of 1.0 grants a second payment without a fractional roll;
+            // one critical sample is still consumed per payment.
+            Assert.That(sampleIndex, Is.EqualTo(4));
+            Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo(before + new Value(8d)));
+        }
+
+        [Test]
         public void Tick_CapsPayoutsAndRetainsBacklog() {
             BankEntries entries = DefaultEntries();
             entries.PayoutIntervalSeconds = 1f;

@@ -79,6 +79,11 @@ namespace Services.Calculators {
                 throw new InvalidOperationException(
                     "Bank bill cost compensation ratio must be finite and between 0 and 1.");
             }
+
+            if (!IsFiniteInRange(value.MultiPayChance, 0f, Services.MultiPayUtility.MaximumChance)) {
+                throw new InvalidOperationException(
+                    $"Bank multi-pay chance must be finite and between 0 and {Services.MultiPayUtility.MaximumChance}.");
+            }
         }
 
         internal static BankEntries NormalizeEffective(BankEntries value) {
@@ -99,6 +104,8 @@ namespace Services.Calculators {
             value.CriticalMultiplier = Normalize(value.CriticalMultiplier, 1d, double.MaxValue,
                 DefaultCriticalMultiplier, ref normalized);
             value.BillCostCompensationRatio = Normalize(value.BillCostCompensationRatio, 0d, 1d, 0d,
+                ref normalized);
+            value.MultiPayChance = Normalize(value.MultiPayChance, 0f, Services.MultiPayUtility.MaximumChance, 0f,
                 ref normalized);
 
             if (normalized) Debug.LogWarning("Invalid effective bank values were normalized to safe ranges.");

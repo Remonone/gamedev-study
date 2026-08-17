@@ -27,7 +27,9 @@ MonoBehaviour:
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
-  Children: []
+  Children:
+  - Child: {fileID: 11400000, guid: 5fac4837bc4810b031c2c7d495faac86, type: 2}
+    DrawEdge: 1
   references:
     version: 2
     RefIds:

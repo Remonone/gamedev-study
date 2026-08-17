@@ -91,6 +91,11 @@ namespace Services.Calculators {
                 throw new InvalidOperationException(
                     "Office clerk multiplier range step and minimum must be finite and non-negative, critical and maximum hire signature multipliers must be finite and at least 1, and the salary review cost ratio must be between 0 and 1.");
             }
+
+            if (!IsFiniteInRange(value.OfficeMultiPayChance, 0f, Services.MultiPayUtility.MaximumChance)) {
+                throw new InvalidOperationException(
+                    $"Office multi-pay chance must be finite and between 0 and {Services.MultiPayUtility.MaximumChance}.");
+            }
         }
 
         internal static OfficeEntries NormalizeEffective(OfficeEntries value) {
@@ -119,6 +124,8 @@ namespace Services.Calculators {
                 double.MaxValue, DefaultMaximumHireSignatureMultiplier, ref normalized);
             value.SalaryReviewCostRatio = Normalize(value.SalaryReviewCostRatio, 0d, 1d,
                 DefaultSalaryReviewCostRatio, ref normalized);
+            value.OfficeMultiPayChance = Normalize(value.OfficeMultiPayChance, 0f,
+                Services.MultiPayUtility.MaximumChance, 0f, ref normalized);
 
             if (normalized) {
                 Debug.LogWarning("Invalid effective office values were normalized to safe ranges.");

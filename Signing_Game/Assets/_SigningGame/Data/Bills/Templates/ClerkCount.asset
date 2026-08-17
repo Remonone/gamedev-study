@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58e5445201c8e3bcd97ec8e413faaf00, type: 3}
   m_Name: ClerkCount
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
-  Id: 
-  Kind: 0
+  Id: clerk_count
+  Kind: 1
   DisplayName: 
   ShortDescription: 
   Color: {r: 1, g: 1, b: 1, a: 1}

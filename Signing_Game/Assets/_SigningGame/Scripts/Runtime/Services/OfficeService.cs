@@ -747,16 +747,28 @@ namespace Services {
             roll = Math.Clamp(roll, 0f, 1f);
             float quality = roll * entries.QualityCeiling;
             bool accepted = quality >= entries.AcceptanceThreshold;
-            double rewardFactor = accepted
-                ? SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier)
-                : 0d;
-            if (accepted && _criticalRandom.RollOffice(entries.OfficeSignatureCriticalChance)) {
-                rewardFactor = SaturatingMultiply(rewardFactor,
-                    SignatureCriticalRandomService.NormalizeMultiplier(entries.OfficeSignatureCriticalMultiplier));
-            }
             Value incomePerDocument = _incomeData.Value.IncomePerDocument;
-            Value requested = accepted ? MultiplyValueSafely(incomePerDocument, rewardFactor) : Value.Zero;
-            Value credited = accepted ? _money.AddMoney(requested) : Value.Zero;
+            Value requested = Value.Zero;
+            Value credited = Value.Zero;
+            if (accepted) {
+                double baseRewardFactor = SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier);
+                int guaranteedExtra = MultiPayUtility.SplitChance(entries.OfficeMultiPayChance, out float extraChance);
+                int paymentCount = 1 + guaranteedExtra;
+                if (extraChance > 0f && _criticalRandom.RollOffice(extraChance)) paymentCount++;
+
+                for (int paymentIndex = 0; paymentIndex < paymentCount; paymentIndex++) {
+                    double rewardFactor = baseRewardFactor;
+                    if (_criticalRandom.RollOffice(entries.OfficeSignatureCriticalChance)) {
+                        rewardFactor = SaturatingMultiply(rewardFactor,
+                            SignatureCriticalRandomService.NormalizeMultiplier(entries.OfficeSignatureCriticalMultiplier));
+                    }
+
+                    Value payment = MultiplyValueSafely(incomePerDocument, rewardFactor);
+                    requested = AddValuesSafely(requested, payment);
+                    credited = AddValuesSafely(credited, _money.AddMoney(payment));
+                }
+            }
+
             _documentProcessed.OnNext(new OfficeDocumentResult(
                 clerk.Id,
                 accepted,
@@ -1277,6 +1289,20 @@ namespace Services {
             }
 
             return Value.FromLog10(resultLog10);
+        }
+
+        private static Value AddValuesSafely(Value first, Value second) {
+            if (first.IsZero) return second;
+            if (second.IsZero) return first;
+            if (first == Value.Infinity || second == Value.Infinity) return Value.Infinity;
+
+            try {
+                Value result = first + second;
+                return result.Base.Degree < 0 ? Value.Infinity : result;
+            }
+            catch (Exception) {
+                return Value.Infinity;
+            }
         }
 
         private static double SaturatingAdd(double left, double right) {

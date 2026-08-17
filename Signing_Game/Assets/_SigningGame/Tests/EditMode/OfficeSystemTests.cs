@@ -694,6 +694,25 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void NormalDocumentReward_MultiPayChancePaysSeparateRewards() {
+            OfficeHarness harness = CreateHarness(
+                CreateEntries(),
+                incomeEntries: new IncomeEntries(1f, 0.4f, Value.One, 0f, 1d, 1f));
+            SetDocumentCount(harness.Documents, 1);
+            var producer = new NormalDocumentProducer();
+            producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+            Assert.That(producer.TryProduce(new DocumentOfferKey(DocumentKind.Normal, "normal"),
+                out IDocumentSession session), Is.True);
+            double before = harness.Wallet.CurrentBalance.ToDouble();
+
+            Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+
+            // A whole multi-pay chance of 1.0 grants a second full payment with its own crit roll.
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 2d).Within(0.0001d));
+            session.Dispose();
+        }
+
+        [Test]
         public void OfficeDocumentOffers_ExposeExactHireAndReviewPresentationDataAndReissueOnRelease() {
             OfficeHarness harness = CreateHarness(CreateEntries(capacity: 2));
             harness.UnlockOffice();
@@ -928,6 +947,29 @@ namespace Tests.EditMode {
             Assert.That(result.RequestedReward.ToDouble(), Is.EqualTo(4d).Within(0.0001d));
             Assert.That(result.CreditedReward.ToDouble(), Is.EqualTo(4d).Within(0.0001d));
             Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 4d).Within(0.0001d));
+        }
+
+        [Test]
+        public void Tick_MultiPayChancePaysSeparateRewardsPerAcceptedDocument() {
+            OfficeEntries entries = CreateEntries();
+            entries.OfficeSignatureCriticalChance = 1f;
+            entries.OfficeSignatureCriticalMultiplier = 4d;
+            entries.OfficeMultiPayChance = 1f;
+            OfficeHarness harness = CreateHarness(entries, () => 1f);
+            harness.UnlockOffice();
+            HireClerk(harness);
+            SetDocumentCount(harness.Documents, 1);
+            OfficeDocumentResult result = default;
+            using IDisposable subscription = harness.Office.DocumentProcessed.Subscribe(value => result = value);
+            double before = harness.Wallet.CurrentBalance.ToDouble();
+
+            harness.Office.Tick(1f);
+
+            // A whole multi-pay chance of 1.0 grants a second payment; each payment rolls its own crit.
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(result.RequestedReward.ToDouble(), Is.EqualTo(8d).Within(0.0001d));
+            Assert.That(result.CreditedReward.ToDouble(), Is.EqualTo(8d).Within(0.0001d));
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 8d).Within(0.0001d));
         }
 
         [Test]

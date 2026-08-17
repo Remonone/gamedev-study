@@ -21,3 +21,4 @@ MonoBehaviour:
         Degree: 0
     ManualSignatureCriticalChance: 0
     ManualSignatureCriticalMultiplier: 1
+    ManualSignatureMultiPayChance: 0

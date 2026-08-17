@@ -25,3 +25,4 @@ MonoBehaviour:
     MinimumClerkMultiplier: 1
     MaximumHireSignatureMultiplier: 2
     SalaryReviewCostRatio: 0.5
+    OfficeMultiPayChance: 0

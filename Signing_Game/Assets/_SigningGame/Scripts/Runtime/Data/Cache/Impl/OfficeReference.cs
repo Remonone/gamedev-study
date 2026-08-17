@@ -26,6 +26,9 @@ namespace Data.Cache {
         [ModifiableParameter("OfficeSignatureCriticalMultiplier", Minimum = 1d)]
         public double OfficeSignatureCriticalMultiplier;
 
+        [ModifiableParameter("OfficeMultiPayChance", Minimum = 0d, Maximum = 100d)]
+        public float OfficeMultiPayChance;
+
         [ModifiableParameter("BaseClerkMultiplierMedian", Minimum = double.Epsilon)]
         public double BaseClerkMultiplierMedian;
 

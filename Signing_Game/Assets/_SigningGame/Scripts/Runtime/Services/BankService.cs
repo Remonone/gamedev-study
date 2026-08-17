@@ -85,14 +85,20 @@ namespace Services {
 
                 Value payout = Value.Zero;
                 for (int index = 0; index < payoutCount; index++) {
-                    double randomUnit = SampleRandomUnit();
-                    bool isCritical = entries.CriticalChance >= 1f ||
-                                      entries.CriticalChance > 0f && randomUnit < entries.CriticalChance;
-                    double multiplier = isCritical
-                        ? entries.CriticalMultiplier
-                        : 1d;
-                    Value intervalPayout = MultiplyValueSafely(entries.PayoutAmount, multiplier);
-                    payout = AddValuesSafely(payout, intervalPayout);
+                    int guaranteedExtra = MultiPayUtility.SplitChance(entries.MultiPayChance, out float extraChance);
+                    int paymentCount = 1 + guaranteedExtra;
+                    if (extraChance > 0f && SampleRandomUnit() < extraChance) paymentCount++;
+
+                    for (int paymentIndex = 0; paymentIndex < paymentCount; paymentIndex++) {
+                        double randomUnit = SampleRandomUnit();
+                        bool isCritical = entries.CriticalChance >= 1f ||
+                                          entries.CriticalChance > 0f && randomUnit < entries.CriticalChance;
+                        double multiplier = isCritical
+                            ? entries.CriticalMultiplier
+                            : 1d;
+                        Value intervalPayout = MultiplyValueSafely(entries.PayoutAmount, multiplier);
+                        payout = AddValuesSafely(payout, intervalPayout);
+                    }
                 }
 
                 double consumed = interval * payoutCount;

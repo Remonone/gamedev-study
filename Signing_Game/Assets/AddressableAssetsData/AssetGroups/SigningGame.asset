@@ -105,6 +105,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - tutorial
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 28126d903f2eaa2ffdde62f1e416f92b
+    m_Address: Assets/_SigningGame/Data/Upgrades/bank_multi_pay_chance_upgrade/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 29bcbf8f158bb6ff91010b8d46eae252
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_sign_multi_pay_chance/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2c7be7cea962d1ff899267fc1ca55038
     m_Address: Assets/_SigningGame/Data/Starter Signature Three.asset
     m_ReadOnly: 0
@@ -201,6 +213,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - tutorial
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fac4837bc4810b031c2c7d495faac86
+    m_Address: Assets/_SigningGame/Data/Upgrades/office_multi_pay_chance_upgrade/Upgrade Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 62b27d10280a9fab7bcd36713bcb5d7c
     m_Address: Assets/_SigningGame/Data/Research/Research Catalog.asset
