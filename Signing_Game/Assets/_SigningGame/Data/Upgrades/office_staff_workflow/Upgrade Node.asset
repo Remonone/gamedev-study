@@ -38,6 +38,6 @@ MonoBehaviour:
       type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         Value:
-          _stored: 0
+          _stored: 1
           _base:
             Degree: 0

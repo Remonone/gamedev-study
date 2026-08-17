@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58e5445201c8e3bcd97ec8e413faaf00, type: 3}
+  m_Name: ClerkCount
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
+  Id: 
+  Kind: 0
+  DisplayName: 
+  ShortDescription: 
+  Color: {r: 1, g: 1, b: 1, a: 1}
+  MinimumTarget: 2
+  MaximumTarget: 50
+  UpgradeId: 
+  MinimumBalance:
+    CostMultiplier: 0
+    WorkFactor: 0
+    RewardFactor: 0
+    DifficultyFactor: 0
+  MaximumBalance:
+    CostMultiplier: 0
+    WorkFactor: 0
+    RewardFactor: 0
+    DifficultyFactor: 0

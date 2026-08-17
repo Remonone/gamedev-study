@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: office_minimum_hire_multiplier_upgrade
   Name: office_minimum_hire_multiplier_upgrade
   Description: 
-  MaxLevel: 0
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080570608353368
@@ -37,6 +37,6 @@ MonoBehaviour:
       type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         Value:
-          _stored: 0
+          _stored: 1
           _base:
             Degree: 0

@@ -59,6 +59,12 @@ namespace Bootstrap.Installer {
             var practiceDocumentProducer = new PracticeDocumentProducer();
             container.Register(practiceDocumentProducer, typeof(IDocumentProducer));
             container.Register(new PlayerSignatureAcceptor());
+            // CONTRACT: TutorialService must initialize AFTER UpgradeService and GameStatisticsService.
+            // The deferred upgrade restore fires Changed during UpgradeService.InitializeAsync, and statistics
+            // restore fires during SaveService's PreInitialize; TutorialService takes its trigger baseline
+            // snapshot in its own InitializeAsync, so a registration order change would reintroduce
+            // popups firing on restored state instead of live gameplay changes.
+            container.Register(new TutorialService());
         }
 
         

@@ -21,7 +21,7 @@ MonoBehaviour:
     rid: 841080592069558290
   Modifiers: []
   FeatureUnlockIds: []
-  GrantsMetaCurrencyPoint: 0
+  GrantsMetaCurrencyPoint: 1
   TreePosition: {x: 3040, y: -40}
   LockedDisplayMode: 0
   ParentUnlockMode: 0

@@ -6,5 +6,6 @@ namespace Constants {
         public const string META_UPGRADE_LABEL = "meta_upgrades";
         public const string BILL_CATALOG_LABEL = "bill_catalog";
         public const string RESEARCH_CATALOG_LABEL = "research_catalog";
+        public const string TUTORIAL_LABEL = "tutorial";
     }
 }

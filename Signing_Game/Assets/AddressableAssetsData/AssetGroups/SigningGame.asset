@@ -99,6 +99,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2384a3473b5276eb5ad8e9a0956d40a3
+    m_Address: Assets/_SigningGame/Data/Tutorial/Tutorial Bank Unlocked.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - tutorial
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2c7be7cea962d1ff899267fc1ca55038
     m_Address: Assets/_SigningGame/Data/Starter Signature Three.asset
     m_ReadOnly: 0
@@ -188,6 +194,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c631f4164ee758b3b6cfff1edd5f494
+    m_Address: Assets/_SigningGame/Data/Tutorial/Tutorial Office First Processed
+      Document.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - tutorial
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 62b27d10280a9fab7bcd36713bcb5d7c
     m_Address: Assets/_SigningGame/Data/Research/Research Catalog.asset

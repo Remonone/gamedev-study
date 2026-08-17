@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: office_clerk_hire_range_upgrade
   Name: office_clerk_hire_range_upgrade
   Description: 
-  MaxLevel: 0
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080570608353366

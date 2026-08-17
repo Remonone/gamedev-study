@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cac07cb528113a2fb8958a14aa00b9d, type: 3}
+  m_Name: Tutorial Bank Unlocked
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Tutorial.TutorialDefinition
+  _id: tutorial.bank_unlocked
+  _trigger:
+    rid: 841080613712953420
+  _slides:
+  - _text: The Bank is unlocked! It generates passive income without a single signature.
+    _icon: {fileID: 0}
+    _advanceCondition:
+      rid: 841080613712953421
+  references:
+    version: 2
+    RefIds:
+    - rid: 841080613712953420
+      type: {class: UpgradeTrigger, ns: Data.Tutorial, asm: SigningGame.Scripts.Runtime}
+      data:
+        UpgradeId: bank_unlock
+        MinLevel: 1
+    - rid: 841080613712953421
+      type: {class: ClickCondition, ns: Data.Tutorial, asm: SigningGame.Scripts.Runtime}
+      data: 

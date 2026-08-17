@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cac07cb528113a2fb8958a14aa00b9d, type: 3}
+  m_Name: Tutorial Office First Processed Document
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Tutorial.TutorialDefinition
+  _id: tutorial.office_first_document
+  _trigger:
+    rid: 841080613712953417
+  _slides:
+  - _text: Your administration has processed its first document! Every accepted document
+      brings stable income to the town treasury.
+    _icon: {fileID: 0}
+    _advanceCondition:
+      rid: 841080613712953418
+  - _text: Open the OFFICE tab to review your clerks and their workload.
+    _icon: {fileID: 0}
+    _advanceCondition:
+      rid: 841080613712953419
+  references:
+    version: 2
+    RefIds:
+    - rid: 841080613712953417
+      type: {class: StatisticsTrigger, ns: Data.Tutorial, asm: SigningGame.Scripts.Runtime}
+      data:
+        StatisticId: office.processed_documents
+        Comparison: 0
+        TargetValue: 1
+    - rid: 841080613712953418
+      type: {class: ClickCondition, ns: Data.Tutorial, asm: SigningGame.Scripts.Runtime}
+      data: 
+    - rid: 841080613712953419
+      type: {class: OpenTabCondition, ns: Data.Tutorial, asm: SigningGame.Scripts.Runtime}
+      data:
+        TabId: office

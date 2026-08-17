@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: archive_upgrade
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
   NumericModifiers:
-  - _id: 
+  - _id: archive_point_document_income_upgrade
     _operation: 0
     _value:
       rid: -2

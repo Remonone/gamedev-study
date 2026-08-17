@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: bill_upgrade
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
   NumericModifiers:
-  - _id: 
+  - _id: bill_reward_multiplier_upgrade
     _operation: 0
     _value:
       rid: -2
