@@ -26,7 +26,7 @@ namespace Services {
 
         public const float PointsPerDocument = 10f;
 
-        private float _currentPoint;
+        private double _currentPoint;
         private int _documentQuantity = 1;
         private int _reservationEpoch;
         private long _nextReservationId;
@@ -42,6 +42,7 @@ namespace Services {
         private readonly Subject<Unit> _documentAdded = new();
         private readonly Subject<GenerationWork> _generationWork = new();
         private readonly Subject<int> _documentsGenerated = new();
+        private readonly Subject<int> _documentsConsumed = new();
 
         public string SaveId => "document_generator";
 
@@ -51,6 +52,7 @@ namespace Services {
         public Observable<Unit> DocumentAdded => _documentAdded;
         public Observable<GenerationWork> WorkGenerated => _generationWork;
         public Observable<int> DocumentsGenerated => _documentsGenerated;
+        public Observable<int> DocumentsConsumed => _documentsConsumed;
 
         private readonly CompositeDisposable _disposables = new();
 
@@ -61,6 +63,7 @@ namespace Services {
             _documentAdded.Dispose();
             _generationWork.Dispose();
             _documentsGenerated.Dispose();
+            _documentsConsumed.Dispose();
             _disposables.Dispose();
         }
 
@@ -81,19 +84,28 @@ namespace Services {
             if (deltaPoints > 0d && !double.IsInfinity(deltaPoints) && !double.IsNaN(deltaPoints)) {
                 _generationWork.OnNext(new GenerationWork(deltaPoints, tokenPerSecond));
             }
-            _currentPoint += (float)deltaPoints;
+            double totalPoints = _currentPoint + deltaPoints;
+            double generatedDocuments = Math.Floor(totalPoints / PointsPerDocument);
+            _currentPoint = totalPoints % PointsPerDocument;
 
-            int generatedDocuments = Mathf.FloorToInt(_currentPoint / PointsPerDocument);
-
-            if (generatedDocuments > 0) {
-                _currentPoint -= generatedDocuments * PointsPerDocument;
-                _documentQuantity += (generatedDocuments * _generatorCache.Value.TokenPerIncome);
-                _documentCount.Value = _documentQuantity;
-                _documentAdded.OnNext(Unit.Default);
-                _documentsGenerated.OnNext(generatedDocuments);
+            if (generatedDocuments >= 1d) {
+                int tokensPerIncome = Math.Max(0, _generatorCache.Value.TokenPerIncome);
+                long storedAndReserved = (long)_documentQuantity + _activeReservations.Count;
+                long availableCapacity = Math.Max(0L, int.MaxValue - storedAndReserved);
+                double requested = generatedDocuments * tokensPerIncome;
+                int actualAdded = requested >= availableCapacity
+                    ? (int)availableCapacity
+                    : (int)requested;
+                // Work converted beyond the integer inventory limit is intentionally discarded.
+                if (actualAdded > 0) {
+                    _documentQuantity += actualAdded;
+                    _documentCount.Value = _documentQuantity;
+                    _documentAdded.OnNext(Unit.Default);
+                    _documentsGenerated.OnNext(actualAdded);
+                }
             }
 
-            _currentProgress.Value = _currentPoint / PointsPerDocument;
+            _currentProgress.Value = (float)(_currentPoint / PointsPerDocument);
         }
 
         public bool TryObtainDocument() {
@@ -102,6 +114,7 @@ namespace Services {
             }
 
             _documentCount.Value = --_documentQuantity;
+            _documentsConsumed.OnNext(1);
             return true;
         }
 
@@ -117,7 +130,12 @@ namespace Services {
         }
 
         internal bool TryCommitReservation(DocumentReservation reservation) {
-            return reservation.Epoch == _reservationEpoch && _activeReservations.Remove(reservation.Id);
+            if (reservation.Epoch != _reservationEpoch || !_activeReservations.Remove(reservation.Id)) {
+                return false;
+            }
+
+            _documentsConsumed.OnNext(1);
+            return true;
         }
 
         internal bool TryCancelReservation(DocumentReservation reservation) {
@@ -130,36 +148,37 @@ namespace Services {
         }
 
         public JToken Serialize() {
+            long persistedQuantity = (long)_documentQuantity + _activeReservations.Count;
             return new JObject {
-                ["documentQuantity"] = _documentQuantity + _activeReservations.Count,
+                ["documentQuantity"] = persistedQuantity,
                 ["currentPoints"] = _currentPoint
             };
         }
 
         public void Deserialize(JToken state) {
             if (state is not JObject data || data["documentQuantity"]?.Type != JTokenType.Integer ||
-                !TryReadNumber(data["currentPoints"], out float currentPoints)) {
+                !TryReadNumber(data["currentPoints"], out double currentPoints)) {
                 throw new JsonSerializationException(
                     "Document generator save data is missing an integer quantity or numeric current points value.");
             }
 
-            int documentQuantity = data["documentQuantity"].Value<int>();
-            bool invalidPoints = float.IsNaN(currentPoints) || float.IsInfinity(currentPoints) ||
-                                  currentPoints < 0f || currentPoints >= PointsPerDocument;
-            if (documentQuantity < 0 || invalidPoints) {
+            long persistedQuantity = data["documentQuantity"].Value<long>();
+            bool invalidPoints = double.IsNaN(currentPoints) || double.IsInfinity(currentPoints) ||
+                                   currentPoints < 0f || currentPoints >= PointsPerDocument;
+            if (persistedQuantity < 0L || persistedQuantity > int.MaxValue || invalidPoints) {
                 throw new JsonSerializationException("Document generator save data contains values outside valid ranges.");
             }
 
             InvalidateReservations();
-            _documentQuantity = documentQuantity;
+            _documentQuantity = (int)persistedQuantity;
             _currentPoint = currentPoints;
             _documentCount.Value = _documentQuantity;
-            _currentProgress.Value = _currentPoint / PointsPerDocument;
+            _currentProgress.Value = (float)(_currentPoint / PointsPerDocument);
         }
 
-        private static bool TryReadNumber(JToken token, out float value) {
+        private static bool TryReadNumber(JToken token, out double value) {
             if (token?.Type is JTokenType.Integer or JTokenType.Float) {
-                value = token.Value<float>();
+                value = token.Value<double>();
                 return true;
             }
 

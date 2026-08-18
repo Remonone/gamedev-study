@@ -214,7 +214,7 @@ namespace SigningGame.Tests.EditMode {
         }
 
         [Test]
-        public void MetaPrefabAndScene_HaveRequiredReferencesAndFifthTab() {
+        public void MetaPrefabAndScene_HaveRequiredReferencesAndRegisteredTabs() {
             const string prefabPath = "Assets/_SigningGame/Prefabs/MetaUpgradeUI.prefab";
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             Assert.That(prefab, Is.Not.Null);
@@ -243,8 +243,9 @@ namespace SigningGame.Tests.EditMode {
                     .SelectMany(root => root.GetComponentsInChildren<UI.PullTabGroupView>(true)).First();
                 var groupState = new SerializedObject(group);
                 SerializedProperty tabs = groupState.FindProperty("_tabs");
-                Assert.That(tabs.arraySize, Is.EqualTo(5));
+                Assert.That(tabs.arraySize, Is.EqualTo(6));
                 Assert.That(tabs.GetArrayElementAtIndex(4).objectReferenceValue, Is.Not.Null);
+                Assert.That(tabs.GetArrayElementAtIndex(5).objectReferenceValue, Is.Not.Null);
             } finally {
                 EditorSceneManager.CloseScene(scene, true);
             }

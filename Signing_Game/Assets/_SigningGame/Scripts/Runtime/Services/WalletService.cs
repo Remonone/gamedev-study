@@ -9,10 +9,14 @@ namespace Services {
     public class WalletService : IService, ISaveable {
         private Value _balance;
         private readonly ReactiveProperty<IValue> _balanceChanged;
+        private readonly Subject<Value> _credited = new();
+        private readonly Subject<Value> _debited = new();
 
         public string SaveId => "wallet";
         
         public Observable<IValue> BalanceChanged => _balanceChanged;
+        public Observable<Value> Credited => _credited;
+        public Observable<Value> Debited => _debited;
         public Value CurrentBalance => _balance;
 
         public WalletService() {
@@ -26,7 +30,9 @@ namespace Services {
 
         internal bool ReplenishWallet(Value value, bool notify) {
             if (value.IsZero || !_balance.IsSignificant(value)) return false;
+            Value before = _balance;
             _balance += value;
+            EmitCredited(before, _balance);
             if (notify) NotifyBalanceChanged();
             return true;
         }
@@ -44,9 +50,21 @@ namespace Services {
         internal bool TryWithdrawWallet(Value value, bool notify) {
             if (!CanAfford(value)) return false;
             if (!_balance.IsSignificant(value)) return true;
+            Value before = _balance;
             _balance = (_balance - value).Value;
+            EmitDebited(before, _balance);
             if (notify) NotifyBalanceChanged();
             return true;
+        }
+
+        private void EmitCredited(Value before, Value after) {
+            Value? delta = after - before;
+            if (delta.HasValue && !delta.Value.IsZero) _credited.OnNext(delta.Value);
+        }
+
+        private void EmitDebited(Value before, Value after) {
+            Value? delta = before - after;
+            if (delta.HasValue && !delta.Value.IsZero) _debited.OnNext(delta.Value);
         }
 
         internal void NotifyBalanceChanged() {
@@ -85,6 +103,8 @@ namespace Services {
 
         public void Dispose() {
             _balanceChanged.Dispose();
+            _credited.Dispose();
+            _debited.Dispose();
         }
 
         private static bool TryReadNumber(JToken token, out double value) {

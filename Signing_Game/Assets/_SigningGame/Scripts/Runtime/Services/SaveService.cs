@@ -20,6 +20,7 @@ namespace Services {
 
         public string FilePath => _filePath;
         public static string DefaultFilePath => Path.Combine(Application.persistentDataPath, DefaultFileName);
+        public event Action BeforeSnapshot;
 
         public SaveService(bool loadExistingOnInitialize = true) : this(DefaultFilePath, loadExistingOnInitialize) { }
 
@@ -47,6 +48,7 @@ namespace Services {
 
         public SaveSnapshot CreateSnapshot() {
             EnsureSaveablesDiscovered();
+            BeforeSnapshot?.Invoke();
             var sections = new Dictionary<string, JToken>(_saveables.Count, StringComparer.Ordinal);
 
             foreach (ISaveable saveable in _saveables) {

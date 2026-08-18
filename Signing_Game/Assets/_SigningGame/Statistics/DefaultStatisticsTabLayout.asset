@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dd52e823fdc5b41abb90e9f109bad4, type: 3}
+  m_Name: DefaultStatisticsTabLayout
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Statistics.StatisticsTabLayoutDefinition
+  _categories:
+  - _title: Economy
+    _trackers:
+    - _statisticId: money.income_per_second
+      _displayName: Income per second
+    - _statisticId: money.max_balance
+      _displayName: Maximum balance
+    - _statisticId: money.total_earned
+      _displayName: Total earned
+    - _statisticId: money.total_spent
+      _displayName: Total spent
+    - _statisticId: income.signature_income
+      _displayName: Signature income
+    - _statisticId: income.clerk_income
+      _displayName: Clerk income multiplier
+    - _statisticId: income.bank_income
+      _displayName: Bank payout
+  - _title: Documents
+    _trackers:
+    - _statisticId: documents.generated_per_second
+      _displayName: Generated per second
+    - _statisticId: documents.processed_per_second
+      _displayName: Processed per second
+    - _statisticId: documents.consumed_per_second
+      _displayName: Consumed per second
+    - _statisticId: documents.generated_total
+      _displayName: Total generated
+    - _statisticId: documents.consumed_total
+      _displayName: Total consumed
+    - _statisticId: documents.successfully_signed
+      _displayName: Successfully signed
+  - _title: Office and bills
+    _trackers:
+    - _statisticId: office.clerk_count
+      _displayName: Clerks
+    - _statisticId: office.clerk_capacity
+      _displayName: Available clerk slots
+    - _statisticId: bills.accepted_count
+      _displayName: Accepted bills
+  - _title: Critical rewards
+    _trackers:
+    - _statisticId: crit.signature_chance
+      _displayName: Signature critical chance
+    - _statisticId: crit.signature_multiplier
+      _displayName: Signature critical multiplier
+    - _statisticId: crit.clerk_chance
+      _displayName: Clerk critical chance
+    - _statisticId: crit.clerk_multiplier
+      _displayName: Clerk critical multiplier
+    - _statisticId: crit.bank_chance
+      _displayName: Bank critical chance
+    - _statisticId: crit.bank_multiplier
+      _displayName: Bank critical multiplier
+  - _title: Multi-pay
+    _trackers:
+    - _statisticId: multipay.signature_chance
+      _displayName: Signature multi-pay chance
+    - _statisticId: multipay.clerk_chance
+      _displayName: Clerk multi-pay chance
+    - _statisticId: multipay.bank_chance
+      _displayName: Bank multi-pay chance

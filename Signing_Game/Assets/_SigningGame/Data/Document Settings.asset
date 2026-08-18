@@ -39,16 +39,16 @@ MonoBehaviour:
   - x
   - y
   - z
-  _paragraphCount: {x: 2, y: 6}
+  _paragraphCount: {x: 2, y: 5}
   _sentencesPerParagraph: {x: 2, y: 4}
   _wordsPerSentence: {x: 5, y: 10}
   _titleWords: {x: 3, y: 5}
   _headingWords: {x: 2, y: 6}
   _minimumParagraphsBetweenHeadings: 2
-  _titleFontSize: {x: 24, y: 36}
-  _headingFontSize: {x: 18, y: 24}
-  _bodyFontSize: {x: 12, y: 16}
-  _footnoteFontSize: {x: 8, y: 12}
+  _titleFontSize: {x: 20, y: 30}
+  _headingFontSize: {x: 14, y: 18}
+  _bodyFontSize: {x: 10, y: 12}
+  _footnoteFontSize: {x: 6, y: 10}
   _titleProbability: 0.9
   _headingProbability: 0.3
   _footnoteProbability: 0.35
