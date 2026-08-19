@@ -7,6 +7,7 @@ using Data.Rules;
 using Exceptions;
 using R3;
 using Services.Locator;
+using Utils;
 
 namespace Services {
     public sealed class SelectedSignatureLoader : IService, IInitialize {
@@ -34,17 +35,33 @@ namespace Services {
         }
 
         public SignaturePresetDefinition GetActivePreset() {
-            if (_usesFixedPreset) {
-                if (_fixedPreset == null) {
-                    throw new SignaturePresetConfigurationException("SelectedSignatureLoader requires a signature preset.");
-                }
-                return _fixedPreset;
-            }
-            string activeId = _progression?.ActivePresetId;
-            if (string.IsNullOrWhiteSpace(activeId) || !_repository.TryGetPreset(activeId, out SignaturePresetDefinition preset)) {
+            if (!TryGetActivePreset(out SignaturePresetDefinition preset)) {
                 throw new SignaturePresetConfigurationException("An active signature must be selected before signing documents.");
             }
             return preset;
+        }
+
+        public bool TryGetActivePreset(out SignaturePresetDefinition preset) {
+            if (_usesFixedPreset) {
+                preset = _fixedPreset;
+                return preset != null;
+            }
+
+            string activeId = _progression?.ActivePresetId;
+            if (string.IsNullOrWhiteSpace(activeId) || _repository == null ||
+                !_repository.TryGetPreset(activeId, out preset)) {
+                preset = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool TryGetBaseIncome(out Value income) {
+            income = default;
+            if (!TryGetActivePreset(out SignaturePresetDefinition preset) || preset.BaseIncome.IsZero) return false;
+            income = preset.BaseIncome;
+            return true;
         }
 
         public SignatureDifficultyRules GetBaseDifficulty() {
@@ -69,7 +86,8 @@ namespace Services {
 
         private void OnActivePresetChanged() {
             _baseDifficulty = null;
-            _cacheInvalidator.Invalidate<SignatureEntries>();
+            _cacheInvalidator?.Invalidate<SignatureEntries>();
+            _cacheInvalidator?.Invalidate<IncomeEntries>();
         }
     }
 }

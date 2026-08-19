@@ -70,6 +70,115 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void StagedPurchase_UsesEffectiveLevelWithoutMutatingCommittedState() {
+            MetaUpgradeNodeDefinition node = CreateMetaNode("meta_income", 1d);
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { node });
+            meta.Deserialize(CreateState(7, 0, new Value(92.2d, new BaseValue(2))));
+
+            Assert.That(meta.TryStagePurchase(node.Id, out long cost), Is.True);
+            Assert.That(cost, Is.EqualTo(1));
+            Assert.That(meta.GetUpgrade(node.Id).Level, Is.Zero);
+            Assert.That(meta.OwnedMetaUpgrades, Is.Empty);
+            Assert.That(meta.EffectiveLevel(node.Id), Is.EqualTo(1));
+            Assert.That(meta.AvailablePoints, Is.EqualTo(12));
+            Assert.That(meta.SpentPoints, Is.EqualTo(1));
+            Assert.That(meta.PreviewAvailablePoints, Is.EqualTo(11));
+            Assert.That(((JArray)meta.Serialize()["upgrades"]).Count, Is.Zero,
+                "ordinary saves must exclude preview levels");
+
+            Assert.That(meta.TryCreateConfirmedPreviewState(out JToken confirmed), Is.True);
+            Assert.That(confirmed["bankedPoints"]?.Value<long>(), Is.EqualTo(11));
+            Assert.That(confirmed["previousIterationPoints"]?.Value<long>(), Is.EqualTo(5));
+            Assert.That(confirmed["moneyPeakStored"]?.Value<double>(), Is.Zero);
+            Assert.That(confirmed["upgrades"]?[0]?["id"]?.Value<string>(), Is.EqualTo(node.Id));
+            Assert.That(confirmed["upgrades"]?[0]?["level"]?.Value<int>(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RepeatedStaging_UsesEffectiveCostAndRollsOverExactPoints() {
+            MetaUpgradeNodeDefinition node = CreateMetaNode("scaling", 1d);
+            node.CostFormula = new LinearFormula { BaseValue = new Value(1d), Slope = new Value(1d) };
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { node });
+            meta.Deserialize(CreateState(0, 0, new Value(92.2d, new BaseValue(2))));
+
+            Assert.That(meta.TryStagePurchase(node.Id, out long firstCost), Is.True);
+            Assert.That(meta.TryStagePurchase(node.Id, out long secondCost), Is.True);
+            Assert.That(firstCost, Is.EqualTo(1));
+            Assert.That(secondCost, Is.EqualTo(2));
+            Assert.That(meta.EffectiveLevel(node.Id), Is.EqualTo(2));
+            Assert.That(meta.SpentPoints, Is.EqualTo(3));
+            Assert.That(meta.PreviewAvailablePoints, Is.EqualTo(2));
+            Assert.That(meta.GetUpgrade(node.Id).Level, Is.Zero);
+        }
+
+        [Test]
+        public void ConfirmedPreview_PreservesUnresolvedLevelsAndActivatesOnlyAfterRestore() {
+            MetaUpgradeNodeDefinition node = CreateMetaNode("known", 1d);
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { node });
+            JObject restored = CreateState(4, 0, new Value(92.2d, new BaseValue(2)));
+            ((JArray)restored["upgrades"]).Add(new JObject { ["id"] = "removed_catalog", ["level"] = 3 });
+            meta.Deserialize(restored);
+
+            Assert.That(meta.TryStagePurchase(node.Id, out _), Is.True);
+            Assert.That(meta.TryCreateConfirmedPreviewState(out JToken confirmed), Is.True);
+            Assert.That(confirmed["upgrades"].ToObject<List<JToken>>(), Has.Count.EqualTo(2));
+            Assert.That(meta.GetUpgrade(node.Id).Level, Is.Zero);
+            Assert.That(meta.OwnedMetaUpgrades, Is.Empty);
+
+            meta.Deserialize(confirmed);
+            Assert.That(meta.GetUpgrade(node.Id).Level, Is.EqualTo(1));
+            Assert.That(meta.OwnedMetaUpgrades, Has.Count.EqualTo(1));
+            Assert.That(meta.SpentPoints, Is.Zero);
+            Assert.That(meta.EffectiveLevel(node.Id), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void PreviewParentUnlocksChildWithoutChangingCommittedState() {
+            MetaUpgradeNodeDefinition parent = CreateMetaNode("parent", 1d);
+            MetaUpgradeNodeDefinition child = CreateMetaNode("child", 1d);
+            parent.Children = new[] { new UpgradeNodeLink { Child = child, DrawEdge = true } };
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { parent, child });
+            meta.Deserialize(CreateState(0, 0, new Value(92.2d, new BaseValue(2))));
+            using var scope = new ServiceScope(null);
+            using var tree = new MetaUpgradeTreeService();
+            scope.Register(meta).Register(tree);
+            tree.InitializeAsync(scope).GetAwaiter().GetResult();
+            UpgradeNodeState parentState = meta.GetUpgrade(parent.Id);
+            UpgradeNodeState childState = meta.GetUpgrade(child.Id);
+            Assert.That(parentState.CurrentState, Is.EqualTo(UpgradeNodeState.State.Locked));
+            Assert.That(childState.CurrentState, Is.EqualTo(UpgradeNodeState.State.Locked));
+
+            Assert.That(tree.CanPurchase(parent.Id), Is.True);
+            Assert.That(meta.TryStagePurchase(parent.Id, out _), Is.True);
+            Assert.That(parentState.Level, Is.Zero);
+            Assert.That(childState.Level, Is.Zero);
+            Assert.That(parentState.CurrentState, Is.EqualTo(UpgradeNodeState.State.Locked));
+            Assert.That(childState.CurrentState, Is.EqualTo(UpgradeNodeState.State.Locked));
+            Assert.That(tree.CanPurchase(child.Id), Is.True);
+        }
+
+        [Test]
+        public void RestoreAndCatalogRebuild_ClearPreviewState() {
+            MetaUpgradeNodeDefinition node = CreateMetaNode("preview", 1d);
+            using var meta = new MetaProgressionService();
+            meta.BuildDefinitions(new[] { node });
+            meta.Deserialize(CreateState(0, 0, new Value(92.2d, new BaseValue(2))));
+            Assert.That(meta.TryStagePurchase(node.Id, out _), Is.True);
+            Assert.That(meta.SpentPoints, Is.EqualTo(1));
+
+            meta.Deserialize(CreateState(0, 0, Value.Zero));
+            Assert.That(meta.SpentPoints, Is.Zero);
+            Assert.That(meta.EffectiveLevel(node.Id), Is.Zero);
+            meta.BuildDefinitions(new[] { node });
+            Assert.That(meta.SpentPoints, Is.Zero);
+            Assert.That(meta.EffectiveLevel(node.Id), Is.Zero);
+        }
+
+        [Test]
         public void UnavailableCatalog_PreservesUnresolvedOwnershipAndDisablesPurchases() {
             using var meta = new MetaProgressionService();
             meta.BuildDefinitions(System.Array.Empty<MetaUpgradeNodeDefinition>());

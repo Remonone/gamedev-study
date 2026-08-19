@@ -8,10 +8,9 @@ using UnityEngine;
 
 namespace Services {
     public sealed class MetaPurchaseService : IService, IInitialize {
-        private const string SignatureProgressionSection = "signature_progression";
-
         private MetaProgressionService _meta;
         private MetaUpgradeTreeService _tree;
+        private SignatureProgressionService _signatureProgression;
         private SaveService _save;
         private AutoSaveService _autoSave;
         private SceneFlowService _sceneFlow;
@@ -23,32 +22,37 @@ namespace Services {
         public UniTask InitializeAsync(IServiceScope scope) {
             _meta = scope.Get<MetaProgressionService>();
             _tree = scope.Get<MetaUpgradeTreeService>();
+            _signatureProgression = scope.Get<SignatureProgressionService>();
             _save = scope.Get<SaveService>();
             _autoSave = scope.Get<AutoSaveService>();
             _sceneFlow = scope.Container.Get<SceneFlowService>();
             return UniTask.CompletedTask;
         }
 
-        public bool TryPurchase(string metaUpgradeId) {
+        public bool CanConfirm => !_commitInProgress && !_committed && !_sceneFlow.IsTransitionInProgress &&
+                                   _meta.HasPreviewPurchases;
+
+        public bool TryStagePurchase(string metaUpgradeId) {
             if (_commitInProgress || _committed || _sceneFlow.IsTransitionInProgress ||
-                !_tree.CanPurchase(metaUpgradeId) ||
-                !_meta.TryCreatePurchasedState(metaUpgradeId, out JToken purchasedMetaState, out _)) {
+                !_tree.CanPurchase(metaUpgradeId) || !_meta.TryStagePurchase(metaUpgradeId, out _)) {
                 return false;
             }
+
+            return true;
+        }
+
+        public bool TryPurchase(string metaUpgradeId) => TryStagePurchase(metaUpgradeId);
+
+        public bool TryConfirmSelection() {
+            if (!CanConfirm || !_meta.TryCreateConfirmedPreviewState(out var purchasedMetaState)) return false;
 
             if (!_sceneFlow.TryReserveGameReload(GameLaunchMode.Continue, out int reservation)) return false;
             _commitInProgress = true;
             try {
-                SaveSnapshot current = _save.CreateSnapshot();
-                if (!current.Sections.TryGetValue(SignatureProgressionSection, out JToken signature) || signature == null) {
-                    Debug.LogWarning("Meta purchase was cancelled because signature progression could not be preserved.");
-                    _sceneFlow.CancelReservedGameReload(reservation);
-                    return false;
-                }
-
+                _save.CreateSnapshot();
                 var sections = new Dictionary<string, JToken>(StringComparer.Ordinal) {
-                    [SignatureProgressionSection] = signature.DeepClone(),
-                    [MetaProgressionService.SaveSectionId] = purchasedMetaState.DeepClone()
+                    [SignatureProgressionService.ProgressionSaveId] = _signatureProgression.CreateResetState(),
+                    [MetaProgressionService.SaveSectionId] = purchasedMetaState
                 };
                 var resetSnapshot = new SaveSnapshot(SaveSnapshot.CurrentVersion, sections);
 

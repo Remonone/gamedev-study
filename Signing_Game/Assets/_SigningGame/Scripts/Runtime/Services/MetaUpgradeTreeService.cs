@@ -76,12 +76,9 @@ namespace Services {
 
             foreach (UpgradeNodeState state in _meta.Nodes) {
                 string id = state.Definition.Id;
-                bool unlocked = !_invalid.Contains(id) && (state.Level > 0 || EvaluateParents(id));
+                bool unlocked = !_invalid.Contains(id) && (_meta.EffectiveLevel(id) > 0 || EvaluateParents(id));
                 _unlocked[id] = unlocked;
                 ownVisibility[id] = unlocked || state.Definition.LockedDisplayMode != LockedNodeDisplayMode.Hidden;
-                if (state.Level == 0) {
-                    state.CurrentState = unlocked ? UpgradeNodeState.State.Available : UpgradeNodeState.State.Locked;
-                }
             }
 
             foreach (UpgradeNodeState state in _meta.Nodes) {
@@ -97,13 +94,13 @@ namespace Services {
             UpgradeNodeState state = _meta.GetUpgrade(id);
             if (state.Definition.ParentUnlockMode == ParentUnlockMode.All) {
                 for (int index = 0; index < parents.Count; index++) {
-                    if (_invalid.Contains(parents[index]) || _meta.GetUpgrade(parents[index])?.Level <= 0) return false;
+                    if (_invalid.Contains(parents[index]) || _meta.EffectiveLevel(parents[index]) <= 0) return false;
                 }
                 return true;
             }
 
             for (int index = 0; index < parents.Count; index++) {
-                if (!_invalid.Contains(parents[index]) && _meta.GetUpgrade(parents[index])?.Level > 0) return true;
+                if (!_invalid.Contains(parents[index]) && _meta.EffectiveLevel(parents[index]) > 0) return true;
             }
             return false;
         }

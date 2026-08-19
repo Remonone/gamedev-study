@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Data.Enums;
+using Utils;
 using UnityEngine;
 
 namespace Authoring {
@@ -10,6 +11,8 @@ namespace Authoring {
         [SerializeField] private string _id;
         [SerializeField] private string _displayName;
         [SerializeField] private List<string> _tags = new();
+        [SerializeField] private SignatureCategory _category = SignatureCategory.Simple;
+        [SerializeField] private Value _baseIncome = Value.One;
         [SerializeField] private SignatureStrokeMatchMode _strokeMatchMode =
             SignatureStrokeMatchMode.Ordered;
 
@@ -21,6 +24,8 @@ namespace Authoring {
         public string Id => _id;
         public string DisplayName => string.IsNullOrWhiteSpace(_displayName) ? name : _displayName;
         public IReadOnlyList<string> Tags => _tags;
+        public SignatureCategory Category => _category;
+        public Value BaseIncome => _baseIncome;
         public SignatureDifficultyProfileDefinition BaseDifficultyProfile => _baseDifficultyProfile;
         public SignatureStrokeMatchMode StrokeMatchMode => _strokeMatchMode;
         public SignatureAlignmentDefinition Alignment => _alignment;

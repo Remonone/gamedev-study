@@ -24,7 +24,9 @@ namespace Presentation {
         public string CurrentPointsText => _meta.CurrentIterationPoints.ToString();
         public string PreviousPointsText => _meta.PreviousIterationPoints.ToString();
         public string BankedPointsText => _meta.BankedPoints.ToString();
-        public string AvailablePointsText => _meta.AvailablePoints.ToString();
+        public string AvailablePointsText => _meta.PreviewAvailablePoints.ToString();
+        public string SpentPointsText => _meta.SpentPoints.ToString();
+        public bool CanConfirm => _purchases.CanConfirm;
 
         public MetaUpgradeTreeViewModel(MetaProgressionService meta, MetaUpgradeTreeService tree,
             MetaPurchaseService purchases) {
@@ -48,7 +50,9 @@ namespace Presentation {
 
         public void ClearSelection() => _selected.Value = null;
 
-        public bool Purchase(string id) => _purchases.TryPurchase(id);
+        public bool Purchase(string id) => _purchases.TryStagePurchase(id);
+
+        public bool ConfirmSelection() => _purchases.TryConfirmSelection();
 
         public void Dispose() {
             _subscriptions.Dispose();
@@ -66,25 +70,26 @@ namespace Presentation {
             var byId = new Dictionary<string, UpgradeNodePresentationModel>(StringComparer.Ordinal);
 
             foreach (UpgradeNodeState state in _tree.Nodes) {
-                bool completed = state.Definition.IsTerminalLevel(state.Level);
+                int effectiveLevel = _meta.EffectiveLevel(state.Definition.Id);
+                bool completed = state.Definition.IsTerminalLevel(effectiveLevel);
                 string price = completed ? "MAX" :
                     _meta.TryResolveCost(state, out long cost) ? cost.ToString() : "INVALID";
                 string level = state.Definition.HasLevelCap
-                    ? $"{state.Level}/{state.Definition.MaxLevel}"
-                    : $"{state.Level}/∞";
+                    ? $"{effectiveLevel}/{state.Definition.MaxLevel}"
+                    : $"{effectiveLevel}/∞";
                 var node = new UpgradeNodePresentationModel(
                     state.Definition.Id,
                     state.Definition.Name,
-                    UpgradeDescriptionFormatter.Format(state.Definition, state.Level),
+                    UpgradeDescriptionFormatter.Format(state.Definition, effectiveLevel),
                     state.Definition.Icon,
                     UpgradeNodePresentationModel.ToRuntimePosition(state.Definition.TreePosition),
-                    state.Level,
+                    effectiveLevel,
                     state.Definition.MaxLevel,
                     level,
                     price,
                     _tree.IsUnlocked(state.Definition.Id),
                     _tree.IsVisible(state.Definition.Id),
-                    false,
+                    _meta.IsPreviewed(state.Definition.Id),
                     1f,
                     _tree.CanPurchase(state.Definition.Id));
                 _nodes.Add(node);

@@ -12,18 +12,18 @@ using UnityEngine.UI;
 namespace Presentation {
     public sealed class StartingSignatureSelectionView : MonoBehaviour {
         [SerializeField] private GameObject _panel;
-        [SerializeField] private Button[] _buttons = new Button[3];
-        [SerializeField] private TextMeshProUGUI[] _labels = new TextMeshProUGUI[3];
+        [SerializeField] private Button[] _buttons = new Button[4];
+        [SerializeField] private TextMeshProUGUI[] _labels = new TextMeshProUGUI[4];
         [SerializeField] private Color _previewColor = Color.white;
         [SerializeField, Range(0f, 0.45f)] private float _previewPadding = 0.1f;
 
-        private readonly UnityAction[] _actions = new UnityAction[3];
-        private readonly SignatureGraphic[] _previews = new SignatureGraphic[3];
+        private readonly UnityAction[] _actions = new UnityAction[4];
+        private readonly SignatureGraphic[] _previews = new SignatureGraphic[4];
         private StartingSignatureSelectionViewModel _viewModel;
 
         private async void Start() {
             if (!HasRequiredReferences()) {
-                Debug.LogError("StartingSignatureSelectionView requires a panel and exactly three button/label pairs.", this);
+                Debug.LogError("StartingSignatureSelectionView requires a panel and exactly four button/label pairs.", this);
                 enabled = false;
                 return;
             }
@@ -41,12 +41,12 @@ namespace Presentation {
             _panel.SetActive(_viewModel.IsSelectionRequired);
             if (!_viewModel.IsSelectionRequired) return;
             Canvas.ForceUpdateCanvases();
-            if (_viewModel.Options.Count != 3) {
-                Debug.LogError("Starting signature selection requires exactly three options.", this);
+            if (_viewModel.Options.Count != 4) {
+                Debug.LogError("Starting signature selection requires exactly four options.", this);
                 return;
             }
 
-            for (int index = 0; index < 3; index++) {
+            for (int index = 0; index < 4; index++) {
                 int capturedIndex = index;
                 RenderOption(index, _viewModel.Options[index]);
                 _actions[index] = () => Select(capturedIndex);
@@ -69,10 +69,10 @@ namespace Presentation {
         }
 
         private bool HasRequiredReferences() {
-            if (_panel == null || _buttons == null || _labels == null || _buttons.Length != 3 || _labels.Length != 3)
+            if (_panel == null || _buttons == null || _labels == null || _buttons.Length != 4 || _labels.Length != 4)
                 return false;
 
-            for (int index = 0; index < 3; index++) {
+            for (int index = 0; index < 4; index++) {
                 if (_buttons[index] == null || _labels[index] == null) return false;
             }
 
@@ -80,12 +80,12 @@ namespace Presentation {
         }
 
         private void RenderOption(int index, StartingSignatureOption option) {
-            _labels[index].text = option.DisplayName;
+            _labels[index].text = $"{option.CategoryDisplayName}\n{option.DisplayName}\nBase income: {option.BaseIncomeText}";
 
             SignatureGraphic preview = GetOrCreatePreview(index);
             if (option.HasPreview && TryBuildLocalStrokes(preview.rectTransform.rect, option.PreviewStrokes,
                     out List<IReadOnlyList<Vector2>> localStrokes)) {
-                _labels[index].enabled = false;
+                _labels[index].enabled = true;
                 preview.enabled = true;
                 preview.color = _previewColor;
                 preview.SetStrokes(localStrokes);

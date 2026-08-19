@@ -1,0 +1,229 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f9383feacb24f8284be1056fe7737f8, type: 3}
+  m_Name: Elegant Signature
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Authoring.SignaturePresetDefinition
+  _id: signature_elegant
+  _displayName: Elegant Signature
+  _tags:
+  - "\u041D\u0430\u0447\u0430\u043B\u044C\u043D\u044B\u0435"
+  _category: 3
+  _baseIncome:
+    _stored: 4
+    _base:
+      Degree: 0
+  _strokeMatchMode: 0
+  _baseDifficultyProfile: {fileID: 11400000, guid: bdaba90eb1534a3f0be70b578f091b7d, type: 2}
+  _alignment:
+    _maximumTranslation: 0.1
+    _minimumScale: 0.85
+    _maximumScale: 1.15
+    _maximumRotationDegrees: 5
+  _processingProfile: {fileID: 11400000, guid: 07be174fbbe3f93dbb12ca0aaed12d65, type: 2}
+  _variants:
+  - _id: elegant_placeholder
+    _strokes:
+    - _id: stroke-1
+      _nodes:
+      - _position: {x: 0.180000, y: 0.240000}
+        _radius: 0.110000
+        _importance: 1
+      - _position: {x: 0.190159, y: 0.252836}
+        _radius: 0.111246
+        _importance: 1
+      - _position: {x: 0.200317, y: 0.265555}
+        _radius: 0.112489
+        _importance: 1
+      - _position: {x: 0.210476, y: 0.278043}
+        _radius: 0.113726
+        _importance: 1
+      - _position: {x: 0.220635, y: 0.290192}
+        _radius: 0.114954
+        _importance: 1
+      - _position: {x: 0.230794, y: 0.301901}
+        _radius: 0.116169
+        _importance: 1
+      - _position: {x: 0.240952, y: 0.313078}
+        _radius: 0.117369
+        _importance: 1
+      - _position: {x: 0.251111, y: 0.323644}
+        _radius: 0.118551
+        _importance: 1
+      - _position: {x: 0.261270, y: 0.333533}
+        _radius: 0.119711
+        _importance: 1
+      - _position: {x: 0.271429, y: 0.342694}
+        _radius: 0.120847
+        _importance: 1
+      - _position: {x: 0.281587, y: 0.351093}
+        _radius: 0.121956
+        _importance: 1
+      - _position: {x: 0.291746, y: 0.358712}
+        _radius: 0.123036
+        _importance: 1
+      - _position: {x: 0.301905, y: 0.365551}
+        _radius: 0.124083
+        _importance: 1
+      - _position: {x: 0.312063, y: 0.371628}
+        _radius: 0.125095
+        _importance: 1
+      - _position: {x: 0.322222, y: 0.376978}
+        _radius: 0.126070
+        _importance: 1
+      - _position: {x: 0.332381, y: 0.381650}
+        _radius: 0.127004
+        _importance: 1
+      - _position: {x: 0.342540, y: 0.385711}
+        _radius: 0.127897
+        _importance: 1
+      - _position: {x: 0.352698, y: 0.389240}
+        _radius: 0.128745
+        _importance: 1
+      - _position: {x: 0.362857, y: 0.392329}
+        _radius: 0.129546
+        _importance: 1
+      - _position: {x: 0.373016, y: 0.395078}
+        _radius: 0.130298
+        _importance: 1
+      - _position: {x: 0.383175, y: 0.397597}
+        _radius: 0.131001
+        _importance: 1
+      - _position: {x: 0.393333, y: 0.400000}
+        _radius: 0.131651
+        _importance: 1
+      - _position: {x: 0.403492, y: 0.402403}
+        _radius: 0.132247
+        _importance: 1
+      - _position: {x: 0.413651, y: 0.404922}
+        _radius: 0.132788
+        _importance: 1
+      - _position: {x: 0.423810, y: 0.407671}
+        _radius: 0.133272
+        _importance: 1
+      - _position: {x: 0.433968, y: 0.410760}
+        _radius: 0.133698
+        _importance: 1
+      - _position: {x: 0.444127, y: 0.414289}
+        _radius: 0.134066
+        _importance: 1
+      - _position: {x: 0.454286, y: 0.418350}
+        _radius: 0.134373
+        _importance: 1
+      - _position: {x: 0.464444, y: 0.423022}
+        _radius: 0.134620
+        _importance: 1
+      - _position: {x: 0.474603, y: 0.428372}
+        _radius: 0.134806
+        _importance: 1
+      - _position: {x: 0.484762, y: 0.434449}
+        _radius: 0.134930
+        _importance: 1
+      - _position: {x: 0.494921, y: 0.441288}
+        _radius: 0.134992
+        _importance: 1
+      - _position: {x: 0.505079, y: 0.448907}
+        _radius: 0.134992
+        _importance: 1
+      - _position: {x: 0.515238, y: 0.457306}
+        _radius: 0.134930
+        _importance: 1
+      - _position: {x: 0.525397, y: 0.466467}
+        _radius: 0.134806
+        _importance: 1
+      - _position: {x: 0.535556, y: 0.476356}
+        _radius: 0.134620
+        _importance: 1
+      - _position: {x: 0.545714, y: 0.486922}
+        _radius: 0.134373
+        _importance: 1
+      - _position: {x: 0.555873, y: 0.498099}
+        _radius: 0.134066
+        _importance: 1
+      - _position: {x: 0.566032, y: 0.509808}
+        _radius: 0.133698
+        _importance: 1
+      - _position: {x: 0.576190, y: 0.521957}
+        _radius: 0.133272
+        _importance: 1
+      - _position: {x: 0.586349, y: 0.534445}
+        _radius: 0.132788
+        _importance: 1
+      - _position: {x: 0.596508, y: 0.547164}
+        _radius: 0.132247
+        _importance: 1
+      - _position: {x: 0.606667, y: 0.560000}
+        _radius: 0.131651
+        _importance: 1
+      - _position: {x: 0.616825, y: 0.572836}
+        _radius: 0.131001
+        _importance: 1
+      - _position: {x: 0.626984, y: 0.585555}
+        _radius: 0.130298
+        _importance: 1
+      - _position: {x: 0.637143, y: 0.598043}
+        _radius: 0.129546
+        _importance: 1
+      - _position: {x: 0.647302, y: 0.610192}
+        _radius: 0.128745
+        _importance: 1
+      - _position: {x: 0.657460, y: 0.621901}
+        _radius: 0.127897
+        _importance: 1
+      - _position: {x: 0.667619, y: 0.633078}
+        _radius: 0.127004
+        _importance: 1
+      - _position: {x: 0.677778, y: 0.643644}
+        _radius: 0.126070
+        _importance: 1
+      - _position: {x: 0.687937, y: 0.653533}
+        _radius: 0.125095
+        _importance: 1
+      - _position: {x: 0.698095, y: 0.662694}
+        _radius: 0.124083
+        _importance: 1
+      - _position: {x: 0.708254, y: 0.671093}
+        _radius: 0.123036
+        _importance: 1
+      - _position: {x: 0.718413, y: 0.678712}
+        _radius: 0.121956
+        _importance: 1
+      - _position: {x: 0.728571, y: 0.685551}
+        _radius: 0.120847
+        _importance: 1
+      - _position: {x: 0.738730, y: 0.691628}
+        _radius: 0.119711
+        _importance: 1
+      - _position: {x: 0.748889, y: 0.696978}
+        _radius: 0.118551
+        _importance: 1
+      - _position: {x: 0.759048, y: 0.701650}
+        _radius: 0.117369
+        _importance: 1
+      - _position: {x: 0.769206, y: 0.705711}
+        _radius: 0.116169
+        _importance: 1
+      - _position: {x: 0.779365, y: 0.709240}
+        _radius: 0.114954
+        _importance: 1
+      - _position: {x: 0.789524, y: 0.712329}
+        _radius: 0.113726
+        _importance: 1
+      - _position: {x: 0.799683, y: 0.715078}
+        _radius: 0.112489
+        _importance: 1
+      - _position: {x: 0.809841, y: 0.717597}
+        _radius: 0.111246
+        _importance: 1
+      - _position: {x: 0.820000, y: 0.720000}
+        _radius: 0.110000
+        _importance: 1
+

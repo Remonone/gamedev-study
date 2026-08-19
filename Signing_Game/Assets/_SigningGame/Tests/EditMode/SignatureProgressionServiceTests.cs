@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Authoring;
 using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
 using Data.Cache;
+using Data.Enums;
 using Data.Rules;
 using Data.Templates;
 using Newtonsoft.Json.Linq;
@@ -32,13 +34,13 @@ namespace Tests.EditMode {
         }
 
         [Test]
-        public void NewGame_GeneratesThreeUniqueStarterOffers_AndUnlocksOnlyChoice() {
+        public void NewGame_GeneratesFourCategoryOffers_AndUnlocksOnlyChoice() {
             FakeRepository repository = CreateRepository(4, 1);
             SignatureProgressionService progression = Initialize(
                 new SignatureProgressionService(GameLaunchMode.NewGame, upperBound => upperBound - 1), repository);
 
-            Assert.That(progression.PendingOfferIds, Has.Count.EqualTo(3));
-            Assert.That(new HashSet<string>(progression.PendingOfferIds), Has.Count.EqualTo(3));
+            Assert.That(progression.PendingOfferIds, Has.Count.EqualTo(4));
+            Assert.That(new HashSet<string>(progression.PendingOfferIds), Has.Count.EqualTo(4));
             string selected = progression.PendingOfferIds[1];
             int notifications = 0;
             using IDisposable subscription = progression.ActivePresetChanged.Subscribe(_ => notifications++);
@@ -52,7 +54,7 @@ namespace Tests.EditMode {
         }
 
         [Test]
-        public void NewGame_WithFewerThanThreeStarters_FailsClearly() {
+        public void NewGame_WithMissingSignatureCategory_FailsClearly() {
             FakeRepository repository = CreateRepository(2, 2);
             var progression = new SignatureProgressionService(GameLaunchMode.NewGame, _ => 0);
             using var scope = new ServiceScope(null);
@@ -81,7 +83,7 @@ namespace Tests.EditMode {
 
         [Test]
         public void RestoredState_NormalizesDuplicatesAndActiveUnlockInvariant() {
-            FakeRepository repository = CreateRepository(3, 0);
+            FakeRepository repository = CreateRepository(4, 0);
             string active = repository.Presets[1].Id;
             var progression = new SignatureProgressionService(GameLaunchMode.Continue, _ => 0);
             progression.Deserialize(new JObject {
@@ -116,8 +118,10 @@ namespace Tests.EditMode {
         }
 
         [Test]
-        public void SelectingActivePreset_ClearsLoaderCacheAndInvalidatesSignatureEntries() {
-            FakeRepository repository = CreateRepository(3, 0);
+        public void SelectingActivePreset_ClearsLoaderCacheAndInvalidatesSignatureAndIncomeEntries() {
+            FakeRepository repository = CreateRepository(4, 0);
+            Assert.That(repository.Presets[3].Category, Is.EqualTo(SignatureCategory.Elegant));
+            Assert.That(repository.Presets[3].HasTag(InternalConstants.STARTING_SIGNATURE_TAG), Is.True);
             var progression = new SignatureProgressionService(GameLaunchMode.NewGame, _ => 0);
             var cache = new CacheVersionService();
             var loader = new SelectedSignatureLoader();
@@ -138,6 +142,51 @@ namespace Tests.EditMode {
 
             Assert.That(cachedRules.GetValue(loader), Is.Null);
             Assert.That(cache.GetVersion<SignatureEntries>(), Is.EqualTo(1));
+            Assert.That(cache.GetVersion<IncomeEntries>(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void NoActivePreset_ExposesSafeBaselineStateBeforeSelection() {
+            FakeRepository repository = CreateRepository(4, 0);
+            var progression = new SignatureProgressionService(GameLaunchMode.NewGame, _ => 0);
+            var cache = new CacheVersionService();
+            var loader = new SelectedSignatureLoader();
+            var scope = new ServiceScope(null);
+            _scopes.Add(scope);
+            scope.Register<ISignaturePresetRepository>(repository)
+                .Register(progression)
+                .Register(cache, typeof(ICacheVersionProvider), typeof(ICacheInvalidator))
+                .Register(loader);
+            progression.InitializeAsync(scope).GetAwaiter().GetResult();
+            loader.InitializeAsync(scope).GetAwaiter().GetResult();
+
+            Assert.That(loader.TryGetActivePreset(out _), Is.False);
+            Assert.That(loader.TryGetBaseIncome(out _), Is.False);
+        }
+
+        [Test]
+        public void ProductionPresets_HaveFourUniqueCategoriesAndPositiveBaseIncome() {
+            string[] paths = {
+                "Assets/_SigningGame/Data/SignaturePreset.asset",
+                "Assets/_SigningGame/Data/Starter Signature Three.asset",
+                "Assets/_SigningGame/Data/Test Preset.asset",
+                "Assets/_SigningGame/Data/Elegant Signature.asset"
+            };
+            var categories = new HashSet<SignatureCategory>();
+            for (int index = 0; index < paths.Length; index++) {
+                SignaturePresetDefinition preset = AssetDatabase.LoadAssetAtPath<SignaturePresetDefinition>(paths[index]);
+                Assert.That(preset, Is.Not.Null, paths[index]);
+                Assert.That(preset.BaseIncome.IsZero, Is.False, paths[index]);
+                Assert.That(categories.Add(preset.Category), Is.True, paths[index]);
+            }
+
+            Assert.That(categories, Is.EquivalentTo(new[] {
+                SignatureCategory.Simple, SignatureCategory.Medium,
+                SignatureCategory.Complex, SignatureCategory.Elegant
+            }));
+            string addressables = File.ReadAllText("Assets/AddressableAssetsData/AssetGroups/SigningGame.asset");
+            Assert.That(addressables, Does.Contain("Assets/_SigningGame/Data/Elegant Signature.asset"));
+            Assert.That(addressables, Does.Contain("d7f7f3c8c1f842a4b8d7d1f2f4de9a60"));
         }
 
         private SignatureProgressionService Initialize(
@@ -152,17 +201,23 @@ namespace Tests.EditMode {
 
         private FakeRepository CreateRepository(int starterCount, int lockedCount) {
             var presets = new List<SignaturePresetDefinition>();
-            for (int index = 0; index < starterCount; index++) presets.Add(CreatePreset($"starter_{index}", true));
+            for (int index = 0; index < starterCount; index++) {
+                SignatureCategory category = (SignatureCategory)(index % 4);
+                presets.Add(CreatePreset($"starter_{index}", true, category));
+            }
             for (int index = 0; index < lockedCount; index++) presets.Add(CreatePreset($"locked_{index}", false));
             return new FakeRepository(presets);
         }
 
-        private SignaturePresetDefinition CreatePreset(string id, bool starter) {
+        private SignaturePresetDefinition CreatePreset(string id, bool starter,
+            SignatureCategory category = SignatureCategory.Simple) {
             SignaturePresetDefinition preset = ScriptableObject.CreateInstance<SignaturePresetDefinition>();
             _objects.Add(preset);
             var serialized = new SerializedObject(preset);
             serialized.FindProperty("_id").stringValue = id;
             serialized.FindProperty("_displayName").stringValue = id;
+            serialized.FindProperty("_category").enumValueIndex = (int)category;
+            serialized.FindProperty("_baseIncome._stored").doubleValue = 1d + (int)category;
             SerializedProperty tags = serialized.FindProperty("_tags");
             tags.arraySize = starter ? 1 : 0;
             if (starter) tags.GetArrayElementAtIndex(0).stringValue = InternalConstants.STARTING_SIGNATURE_TAG;

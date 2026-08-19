@@ -4,6 +4,7 @@ using Authoring;
 using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using R3;
@@ -12,7 +13,7 @@ using Services.Locator;
 namespace Services {
     public sealed class SignatureProgressionService : IService, ISaveable, IInitialize {
         public const string ProgressionSaveId = "signature_progression";
-        private const int OfferCount = 3;
+        private const int OfferCount = 4;
         private const string LegacyPresetId = "test_preset";
 
         private readonly GameLaunchMode _launchMode;
@@ -67,6 +68,14 @@ namespace Services {
                 return false;
             }
             return _repository.TryGetPreset(_pendingOfferIds[index], out preset);
+        }
+
+        public JToken CreateResetState() {
+            return new JObject {
+                ["activePresetId"] = JValue.CreateNull(),
+                ["unlockedPresetIds"] = new JArray(),
+                ["pendingOfferIds"] = new JArray()
+            };
         }
 
         public JToken Serialize() => new JObject {
@@ -146,36 +155,49 @@ namespace Services {
         private bool HasValidPendingOffers() {
             if (_pendingOfferIds.Count != OfferCount) return false;
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            var categories = new HashSet<SignatureCategory>();
             for (int index = 0; index < _pendingOfferIds.Count; index++) {
                 string id = _pendingOfferIds[index];
                 if (!seen.Add(id) || !_repository.TryGetPreset(id, out SignaturePresetDefinition preset) ||
-                    !preset.HasTag(InternalConstants.STARTING_SIGNATURE_TAG)) return false;
+                    !preset.HasTag(InternalConstants.STARTING_SIGNATURE_TAG) ||
+                    !Enum.IsDefined(typeof(SignatureCategory), preset.Category) ||
+                    !categories.Add(preset.Category) || preset.BaseIncome.IsZero) return false;
             }
-            return true;
+            return categories.Count == Enum.GetValues(typeof(SignatureCategory)).Length;
         }
 
         private void GeneratePendingOffers() {
-            var candidates = new List<SignaturePresetDefinition>();
+            var candidates = new Dictionary<SignatureCategory, List<SignaturePresetDefinition>>();
+            foreach (SignatureCategory category in Enum.GetValues(typeof(SignatureCategory))) {
+                candidates.Add(category, new List<SignaturePresetDefinition>());
+            }
+
             IReadOnlyList<SignaturePresetDefinition> presets = _repository.Presets;
             for (int index = 0; index < presets.Count; index++) {
                 SignaturePresetDefinition preset = presets[index];
-                if (preset != null && preset.HasTag(InternalConstants.STARTING_SIGNATURE_TAG)) candidates.Add(preset);
-            }
-            if (candidates.Count < OfferCount) {
-                throw new InvalidOperationException(
-                    $"At least {OfferCount} signature presets tagged '{InternalConstants.STARTING_SIGNATURE_TAG}' are required.");
+                if (preset == null || !preset.HasTag(InternalConstants.STARTING_SIGNATURE_TAG)) continue;
+                if (!Enum.IsDefined(typeof(SignatureCategory), preset.Category) || preset.BaseIncome.IsZero) {
+                    throw new InvalidOperationException(
+                        $"Starter signature preset '{preset.Id}' has an invalid category or base income.");
+                }
+                candidates[preset.Category].Add(preset);
             }
 
             _pendingOfferIds.Clear();
-            for (int offerIndex = 0; offerIndex < OfferCount; offerIndex++) {
-                int remaining = candidates.Count - offerIndex;
-                int offset = _nextIndex(remaining);
-                if (offset < 0 || offset >= remaining) {
-                    throw new InvalidOperationException($"Signature random source returned {offset} for upper bound {remaining}.");
+            foreach (SignatureCategory category in Enum.GetValues(typeof(SignatureCategory))) {
+                List<SignaturePresetDefinition> categoryCandidates = candidates[category];
+                if (categoryCandidates.Count == 0) {
+                    throw new InvalidOperationException(
+                        $"At least one starter signature preset is required for category '{category}'.");
                 }
-                int selectedIndex = offerIndex + offset;
-                (candidates[offerIndex], candidates[selectedIndex]) = (candidates[selectedIndex], candidates[offerIndex]);
-                _pendingOfferIds.Add(candidates[offerIndex].Id);
+
+                int selectedIndex = _nextIndex(categoryCandidates.Count);
+                if (selectedIndex < 0 || selectedIndex >= categoryCandidates.Count) {
+                    throw new InvalidOperationException(
+                        $"Signature random source returned {selectedIndex} for upper bound {categoryCandidates.Count}.");
+                }
+
+                _pendingOfferIds.Add(categoryCandidates[selectedIndex].Id);
             }
         }
 

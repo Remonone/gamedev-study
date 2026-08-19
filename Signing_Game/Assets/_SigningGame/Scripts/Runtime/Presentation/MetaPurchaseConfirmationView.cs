@@ -26,12 +26,13 @@ namespace Presentation {
             Hide();
         }
 
-        public void Show(UpgradeNodePresentationModel node, Action onConfirm) {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+        public void Show(string spentPoints, Action onConfirm) {
+            if (string.IsNullOrWhiteSpace(spentPoints)) throw new ArgumentException("Spent points are required.", nameof(spentPoints));
             _onConfirm = onConfirm ?? throw new ArgumentNullException(nameof(onConfirm));
             if (_message != null) {
-                _message.text = $"Buy {node.Name} for {node.Price} meta points?\n" +
-                                "Money, ordinary upgrades, office, bills, bank and archive research will reset.";
+                _message.text = $"Apply {spentPoints} meta points on reset?\n" +
+                                "Money, ordinary upgrades, office, bills, bank and archive research will reset.\n" +
+                                "A new signature will be selected for the next iteration.";
             }
             if (_panelRoot != null) _panelRoot.SetActive(true);
         }

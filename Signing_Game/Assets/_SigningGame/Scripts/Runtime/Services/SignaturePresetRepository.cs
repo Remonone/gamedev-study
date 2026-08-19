@@ -5,6 +5,7 @@ using Authoring;
 using Constants;
 using Contracts;
 using Cysharp.Threading.Tasks;
+using Data.Enums;
 using Data.Templates;
 using Exceptions;
 using Services.Locator;
@@ -107,6 +108,16 @@ namespace Services {
             if (string.IsNullOrWhiteSpace(preset.Id)) {
                 throw new SignaturePresetConfigurationException(
                     $"Signature preset '{preset.name}' has empty Id.");
+            }
+
+            if (!Enum.IsDefined(typeof(SignatureCategory), preset.Category)) {
+                throw new SignaturePresetConfigurationException(
+                    $"Signature preset '{preset.Id}' has an invalid category.");
+            }
+
+            if (preset.BaseIncome.IsZero) {
+                throw new SignaturePresetConfigurationException(
+                    $"Signature preset '{preset.Id}' requires a positive base income.");
             }
 
             if (!_presetsById.TryAdd(preset.Id, preset)) {

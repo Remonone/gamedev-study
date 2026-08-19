@@ -22,6 +22,7 @@ namespace Services {
         private readonly CompositeDisposable _subscriptions = new();
         private Dictionary<string, UpgradeNodeState> _states = new(StringComparer.Ordinal);
         private Dictionary<string, int> _unresolvedLevels = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> _previewLevels = new(StringComparer.Ordinal);
         private HashSet<UpgradeNodeState> _owned = new();
         private RestoreData _deferredRestore;
         private IAssetListLease<MetaUpgradeNodeDefinition> _lease;
@@ -33,6 +34,7 @@ namespace Services {
         private long _bankedPoints;
         private long _previousIterationPoints;
         private long _currentIterationPoints;
+        private long _spentPoints;
         private bool _catalogBuilt;
         private bool _catalogAvailable;
 
@@ -51,6 +53,9 @@ namespace Services {
         public long PreviousIterationPoints => _previousIterationPoints;
         public long CurrentIterationPoints => _currentIterationPoints;
         public long AvailablePoints => SaturatingAdd(_bankedPoints, _currentIterationPoints);
+        public long SpentPoints => _spentPoints;
+        public long PreviewAvailablePoints => AvailablePoints >= _spentPoints ? AvailablePoints - _spentPoints : 0L;
+        public bool HasPreviewPurchases => _previewLevels.Count > 0;
         public bool IsEligible => MetaPointCalculator.IsEligible(
             _currentIterationPoints, _previousIterationPoints, UnlockThreshold);
         public bool IsCatalogAvailable => _catalogAvailable;
@@ -101,6 +106,7 @@ namespace Services {
 
             _states = states;
             _owned = new HashSet<UpgradeNodeState>();
+            ClearPreview();
             _catalogAvailable = states.Count > 0;
             _catalogBuilt = true;
             if (!_catalogAvailable) {
@@ -112,10 +118,23 @@ namespace Services {
             return string.IsNullOrWhiteSpace(id) ? null : _states.GetValueOrDefault(id);
         }
 
+        public int EffectiveLevel(string id) {
+            if (string.IsNullOrWhiteSpace(id)) return 0;
+            return _previewLevels.TryGetValue(id, out int previewLevel)
+                ? previewLevel
+                : GetUpgrade(id)?.Level ?? 0;
+        }
+
+        public bool IsPreviewed(string id) {
+            return !string.IsNullOrWhiteSpace(id) && _previewLevels.ContainsKey(id);
+        }
+
         public bool TryResolveCost(UpgradeNodeState state, out long cost) {
             cost = 0L;
-            if (state?.Definition?.CostFormula == null || state.Definition.IsTerminalLevel(state.Level)) return false;
-            Value value = state.Definition.CostFormula.Evaluate(state.Level);
+            if (state?.Definition?.CostFormula == null) return false;
+            int level = EffectiveLevel(state.Definition.Id);
+            if (state.Definition.IsTerminalLevel(level)) return false;
+            Value value = state.Definition.CostFormula.Evaluate(level);
             if (value.IsZero) return false;
             double numeric = value.ToDouble();
             if (double.IsNaN(numeric) || double.IsInfinity(numeric) || numeric <= 0d ||
@@ -126,7 +145,20 @@ namespace Services {
 
         public bool CanPurchase(string id) {
             UpgradeNodeState state = GetUpgrade(id);
-            return _catalogAvailable && IsEligible && TryResolveCost(state, out long cost) && cost <= AvailablePoints;
+            return _catalogAvailable && IsEligible && TryResolveCost(state, out long cost) && cost <= PreviewAvailablePoints;
+        }
+
+        public bool TryStagePurchase(string id, out long cost) {
+            cost = 0L;
+            UpgradeNodeState upgrade = GetUpgrade(id);
+            if (!_catalogAvailable || !IsEligible || !TryResolveCost(upgrade, out cost) || cost > PreviewAvailablePoints) {
+                return false;
+            }
+
+            _previewLevels[id] = EffectiveLevel(id) + 1;
+            _spentPoints = SaturatingAdd(_spentPoints, cost);
+            _changed.OnNext(Unit.Default);
+            return true;
         }
 
         internal bool TryCreatePurchasedState(string id, out JToken state, out long cost) {
@@ -137,17 +169,40 @@ namespace Services {
                 return false;
             }
 
-            int nextLevel = upgrade.Level + 1;
-            state = SerializeState(id, nextLevel, AvailablePoints - cost, _currentIterationPoints, Value.Zero);
+            var levels = new Dictionary<string, int>(_unresolvedLevels, StringComparer.Ordinal);
+            foreach (KeyValuePair<string, UpgradeNodeState> pair in _states) {
+                if (pair.Value.Level > 0) levels[pair.Key] = pair.Value.Level;
+            }
+            levels[id] = EffectiveLevel(id) + 1;
+            state = SerializeLevels(levels, AvailablePoints - cost, _currentIterationPoints, Value.Zero);
+            return true;
+        }
+
+        public bool TryCreateConfirmedPreviewState(out JToken state) {
+            state = null;
+            if (!HasPreviewPurchases || _spentPoints > AvailablePoints) return false;
+
+            var levels = new Dictionary<string, int>(_unresolvedLevels, StringComparer.Ordinal);
+            foreach (KeyValuePair<string, UpgradeNodeState> pair in _states) {
+                int level = EffectiveLevel(pair.Key);
+                if (level > 0) levels[pair.Key] = level;
+            }
+
+            state = SerializeLevels(levels, PreviewAvailablePoints, _currentIterationPoints, Value.Zero);
             return true;
         }
 
         public JToken Serialize() {
-            return SerializeState(null, 0, _bankedPoints, _previousIterationPoints, _moneyPeak);
+            var levels = new Dictionary<string, int>(_unresolvedLevels, StringComparer.Ordinal);
+            foreach (KeyValuePair<string, UpgradeNodeState> pair in _states) {
+                if (pair.Value.Level > 0) levels[pair.Key] = pair.Value.Level;
+            }
+            return SerializeLevels(levels, _bankedPoints, _previousIterationPoints, _moneyPeak);
         }
 
         public void Deserialize(JToken state) {
             RestoreData restored = ParseRestore(state);
+            ClearPreview();
             if (!_catalogBuilt) {
                 _deferredRestore = restored;
                 return;
@@ -164,6 +219,7 @@ namespace Services {
             _states.Clear();
             _owned.Clear();
             _unresolvedLevels.Clear();
+            ClearPreview();
             _deferredRestore = null;
         }
 
@@ -183,6 +239,7 @@ namespace Services {
         }
 
         private void ApplyRestore(RestoreData restored, bool notify) {
+            ClearPreview();
             var states = new Dictionary<string, UpgradeNodeState>(_states.Count, StringComparer.Ordinal);
             foreach (KeyValuePair<string, UpgradeNodeState> pair in _states) {
                 states.Add(pair.Key, new UpgradeNodeState(pair.Value.Definition));
@@ -220,11 +277,8 @@ namespace Services {
             RefreshCurrentPoints(notify);
         }
 
-        private JToken SerializeState(string changedId, int changedLevel, long banked, long previous, Value peak) {
-            var levels = new Dictionary<string, int>(_unresolvedLevels, StringComparer.Ordinal);
-            foreach (UpgradeNodeState upgrade in _owned) levels[upgrade.Definition.Id] = upgrade.Level;
-            if (!string.IsNullOrWhiteSpace(changedId)) levels[changedId] = changedLevel;
-
+        private static JToken SerializeLevels(IReadOnlyDictionary<string, int> levels, long banked,
+            long previous, Value peak) {
             var upgrades = new JArray();
             foreach (KeyValuePair<string, int> pair in levels) {
                 upgrades.Add(new JObject { ["id"] = pair.Key, ["level"] = pair.Value });
@@ -237,6 +291,11 @@ namespace Services {
                 ["moneyPeakDegree"] = peak.Base.Degree,
                 ["upgrades"] = upgrades
             };
+        }
+
+        private void ClearPreview() {
+            _previewLevels.Clear();
+            _spentPoints = 0L;
         }
 
         private static RestoreData ParseRestore(JToken state) {

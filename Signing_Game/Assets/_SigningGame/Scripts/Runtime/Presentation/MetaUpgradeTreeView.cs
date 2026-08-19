@@ -7,6 +7,8 @@ using Services.Locator;
 using TMPro;
 using UI;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace Presentation {
     public sealed class MetaUpgradeTreeView : MonoBehaviour {
@@ -18,10 +20,12 @@ namespace Presentation {
         [SerializeField] private MetaPurchaseConfirmationView _confirmation;
         [SerializeField] private TextMeshProUGUI _currencyText;
         [SerializeField] private TextMeshProUGUI _iterationText;
+        [SerializeField] private Button _confirmSelectionButton;
 
         private readonly List<UpgradeNodeView> _nodeViews = new();
         private readonly CompositeDisposable _subscriptions = new();
         private MetaUpgradeTreeViewModel _viewModel;
+        private UnityAction _confirmSelectionAction;
 
         private async void Start() {
             if (!ValidateReferences()) { enabled = false; return; }
@@ -39,6 +43,8 @@ namespace Presentation {
             _viewModel.Changed.Subscribe(_ => Refresh()).AddTo(_subscriptions);
             _viewModel.SelectedNode.Subscribe(OnSelected).AddTo(_subscriptions);
             _pullTab.BindAvailability(_viewModel.Availability);
+            _confirmSelectionAction = ConfirmSelection;
+            _confirmSelectionButton.onClick.AddListener(_confirmSelectionAction);
             Refresh();
         }
 
@@ -69,8 +75,10 @@ namespace Presentation {
                     edgeRect.InverseTransformPoint(child.TransformPoint(child.rect.center))));
             }
             _edgeGraphic.SetEdges(positioned);
-            _currencyText.text = $"Banked: {_viewModel.BankedPointsText}   Available: {_viewModel.AvailablePointsText}";
+            _currencyText.text = $"Banked: {_viewModel.BankedPointsText}   Available: {_viewModel.AvailablePointsText} (-{_viewModel.SpentPointsText})";
             _iterationText.text = $"This iteration: {_viewModel.CurrentPointsText}   Previous: {_viewModel.PreviousPointsText}";
+            _confirmSelectionButton.gameObject.SetActive(_viewModel.CanConfirm);
+            _confirmSelectionButton.interactable = _viewModel.CanConfirm;
         }
 
         private void OnSelected(UpgradeNodePresentationModel node) {
@@ -87,8 +95,12 @@ namespace Presentation {
                 }
             }
             if (selected == null || !selected.CanPurchase) return false;
-            _confirmation.Show(selected, () => _viewModel.Purchase(id));
-            return true;
+            return _viewModel.Purchase(id);
+        }
+
+        private void ConfirmSelection() {
+            if (_viewModel == null || !_viewModel.CanConfirm) return;
+            _confirmation.Show(_viewModel.SpentPointsText, () => _viewModel.ConfirmSelection());
         }
 
         private void ClearNodes() {
@@ -103,13 +115,17 @@ namespace Presentation {
         private bool ValidateReferences() {
             bool valid = _pullTab != null && _content != null && _edgeGraphic != null && _nodePrefab != null &&
                          _detailsView != null && _confirmation != null && _currencyText != null &&
-                         _iterationText != null && _edgeGraphic.transform.parent == _content;
+                         _iterationText != null && _confirmSelectionButton != null &&
+                         _edgeGraphic.transform.parent == _content;
             if (!valid) Debug.LogError("MetaUpgradeTreeView requires all tree, tab, labels and confirmation references.", this);
             return valid;
         }
 
         private void OnDestroy() {
             _pullTab?.UnbindAvailability();
+            if (_confirmSelectionButton != null && _confirmSelectionAction != null) {
+                _confirmSelectionButton.onClick.RemoveListener(_confirmSelectionAction);
+            }
             _subscriptions.Dispose();
             ClearNodes();
             _viewModel?.Dispose();

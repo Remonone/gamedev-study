@@ -5,11 +5,13 @@ using Data.Cache;
 using Data.Modifiers;
 using Data.Modifiers.Providers;
 using Services.Locator;
+using Utils;
 
 namespace Services.Calculators {
     public sealed class IncomeCacheCalculator : ICacheCalculator<IncomeEntries>, IService, IPreInitialize {
         
         private IModifierService _modifierService;
+        private SelectedSignatureLoader _signatureLoader;
         private IAssetProvider _assetProvider;
         private IAssetListLease<IncomeReference> _referenceLease;
         private IncomeReference _reference;
@@ -18,18 +20,19 @@ namespace Services.Calculators {
         private PracticeModifierProvider _practiceModifierProvider;
         
         public IncomeEntries Calculate() {
-            var income = _reference.Value;
+            IncomeEntries income = BuildBaseline();
             return _modifierService.Apply(income);
         }
 
         internal IncomeEntries CalculateWithoutBill() {
-            IncomeEntries result = _upgradeModifierProvider.Collect(_reference.Value);
+            IncomeEntries result = _upgradeModifierProvider.Collect(BuildBaseline());
             if (_metaModifierProvider != null) result = _metaModifierProvider.Collect(result);
             return _practiceModifierProvider != null ? _practiceModifierProvider.Collect(result) : result;
         }
         
         public async UniTask PreInitializeAsync(IServiceScope scope) {
             _modifierService = scope.Get<IModifierService>();
+            _signatureLoader = scope.Get<SelectedSignatureLoader>();
             _upgradeModifierProvider = scope.Get<ModifierStorage>().GetProvider<UpgradeModifierProvider>();
             scope.Get<ModifierStorage>().TryGetProvider(out _metaModifierProvider);
             scope.Get<ModifierStorage>().TryGetProvider(out _practiceModifierProvider);
@@ -42,6 +45,13 @@ namespace Services.Calculators {
             _referenceLease.Dispose();
             _referenceLease = null;
             _reference = null;
+            _signatureLoader = null;
+        }
+
+        private IncomeEntries BuildBaseline() {
+            IncomeEntries baseline = _reference.Value;
+            if (_signatureLoader.TryGetBaseIncome(out Value baseIncome)) baseline.IncomePerDocument = baseIncome;
+            return baseline;
         }
     }
 }

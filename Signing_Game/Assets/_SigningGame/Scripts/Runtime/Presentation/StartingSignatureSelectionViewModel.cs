@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Authoring;
+using Data.Enums;
 using Services;
 using UnityEngine;
 
@@ -8,20 +9,26 @@ namespace Presentation {
     public readonly struct StartingSignatureOption {
         public string Id { get; }
         public string DisplayName { get; }
+        public SignatureCategory Category { get; }
+        public string CategoryDisplayName => Category.ToString();
+        public string BaseIncomeText { get; }
         public IReadOnlyList<IReadOnlyList<Vector2>> PreviewStrokes { get; }
 
         public bool HasPreview => PreviewStrokes != null && PreviewStrokes.Count > 0;
 
-        public StartingSignatureOption(string id, string displayName, IReadOnlyList<IReadOnlyList<Vector2>> previewStrokes) {
+        public StartingSignatureOption(string id, string displayName, SignatureCategory category, string baseIncomeText,
+            IReadOnlyList<IReadOnlyList<Vector2>> previewStrokes) {
             Id = id;
             DisplayName = displayName;
+            Category = category;
+            BaseIncomeText = baseIncomeText;
             PreviewStrokes = previewStrokes ?? Array.Empty<IReadOnlyList<Vector2>>();
         }
     }
 
     public sealed class StartingSignatureSelectionViewModel : IDisposable {
         private readonly SignatureProgressionService _progression;
-        private readonly List<StartingSignatureOption> _options = new(3);
+        private readonly List<StartingSignatureOption> _options = new(4);
 
         public IReadOnlyList<StartingSignatureOption> Options => _options;
         public bool IsSelectionRequired => _progression.RequiresStartingSelection;
@@ -29,7 +36,8 @@ namespace Presentation {
         public StartingSignatureSelectionViewModel(SignatureProgressionService progression) {
             _progression = progression ?? throw new ArgumentNullException(nameof(progression));
             for (int index = 0; progression.TryGetPendingPreset(index, out SignaturePresetDefinition preset); index++) {
-                _options.Add(new StartingSignatureOption(preset.Id, preset.DisplayName, BuildPreviewStrokes(preset)));
+                _options.Add(new StartingSignatureOption(preset.Id, preset.DisplayName, preset.Category,
+                    preset.BaseIncome.ToString(), BuildPreviewStrokes(preset)));
             }
         }
 
