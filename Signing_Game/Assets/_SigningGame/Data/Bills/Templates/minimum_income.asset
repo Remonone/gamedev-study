@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58e5445201c8e3bcd97ec8e413faaf00, type: 3}
+  m_Name: minimum_income
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
+  Id: minimum_income
+  Definition:
+    rid: 1001000000000004
+  DisplayName: Income
+  ShortDescription: Earn at least the required income per document.
+  Color: {r: 0.55, g: 0.85, b: 0.45, a: 1}
+  MinimumBalance:
+    CostMultiplier: 1.1
+    WorkFactor: 0.15
+    RewardFactor: 0.1
+    DifficultyFactor: 0.01
+  MaximumBalance:
+    CostMultiplier: 1.5
+    WorkFactor: 0.75
+    RewardFactor: 0.3
+    DifficultyFactor: 0.08
+  references:
+    version: 2
+    RefIds:
+    - rid: 1001000000000004
+      type: {class: MinimumIncomeRequirementDefinition, ns: Data.Bills, asm: SigningGame.Scripts.Runtime}
+      data:
+        MinimumTarget:
+          _stored: 1
+          _base:
+            Degree: 0
+        MaximumTarget:
+          _stored: 1
+          _base:
+            Degree: 1

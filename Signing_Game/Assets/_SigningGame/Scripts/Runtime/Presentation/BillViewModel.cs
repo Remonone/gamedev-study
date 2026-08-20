@@ -5,6 +5,7 @@ using Data.Bills;
 using R3;
 using Services;
 using UnityEngine;
+using Utils;
 
 namespace Presentation {
     public sealed class BillViewModel : IDisposable {
@@ -148,9 +149,7 @@ namespace Presentation {
                 string name = string.IsNullOrWhiteSpace(info.DisplayName)
                     ? GetRequirementName(requirement.Kind)
                     : info.DisplayName;
-                string value = requirement.Kind == BillRequirementKind.OwnedUpgrade
-                    ? "1"
-                    : requirement.NumericTarget.ToString(CultureInfo.InvariantCulture);
+                string value = FormatRequirementValue(requirement);
                 string details = string.IsNullOrWhiteSpace(info.ShortDescription)
                     ? GetRequirementDescription(requirement)
                     : info.ShortDescription;
@@ -231,18 +230,34 @@ namespace Presentation {
 
         private static string GetRequirementDescription(BillRequirementSnapshot requirement) => requirement == null
             ? "Meet this requirement."
-            : requirement.Kind switch {
-            BillRequirementKind.OwnedUpgrade => $"Own upgrade: {requirement.UpgradeId}",
-            BillRequirementKind.MinimumClerkCount => $"Have at least {requirement.NumericTarget} clerks.",
-            BillRequirementKind.MinimumUnlockedDocumentQuality =>
-                $"Unlock document quality {requirement.NumericTarget}.",
-            _ => "Meet this requirement."
-        };
+            : requirement switch {
+                OwnedUpgradeRequirementSnapshot owned => $"Own upgrade: {owned.UpgradeId}",
+                MinimumClerkCountRequirementSnapshot clerks => $"Have at least {clerks.NumericTarget} clerks.",
+                MinimumDocumentQualityRequirementSnapshot quality =>
+                    $"Unlock document quality {quality.NumericTarget}.",
+                MinimumIncomeRequirementSnapshot income =>
+                    $"Earn at least {income.IncomeTarget}$ per document.",
+                ProcessedDocumentsRequirementSnapshot processed =>
+                    $"Process at least {processed.NumericTarget} office documents.",
+                _ => "Meet this requirement."
+            };
+
+        private static string FormatRequirementValue(BillRequirementSnapshot requirement) {
+            return requirement switch {
+                OwnedUpgradeRequirementSnapshot => "1",
+                MinimumIncomeRequirementSnapshot income => income.IncomeTarget.ToString(),
+                NumericBillRequirementSnapshot numeric =>
+                    numeric.NumericTarget.ToString(CultureInfo.InvariantCulture),
+                _ => string.Empty
+            };
+        }
 
         private static Color GetRequirementColor(BillRequirementKind kind) => kind switch {
             BillRequirementKind.OwnedUpgrade => new Color(0.35f, 0.65f, 1f),
             BillRequirementKind.MinimumClerkCount => new Color(0.95f, 0.65f, 0.2f),
-            BillRequirementKind.MinimumUnlockedDocumentQuality => new Color(0.55f, 0.85f, 0.45f),
+            BillRequirementKind.MinimumUnlockedDocumentQuality => new Color(1f, 0.5082709f, 0f),
+            BillRequirementKind.MinimumIncome => new Color(0.55f, 0.85f, 0.45f),
+            BillRequirementKind.ProcessedDocuments => new Color(0.75f, 0.45f, 0.9f),
             _ => Color.white
         };
 

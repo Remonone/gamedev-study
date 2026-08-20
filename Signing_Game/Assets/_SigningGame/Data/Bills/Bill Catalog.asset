@@ -16,4 +16,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c273746bd12ddec1cb87ba6ad5576d87, type: 2}
   - {fileID: 11400000, guid: b9c41574247d09cf0811b08000422ef9, type: 2}
   RequirementTemplates:
+  - {fileID: 11400000, guid: 7e2c8e5a5b6547bdb4a68f4f8f39d101, type: 2}
+  - {fileID: 11400000, guid: d66f7a278aafe8958afc3c4ebc9ee043, type: 2}
   - {fileID: 11400000, guid: 18dbc34109cf4c6198a04d4e5cb9a0c0, type: 2}
+  - {fileID: 11400000, guid: 5a9c8c6a1f1b4d2bb3b27e0a3f2e7c11, type: 2}
+  - {fileID: 11400000, guid: 91f8b68e35e64365af3b5abf0ac9e7d2, type: 2}

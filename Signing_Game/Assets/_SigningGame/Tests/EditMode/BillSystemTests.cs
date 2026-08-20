@@ -11,6 +11,7 @@ using Data.Formulas;
 using Data.Modifiers;
 using Data.Modifiers.Calculation;
 using Data.Modifiers.Numeric;
+using Data.Persistence;
 using Data.Results;
 using Data.Rules;
 using Data.Upgrades;
@@ -77,9 +78,10 @@ namespace Tests.EditMode {
             extreme.CompletionModifiers = new[] { CreateGenerationModifier() };
             var template = TrackObject(ScriptableObject.CreateInstance<BillRequirementTemplateDefinition>());
             template.Id = "extreme_clerk";
-            template.Kind = BillRequirementKind.MinimumClerkCount;
-            template.MinimumTarget = 0;
-            template.MaximumTarget = 0;
+            template.Definition = new MinimumClerkCountRequirementDefinition {
+                MinimumTarget = 0,
+                MaximumTarget = 0
+            };
             template.MinimumBalance = new BillRequirementBalance {
                 CostMultiplier = 1d,
                 RewardFactor = double.MaxValue
@@ -135,9 +137,10 @@ namespace Tests.EditMode {
             qualityReward.BaseRequiredProgress = 10d;
             var template = TrackObject(ScriptableObject.CreateInstance<BillRequirementTemplateDefinition>());
             template.Id = "quality_requirement";
-            template.Kind = BillRequirementKind.MinimumUnlockedDocumentQuality;
-            template.MinimumTarget = 2;
-            template.MaximumTarget = 3;
+            template.Definition = new MinimumDocumentQualityRequirementDefinition {
+                MinimumTarget = 2,
+                MaximumTarget = 3
+            };
             template.MinimumBalance = new BillRequirementBalance {
                 CostMultiplier = 2d, WorkFactor = 0.5d, RewardFactor = 0.1d, DifficultyFactor = 0.4d
             };
@@ -160,7 +163,8 @@ namespace Tests.EditMode {
                 }
             }
             Assert.That(option, Is.Not.Null);
-            BillRequirementSnapshot requirement = option.Requirements[0];
+            MinimumDocumentQualityRequirementSnapshot requirement =
+                (MinimumDocumentQualityRequirementSnapshot)option.Requirements[0];
             Assert.That(requirement.NumericTarget, Is.InRange(2, 3));
             double t = requirement.NumericTarget - 2d;
             double expectedCostMultiplier = 2d + t;
@@ -177,6 +181,184 @@ namespace Tests.EditMode {
                 anySatisfied |= environment.Bills.AreRequirementsSatisfied(environment.Bills.Catalog[index]);
             }
             Assert.That(anySatisfied, Is.True);
+        }
+
+        [Test]
+        public void NewRequirementTypes_RollTypedSnapshots() {
+            BillRewardDefinition incomeFallback = CreateReward("income_fallback", true, 1d);
+            BillRewardDefinition incomeReward = CreateReward("minimum_income", true, 1d);
+            incomeReward.MinimumRequirementCount = 1;
+            incomeReward.MaximumRequirementCount = 1;
+            BillRequirementTemplateDefinition incomeTemplate = CreateTemplate(
+                "minimum_income",
+                new MinimumIncomeRequirementDefinition {
+                    MinimumTarget = Value.One,
+                    MaximumTarget = new Value(1000d)
+                });
+            BillEntries incomeEntries = DefaultBillEntries();
+            incomeEntries.CatalogSize = 2;
+            TestEnvironment incomeEnvironment = CreateEnvironment(
+                new[] { incomeFallback, incomeReward },
+                incomeEntries,
+                new[] { incomeTemplate });
+
+            GeneratedBillOption incomeOption = FindOption(incomeEnvironment.Bills, incomeReward.Id);
+            Assert.That(incomeOption, Is.Not.Null);
+            Assert.That(incomeOption.Requirements, Has.Count.EqualTo(1));
+            Assert.That(incomeOption.Requirements[0],
+                Is.TypeOf<MinimumIncomeRequirementSnapshot>());
+            MinimumIncomeRequirementSnapshot income =
+                (MinimumIncomeRequirementSnapshot)incomeOption.Requirements[0];
+            Assert.That(income.IncomeTarget, Is.GreaterThanOrEqualTo(Value.One));
+            Assert.That(income.IncomeTarget, Is.LessThanOrEqualTo(new Value(1000d)));
+
+            BillRewardDefinition processedReward = CreateReward("processed_documents", true, 1d);
+            processedReward.MinimumRequirementCount = 1;
+            processedReward.MaximumRequirementCount = 1;
+            BillRequirementTemplateDefinition processedTemplate = CreateTemplate(
+                "processed_documents",
+                new ProcessedDocumentsRequirementDefinition {
+                    MinimumTarget = 10,
+                    MaximumTarget = 1000
+                });
+            BillRewardDefinition processedFallback = CreateReward("processed_fallback", true, 1d);
+            BillEntries processedEntries = DefaultBillEntries();
+            processedEntries.CatalogSize = 2;
+            TestEnvironment processedEnvironment = CreateEnvironment(
+                new[] { processedFallback, processedReward },
+                processedEntries,
+                new[] { processedTemplate });
+
+            GeneratedBillOption processedOption = FindOption(processedEnvironment.Bills, processedReward.Id);
+            Assert.That(processedOption, Is.Not.Null);
+            Assert.That(processedOption.Requirements[0],
+                Is.TypeOf<ProcessedDocumentsRequirementSnapshot>());
+            ProcessedDocumentsRequirementSnapshot processed =
+                (ProcessedDocumentsRequirementSnapshot)processedOption.Requirements[0];
+            Assert.That(processed.NumericTarget, Is.InRange(10, 1000));
+        }
+
+        [Test]
+        public void BillsPersistence_V1AndV2_RoundTripPendingActiveAndNullOptionCompletion() {
+            BillRewardDefinition legacyFallback = CreateReward("legacy_fallback", true, 1d);
+            BillRewardDefinition legacyReward = CreateReward("legacy", true, 1d);
+            legacyReward.MinimumRequirementCount = 1;
+            legacyReward.MaximumRequirementCount = 2;
+            BillRequirementTemplateDefinition clerkTemplate = CreateTemplate(
+                "legacy_clerks",
+                new MinimumClerkCountRequirementDefinition {
+                    MinimumTarget = 0,
+                    MaximumTarget = 0
+                });
+            BillRequirementTemplateDefinition qualityTemplate = CreateTemplate(
+                "legacy_quality",
+                new MinimumDocumentQualityRequirementDefinition {
+                    MinimumTarget = 2,
+                    MaximumTarget = 2
+                });
+            BillEntries legacyEntries = DefaultBillEntries();
+            legacyEntries.CatalogSize = 2;
+            TestEnvironment legacySource = CreateEnvironment(
+                new[] { legacyFallback, legacyReward },
+                legacyEntries,
+                new[] { clerkTemplate, qualityTemplate },
+                new DocumentEntries { DocumentQualityLevel = 2, SelectedDocumentQualityLevel = 0 });
+
+            JObject v2 = (JObject)legacySource.Bills.Serialize();
+            Assert.That(v2["requirementsVersion"]?.Value<int>(), Is.EqualTo(2));
+            JObject legacyOption = FindSerializedOption((JArray)v2["catalog"], legacyReward.Id);
+            JArray v2Requirements = (JArray)legacyOption["requirements"];
+            Assert.That(v2Requirements.Count, Is.GreaterThan(0));
+            foreach (JToken requirement in v2Requirements) {
+                Assert.That(requirement["upgradeId"]?.Type, Is.EqualTo(JTokenType.Null));
+            }
+
+            JObject v1 = (JObject)v2.DeepClone();
+            v1.Remove("requirementsVersion");
+            TestEnvironment v1Restored = CreateEnvironment(
+                new[] { legacyFallback, legacyReward },
+                legacyEntries,
+                new[] { clerkTemplate, qualityTemplate },
+                new DocumentEntries { DocumentQualityLevel = 2, SelectedDocumentQualityLevel = 0 },
+                deferredRestore: v1);
+            Assert.That(v1Restored.Bills.Catalog, Has.Count.EqualTo(2));
+            GeneratedBillOption restoredLegacyOption = FindOption(v1Restored.Bills, legacyReward.Id);
+            Assert.That(restoredLegacyOption, Is.Not.Null);
+            Assert.That(restoredLegacyOption.Requirements, Has.Count.EqualTo(v2Requirements.Count));
+
+            BillRewardDefinition pendingReward = CreateReward("pending", true, 10d);
+            TestEnvironment pendingSource = CreateEnvironment(new[] { pendingReward });
+            Assert.That(pendingSource.Bills.TryPurchase(pendingSource.Bills.Catalog[0].OptionId), Is.True);
+            JObject pendingState = (JObject)pendingSource.Bills.Serialize();
+            TestEnvironment pendingRestored = CreateEnvironment(
+                new[] { pendingReward }, deferredRestore: pendingState);
+            Assert.That(pendingRestored.Bills.Pending, Is.Not.Null);
+            Assert.That(pendingRestored.Bills.Pending.PaidCost,
+                Is.EqualTo(pendingSource.Bills.Pending.PaidCost));
+
+            BillRewardDefinition activeReward = CreateReward("active", true, 10d);
+            activeReward.BaseRequiredProgress = 10d;
+            TestEnvironment activeSource = CreateEnvironment(new[] { activeReward });
+            StartBill(activeSource, activeSource.Bills.Catalog[0], 1f);
+            JObject activeState = (JObject)activeSource.Bills.Serialize();
+            TestEnvironment activeRestored = CreateEnvironment(
+                new[] { activeReward }, deferredRestore: activeState);
+            Assert.That(activeRestored.Bills.ActiveBills, Has.Count.EqualTo(1));
+            Assert.That(activeRestored.Bills.ActiveBills[0].Progress,
+                Is.EqualTo(activeSource.Bills.ActiveBills[0].Progress));
+
+            BillRewardDefinition completedReward = CreateReward("completed", true, 10d);
+            TestEnvironment completedSource = CreateEnvironment(new[] { completedReward });
+            StartBill(completedSource, completedSource.Bills.Catalog[0], 1f);
+            completedSource.Accepted.Report(NormalDocumentProcessingSource.Manual, 1);
+            Assert.That(completedSource.Bills.CompletedBills, Has.Count.EqualTo(1));
+            BillCompletionRecord expected = completedSource.Bills.CompletedBills[0];
+            JObject nullOptionState = (JObject)completedSource.Bills.Serialize();
+            JObject completedData = (JObject)((JArray)nullOptionState["completed"])[0];
+            completedData["option"] = JValue.CreateNull();
+
+            TestEnvironment nullOptionRestored = CreateEnvironment(
+                new[] { completedReward }, deferredRestore: nullOptionState);
+            AssertCompletionHistory(nullOptionRestored.Bills.CompletedBills[0], expected);
+            Assert.That(nullOptionRestored.Bills.CompletedBills[0].Option, Is.Null);
+
+            JObject secondRoundTrip = (JObject)nullOptionRestored.Bills.Serialize();
+            Assert.That(((JObject)((JArray)secondRoundTrip["completed"])[0])["option"]?.Type,
+                Is.EqualTo(JTokenType.Null));
+            TestEnvironment secondRestored = CreateEnvironment(
+                new[] { completedReward }, deferredRestore: secondRoundTrip);
+            AssertCompletionHistory(secondRestored.Bills.CompletedBills[0], expected);
+            Assert.That(secondRestored.Bills.CompletedBills[0].Option, Is.Null);
+        }
+
+        [Test]
+        public void SaveService_RejectsMalformedBillRequirementVersionsWithoutMutatingBills() {
+            BillRewardDefinition reward = CreateReward("compatibility", true, 1d);
+            TestEnvironment environment = CreateEnvironment(new[] { reward });
+            JToken before = environment.Bills.Serialize();
+            var other = new CompatibilityProbeSaveable();
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+                $"SigningGame_BillCompatibility_{Guid.NewGuid():N}.json");
+            var saveService = new SaveService(path, loadExistingOnInitialize: false);
+            environment.Scope.Register(other).Register(saveService);
+            saveService.PreInitializeAsync(environment.Scope).GetAwaiter().GetResult();
+
+            foreach (JToken version in new JToken[] { new JValue("malformed"), new JValue(99) }) {
+                JObject malformed = (JObject)before.DeepClone();
+                malformed["requirementsVersion"] = version;
+                other.State = 0;
+                var snapshot = new SaveSnapshot(SaveSnapshot.CurrentVersion,
+                    new Dictionary<string, JToken> {
+                        [environment.Bills.SaveId] = malformed,
+                        [other.SaveId] = new JValue(42)
+                    });
+
+                Assert.That(saveService.LoadSnapshot(snapshot), Is.False);
+                Assert.That(other.State, Is.EqualTo(42));
+                Assert.That(JToken.DeepEquals(environment.Bills.Serialize(), before), Is.True);
+            }
+
+            Assert.That(SaveSnapshot.CurrentVersion, Is.EqualTo(1));
         }
 
         [Test]
@@ -537,6 +719,36 @@ namespace Tests.EditMode {
             return reward;
         }
 
+        private BillRequirementTemplateDefinition CreateTemplate(
+            string id,
+            BillRequirementDefinition definition) {
+            var template = TrackObject(ScriptableObject.CreateInstance<BillRequirementTemplateDefinition>());
+            template.Id = id;
+            template.Definition = definition;
+            template.MinimumBalance = new BillRequirementBalance {
+                CostMultiplier = 1d,
+                WorkFactor = 0d,
+                RewardFactor = 0d,
+                DifficultyFactor = 0d
+            };
+            template.MaximumBalance = template.MinimumBalance;
+            return template;
+        }
+
+        private static void AssertCompletionHistory(
+            BillCompletionRecord actual,
+            BillCompletionRecord expected) {
+            Assert.That(actual.PaidCost, Is.EqualTo(expected.PaidCost));
+            Assert.That(actual.ElapsedWorkSeconds, Is.EqualTo(expected.ElapsedWorkSeconds));
+            Assert.That(actual.ProcessedDocumentCount, Is.EqualTo(expected.ProcessedDocumentCount));
+            Assert.That(actual.HasCompleteWorkStatistics, Is.EqualTo(expected.HasCompleteWorkStatistics));
+            Assert.That(actual.ActualCompletionPayout, Is.EqualTo(expected.ActualCompletionPayout));
+            Assert.That(actual.HasCompletionPayout, Is.EqualTo(expected.HasCompletionPayout));
+            Assert.That(actual.AdditionalGeneratedDocuments,
+                Is.EqualTo(expected.AdditionalGeneratedDocuments));
+            Assert.That(actual.AdditionalIncome, Is.EqualTo(expected.AdditionalIncome));
+        }
+
         private ModifierDefinition CreateGenerationModifier() {
             var value = new ConstantNumericValueDefinition();
             typeof(ConstantNumericValueDefinition).GetField("_value",
@@ -641,6 +853,25 @@ namespace Tests.EditMode {
             return null;
         }
 
+        private static GeneratedBillOption FindOption(BillService bills, string rewardId) {
+            for (int index = 0; index < bills.Catalog.Count; index++) {
+                if (string.Equals(bills.Catalog[index].Reward.Id, rewardId, StringComparison.Ordinal)) {
+                    return bills.Catalog[index];
+                }
+            }
+            return null;
+        }
+
+        private static JObject FindSerializedOption(JArray options, string rewardId) {
+            for (int index = 0; index < options.Count; index++) {
+                if (string.Equals(options[index]["rewardId"]?.Value<string>(), rewardId,
+                        StringComparison.Ordinal)) {
+                    return (JObject)options[index];
+                }
+            }
+            return null;
+        }
+
         private T TrackObject<T>(T value) where T : UnityEngine.Object {
             _objects.Add(value);
             return value;
@@ -675,6 +906,22 @@ namespace Tests.EditMode {
             }
 
             public void Dispose() => Scope.Dispose();
+        }
+
+        private sealed class CompatibilityProbeSaveable : IService, ISaveable {
+            public string SaveId => "compatibility_probe";
+            public int State { get; set; }
+
+            public JToken Serialize() => new JValue(State);
+
+            public void Deserialize(JToken state) {
+                if (state?.Type != JTokenType.Integer) {
+                    throw new Newtonsoft.Json.JsonSerializationException("Expected an integer state.");
+                }
+                State = state.Value<int>();
+            }
+
+            public void Dispose() { }
         }
 
         private sealed class StaticCalculator<T> : ICacheCalculator<T>, IService where T : struct {

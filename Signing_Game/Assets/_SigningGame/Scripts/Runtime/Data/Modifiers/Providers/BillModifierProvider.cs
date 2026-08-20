@@ -1,4 +1,5 @@
 using System;
+using Data.Bills;
 using Data.Cache;
 using Services;
 using Services.Locator;
@@ -12,16 +13,16 @@ namespace Data.Modifiers.Providers {
             if (typeof(T) == typeof(BillEntries) || _bills == null) return target;
 
             BillEntries entries = _billData.Value;
+            if (target is IncomeEntries income) {
+                return (T)(object)BillIncomeEvaluator.Evaluate(
+                    income,
+                    _bills.CompletionRecords,
+                    _bills.ActiveBills,
+                    entries);
+            }
+
             T result = BillCompletionModifierEvaluator.Apply(target, _bills.CompletionRecords, entries);
             if (!_bills.HasActiveBills) return result;
-
-            if (result is IncomeEntries income) {
-                double baseMultiplier = Math.Clamp(entries.BaseActiveIncomeMultiplier, 0d, 1d);
-                double penaltyStrength = Math.Clamp(entries.ActiveIncomePenaltyStrength, 0d, 1d);
-                double multiplier = 1d - (1d - baseMultiplier) * penaltyStrength;
-                income.IncomePerDocument *= multiplier;
-                return (T)(object)income;
-            }
 
             if (result is GenerationEntries generation) {
                 double bonus = _bills.GetStrongestActiveGenerationBonus(entries);

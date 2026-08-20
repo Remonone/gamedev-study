@@ -13,13 +13,11 @@ MonoBehaviour:
   m_Name: Document Quality
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
   Id: document_quality
-  Kind: 2
+  Definition:
+    rid: 1001000000000002
   DisplayName: Document Quality
   ShortDescription: Level of document quality required for a bill
   Color: {r: 1, g: 0.5082709, b: 0, a: 1}
-  MinimumTarget: 1
-  MaximumTarget: 9
-  UpgradeId: 
   MinimumBalance:
     CostMultiplier: 1.1
     WorkFactor: 0.2
@@ -30,3 +28,11 @@ MonoBehaviour:
     WorkFactor: 0.3
     RewardFactor: 0.15
     DifficultyFactor: 0.026000000536441803
+  references:
+    version: 2
+    RefIds:
+    - rid: 1001000000000002
+      type: {class: MinimumDocumentQualityRequirementDefinition, ns: Data.Bills, asm: SigningGame.Scripts.Runtime}
+      data:
+        MinimumTarget: 2
+        MaximumTarget: 9

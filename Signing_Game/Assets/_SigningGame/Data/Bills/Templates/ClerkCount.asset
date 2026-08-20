@@ -13,20 +13,26 @@ MonoBehaviour:
   m_Name: ClerkCount
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
   Id: clerk_count
-  Kind: 1
-  DisplayName: 
-  ShortDescription: 
-  Color: {r: 1, g: 1, b: 1, a: 1}
-  MinimumTarget: 2
-  MaximumTarget: 50
-  UpgradeId: 
+  Definition:
+    rid: 1001000000000001
+  DisplayName: Clerks
+  ShortDescription: Have at least the required number of clerks.
+  Color: {r: 0.95, g: 0.65, b: 0.2, a: 1}
   MinimumBalance:
-    CostMultiplier: 0
-    WorkFactor: 0
-    RewardFactor: 0
+    CostMultiplier: 1.1
+    WorkFactor: 0.2
+    RewardFactor: 0.1
     DifficultyFactor: 0
   MaximumBalance:
-    CostMultiplier: 0
-    WorkFactor: 0
-    RewardFactor: 0
-    DifficultyFactor: 0
+    CostMultiplier: 1.35
+    WorkFactor: 0.6
+    RewardFactor: 0.25
+    DifficultyFactor: 0.05
+  references:
+    version: 2
+    RefIds:
+    - rid: 1001000000000001
+      type: {class: MinimumClerkCountRequirementDefinition, ns: Data.Bills, asm: SigningGame.Scripts.Runtime}
+      data:
+        MinimumTarget: 2
+        MaximumTarget: 10

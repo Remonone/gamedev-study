@@ -42,24 +42,81 @@ namespace Data.Bills {
         }
     }
 
-    public sealed class BillRequirementSnapshot {
+    public abstract class BillRequirementSnapshot {
         public string TemplateId { get; }
-        public BillRequirementKind Kind { get; }
-        public int NumericTarget { get; }
-        public string UpgradeId { get; }
+        public abstract BillRequirementKind Kind { get; }
         public BillRequirementBalance Balance { get; }
 
         public BillRequirementSnapshot(
             string templateId,
-            BillRequirementKind kind,
-            int numericTarget,
-            string upgradeId,
             BillRequirementBalance balance) {
             TemplateId = templateId;
-            Kind = kind;
-            NumericTarget = numericTarget;
-            UpgradeId = upgradeId;
             Balance = balance;
+        }
+    }
+
+    public sealed class OwnedUpgradeRequirementSnapshot : BillRequirementSnapshot {
+        public string UpgradeId { get; }
+        public override BillRequirementKind Kind => BillRequirementKind.OwnedUpgrade;
+
+        public OwnedUpgradeRequirementSnapshot(string templateId, string upgradeId, BillRequirementBalance balance)
+            : base(templateId, balance) {
+            UpgradeId = upgradeId;
+        }
+    }
+
+    public abstract class NumericBillRequirementSnapshot : BillRequirementSnapshot {
+        public int NumericTarget { get; }
+
+        protected NumericBillRequirementSnapshot(
+            string templateId,
+            int numericTarget,
+            BillRequirementBalance balance)
+            : base(templateId, balance) {
+            NumericTarget = numericTarget;
+        }
+    }
+
+    public sealed class MinimumClerkCountRequirementSnapshot : NumericBillRequirementSnapshot {
+        public override BillRequirementKind Kind => BillRequirementKind.MinimumClerkCount;
+
+        public MinimumClerkCountRequirementSnapshot(
+            string templateId,
+            int numericTarget,
+            BillRequirementBalance balance)
+            : base(templateId, numericTarget, balance) { }
+    }
+
+    public sealed class MinimumDocumentQualityRequirementSnapshot : NumericBillRequirementSnapshot {
+        public override BillRequirementKind Kind => BillRequirementKind.MinimumUnlockedDocumentQuality;
+
+        public MinimumDocumentQualityRequirementSnapshot(
+            string templateId,
+            int numericTarget,
+            BillRequirementBalance balance)
+            : base(templateId, numericTarget, balance) { }
+    }
+
+    public sealed class ProcessedDocumentsRequirementSnapshot : NumericBillRequirementSnapshot {
+        public override BillRequirementKind Kind => BillRequirementKind.ProcessedDocuments;
+
+        public ProcessedDocumentsRequirementSnapshot(
+            string templateId,
+            int numericTarget,
+            BillRequirementBalance balance)
+            : base(templateId, numericTarget, balance) { }
+    }
+
+    public sealed class MinimumIncomeRequirementSnapshot : BillRequirementSnapshot {
+        public Value IncomeTarget { get; }
+        public override BillRequirementKind Kind => BillRequirementKind.MinimumIncome;
+
+        public MinimumIncomeRequirementSnapshot(
+            string templateId,
+            Value incomeTarget,
+            BillRequirementBalance balance)
+            : base(templateId, balance) {
+            IncomeTarget = incomeTarget;
         }
     }
 

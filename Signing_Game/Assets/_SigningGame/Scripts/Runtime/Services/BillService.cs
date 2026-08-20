@@ -51,6 +51,7 @@ namespace Services {
         private DocumentGeneratorService _documentGenerator;
         private MoneyAggregator _moneyAggregator;
         private BankService _bank;
+        private GameStatisticsService _statistics;
 
         private double[] _generationAttributionShares = Array.Empty<double>();
         private double[] _incomeAttributionShares = Array.Empty<double>();
@@ -67,6 +68,7 @@ namespace Services {
         private bool _handlingInvalidation;
         private bool _ignoreWalletNotification;
         private int _observedClerkCount;
+        private int _observedProcessedDocumentCount;
         private int _claimEpoch;
         private long _nextClaimToken;
         private long _nextOptionId = 1;
@@ -123,6 +125,7 @@ namespace Services {
             scope.TryGet(out _documentGenerator);
             scope.TryGet(out _moneyAggregator);
             scope.TryGet(out _bank);
+            scope.TryGet(out _statistics);
             _postInitialized = true;
 
             if (_deferredRestore != null) {
@@ -141,7 +144,7 @@ namespace Services {
                 Debug.LogWarning("Bill catalog contains no rewards. The bill system started with an empty catalog.");
             }
             else {
-                ReplaceCatalog(BuildFreshCatalog(CreateStateView(null, _active, _completed), _billData.Value));
+                ReplaceCatalog(BuildFreshCatalog(CreateStateView(null, _active, _completed, _billData.Value), _billData.Value));
             }
 
             _acceptedDocuments.Processed.Subscribe(ProcessAcceptedDocument).AddTo(_subscriptions);
@@ -157,6 +160,10 @@ namespace Services {
                 _observedClerkCount = clerkCount;
                 ReconcileAfterExternalStateChange();
             }).AddTo(_subscriptions);
+            if (_statistics != null) {
+                _observedProcessedDocumentCount = ResolveProcessedDocumentCount();
+                _statistics.Changed.Subscribe(_ => OnStatisticsChanged()).AddTo(_subscriptions);
+            }
             _cacheVersions.Invalidated.Subscribe(OnCacheInvalidated).AddTo(_subscriptions);
             Observable.EveryUpdate().Select(_ => Time.deltaTime).Subscribe(OnUpdate).AddTo(_subscriptions);
             if (_documentGenerator != null) {
@@ -266,8 +273,10 @@ namespace Services {
 
         public bool AreRequirementsSatisfied(GeneratedBillOption option) {
             if (option == null || !_postInitialized) return false;
-            int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, _billData.Value);
-            return AreRequirementsSatisfied(option, CaptureExternalState(unlockedQuality));
+            BillEntries entries = _billData.Value;
+            StateView state = CreateStateView(_pending, _active, _completed, entries);
+            return AreRequirementsSatisfied(option, CaptureExternalState(
+                ResolveCandidateUnlockedQuality(state.Completed, entries), state.Income));
         }
 
         public bool IsRequirementSatisfied(GeneratedBillOption option, BillRequirementSnapshot requirement) {
@@ -280,8 +289,10 @@ namespace Services {
                 }
             }
             if (!belongsToOption) return false;
-            int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, _billData.Value);
-            return IsRequirementSatisfied(requirement, CaptureExternalState(unlockedQuality));
+            BillEntries entries = _billData.Value;
+            StateView state = CreateStateView(_pending, _active, _completed, entries);
+            return IsRequirementSatisfied(requirement, CaptureExternalState(
+                ResolveCandidateUnlockedQuality(state.Completed, entries), state.Income));
         }
 
         public IReadOnlyList<BillPurchaseBlocker> GetPurchaseBlockers(long optionId) {
@@ -301,7 +312,9 @@ namespace Services {
                 blockers.Add(new BillPurchaseBlocker(BillPurchaseBlockerKind.ActiveLimitReached));
             }
             int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, entries);
-            ExternalState external = CaptureExternalState(unlockedQuality);
+            ExternalState external = CaptureExternalState(
+                unlockedQuality,
+                CreateStateView(_pending, _active, _completed, entries).Income);
             for (int index = 0; index < option.Requirements.Count; index++) {
                 BillRequirementSnapshot requirement = option.Requirements[index];
                 if (!IsRequirementSatisfied(requirement, external)) {
@@ -328,7 +341,9 @@ namespace Services {
             BillEntries entries = _billData.Value;
             if (_active.Count >= ResolveActiveLimit(entries)) return false;
             int unlockedQuality = ResolveCandidateUnlockedQuality(_completed, entries);
-            if (!AreRequirementsSatisfied(option, CaptureExternalState(unlockedQuality))) return false;
+            if (!AreRequirementsSatisfied(option, CaptureExternalState(
+                    unlockedQuality,
+                    CreateStateView(_pending, _active, _completed, entries).Income))) return false;
 
             Value price = ResolvePrice(option, entries);
             if (!_wallet.CanAfford(price)) return false;
@@ -421,7 +436,7 @@ namespace Services {
 
             BillEntries entries = _billData.Value;
             if (result.Status != SignatureEvaluationStatus.Accepted) {
-                StateView rejectedState = CreateStateView(null, _active, _completed);
+                StateView rejectedState = CreateStateView(null, _active, _completed, entries);
                 if (!TryPrepareCatalog(rejectedState, entries, true, out CatalogBuild rejectedBuild)) {
                     Debug.LogError("Bill rejection could not regenerate a valid catalog.");
                     return false;
@@ -456,7 +471,7 @@ namespace Services {
                 0d,
                 0,
                 true));
-            StateView acceptedState = CreateStateView(null, nextActive, _completed);
+            StateView acceptedState = CreateStateView(null, nextActive, _completed, entries);
             if (!TryPrepareCatalog(acceptedState, entries, false, out CatalogBuild acceptedBuild)) return false;
 
             _isMutating = true;
@@ -543,7 +558,7 @@ namespace Services {
                 0d,
                 Value.Zero);
             var candidateCompleted = new List<BillCompletionRecord>(_completed) { provisional };
-            StateView candidate = CreateStateView(_pending, nextActive, candidateCompleted);
+            StateView candidate = CreateStateView(_pending, nextActive, candidateCompleted, entries);
             if (!TryPrepareCatalog(candidate, entries, false, out CatalogBuild build)) return;
 
             _isMutating = true;
@@ -611,9 +626,8 @@ namespace Services {
             double m = Math.Clamp(selectedQuality, 1, 10);
             int qualityTarget = 0;
             for (int index = 0; index < option.Requirements.Count; index++) {
-                BillRequirementSnapshot requirement = option.Requirements[index];
-                if (requirement.Kind == BillRequirementKind.MinimumUnlockedDocumentQuality) {
-                    qualityTarget = requirement.NumericTarget;
+                if (option.Requirements[index] is MinimumDocumentQualityRequirementSnapshot quality) {
+                    qualityTarget = quality.NumericTarget;
                     break;
                 }
             }
@@ -663,7 +677,7 @@ namespace Services {
             }
 
             BillEntries entries = _billData.Value;
-            StateView state = CreateStateView(_pending, _active, _completed);
+            StateView state = CreateStateView(_pending, _active, _completed, entries);
             if (TryPrepareCatalog(state, entries, false, out CatalogBuild build) && build.Replaced) {
                 _isMutating = true;
                 try { ReplaceCatalog(build); }
@@ -679,7 +693,8 @@ namespace Services {
 
             _handlingInvalidation = true;
             try {
-                if (type == typeof(BillEntries) || type == typeof(DocumentEntries)) {
+                if (type == typeof(BillEntries) || type == typeof(DocumentEntries) ||
+                    type == typeof(IncomeEntries)) {
                     ReconcileAfterExternalStateChange();
                 }
                 if (type == typeof(BillEntries)) {
@@ -695,6 +710,34 @@ namespace Services {
             finally {
                 _handlingInvalidation = false;
             }
+        }
+
+        private void OnStatisticsChanged() {
+            if (!_postInitialized || _isMutating || _statistics == null) return;
+
+            int current = ResolveProcessedDocumentCount();
+            if (current == _observedProcessedDocumentCount) return;
+
+            bool increased = current > _observedProcessedDocumentCount;
+            _observedProcessedDocumentCount = current;
+            if (increased) {
+                // A growing total can only change processed-document requirement state.
+                NotifyChanged();
+                return;
+            }
+
+            // A reload or correction can invalidate already rolled options, so rebuild the catalog.
+            ReconcileAfterExternalStateChange();
+        }
+
+        private int ResolveProcessedDocumentCount() {
+            if (_statistics == null ||
+                !_statistics.TryGetValue(GameStatisticIds.OfficeProcessedDocuments, out double value) ||
+                double.IsNaN(value) || double.IsInfinity(value) || value <= 0d) {
+                return 0;
+            }
+
+            return value >= int.MaxValue ? int.MaxValue : (int)Math.Floor(value);
         }
 
         private bool TryPrepareCatalog(
@@ -713,7 +756,7 @@ namespace Services {
             }
 
             int unlockedQuality = ResolveCandidateUnlockedQuality(state.Completed, entries);
-            ExternalState external = CaptureExternalState(unlockedQuality);
+            ExternalState external = CaptureExternalState(unlockedQuality, state.Income);
             if (!forceReroll && IsCatalogValidForState(_catalog, state, entries, external)) {
                 build = new CatalogBuild(_catalog, _random.Fork(), _nextOptionId, false);
                 return true;
@@ -725,7 +768,7 @@ namespace Services {
 
         private CatalogBuild BuildFreshCatalog(StateView state, BillEntries entries) {
             int unlockedQuality = ResolveCandidateUnlockedQuality(state.Completed, entries);
-            return BuildFreshCatalog(state, entries, CaptureExternalState(unlockedQuality));
+            return BuildFreshCatalog(state, entries, CaptureExternalState(unlockedQuality, state.Income));
         }
 
         private CatalogBuild BuildFreshCatalog(
@@ -863,7 +906,7 @@ namespace Services {
             result = null;
             var candidates = new List<RequirementCandidate>();
             foreach (BillRequirementTemplateDefinition template in _templates.Values) {
-                if (usedKinds.Contains(template.Kind)) continue;
+                if (template.Definition == null || usedKinds.Contains(template.Definition.Kind)) continue;
                 if (TryCreateCandidate(template, satisfied, external, out RequirementCandidate candidate)) {
                     candidates.Add(candidate);
                 }
@@ -871,16 +914,41 @@ namespace Services {
             if (candidates.Count == 0) return false;
 
             RequirementCandidate selected = candidates[random.NextInt(0, candidates.Count)];
-            int target = selected.MinimumTarget == selected.MaximumTarget
+            BillRequirementDefinition definition = selected.Definition;
+            if (definition is OwnedUpgradeRequirementDefinition owned) {
+                result = new OwnedUpgradeRequirementSnapshot(
+                    selected.Template.Id,
+                    owned.UpgradeId,
+                    selected.Template.ResolveBalance(0d));
+                return true;
+            }
+
+            if (selected.HasValueTarget) {
+                Value incomeTarget = selected.MinimumValueTarget == selected.MaximumValueTarget
+                    ? selected.MinimumValueTarget
+                    : RollValueTarget(selected.MinimumValueTarget, selected.MaximumValueTarget, random);
+                result = new MinimumIncomeRequirementSnapshot(
+                    selected.Template.Id,
+                    incomeTarget,
+                    selected.Template.ResolveBalance(ResolveTargetFraction(
+                        incomeTarget, selected.MinimumValueTarget, selected.MaximumValueTarget)));
+                return true;
+            }
+
+            int numericTarget = selected.MinimumTarget == selected.MaximumTarget
                 ? selected.MinimumTarget
                 : random.NextInt(selected.MinimumTarget, selected.MaximumTarget + 1);
-            BillRequirementTemplateDefinition definition = selected.Template;
-            result = new BillRequirementSnapshot(
-                definition.Id,
-                definition.Kind,
-                target,
-                definition.Kind == BillRequirementKind.OwnedUpgrade ? definition.UpgradeId : null,
-                definition.ResolveBalance(target));
+            double targetFraction = ResolveTargetFraction(
+                numericTarget, selected.MinimumTarget, selected.MaximumTarget);
+            result = definition switch {
+                MinimumClerkCountRequirementDefinition => new MinimumClerkCountRequirementSnapshot(
+                    selected.Template.Id, numericTarget, selected.Template.ResolveBalance(targetFraction)),
+                MinimumDocumentQualityRequirementDefinition => new MinimumDocumentQualityRequirementSnapshot(
+                    selected.Template.Id, numericTarget, selected.Template.ResolveBalance(targetFraction)),
+                ProcessedDocumentsRequirementDefinition => new ProcessedDocumentsRequirementSnapshot(
+                    selected.Template.Id, numericTarget, selected.Template.ResolveBalance(targetFraction)),
+                _ => null
+            };
             return true;
         }
 
@@ -890,29 +958,61 @@ namespace Services {
             ExternalState external,
             out RequirementCandidate candidate) {
             candidate = default;
-            if (template.Kind == BillRequirementKind.OwnedUpgrade) {
-                bool owned = external.OwnedUpgradeIds.Contains(template.UpgradeId);
+            BillRequirementDefinition definition = template.Definition;
+            if (definition is OwnedUpgradeRequirementDefinition ownedDefinition) {
+                bool owned = external.OwnedUpgradeIds.Contains(ownedDefinition.UpgradeId);
                 if (owned != satisfied) return false;
-                candidate = new RequirementCandidate(template, 0, 0);
+                candidate = new RequirementCandidate(
+                    template, definition, 0, 0, Value.Zero, Value.Zero, false);
                 return true;
             }
 
-            int minimum = template.MinimumTarget;
-            int maximum = template.MaximumTarget;
+            if (definition is MinimumIncomeRequirementDefinition incomeDefinition) {
+                Value incomeMinimum = incomeDefinition.MinimumTarget;
+                Value incomeMaximum = incomeDefinition.MaximumTarget;
+                Value currentIncome = external.IncomePerDocument;
+                if (satisfied) {
+                    if (currentIncome < incomeMinimum) return false;
+                    if (currentIncome < incomeMaximum) incomeMaximum = currentIncome;
+                }
+                else {
+                    if (currentIncome >= incomeMaximum) return false;
+                    incomeMinimum = currentIncome < incomeMinimum
+                        ? incomeMinimum
+                        : IncrementValue(currentIncome);
+                    if (incomeMinimum > incomeMaximum) return false;
+                }
+
+                candidate = new RequirementCandidate(
+                    template, definition, 0, 0, incomeMinimum, incomeMaximum, true);
+                return true;
+            }
+
+            int minimum;
+            int maximum;
             int current;
-            if (template.Kind == BillRequirementKind.MinimumClerkCount) {
+            if (definition is MinimumClerkCountRequirementDefinition clerkDefinition) {
+                minimum = clerkDefinition.MinimumTarget;
+                maximum = clerkDefinition.MaximumTarget;
                 current = external.ClerkCount;
             }
-            else {
-                minimum = Math.Max(minimum, 2);
-                maximum = Math.Min(Math.Min(maximum, 10), external.UnlockedQuality + 1);
+            else if (definition is MinimumDocumentQualityRequirementDefinition qualityDefinition) {
+                minimum = Math.Max(qualityDefinition.MinimumTarget, 2);
+                maximum = Math.Min(Math.Min(qualityDefinition.MaximumTarget, 10), external.UnlockedQuality + 1);
                 current = external.UnlockedQuality;
             }
+            else if (definition is ProcessedDocumentsRequirementDefinition processedDefinition) {
+                minimum = processedDefinition.MinimumTarget;
+                maximum = processedDefinition.MaximumTarget;
+                current = external.ProcessedDocumentCount;
+            }
+            else return false;
 
             if (satisfied) maximum = Math.Min(maximum, current);
             else minimum = Math.Max(minimum, current + 1);
             if (minimum > maximum) return false;
-            candidate = new RequirementCandidate(template, minimum, maximum);
+            candidate = new RequirementCandidate(
+                template, definition, minimum, maximum, Value.Zero, Value.Zero, false);
             return true;
         }
 
@@ -942,10 +1042,15 @@ namespace Services {
             return Math.Clamp(candidate.DocumentQualityLevel, 0, 9) + 1;
         }
 
-        private ExternalState CaptureExternalState(int unlockedQuality) {
+        private ExternalState CaptureExternalState(int unlockedQuality, IncomeEntries income) {
             var owned = new HashSet<string>(StringComparer.Ordinal);
             foreach (var state in _upgrades.OwnedUpgrades) owned.Add(state.Definition.Id);
-            return new ExternalState(owned, _office.ClerkCount, Math.Clamp(unlockedQuality, 1, 10));
+            return new ExternalState(
+                owned,
+                _office.ClerkCount,
+                Math.Clamp(unlockedQuality, 1, 10),
+                income.IncomePerDocument,
+                ResolveProcessedDocumentCount());
         }
 
         private static bool AreRequirementsSatisfied(GeneratedBillOption option, ExternalState external) {
@@ -959,13 +1064,17 @@ namespace Services {
         private static bool IsRequirementSatisfied(
             BillRequirementSnapshot requirement,
             ExternalState external) {
-            return requirement.Kind switch {
-                BillRequirementKind.OwnedUpgrade =>
-                    external.OwnedUpgradeIds.Contains(requirement.UpgradeId),
-                BillRequirementKind.MinimumClerkCount =>
-                    external.ClerkCount >= requirement.NumericTarget,
-                BillRequirementKind.MinimumUnlockedDocumentQuality =>
-                    external.UnlockedQuality >= requirement.NumericTarget,
+            return requirement switch {
+                OwnedUpgradeRequirementSnapshot owned =>
+                    external.OwnedUpgradeIds.Contains(owned.UpgradeId),
+                MinimumClerkCountRequirementSnapshot clerks =>
+                    external.ClerkCount >= clerks.NumericTarget,
+                MinimumDocumentQualityRequirementSnapshot quality =>
+                    external.UnlockedQuality >= quality.NumericTarget,
+                MinimumIncomeRequirementSnapshot income =>
+                    external.IncomePerDocument >= income.IncomeTarget,
+                ProcessedDocumentsRequirementSnapshot processed =>
+                    external.ProcessedDocumentCount >= processed.NumericTarget,
                 _ => false
             };
         }
@@ -1007,7 +1116,8 @@ namespace Services {
             _nextActivationOrder = 1L;
             _nextCompletionOrder = 1L;
             if (_rewards.Count > 0) {
-                ReplaceCatalog(BuildFreshCatalog(CreateStateView(null, _active, _completed), _billData.Value));
+                ReplaceCatalog(BuildFreshCatalog(
+                    CreateStateView(null, _active, _completed, _billData.Value), _billData.Value));
             }
             InvalidateActiveCaches();
             InvalidateAllCompletionGroups();
@@ -1272,11 +1382,14 @@ namespace Services {
             return result;
         }
 
-        private static StateView CreateStateView(
+        private StateView CreateStateView(
             PendingBillState pending,
             IReadOnlyList<ActiveBillState> active,
-            IReadOnlyList<BillCompletionRecord> completed) {
-            return new StateView(pending, active, completed);
+            IReadOnlyList<BillCompletionRecord> completed,
+            BillEntries entries) {
+            IncomeEntries baseline = _incomeCalculator?.CalculateWithoutBill() ?? default;
+            IncomeEntries income = BillIncomeEvaluator.Evaluate(baseline, completed, active, entries);
+            return new StateView(pending, active, completed, income);
         }
 
         private static int ResolveCatalogSize(BillEntries entries) => Math.Clamp(entries.CatalogSize, 1, 64);
@@ -1285,6 +1398,59 @@ namespace Services {
             Math.Max(1, entries.MaximumPriorityWeight);
 
         private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
+
+        private static double ResolveTargetFraction(int target, int minimum, int maximum) {
+            if (minimum >= maximum) return 0d;
+            return Math.Clamp((double)(target - minimum) / (maximum - minimum), 0d, 1d);
+        }
+
+        private static double ResolveTargetFraction(Value target, Value minimum, Value maximum) {
+            if (minimum >= maximum) return 0d;
+            double targetValue = target.ToDouble();
+            double minimumValue = minimum.ToDouble();
+            double maximumValue = maximum.ToDouble();
+            if (IsFinite(targetValue) && IsFinite(minimumValue) && IsFinite(maximumValue) &&
+                maximumValue > minimumValue) {
+                return Math.Clamp((targetValue - minimumValue) / (maximumValue - minimumValue), 0d, 1d);
+            }
+
+            return Math.Clamp(
+                (target.ToLog10() - minimum.ToLog10()) / (maximum.ToLog10() - minimum.ToLog10()),
+                0d,
+                1d);
+        }
+
+        private static Value RollValueTarget(Value minimum, Value maximum, IBillRandom random) {
+            double minimumValue = minimum.ToDouble();
+            double maximumValue = maximum.ToDouble();
+            if (IsFinite(minimumValue) && IsFinite(maximumValue) &&
+                minimumValue >= 0d && maximumValue <= int.MaxValue && maximumValue >= minimumValue) {
+                int lower = Math.Max(0, (int)Math.Ceiling(minimumValue));
+                int upper = Math.Min(int.MaxValue, (int)Math.Floor(maximumValue));
+                if (upper >= lower) {
+                    if (upper == int.MaxValue) {
+                        long range = (long)upper - lower + 1L;
+                        if (range <= int.MaxValue) {
+                            return new Value(lower + random.NextInt(0, (int)range));
+                        }
+                        double maxFraction = random.NextInt(0, 1_000_000) / 1_000_000d;
+                        return new Value(lower + (upper - lower) * maxFraction);
+                    }
+                    return new Value(random.NextInt(lower, upper + 1));
+                }
+            }
+
+            double fraction = random.NextInt(0, 1_000_000) / 1_000_000d;
+            return Value.FromLog10(minimum.ToLog10() +
+                (maximum.ToLog10() - minimum.ToLog10()) * fraction);
+        }
+
+        private static Value IncrementValue(Value value) {
+            double number = value.ToDouble();
+            return IsFinite(number) && number < double.MaxValue
+                ? new Value(number + 1d)
+                : Value.Infinity;
+        }
 
         private static double SaturatingAddPositive(double left, double right) {
             if (double.IsNaN(left) || left <= 0d) left = 0d;
@@ -1354,15 +1520,27 @@ namespace Services {
             if (string.IsNullOrWhiteSpace(template.Id)) {
                 throw new InvalidOperationException($"Bill requirement template '{template.name}' has an empty ID.");
             }
-            if (!Enum.IsDefined(typeof(BillRequirementKind), template.Kind)) {
-                throw new InvalidOperationException($"Bill requirement '{template.Id}' has an invalid kind.");
+            if (template.Definition == null) {
+                throw new InvalidOperationException($"Bill requirement '{template.Id}' has no definition.");
             }
-            if (template.Kind == BillRequirementKind.OwnedUpgrade) {
-                if (string.IsNullOrWhiteSpace(template.UpgradeId)) {
+            if (template.Definition is OwnedUpgradeRequirementDefinition owned) {
+                if (string.IsNullOrWhiteSpace(owned.UpgradeId)) {
                     throw new InvalidOperationException($"Bill requirement '{template.Id}' has no upgrade ID.");
                 }
             }
-            else if (template.MinimumTarget < 0 || template.MaximumTarget < template.MinimumTarget) {
+            else if (template.Definition is MinimumIncomeRequirementDefinition income) {
+                if (income.MinimumTarget.IsZero || income.MaximumTarget < income.MinimumTarget ||
+                    !IsFinite(income.MinimumTarget.ToDouble()) && income.MinimumTarget != Value.Infinity ||
+                    !IsFinite(income.MaximumTarget.ToDouble()) && income.MaximumTarget != Value.Infinity) {
+                    throw new InvalidOperationException($"Bill requirement '{template.Id}' has an invalid income range.");
+                }
+            }
+            else if (template.Definition is MinimumClerkCountRequirementDefinition clerks &&
+                     (clerks.MinimumTarget < 0 || clerks.MaximumTarget < clerks.MinimumTarget) ||
+                     template.Definition is MinimumDocumentQualityRequirementDefinition quality &&
+                     (quality.MinimumTarget < 0 || quality.MaximumTarget < quality.MinimumTarget) ||
+                     template.Definition is ProcessedDocumentsRequirementDefinition processed &&
+                     (processed.MinimumTarget < 0 || processed.MaximumTarget < processed.MinimumTarget)) {
                 throw new InvalidOperationException($"Bill requirement '{template.Id}' has an invalid target range.");
             }
             ValidateBalance(template.Id, template.MinimumBalance);
@@ -1419,16 +1597,28 @@ namespace Services {
 
         private readonly struct RequirementCandidate {
             public BillRequirementTemplateDefinition Template { get; }
+            public BillRequirementDefinition Definition { get; }
             public int MinimumTarget { get; }
             public int MaximumTarget { get; }
+            public Value MinimumValueTarget { get; }
+            public Value MaximumValueTarget { get; }
+            public bool HasValueTarget { get; }
 
             public RequirementCandidate(
                 BillRequirementTemplateDefinition template,
+                BillRequirementDefinition definition,
                 int minimumTarget,
-                int maximumTarget) {
+                int maximumTarget,
+                Value minimumValueTarget,
+                Value maximumValueTarget,
+                bool hasValueTarget) {
                 Template = template;
+                Definition = definition;
                 MinimumTarget = minimumTarget;
                 MaximumTarget = maximumTarget;
+                MinimumValueTarget = minimumValueTarget;
+                MaximumValueTarget = maximumValueTarget;
+                HasValueTarget = hasValueTarget;
             }
         }
 
@@ -1436,11 +1626,20 @@ namespace Services {
             public HashSet<string> OwnedUpgradeIds { get; }
             public int ClerkCount { get; }
             public int UnlockedQuality { get; }
+            public Value IncomePerDocument { get; }
+            public int ProcessedDocumentCount { get; }
 
-            public ExternalState(HashSet<string> ownedUpgradeIds, int clerkCount, int unlockedQuality) {
+            public ExternalState(
+                HashSet<string> ownedUpgradeIds,
+                int clerkCount,
+                int unlockedQuality,
+                Value incomePerDocument,
+                int processedDocumentCount) {
                 OwnedUpgradeIds = ownedUpgradeIds;
                 ClerkCount = clerkCount;
                 UnlockedQuality = unlockedQuality;
+                IncomePerDocument = incomePerDocument;
+                ProcessedDocumentCount = processedDocumentCount;
             }
         }
 
@@ -1448,14 +1647,17 @@ namespace Services {
             public PendingBillState Pending { get; }
             public IReadOnlyList<ActiveBillState> Active { get; }
             public IReadOnlyList<BillCompletionRecord> Completed { get; }
+            public IncomeEntries Income { get; }
 
             public StateView(
                 PendingBillState pending,
                 IReadOnlyList<ActiveBillState> active,
-                IReadOnlyList<BillCompletionRecord> completed) {
+                IReadOnlyList<BillCompletionRecord> completed,
+                IncomeEntries income) {
                 Pending = pending;
                 Active = active;
                 Completed = completed;
+                Income = income;
             }
         }
 

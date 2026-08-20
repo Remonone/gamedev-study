@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data.Formulas;
+using Data.Bills;
 using Data.Modifiers;
 using Data.Modifiers.Numeric;
 using Data.Upgrades;
@@ -343,6 +344,31 @@ namespace SigningGame.Tests.EditMode {
                 _UpgradeRoot + "/new_id/Upgrade Node.asset");
             Assert.That(restored, Is.Not.Null);
             Assert.That(restored.Id, Is.EqualTo("new_id"));
+        }
+
+        [Test]
+        public void RenameNode_FindsManagedOwnedUpgradeBillReference() {
+            UpgradeNodeDefinition node = Create("referenced_upgrade");
+            var template = ScriptableObject.CreateInstance<BillRequirementTemplateDefinition>();
+            template.Id = "owned_upgrade_reference";
+            template.Definition = new OwnedUpgradeRequirementDefinition {
+                UpgradeId = node.Id
+            };
+            template.MinimumBalance = new BillRequirementBalance {
+                CostMultiplier = 1d
+            };
+            template.MaximumBalance = template.MinimumBalance;
+            string templatePath = _Root + "/owned_upgrade_reference.asset";
+            AssetDatabase.CreateAsset(template, templatePath);
+            AssetDatabase.SaveAssets();
+
+            UpgradeTreeOperationResult<UpgradeNodeDefinition> result =
+                _operations.RenameNode(node, "renamed_upgrade");
+
+            Assert.That(result.Success, Is.False, result.Error);
+            Assert.That(result.Error, Does.Contain("referenced by bill requirements"));
+            Assert.That(AssetDatabase.LoadAssetAtPath<BillRequirementTemplateDefinition>(templatePath),
+                Is.Not.Null);
         }
 
         [Test]

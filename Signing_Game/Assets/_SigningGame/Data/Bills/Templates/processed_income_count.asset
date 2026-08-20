@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58e5445201c8e3bcd97ec8e413faaf00, type: 3}
+  m_Name: processed_income_count
+  m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Bills.BillRequirementTemplateDefinition
+  Id: processed_income_count
+  Definition:
+    rid: 1001000000000005
+  DisplayName: Processed Documents
+  ShortDescription: Process at least the required number of office documents.
+  Color: {r: 0.75, g: 0.45, b: 0.9, a: 1}
+  MinimumBalance:
+    CostMultiplier: 1.2
+    WorkFactor: 0.2
+    RewardFactor: 0.12
+    DifficultyFactor: 0.02
+  MaximumBalance:
+    CostMultiplier: 1.8
+    WorkFactor: 1
+    RewardFactor: 0.4
+    DifficultyFactor: 0.1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1001000000000005
+      type: {class: ProcessedDocumentsRequirementDefinition, ns: Data.Bills, asm: SigningGame.Scripts.Runtime}
+      data:
+        MinimumTarget: 10
+        MaximumTarget: 1000

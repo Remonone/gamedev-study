@@ -816,7 +816,8 @@ namespace SigningGame.Editor.UpgradeTree {
                 .Where(path => {
                     BillRequirementTemplateDefinition definition =
                         AssetDatabase.LoadAssetAtPath<BillRequirementTemplateDefinition>(path);
-                    return definition != null && string.Equals(definition.UpgradeId, id, StringComparison.Ordinal);
+                    return definition?.Definition is OwnedUpgradeRequirementDefinition owned &&
+                           string.Equals(owned.UpgradeId, id, StringComparison.Ordinal);
                 }).ToList();
         }
 

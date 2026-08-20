@@ -41,19 +41,17 @@ namespace Services {
                     ["completionOrder"] = completion.CompletionOrder,
                     ["additionalGeneratedDocuments"] = completion.AdditionalGeneratedDocuments,
                     ["additionalIncomeStored"] = completion.AdditionalIncome.Stored,
-                    ["additionalIncomeDegree"] = completion.AdditionalIncome.Base.Degree
+                    ["additionalIncomeDegree"] = completion.AdditionalIncome.Base.Degree,
+                    ["option"] = completion.Option == null ? JValue.CreateNull() : SerializeOption(completion.Option),
+                    ["paidStored"] = completion.PaidCost.Stored,
+                    ["paidDegree"] = completion.PaidCost.Base.Degree,
+                    ["elapsedWorkSeconds"] = completion.ElapsedWorkSeconds,
+                    ["processedDocumentCount"] = completion.ProcessedDocumentCount,
+                    ["hasCompleteWorkStatistics"] = completion.HasCompleteWorkStatistics,
+                    ["payoutStored"] = completion.ActualCompletionPayout.Stored,
+                    ["payoutDegree"] = completion.ActualCompletionPayout.Base.Degree,
+                    ["hasCompletionPayout"] = completion.HasCompletionPayout
                 };
-                if (completion.Option != null) {
-                    data["option"] = SerializeOption(completion.Option);
-                    data["paidStored"] = completion.PaidCost.Stored;
-                    data["paidDegree"] = completion.PaidCost.Base.Degree;
-                    data["elapsedWorkSeconds"] = completion.ElapsedWorkSeconds;
-                    data["processedDocumentCount"] = completion.ProcessedDocumentCount;
-                    data["hasCompleteWorkStatistics"] = completion.HasCompleteWorkStatistics;
-                    data["payoutStored"] = completion.ActualCompletionPayout.Stored;
-                    data["payoutDegree"] = completion.ActualCompletionPayout.Base.Degree;
-                    data["hasCompletionPayout"] = completion.HasCompletionPayout;
-                }
                 completed.Add(data);
             }
 
@@ -67,6 +65,7 @@ namespace Services {
             }
 
             return new JObject {
+                ["requirementsVersion"] = 2,
                 ["randomState"] = _random.State,
                 ["nextOptionId"] = _nextOptionId,
                 ["nextInstanceId"] = _nextInstanceId,
@@ -173,9 +172,9 @@ namespace Services {
                 nextCatalog.Add(option);
             }
 
-            StateView candidate = CreateStateView(nextPending, nextActive, nextCompleted);
+            StateView candidate = CreateStateView(nextPending, nextActive, nextCompleted, entries);
             int unlockedQuality = ResolveCandidateUnlockedQuality(nextCompleted, entries);
-            ExternalState external = CaptureExternalState(unlockedQuality);
+            ExternalState external = CaptureExternalState(unlockedQuality, candidate.Income);
             int desiredCount = Math.Min(ResolveCatalogSize(entries), CountEligibleRewards(candidate));
             bool suppressed = ShouldSuppressCatalog(candidate, entries);
             bool restoredCatalogValid = suppressed
@@ -237,13 +236,23 @@ namespace Services {
             for (int index = 0; index < data.Requirements.Count; index++) {
                 RequirementRestore requirement = data.Requirements[index];
                 if (!_templates.TryGetValue(requirement.TemplateId, out BillRequirementTemplateDefinition template) ||
-                    template.Kind != requirement.Kind || !kinds.Add(requirement.Kind)) return null;
-                requirements.Add(new BillRequirementSnapshot(
-                    requirement.TemplateId,
-                    requirement.Kind,
-                    requirement.NumericTarget,
-                    requirement.UpgradeId,
-                    requirement.Balance));
+                    template.Definition == null || template.Definition.Kind != requirement.Kind ||
+                    !kinds.Add(requirement.Kind)) return null;
+                BillRequirementSnapshot snapshot = template.Definition switch {
+                    OwnedUpgradeRequirementDefinition => new OwnedUpgradeRequirementSnapshot(
+                        requirement.TemplateId, requirement.UpgradeId, requirement.Balance),
+                    MinimumClerkCountRequirementDefinition => new MinimumClerkCountRequirementSnapshot(
+                        requirement.TemplateId, requirement.NumericTarget, requirement.Balance),
+                    MinimumDocumentQualityRequirementDefinition => new MinimumDocumentQualityRequirementSnapshot(
+                        requirement.TemplateId, requirement.NumericTarget, requirement.Balance),
+                    MinimumIncomeRequirementDefinition => new MinimumIncomeRequirementSnapshot(
+                        requirement.TemplateId, requirement.IncomeTarget, requirement.Balance),
+                    ProcessedDocumentsRequirementDefinition => new ProcessedDocumentsRequirementSnapshot(
+                        requirement.TemplateId, requirement.NumericTarget, requirement.Balance),
+                    _ => null
+                };
+                if (snapshot == null) return null;
+                requirements.Add(snapshot);
             }
             return new GeneratedBillOption(
                 data.OptionId,
@@ -283,16 +292,31 @@ namespace Services {
             var requirements = new JArray();
             for (int index = 0; index < option.Requirements.Count; index++) {
                 BillRequirementSnapshot requirement = option.Requirements[index];
-                requirements.Add(new JObject {
+                var serialized = new JObject {
                     ["templateId"] = requirement.TemplateId,
                     ["kind"] = (int)requirement.Kind,
-                    ["numericTarget"] = requirement.NumericTarget,
-                    ["upgradeId"] = requirement.UpgradeId,
+                    ["upgradeId"] = requirement.Kind == BillRequirementKind.OwnedUpgrade
+                        ? ((OwnedUpgradeRequirementSnapshot)requirement).UpgradeId
+                        : JValue.CreateNull(),
                     ["costMultiplier"] = requirement.Balance.CostMultiplier,
                     ["workFactor"] = requirement.Balance.WorkFactor,
                     ["rewardFactor"] = requirement.Balance.RewardFactor,
                     ["difficultyFactor"] = requirement.Balance.DifficultyFactor
-                });
+                };
+                switch (requirement) {
+                    case NumericBillRequirementSnapshot numeric:
+                        serialized["numericTarget"] = numeric.NumericTarget;
+                        break;
+                    case MinimumIncomeRequirementSnapshot income:
+                        serialized["incomeTargetStored"] = income.IncomeTarget.Stored;
+                        serialized["incomeTargetDegree"] = income.IncomeTarget.Base.Degree;
+                        break;
+                    case OwnedUpgradeRequirementSnapshot:
+                        break;
+                    default:
+                        throw new JsonSerializationException("Unsupported bill requirement snapshot type.");
+                }
+                requirements.Add(serialized);
             }
             return new JObject {
                 ["optionId"] = option.OptionId,
@@ -316,6 +340,18 @@ namespace Services {
                 throw new JsonSerializationException("Bill state is missing required arrays or counters.");
             }
 
+            int requirementsVersion = 1;
+            JToken requirementsVersionToken = root["requirementsVersion"];
+            if (requirementsVersionToken != null) {
+                if (requirementsVersionToken.Type != JTokenType.Integer) {
+                    throw new JsonSerializationException("Unsupported bill requirement schema version.");
+                }
+                requirementsVersion = requirementsVersionToken.Value<int>();
+                if (requirementsVersion != 1 && requirementsVersion != 2) {
+                    throw new JsonSerializationException("Unsupported bill requirement schema version.");
+                }
+            }
+
             var restored = new RestoreData(
                 randomState,
                 nextOptionId,
@@ -324,7 +360,7 @@ namespace Services {
                 nextCompletionOrder);
             var optionIds = new HashSet<long>();
             foreach (JToken token in catalog) {
-                OptionRestore option = ParseOption(token);
+                OptionRestore option = ParseOption(token, requirementsVersion);
                 if (!optionIds.Add(option.OptionId)) throw new JsonSerializationException("Duplicate bill option ID.");
                 restored.Catalog.Add(option);
             }
@@ -335,7 +371,7 @@ namespace Services {
                     !TryReadValue(pendingData["paidStored"], pendingData["paidDegree"], false, out Value paid)) {
                     throw new JsonSerializationException("Pending bill state is invalid.");
                 }
-                OptionRestore option = ParseOption(pendingData["option"]);
+                OptionRestore option = ParseOption(pendingData["option"], requirementsVersion);
                 if (!optionIds.Add(option.OptionId)) throw new JsonSerializationException("Duplicate bill option ID.");
                 restored.Pending = new PendingRestore(option, paid);
             }
@@ -374,7 +410,7 @@ namespace Services {
                 if (weight < 1 || !instanceIds.Add(instanceId)) {
                     throw new JsonSerializationException("Active bill IDs and weights must be valid and unique.");
                 }
-                OptionRestore option = ParseOption(data["option"]);
+                OptionRestore option = ParseOption(data["option"], requirementsVersion);
                 if (progress >= option.RequiredProgress) {
                     throw new JsonSerializationException(
                         $"Active bill '{instanceId}' already reached its completion target.");
@@ -413,7 +449,7 @@ namespace Services {
                 Value payout = Value.Zero;
                 bool hasCompletionPayout = false;
                 if (hasAnyHistoryField) {
-                    if (data["option"] == null ||
+                    if (data.Property("option") == null ||
                         !TryReadValue(data["paidStored"], data["paidDegree"], true, out paidCost) ||
                         !TryReadNumber(data["elapsedWorkSeconds"], out elapsedWorkSeconds) ||
                         elapsedWorkSeconds < 0d ||
@@ -425,11 +461,13 @@ namespace Services {
                         throw new JsonSerializationException(
                             "Completed bill historical statistics are incomplete or invalid.");
                     }
-                    completionOption = ParseOption(data["option"]);
-                    if (!string.Equals(completionOption.RewardId, rewardId, StringComparison.Ordinal) ||
-                        !optionIds.Add(completionOption.OptionId)) {
-                        throw new JsonSerializationException(
-                            "Completed bill option is duplicated or does not match its reward.");
+                    if (data["option"]?.Type != JTokenType.Null) {
+                        completionOption = ParseOption(data["option"], requirementsVersion);
+                        if (!string.Equals(completionOption.RewardId, rewardId, StringComparison.Ordinal) ||
+                            !optionIds.Add(completionOption.OptionId)) {
+                            throw new JsonSerializationException(
+                                "Completed bill option is duplicated or does not match its reward.");
+                        }
                     }
                     hasCompleteWorkStatistics = data["hasCompleteWorkStatistics"].Value<bool>();
                     hasCompletionPayout = data["hasCompletionPayout"].Value<bool>();
@@ -499,7 +537,7 @@ namespace Services {
             }
         }
 
-        private static OptionRestore ParseOption(JToken token) {
+        private static OptionRestore ParseOption(JToken token, int requirementsVersion) {
             if (token is not JObject data ||
                 !TryReadPositiveLong(data["optionId"], out long optionId) ||
                 data["rewardId"]?.Type != JTokenType.String ||
@@ -517,7 +555,6 @@ namespace Services {
                 if (requirementToken is not JObject requirement ||
                     requirement["templateId"]?.Type != JTokenType.String ||
                     requirement["kind"]?.Type != JTokenType.Integer ||
-                    requirement["numericTarget"]?.Type != JTokenType.Integer ||
                     !TryReadNumber(requirement["costMultiplier"], out double costMultiplier) || costMultiplier < 1d ||
                     !TryReadNumber(requirement["workFactor"], out double workFactor) || workFactor < 0d ||
                     !TryReadNumber(requirement["rewardFactor"], out double rewardFactor) || rewardFactor < 0d ||
@@ -530,16 +567,49 @@ namespace Services {
                     !kinds.Add(kind)) {
                     throw new JsonSerializationException("Bill requirement IDs and kinds must be valid and unique.");
                 }
-                string upgradeId = requirement["upgradeId"]?.Type == JTokenType.String
-                    ? requirement["upgradeId"].Value<string>()
-                    : null;
-                if (kind == BillRequirementKind.OwnedUpgrade && string.IsNullOrWhiteSpace(upgradeId)) {
-                    throw new JsonSerializationException("Owned-upgrade bill requirement has no upgrade ID.");
+                if (requirementsVersion == 1 && kind > BillRequirementKind.MinimumUnlockedDocumentQuality) {
+                    throw new JsonSerializationException("Legacy bill requirements contain an unsupported kind.");
                 }
+
+                JToken upgradeToken = requirement["upgradeId"];
+                string upgradeId = null;
+                if (kind == BillRequirementKind.OwnedUpgrade) {
+                    if (upgradeToken?.Type != JTokenType.String ||
+                        string.IsNullOrWhiteSpace(upgradeId = upgradeToken.Value<string>())) {
+                        throw new JsonSerializationException("Owned-upgrade bill requirement has no upgrade ID.");
+                    }
+                }
+                else {
+                    if (requirementsVersion == 2 && requirement.Property("upgradeId") == null) {
+                        throw new JsonSerializationException(
+                            "Version 2 non-owned bill requirements must contain a null upgrade ID.");
+                    }
+                    if (upgradeToken != null && upgradeToken.Type != JTokenType.Null) {
+                        throw new JsonSerializationException("Non-owned bill requirements must have a null upgrade ID.");
+                    }
+                }
+
+                int numericTarget = 0;
+                Value incomeTarget = Value.Zero;
+                if (kind == BillRequirementKind.MinimumIncome) {
+                    if (requirementsVersion != 2 ||
+                        !TryReadValue(requirement["incomeTargetStored"], requirement["incomeTargetDegree"], false,
+                            out incomeTarget)) {
+                        throw new JsonSerializationException("Income bill requirement target is invalid.");
+                    }
+                }
+                else if (kind != BillRequirementKind.OwnedUpgrade) {
+                    if (requirement["numericTarget"]?.Type != JTokenType.Integer) {
+                        throw new JsonSerializationException("Numeric bill requirement target is missing.");
+                    }
+                    numericTarget = requirement["numericTarget"].Value<int>();
+                }
+
                 result.Requirements.Add(new RequirementRestore(
                     templateId,
                     kind,
-                    requirement["numericTarget"].Value<int>(),
+                    numericTarget,
+                    incomeTarget,
                     upgradeId,
                     new BillRequirementBalance {
                         CostMultiplier = costMultiplier,
@@ -704,6 +774,7 @@ namespace Services {
             public string TemplateId { get; }
             public BillRequirementKind Kind { get; }
             public int NumericTarget { get; }
+            public Value IncomeTarget { get; }
             public string UpgradeId { get; }
             public BillRequirementBalance Balance { get; }
 
@@ -711,11 +782,13 @@ namespace Services {
                 string templateId,
                 BillRequirementKind kind,
                 int numericTarget,
+                Value incomeTarget,
                 string upgradeId,
                 BillRequirementBalance balance) {
                 TemplateId = templateId;
                 Kind = kind;
                 NumericTarget = numericTarget;
+                IncomeTarget = incomeTarget;
                 UpgradeId = upgradeId;
                 Balance = balance;
             }
