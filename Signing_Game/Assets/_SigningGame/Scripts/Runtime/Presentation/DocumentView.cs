@@ -39,13 +39,15 @@ namespace Presentation {
             if (presentation == null) throw new ArgumentNullException(nameof(presentation));
             if (_viewModel != null) throw new InvalidOperationException("A bound document cannot become a preview again.");
 
+            _field.HideGuidance();
             _field.Clear();
             _presentation = presentation;
             RefreshView();
             gameObject.SetActive(true);
         }
 
-        public void Init(DocumentViewModel viewModel, DispensedDocumentPresentation presentation) {
+        public void Init(DocumentViewModel viewModel, DispensedDocumentPresentation presentation,
+            SignatureGuidanceSnapshot guidance) {
             DocumentViewModel nextViewModel = viewModel
                 ?? throw new ArgumentNullException(nameof(viewModel));
             if (presentation == null) throw new ArgumentNullException(nameof(presentation));
@@ -55,7 +57,14 @@ namespace Presentation {
             _presentation = presentation;
             _viewModel = nextViewModel;
             RefreshView();
+            if (!_field.ConfigureGuidance(guidance)) {
+                throw new InvalidOperationException("Document guidance geometry cannot be mapped to the signing field.");
+            }
             gameObject.SetActive(true);
+        }
+
+        public void Init(DocumentViewModel viewModel, DispensedDocumentPresentation presentation) {
+            Init(viewModel, presentation, null);
         }
 
         private void RefreshView() {

@@ -40,6 +40,7 @@ namespace Bootstrap.Installer {
             container.Register(new UpgradeService());
             container.Register(new MetaProgressionService());
             container.Register(new GameStatisticsService());
+            container.Register(new SignatureGuidanceService());
             container.Register(new UnlockService());
             container.Register(new UpgradeTreeService());
             container.Register(new MetaUpgradeTreeService());

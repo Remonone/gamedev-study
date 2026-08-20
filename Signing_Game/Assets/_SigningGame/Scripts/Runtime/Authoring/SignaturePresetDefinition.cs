@@ -16,6 +16,9 @@ namespace Authoring {
         [SerializeField] private SignatureStrokeMatchMode _strokeMatchMode =
             SignatureStrokeMatchMode.Ordered;
 
+        [SerializeField, Min(0)] private int _guidanceFullDisplayAfterSignatures = 3;
+        [SerializeField, Min(0)] private int _guidanceFadeOutSignatureCount = 5;
+
         [SerializeField] private SignatureDifficultyProfileDefinition _baseDifficultyProfile;
         [SerializeField] private SignatureAlignmentDefinition _alignment = new();
         [SerializeField] private SignatureProcessingProfileDefinition _processingProfile;
@@ -28,6 +31,8 @@ namespace Authoring {
         public Value BaseIncome => _baseIncome;
         public SignatureDifficultyProfileDefinition BaseDifficultyProfile => _baseDifficultyProfile;
         public SignatureStrokeMatchMode StrokeMatchMode => _strokeMatchMode;
+        public int GuidanceFullDisplayAfterSignatures => _guidanceFullDisplayAfterSignatures;
+        public int GuidanceFadeOutSignatureCount => _guidanceFadeOutSignatureCount;
         public SignatureAlignmentDefinition Alignment => _alignment;
         public SignatureProcessingProfileDefinition ProcessingProfile => _processingProfile;
         public IReadOnlyList<SignatureVariantDefinition> Variants => _variants;

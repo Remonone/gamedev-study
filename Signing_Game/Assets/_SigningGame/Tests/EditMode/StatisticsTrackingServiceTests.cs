@@ -81,10 +81,16 @@ namespace Tests.EditMode {
             ReportResult(harness.SignatureAcceptor, DocumentKind.Bill, RewardStatus.RewardGranted);
             ReportResult(harness.SignatureAcceptor, DocumentKind.Normal, RewardStatus.RewardRejected);
 
+            AssertStatistic(harness.Statistics, GameStatisticIds.DocumentsSuccessfullySigned, 3d);
             harness.PumpSeconds(1f);
 
             AssertStatistic(harness.Statistics, GameStatisticIds.DocumentsSuccessfullySigned, 3d);
             AssertStatistic(harness.Statistics, GameStatisticIds.BillsAcceptedCount, 1d);
+
+            ReportResult(harness.SignatureAcceptor, DocumentKind.Normal, RewardStatus.RewardGranted);
+            AssertStatistic(harness.Statistics, GameStatisticIds.DocumentsSuccessfullySigned, 4d);
+            harness.PumpSeconds(1f);
+            AssertStatistic(harness.Statistics, GameStatisticIds.DocumentsSuccessfullySigned, 4d);
         }
 
         [Test]

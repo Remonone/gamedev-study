@@ -11,6 +11,7 @@ namespace Services {
         private MetaProgressionService _meta;
         private MetaUpgradeTreeService _tree;
         private SignatureProgressionService _signatureProgression;
+        private GameStatisticsService _statistics;
         private SaveService _save;
         private AutoSaveService _autoSave;
         private SceneFlowService _sceneFlow;
@@ -23,6 +24,7 @@ namespace Services {
             _meta = scope.Get<MetaProgressionService>();
             _tree = scope.Get<MetaUpgradeTreeService>();
             _signatureProgression = scope.Get<SignatureProgressionService>();
+            _statistics = scope.Get<GameStatisticsService>();
             _save = scope.Get<SaveService>();
             _autoSave = scope.Get<AutoSaveService>();
             _sceneFlow = scope.Container.Get<SceneFlowService>();
@@ -52,6 +54,7 @@ namespace Services {
                 _save.CreateSnapshot();
                 var sections = new Dictionary<string, JToken>(StringComparer.Ordinal) {
                     [SignatureProgressionService.ProgressionSaveId] = _signatureProgression.CreateResetState(),
+                    [GameStatisticsService.SaveSectionId] = _statistics.CreateResetState(),
                     [MetaProgressionService.SaveSectionId] = purchasedMetaState
                 };
                 var resetSnapshot = new SaveSnapshot(SaveSnapshot.CurrentVersion, sections);

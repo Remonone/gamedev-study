@@ -14,13 +14,14 @@ using Utils;
 namespace Services {
     /// <summary>
     /// Aggregates gameplay events into <see cref="GameStatisticsService"/> for the statistics tab.
-    /// Event handlers only accumulate in memory; all statistics are flushed at most once per second
-    /// through a single batch so hot paths (office ticks, bank payouts) do not spam Changed events.
+    /// Buffered rate/currency statistics are flushed at most once per second through a single batch
+    /// so hot paths (office ticks, bank payouts) do not spam Changed events. The successful-signature
+    /// total is authoritative in GameStatisticsService and is updated synchronously on acceptance.
     /// Money totals use a reversible finite-double encoding because statistics store doubles.
     /// </summary>
     public sealed class StatisticsTrackingService : IService, IInitialize, IPostInitialize {
         private const int RateWindowSeconds = 5;
-        private const int FlushMutationCount = 11;
+        private const int FlushMutationCount = 10;
 
         private const int SnapshotMutationCount = 13;
 
@@ -45,7 +46,6 @@ namespace Services {
         private Value _maxBalance;
         private double _generatedTotal;
         private double _consumedTotal;
-        private double _successfullySigned;
         private double _billAcceptedCount;
         private double _lastProcessedTotal;
         private double _secondAccumulator;
@@ -119,7 +119,7 @@ namespace Services {
         private void OnDocumentHandled(DocumentHandleResult result) {
             if (result.Status != RewardStatus.RewardGranted) return;
 
-            _successfullySigned++;
+            _statistics.AddValue(GameStatisticIds.DocumentsSuccessfullySigned, 1d);
             if (result.Kind == DocumentKind.Bill) _billAcceptedCount++;
         }
 
@@ -183,8 +183,6 @@ namespace Services {
             _flushMutations[count++] = GameStatisticMutation.Set(
                 GameStatisticIds.DocumentsConsumedTotal, _consumedTotal);
             _flushMutations[count++] = GameStatisticMutation.Set(
-                GameStatisticIds.DocumentsSuccessfullySigned, _successfullySigned);
-            _flushMutations[count++] = GameStatisticMutation.Set(
                 GameStatisticIds.BillsAcceptedCount, _billAcceptedCount);
             _flushMutations[count++] = GameStatisticMutation.Set(
                 GameStatisticIds.DocumentsGeneratedPerSecond, SumBuckets(_generatedBuckets) / RateWindowSeconds);
@@ -206,7 +204,6 @@ namespace Services {
             _maxBalance = ReadMoneyStatistic(GameStatisticIds.MoneyMaxBalance);
             _generatedTotal = ReadCountStatistic(GameStatisticIds.DocumentsGeneratedTotal);
             _consumedTotal = ReadCountStatistic(GameStatisticIds.DocumentsConsumedTotal);
-            _successfullySigned = ReadCountStatistic(GameStatisticIds.DocumentsSuccessfullySigned);
             _billAcceptedCount = ReadCountStatistic(GameStatisticIds.BillsAcceptedCount);
             _lastProcessedTotal = ReadCountStatistic(GameStatisticIds.OfficeProcessedDocuments);
             TrackMaxBalance();

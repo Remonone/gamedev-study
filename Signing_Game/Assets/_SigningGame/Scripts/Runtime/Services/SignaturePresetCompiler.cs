@@ -17,6 +17,8 @@ namespace Services {
             if (preset == null) throw Error("Preset is required.");
             if (string.IsNullOrWhiteSpace(preset.Id)) throw Error("Preset Id is required.");
             if (preset.ProcessingProfile == null) throw Error("Preset processing profile is required.");
+            if (preset.GuidanceFullDisplayAfterSignatures < 0 || preset.GuidanceFadeOutSignatureCount < 0)
+                throw Error("Signature guidance counts must be non-negative.");
             SignatureProcessingRules processing = preset.ProcessingProfile.ToRules();
             if (preset.StrokeMatchMode != SignatureStrokeMatchMode.Ordered)
                 throw Error("Only Ordered stroke matching is supported; BestAssignment is not supported.");
@@ -54,7 +56,8 @@ namespace Services {
 
             return new CompiledSignaturePreset(preset.Id, preset.ProcessingProfile.Id, processing,
                 new SignatureAlignmentRules(alignment.MaximumTranslation, alignment.MinimumScale,
-                    alignment.MaximumScale, alignment.MaximumRotationDegrees), preset.StrokeMatchMode, variants);
+                    alignment.MaximumScale, alignment.MaximumRotationDegrees), preset.StrokeMatchMode,
+                preset.GuidanceFullDisplayAfterSignatures, preset.GuidanceFadeOutSignatureCount, variants);
         }
 
         private static void ValidateStroke(SignatureTemplateStrokeDefinition stroke, int expectedCount,

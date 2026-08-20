@@ -32,11 +32,15 @@ namespace Services {
     }
 
     public sealed class GameStatisticsService : IService, ISaveable {
+        public const string SaveSectionId = "GameStatistics";
+
         private readonly Dictionary<string, double> _values = new(StringComparer.Ordinal);
         private readonly Subject<Unit> _changed = new();
 
-        public string SaveId => "GameStatistics";
+        public string SaveId => SaveSectionId;
         public Observable<Unit> Changed => _changed;
+
+        public JObject CreateResetState() => new();
 
         public bool SetValue(string statisticId, double value) {
             ValidateEntry(statisticId, value);

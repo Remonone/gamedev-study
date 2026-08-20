@@ -49,13 +49,16 @@ namespace Presentation {
             if (presentation == null) throw new ArgumentNullException(nameof(presentation));
 
             DocumentViewModel viewModel = null;
+            SignatureGuidanceService guidanceService = ServiceLocator.For(this).Get<SignatureGuidanceService>();
+            bool hasGuidanceSnapshot = guidanceService.TryGetSnapshot(out SignatureGuidanceSnapshot guidance);
             try {
                 ServiceLocator.For(this).Get(out PlayerSignatureAcceptor acceptor);
                 viewModel = _builder
                     .SetContext(context)
                     .SetAcceptor(acceptor)
                     .Build();
-                document.Init(viewModel, presentation);
+                document.Init(viewModel, presentation, hasGuidanceSnapshot ? guidance : null);
+                if (hasGuidanceSnapshot) guidanceService.ConsumeSessionReminder();
             }
             catch {
                 viewModel?.Dispose();

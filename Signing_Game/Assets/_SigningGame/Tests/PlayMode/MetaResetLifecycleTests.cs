@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Constants;
 using Contracts;
 using Data.Formulas;
 using Data.Persistence;
@@ -43,6 +44,7 @@ namespace Tests.PlayMode {
                     Assert.That(sourceMeta.TryCreatePurchasedState(definition.Id, out JToken purchased, out _), Is.True);
                     var reset = new SaveSnapshot(SaveSnapshot.CurrentVersion, new Dictionary<string, JToken> {
                         ["signature_progression"] = new JObject { ["active"] = "starter_signature" },
+                        [GameStatisticsService.SaveSectionId] = new JObject(),
                         [MetaProgressionService.SaveSectionId] = purchased
                     });
                     var writer = new SaveService(path, loadExistingOnInitialize: false);
@@ -55,9 +57,11 @@ namespace Tests.PlayMode {
                 var wallet = new WalletService();
                 wallet.ReplenishWallet(new Value(123d));
                 wallet.Deserialize(new JObject { ["stored"] = 0d, ["degree"] = 0 });
+                var statistics = new GameStatisticsService();
+                statistics.SetValue(GameStatisticIds.DocumentsSuccessfullySigned, 22d);
                 var restoredMeta = new MetaProgressionService();
                 restoredMeta.BuildDefinitions(new[] { definition });
-                scope.Register(reader).Register(signature).Register(wallet).Register(restoredMeta);
+                scope.Register(reader).Register(signature).Register(wallet).Register(statistics).Register(restoredMeta);
                 reader.PreInitializeAsync(scope).GetAwaiter().GetResult();
 
                 Assert.That(signature.State["active"]?.Value<string>(), Is.EqualTo("starter_signature"));
@@ -65,6 +69,7 @@ namespace Tests.PlayMode {
                 Assert.That(restoredMeta.PreviousIterationPoints, Is.EqualTo(5));
                 Assert.That(restoredMeta.MoneyPeak.IsZero, Is.True);
                 Assert.That(wallet.CurrentBalance.IsZero, Is.True);
+                Assert.That(statistics.TryGetValue(GameStatisticIds.DocumentsSuccessfullySigned, out _), Is.False);
             } finally {
                 UnityEngine.Object.Destroy(definition);
                 if (Directory.Exists(directory)) Directory.Delete(directory, true);

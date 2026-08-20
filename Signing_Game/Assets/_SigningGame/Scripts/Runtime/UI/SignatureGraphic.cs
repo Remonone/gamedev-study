@@ -9,8 +9,12 @@ namespace UI {
         [SerializeField, Range(3, 16)] private int _roundingSegments = 8;
 
         private readonly List<List<Vector2>> _strokes = new();
+        private readonly List<float> _strokeAlphas = new();
 
         private List<Vector2> _activeStroke;
+
+        public int StrokeCount => _strokes.Count;
+        public float GetStrokeAlpha(int strokeIndex) => _strokeAlphas[strokeIndex];
 
         public void BeginStroke(Vector2 localPos) {
             _activeStroke = new List<Vector2>(64) {
@@ -18,6 +22,7 @@ namespace UI {
             };
             
             _strokes.Add(_activeStroke);
+            _strokeAlphas.Add(1f);
             SetVerticesDirty();
         }
 
@@ -40,6 +45,7 @@ namespace UI {
         public void SetStrokes(IReadOnlyList<IReadOnlyList<Vector2>> strokes) {
             _activeStroke = null;
             _strokes.Clear();
+            _strokeAlphas.Clear();
 
             if (strokes != null) {
                 for (int strokeIndex = 0; strokeIndex < strokes.Count; strokeIndex++) {
@@ -51,6 +57,7 @@ namespace UI {
                         stroke.Add(sourceStroke[pointIndex]);
                     }
                     _strokes.Add(stroke);
+                    _strokeAlphas.Add(1f);
                 }
             }
 
@@ -60,6 +67,27 @@ namespace UI {
         public void Clear() {
             _activeStroke = null;
             _strokes.Clear();
+            _strokeAlphas.Clear();
+            SetVerticesDirty();
+        }
+
+        public void SetStrokeAlphas(IReadOnlyList<float> alphas) {
+            if (alphas == null) throw new System.ArgumentNullException(nameof(alphas));
+            if (alphas.Count != _strokes.Count) {
+                throw new System.ArgumentException("Stroke alpha count must match stroke count.", nameof(alphas));
+            }
+
+            for (int index = 0; index < alphas.Count; index++) {
+                _strokeAlphas[index] = Mathf.Clamp01(alphas[index]);
+            }
+            SetVerticesDirty();
+        }
+
+        public void SetStrokeAlpha(int strokeIndex, float alpha) {
+            if (strokeIndex < 0 || strokeIndex >= _strokeAlphas.Count)
+                throw new System.ArgumentOutOfRangeException(nameof(strokeIndex));
+
+            _strokeAlphas[strokeIndex] = Mathf.Clamp01(alpha);
             SetVerticesDirty();
         }
 
@@ -69,20 +97,28 @@ namespace UI {
             float radius = _thickness / 2f;
             Color32 vertexColor = color;
             
-            foreach (var stroke in _strokes) {
+            for (int strokeIndex = 0; strokeIndex < _strokes.Count; strokeIndex++) {
+                List<Vector2> stroke = _strokes[strokeIndex];
                 if (stroke.Count == 0) continue;
+
+                Color32 strokeColor = WithStrokeAlpha(vertexColor, _strokeAlphas[strokeIndex]);
                 
-                AddDisc(vh, stroke[0], radius, _roundingSegments, vertexColor);
+                AddDisc(vh, stroke[0], radius, _roundingSegments, strokeColor);
 
                 for (int i = 1; i < stroke.Count; i++) {
                     Vector2 previous = stroke[i - 1];
                     Vector2 current = stroke[i];
                     
-                    AddSegment(vh, previous, current, radius, vertexColor);
+                    AddSegment(vh, previous, current, radius, strokeColor);
                     
-                    AddDisc(vh, current, radius, _roundingSegments, vertexColor);
+                    AddDisc(vh, current, radius, _roundingSegments, strokeColor);
                 }
             }
+        }
+
+        private static Color32 WithStrokeAlpha(Color32 source, float strokeAlpha) {
+            source.a = (byte)Mathf.RoundToInt(source.a * Mathf.Clamp01(strokeAlpha));
+            return source;
         }
 
         private void AddDisc(VertexHelper vertexHelper, Vector2 point, float radius, int segmentsCount, Color32 color) {
