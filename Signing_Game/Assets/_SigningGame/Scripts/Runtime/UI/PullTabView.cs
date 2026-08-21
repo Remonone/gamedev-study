@@ -138,6 +138,29 @@ namespace UI {
             RefreshInteraction();
         }
 
+        public void Configure(
+            PullTabAxis movementAxis,
+            RectTransform pulledObject,
+            Transform startPosition,
+            Transform stopPosition,
+            Transform disabledPosition,
+            float threshold = 100f,
+            bool initiallyAvailable = true) {
+            if (_initialized && _isValid) {
+                throw new InvalidOperationException("PullTabView cannot be reconfigured after initialization.");
+            }
+
+            _movementAxis = movementAxis;
+            _pulledObject = pulledObject;
+            _startPosition = startPosition;
+            _stopPosition = stopPosition;
+            _disabledPosition = disabledPosition;
+            _threshold = threshold;
+            _initiallyAvailable = initiallyAvailable;
+            _initialized = false;
+            enabled = true;
+        }
+
         public void SetOpen(bool open, bool immediate = false) {
             if (!TryInitialize()) return;
             if (!IsAvailable && open) return;

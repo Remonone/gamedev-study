@@ -55,6 +55,11 @@ namespace UI {
             EnsurePool();
             RewardIncomeDisplay reward = _pool.Get();
             reward.RectTransform.anchoredPosition = GetSpawnPosition();
+            if (result.Kind == DocumentKind.SignatureGuidance) {
+                reward.ShowAccuracy(result.Accuracy);
+                return;
+            }
+
             reward.Show(
                 result.Accuracy,
                 result.Status == RewardStatus.RewardGranted,

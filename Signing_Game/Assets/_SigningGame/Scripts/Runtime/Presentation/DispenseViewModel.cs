@@ -88,6 +88,10 @@ namespace Presentation {
             Refresh();
         }
 
+        public void RefreshPresentation() {
+            Refresh(true);
+        }
+
         public void AdvanceAfterClaim(DocumentOfferKey claimedKey) {
             Refresh();
             if (claimedKey.Kind != DocumentKind.Normal || _current == null || !_current.IsAvailable ||

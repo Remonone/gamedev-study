@@ -117,7 +117,8 @@ namespace Services {
         }
 
         private void OnDocumentHandled(DocumentHandleResult result) {
-            if (result.Status != RewardStatus.RewardGranted) return;
+            if (result.Kind == DocumentKind.SignatureGuidance ||
+                result.Status != RewardStatus.RewardGranted) return;
 
             _statistics.AddValue(GameStatisticIds.DocumentsSuccessfullySigned, 1d);
             if (result.Kind == DocumentKind.Bill) _billAcceptedCount++;

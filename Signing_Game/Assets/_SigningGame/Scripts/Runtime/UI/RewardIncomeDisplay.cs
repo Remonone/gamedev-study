@@ -12,6 +12,7 @@ namespace UI {
         [SerializeField, Min(0f)] private float _fadeDuration = 0.35f;
         [SerializeField] private Color _acceptedColor = new(0.51989424f, 0.8642394f, 0.37046114f, 1f);
         [SerializeField] private Color _rejectedColor = new(0.95f, 0.33f, 0.28f, 1f);
+        [SerializeField] private Color _accuracyColor = new(0.35f, 0.72f, 0.9f, 1f);
 
         private RectTransform _rectTransform;
         private CanvasGroup _canvasGroup;
@@ -50,6 +51,36 @@ namespace UI {
             _rectTransform.localScale = Vector3.one;
             _text.color = isAccepted ? _acceptedColor : _rejectedColor;
             _text.text = $"{(isAccepted ? acceptedText : "Rejected")}\nAcc.: {(accuracy * 100f):0.00}%";
+
+            Vector2 startPosition = _rectTransform.anchoredPosition;
+            float totalDuration = _visibleDuration + _fadeDuration;
+            _sequence = DOTween.Sequence()
+                .SetTarget(this)
+                .Append(DOTween
+                    .To(
+                        () => _rectTransform.anchoredPosition,
+                        value => _rectTransform.anchoredPosition = value,
+                        startPosition + _drift,
+                        totalDuration)
+                    .SetEase(Ease.OutCubic))
+                .Insert(
+                    _visibleDuration,
+                    DOTween.To(
+                        () => _canvasGroup.alpha,
+                        value => _canvasGroup.alpha = value,
+                        0f,
+                        _fadeDuration))
+                .OnComplete(Release);
+        }
+
+        public void ShowAccuracy(float accuracy) {
+            EnsureInitialized();
+            KillMotion();
+
+            _canvasGroup.alpha = 1f;
+            _rectTransform.localScale = Vector3.one;
+            _text.color = _accuracyColor;
+            _text.text = $"Accuracy: {(accuracy * 100f):0.00}%";
 
             Vector2 startPosition = _rectTransform.anchoredPosition;
             float totalDuration = _visibleDuration + _fadeDuration;

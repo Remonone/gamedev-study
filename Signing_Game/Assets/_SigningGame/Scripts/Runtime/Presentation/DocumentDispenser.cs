@@ -50,7 +50,10 @@ namespace Presentation {
 
             DocumentViewModel viewModel = null;
             SignatureGuidanceService guidanceService = ServiceLocator.For(this).Get<SignatureGuidanceService>();
-            bool hasGuidanceSnapshot = guidanceService.TryGetSnapshot(out SignatureGuidanceSnapshot guidance);
+            bool forceProgressiveGuidance = presentation.Kind == DocumentKind.SignatureGuidance;
+            bool hasGuidanceSnapshot = guidanceService.TryGetSnapshot(
+                forceProgressiveGuidance,
+                out SignatureGuidanceSnapshot guidance);
             try {
                 ServiceLocator.For(this).Get(out PlayerSignatureAcceptor acceptor);
                 viewModel = _builder
@@ -58,7 +61,9 @@ namespace Presentation {
                     .SetAcceptor(acceptor)
                     .Build();
                 document.Init(viewModel, presentation, hasGuidanceSnapshot ? guidance : null);
-                if (hasGuidanceSnapshot) guidanceService.ConsumeSessionReminder();
+                if (hasGuidanceSnapshot && guidance.IsSessionReminder) {
+                    guidanceService.ConsumeSessionReminder();
+                }
             }
             catch {
                 viewModel?.Dispose();
@@ -103,6 +108,7 @@ namespace Presentation {
                 DocumentKind.ClerkSalaryReview => _clerkSalaryReviewDocumentPrefab,
                 DocumentKind.Bill => _billDocumentPrefab,
                 DocumentKind.Practice => _practiceDocumentPrefab,
+                DocumentKind.SignatureGuidance => _normalDocumentPrefab,
                 _ => null
             };
             if (prefab == null) {

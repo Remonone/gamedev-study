@@ -37,6 +37,7 @@ namespace Presentation {
                 DocumentKind.ClerkSalaryReview => "SALARY REVIEW",
                 DocumentKind.Bill => offer.Header ?? "BILL",
                 DocumentKind.Practice => offer.Header ?? "PRACTICE",
+                DocumentKind.SignatureGuidance => offer.Header ?? "SIGNATURE GUIDANCE",
                 _ => string.Empty
             };
             ProfileText = string.IsNullOrWhiteSpace(offer.PersonName)

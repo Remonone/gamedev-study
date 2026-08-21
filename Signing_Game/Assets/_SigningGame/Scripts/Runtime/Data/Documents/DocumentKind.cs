@@ -5,6 +5,7 @@ namespace Data.Documents {
         ClerkHire = 2,
         ClerkSalaryReview = 3,
         Bill = 4,
-        Practice = 5
+        Practice = 5,
+        SignatureGuidance = 6
     }
 }

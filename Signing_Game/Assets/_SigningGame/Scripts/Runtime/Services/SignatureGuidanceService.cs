@@ -24,6 +24,10 @@ namespace Services {
         }
 
         public bool TryGetSnapshot(out SignatureGuidanceSnapshot snapshot) {
+            return TryGetSnapshot(false, out snapshot);
+        }
+
+        public bool TryGetSnapshot(bool forceProgressive, out SignatureGuidanceSnapshot snapshot) {
             snapshot = null;
             if (_signatureLoader == null || _repository == null ||
                 !_signatureLoader.TryGetActivePreset(out SignaturePresetDefinition preset)) {
@@ -46,6 +50,12 @@ namespace Services {
             _statistics?.TryGetValue(GameStatisticIds.DocumentsSuccessfullySigned, out successfulSignatures);
             SignatureGuidancePhase phase = SignatureGuidancePhaseCalculator.Calculate(successfulSignatures,
                 compiled.GuidanceFullDisplayAfterSignatures, compiled.GuidanceFadeOutSignatureCount);
+
+            if (forceProgressive) {
+                snapshot = new SignatureGuidanceSnapshot(false, SignatureGuidancePhaseKind.Progressive,
+                    SignatureGuidancePhase.MaximumAlpha, strokes);
+                return true;
+            }
 
             if (!_reminderConsumed) {
                 snapshot = new SignatureGuidanceSnapshot(true, SignatureGuidancePhaseKind.Full,

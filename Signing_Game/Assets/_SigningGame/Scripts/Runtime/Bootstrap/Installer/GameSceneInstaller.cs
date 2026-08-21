@@ -57,6 +57,8 @@ namespace Bootstrap.Installer {
             var billDocumentProducer = new BillDocumentProducer();
             container.Register(billDocumentProducer, typeof(IDocumentProducer));
             container.Register(new ResearchService());
+            container.Register(new DocumentQualityService());
+            container.Register(new SignatureGuidanceDocumentProducer());
             var practiceDocumentProducer = new PracticeDocumentProducer();
             container.Register(practiceDocumentProducer, typeof(IDocumentProducer));
             container.Register(new PlayerSignatureAcceptor());

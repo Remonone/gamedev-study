@@ -31,6 +31,7 @@ namespace Presentation {
         private DispensedDocumentPresentation _displayedPresentation;
         private DispensedDocumentPresentation _deferredPresentation;
         private IDisposable _viewModelObservation;
+        private IDisposable _qualityObservation;
         private IDisposable _dragObservation;
         private IDisposable _documentHoverObservation;
         private bool _isPointerOverDispenseArea;
@@ -62,6 +63,8 @@ namespace Presentation {
                 scope.Get<PlayerStatStash>().Documents,
                 new StableRandom((ulong)Time.deltaTime));
             _viewModelObservation = _viewModel.Changed.Subscribe(OnPresentationChanged);
+            _qualityObservation = scope.Get<DocumentQualityService>().Changed
+                .Subscribe(_ => _viewModel.RefreshPresentation());
             ApplyPresentation(_viewModel.Current);
             return UniTask.CompletedTask;
         }
@@ -69,6 +72,8 @@ namespace Presentation {
         public void Dispose() {
             _viewModelObservation?.Dispose();
             _viewModelObservation = null;
+            _qualityObservation?.Dispose();
+            _qualityObservation = null;
             _viewModel?.Dispose();
             _viewModel = null;
             DestroyOwnedDocument();
