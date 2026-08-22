@@ -23,6 +23,7 @@ namespace Presentation {
         [SerializeField] private Transform _shallowDocumentActive;
         [SerializeField] private AudioCue _documentSlideOut;
         [SerializeField] private AudioCue _documentSlideIn;
+        [SerializeField] private StampView _stampView;
 
         private DocumentView _activeDocument;
         private DocumentDispenser _dispenser;
@@ -65,6 +66,7 @@ namespace Presentation {
             _viewModelObservation = _viewModel.Changed.Subscribe(OnPresentationChanged);
             _qualityObservation = scope.Get<DocumentQualityService>().Changed
                 .Subscribe(_ => _viewModel.RefreshPresentation());
+            InitializeStamp(scope);
             ApplyPresentation(_viewModel.Current);
             return UniTask.CompletedTask;
         }
@@ -76,8 +78,18 @@ namespace Presentation {
             _qualityObservation = null;
             _viewModel?.Dispose();
             _viewModel = null;
+            _stampView?.Dispose();
+            _stampView = null;
             DestroyOwnedDocument();
             _deferredPresentation = null;
+        }
+
+        private void InitializeStamp(IServiceScope scope) {
+            if (_stampView == null) throw new InvalidOperationException("DispenseView requires a StampView.");
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) throw new InvalidOperationException("DispenseView requires a parent Canvas.");
+
+            _stampView.Initialize(scope.Get<UnlockService>(), canvas);
         }
 
         private void OnPresentationChanged(DispensedDocumentPresentation presentation) {

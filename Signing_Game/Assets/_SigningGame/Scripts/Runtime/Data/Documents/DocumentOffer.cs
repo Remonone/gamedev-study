@@ -32,6 +32,7 @@ namespace Data.Documents {
         public int? PersonAge { get; }
         public Value? Amount { get; }
         public double? InternalMultiplier { get; }
+        public bool RequiresStamp { get; }
 
         public DocumentOffer(
             DocumentOfferKey key,
@@ -41,7 +42,8 @@ namespace Data.Documents {
             string personName = null,
             int? personAge = null,
             Value? amount = null,
-            double? internalMultiplier = null) {
+            double? internalMultiplier = null,
+            bool requiresStamp = false) {
             Key = key;
             IsAvailable = isAvailable;
             Header = header;
@@ -50,6 +52,7 @@ namespace Data.Documents {
             PersonAge = personAge;
             Amount = amount;
             InternalMultiplier = internalMultiplier;
+            RequiresStamp = requiresStamp;
         }
 
         public bool Equals(DocumentOffer other) {
@@ -57,7 +60,7 @@ namespace Data.Documents {
                    string.Equals(Header, other.Header, StringComparison.Ordinal) && Icon == other.Icon &&
                    string.Equals(PersonName, other.PersonName, StringComparison.Ordinal) &&
                    PersonAge == other.PersonAge && Nullable.Equals(Amount, other.Amount) &&
-                   InternalMultiplier == other.InternalMultiplier;
+                   InternalMultiplier == other.InternalMultiplier && RequiresStamp == other.RequiresStamp;
         }
 
         public override bool Equals(object obj) => Equals(obj as DocumentOffer);
@@ -72,6 +75,7 @@ namespace Data.Documents {
             hash.Add(PersonAge);
             hash.Add(Amount);
             hash.Add(InternalMultiplier);
+            hash.Add(RequiresStamp);
             return hash.ToHashCode();
         }
     }

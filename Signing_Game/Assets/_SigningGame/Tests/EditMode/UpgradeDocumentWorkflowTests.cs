@@ -712,7 +712,7 @@ namespace Tests.EditMode {
             public int DisposeCount { get; private set; }
             public DocumentKind Kind => DocumentKind.Normal;
             public IDocumentEvaluationPolicy EvaluationPolicy { get; } = new PassthroughPolicy();
-            public bool TryProcess(SignatureEvaluationResult result) => true;
+            public bool TryProcess(SignatureEvaluationResult result, bool isStamped = false) => true;
             public void Dispose() => DisposeCount++;
         }
 

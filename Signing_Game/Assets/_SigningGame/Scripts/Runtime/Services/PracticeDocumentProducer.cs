@@ -45,7 +45,7 @@ namespace Services {
                 _policy = new PracticeEvaluationPolicy(claim.SignatureThreshold);
             }
 
-            public bool TryProcess(SignatureEvaluationResult result) {
+            public bool TryProcess(SignatureEvaluationResult result, bool isStamped = false) {
                 if (result == null) throw new ArgumentNullException(nameof(result));
                 if (_finished) return false;
                 bool processed = _research.TryProcessClaim(_claim, result);

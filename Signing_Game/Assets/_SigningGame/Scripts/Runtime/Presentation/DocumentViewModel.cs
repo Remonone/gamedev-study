@@ -21,12 +21,18 @@ namespace Presentation {
 
         public bool IsSigning => _signatureRecorder.IsAttemptActive;
         public bool IsStrokeActive => _signatureRecorder.IsStrokeActive;
+        public bool IsStamped { get; private set; }
 
         public void Evaluate(SignatureAttempt attempt) {
             if (_disposed) throw new ObjectDisposedException(nameof(DocumentViewModel));
             if (_evaluated) throw new InvalidOperationException("A document can only be evaluated once.");
             _evaluated = true;
-            _acceptor.AcceptSignature(attempt, _session);
+            _acceptor.AcceptSignature(attempt, _session, IsStamped);
+        }
+
+        public void MarkStamped() {
+            if (_disposed) throw new ObjectDisposedException(nameof(DocumentViewModel));
+            IsStamped = true;
         }
 
         public void StartStroke(SignatureInputPoint firstPoint) {

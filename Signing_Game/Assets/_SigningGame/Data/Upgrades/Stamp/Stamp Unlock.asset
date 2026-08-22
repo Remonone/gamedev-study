@@ -10,33 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
-  m_Name: Upgrade Node
+  m_Name: Stamp Unlock
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
-  Id: office_salary_review_upgrade
-  Name: office_salary_review_upgrade
-  Description: 
-  MaxLevel: 0
+  Id: stamp_unlock
+  Name: Stamp
+  Description: Unlocks the stamp for marking documents.
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080570608353369
+    rid: 841080518039568999
   Modifiers: []
-  FeatureUnlockIds: []
-  GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 1520, y: 440}
-  LockedDisplayMode: 0
+  FeatureUnlockIds:
+  - stamp
+  GrantsMetaCurrencyPoint: 1
+  TreePosition: {x: -120, y: -80}
+  LockedDisplayMode: 1
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
-  Children:
-  - Child: {fileID: 11400000, guid: 0ac4835f9214157f0bcff860efea6294, type: 2}
-    DrawEdge: 1
+  Children: []
   references:
     version: 2
     RefIds:
-    - rid: 841080570608353369
+    - rid: 841080518039568999
       type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         Value:
-          _stored: 0
+          _stored: 25
           _base:
             Degree: 0

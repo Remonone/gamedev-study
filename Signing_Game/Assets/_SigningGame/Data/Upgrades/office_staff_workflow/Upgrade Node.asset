@@ -23,7 +23,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 37d3767178d11c8dc98e8aad952b0d84, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 1200, y: 120}
+  TreePosition: {x: 1200, y: 80}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

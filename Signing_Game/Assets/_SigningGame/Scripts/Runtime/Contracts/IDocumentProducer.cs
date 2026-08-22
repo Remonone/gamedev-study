@@ -15,7 +15,7 @@ namespace Contracts {
     public interface IDocumentSession : IDisposable {
         DocumentKind Kind { get; }
         IDocumentEvaluationPolicy EvaluationPolicy { get; }
-        bool TryProcess(SignatureEvaluationResult result);
+        bool TryProcess(SignatureEvaluationResult result, bool isStamped = false);
     }
 
     public interface IDocumentEvaluationPolicy {

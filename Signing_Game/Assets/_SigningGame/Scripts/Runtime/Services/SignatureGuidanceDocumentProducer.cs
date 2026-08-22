@@ -73,7 +73,7 @@ namespace Services {
             public DocumentKind Kind => DocumentKind.SignatureGuidance;
             public IDocumentEvaluationPolicy EvaluationPolicy => Policy;
 
-            public bool TryProcess(SignatureEvaluationResult result) {
+            public bool TryProcess(SignatureEvaluationResult result, bool isStamped = false) {
                 if (result == null) throw new ArgumentNullException(nameof(result));
                 if (_finished) return false;
 

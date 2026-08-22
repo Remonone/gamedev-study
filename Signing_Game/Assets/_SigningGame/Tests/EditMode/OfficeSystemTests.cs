@@ -683,7 +683,8 @@ namespace Tests.EditMode {
             SetDocumentCount(harness.Documents, 1);
             var producer = new NormalDocumentProducer();
             producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
-            Assert.That(producer.TryProduce(new DocumentOfferKey(DocumentKind.Normal, "normal"),
+            Assert.That(producer.TryPeekOffer(out DocumentOffer offer), Is.True);
+            Assert.That(producer.TryProduce(offer.Key,
                 out IDocumentSession session), Is.True);
             double before = harness.Wallet.CurrentBalance.ToDouble();
 
@@ -701,7 +702,8 @@ namespace Tests.EditMode {
             SetDocumentCount(harness.Documents, 1);
             var producer = new NormalDocumentProducer();
             producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
-            Assert.That(producer.TryProduce(new DocumentOfferKey(DocumentKind.Normal, "normal"),
+            Assert.That(producer.TryPeekOffer(out DocumentOffer offer), Is.True);
+            Assert.That(producer.TryProduce(offer.Key,
                 out IDocumentSession session), Is.True);
             double before = harness.Wallet.CurrentBalance.ToDouble();
 
@@ -710,6 +712,43 @@ namespace Tests.EditMode {
             // A whole multi-pay chance of 1.0 grants a second full payment with its own crit roll.
             Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(before + 2d).Within(0.0001d));
             session.Dispose();
+        }
+
+        [Test]
+        public void NormalDocumentReward_UsesStampStateForRequiredAndOptionalDocuments() {
+            OfficeHarness harness = CreateHarness(
+                CreateEntries(),
+                incomeEntries: new IncomeEntries(1f, 0.4f, Value.One));
+            harness.UnlockStamp();
+            SetDocumentCount(harness.Documents, 1);
+            var producer = new NormalDocumentProducer();
+            producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+
+            Assert.That(producer.TryPeekOffer(out DocumentOffer firstOffer), Is.True);
+            Assert.That(firstOffer.RequiresStamp, Is.False);
+            Assert.That(producer.TryProduce(firstOffer.Key, out IDocumentSession discarded), Is.True);
+            discarded.Dispose();
+
+            Assert.That(producer.TryPeekOffer(out DocumentOffer requiredOffer), Is.True);
+            Assert.That(requiredOffer.RequiresStamp, Is.True);
+            Assert.That(producer.TryProduce(requiredOffer.Key, out IDocumentSession required), Is.True);
+            double beforeRequired = harness.Wallet.CurrentBalance.ToDouble();
+            Assert.That(required.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f), true),
+                Is.True);
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(),
+                Is.EqualTo(beforeRequired + 3d).Within(0.0001d));
+            required.Dispose();
+
+            SetDocumentCount(harness.Documents, 1);
+            Assert.That(producer.TryPeekOffer(out DocumentOffer optionalOffer), Is.True);
+            Assert.That(optionalOffer.RequiresStamp, Is.False);
+            Assert.That(producer.TryProduce(optionalOffer.Key, out IDocumentSession optional), Is.True);
+            double beforeOptional = harness.Wallet.CurrentBalance.ToDouble();
+            Assert.That(optional.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f), true),
+                Is.True);
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(),
+                Is.EqualTo(beforeOptional + 0.5d).Within(0.0001d));
+            optional.Dispose();
         }
 
         [Test]
@@ -1081,7 +1120,8 @@ namespace Tests.EditMode {
             Observable<float> updates = null, Value? income = null, IncomeEntries? incomeEntries = null) {
             UpgradeNodeDefinition officeUnlock = CreateUpgrade("office_unlock", FeatureIds.Office);
             UpgradeNodeDefinition documentUpgrade = CreateUpgrade("document_upgrade");
-            var provider = new FakeAssetProvider(new[] { officeUnlock, documentUpgrade });
+            UpgradeNodeDefinition stampUnlock = CreateUpgrade("stamp_unlock", FeatureIds.Stamp);
+            var provider = new FakeAssetProvider(new[] { officeUnlock, documentUpgrade, stampUnlock });
             var scope = new ServiceScope(null);
             var wallet = new WalletService();
             wallet.ReplenishWallet(new Value(100));
@@ -1119,7 +1159,7 @@ namespace Tests.EditMode {
             stash.PreInitializeAsync(scope).GetAwaiter().GetResult();
             office.InitializeAsync(scope).GetAwaiter().GetResult();
 
-            var harness = new OfficeHarness(scope, wallet, cache, upgrades, documents, statistics,
+            var harness = new OfficeHarness(scope, wallet, cache, upgrades, unlocks, documents, statistics,
                 officeCalculator, office);
             _disposables.Add(harness);
             return harness;
@@ -1234,6 +1274,7 @@ namespace Tests.EditMode {
             public WalletService Wallet { get; }
             public CacheVersionService Cache { get; }
             public UpgradeService Upgrades { get; }
+            public UnlockService Unlocks { get; }
             public DocumentGeneratorService Documents { get; }
             public GameStatisticsService Statistics { get; }
             public StaticCalculator<OfficeEntries> OfficeCalculator { get; }
@@ -1241,12 +1282,14 @@ namespace Tests.EditMode {
             private bool _disposed;
 
             public OfficeHarness(ServiceScope scope, WalletService wallet, CacheVersionService cache,
-                UpgradeService upgrades, DocumentGeneratorService documents, GameStatisticsService statistics,
+                UpgradeService upgrades, UnlockService unlocks, DocumentGeneratorService documents,
+                GameStatisticsService statistics,
                 StaticCalculator<OfficeEntries> officeCalculator, OfficeService office) {
                 Scope = scope;
                 Wallet = wallet;
                 Cache = cache;
                 Upgrades = upgrades;
+                Unlocks = unlocks;
                 Documents = documents;
                 Statistics = statistics;
                 OfficeCalculator = officeCalculator;
@@ -1255,6 +1298,10 @@ namespace Tests.EditMode {
 
             public void UnlockOffice() {
                 PurchaseAndComplete(Upgrades, "office_unlock");
+            }
+
+            public void UnlockStamp() {
+                PurchaseAndComplete(Upgrades, "stamp_unlock");
             }
 
             public void Dispose() {

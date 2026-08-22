@@ -9,6 +9,8 @@ namespace Data.Cache {
         public int DocumentQualityLevel;
         
         public int SelectedDocumentQualityLevel;
+
+        public int StampRequiredEveryNthOffer;
     }
     
     [CreateAssetMenu(menuName = "References/Document Reference")]

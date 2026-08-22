@@ -18,6 +18,7 @@ namespace Presentation {
         public string ProfileText { get; }
         public string AmountText { get; }
         public string InternalMultiplierText { get; }
+        public bool RequiresStamp => Offer.RequiresStamp;
 
         public DispensedDocumentPresentation(
             DocumentOffer offer,

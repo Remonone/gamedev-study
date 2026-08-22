@@ -15,3 +15,4 @@ MonoBehaviour:
   Value:
     DocumentQualityLevel: 1
     SelectedDocumentQualityLevel: 0
+    StampRequiredEveryNthOffer: 2

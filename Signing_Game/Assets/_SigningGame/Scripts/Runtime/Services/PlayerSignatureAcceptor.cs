@@ -29,6 +29,10 @@ namespace Services {
         }
 
         public bool AcceptSignature(SignatureAttempt attempt, IDocumentSession session) {
+            return AcceptSignature(attempt, session, false);
+        }
+
+        public bool AcceptSignature(SignatureAttempt attempt, IDocumentSession session, bool isStamped) {
             if (attempt == null) throw new ArgumentNullException(nameof(attempt));
             if (session == null) throw new ArgumentNullException(nameof(session));
 
@@ -41,7 +45,7 @@ namespace Services {
                 _stash.GetActivePreset(),
                 inputs.Difficulty,
                 inputs.Modifiers);
-            if (!session.TryProcess(evaluationResult)) return false;
+            if (!session.TryProcess(evaluationResult, isStamped)) return false;
 
             _documentResults.OnNext(new DocumentHandleResult(
                 session.Kind,

@@ -30,10 +30,14 @@ namespace Presentation {
         private DocumentViewModel _viewModel;
         private DispensedDocumentPresentation _presentation;
         private AudioService _audioService;
+        private StampGraphic _stampGraphic;
+        private readonly Vector3[] _documentWorldCorners = new Vector3[4];
 
         private double _soundCooldown;
 
         public DocumentViewModel ViewModel => _viewModel;
+        internal bool CanReceiveStamp => _presentation != null &&
+                                          DocumentKind.Normal.Equals(_presentation.Kind);
 
         public void ShowPreview(DispensedDocumentPresentation presentation) {
             if (presentation == null) throw new ArgumentNullException(nameof(presentation));
@@ -41,6 +45,7 @@ namespace Presentation {
 
             _field.HideGuidance();
             _field.Clear();
+            _stampGraphic.Clear();
             _presentation = presentation;
             RefreshView();
             gameObject.SetActive(true);
@@ -54,6 +59,7 @@ namespace Presentation {
             if (_viewModel != null) throw new InvalidOperationException("DocumentView can only be bound once.");
 
             _field.Clear();
+            _stampGraphic.Clear();
             _presentation = presentation;
             _viewModel = nextViewModel;
             RefreshView();
@@ -74,7 +80,8 @@ namespace Presentation {
             _text.text = TmpDocumentFormatter.Format(document);
             if (DocumentKind.Normal.Equals(_presentation.Kind))
                 _header.color = _presentation.HeaderColor;
-            SetOptionalText(_headerTitle, _presentation.HeaderText);
+            string headerText = _presentation.RequiresStamp ? "STAMP REQUIRED" : _presentation.HeaderText;
+            SetOptionalText(_headerTitle, headerText);
             SetOptionalText(_profileText, _presentation.ProfileText);
             SetOptionalText(_amountText, _presentation.AmountText);
             SetOptionalText(_internalMultiplierText, _presentation.InternalMultiplierText);
@@ -106,7 +113,68 @@ namespace Presentation {
             return _viewModel.CollectSignature(endTime);
         }
 
+        internal bool TryGetScreenRect(Camera eventCamera, out Rect screenRect) {
+            screenRect = default;
+            if (_viewModel == null || !CanReceiveStamp || !isActiveAndEnabled) return false;
+
+            RectTransform documentRect = (RectTransform)transform;
+            documentRect.GetWorldCorners(_documentWorldCorners);
+            Vector2 first = RectTransformUtility.WorldToScreenPoint(eventCamera, _documentWorldCorners[0]);
+            float xMin = first.x;
+            float xMax = first.x;
+            float yMin = first.y;
+            float yMax = first.y;
+            for (int index = 1; index < _documentWorldCorners.Length; index++) {
+                Vector2 point = RectTransformUtility.WorldToScreenPoint(
+                    eventCamera,
+                    _documentWorldCorners[index]);
+                xMin = Mathf.Min(xMin, point.x);
+                xMax = Mathf.Max(xMax, point.x);
+                yMin = Mathf.Min(yMin, point.y);
+                yMax = Mathf.Max(yMax, point.y);
+            }
+
+            screenRect = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
+            return screenRect.width > 0f && screenRect.height > 0f;
+        }
+
+        internal bool TryPlaceStamp(Rect stampScreenRect, Camera eventCamera) {
+            if (_viewModel == null || !_stampGraphic ||
+                !TryGetScreenRect(eventCamera, out Rect documentScreenRect)) return false;
+
+            float xMin = Mathf.Max(stampScreenRect.xMin, documentScreenRect.xMin);
+            float yMin = Mathf.Max(stampScreenRect.yMin, documentScreenRect.yMin);
+            float xMax = Mathf.Min(stampScreenRect.xMax, documentScreenRect.xMax);
+            float yMax = Mathf.Min(stampScreenRect.yMax, documentScreenRect.yMax);
+            if (xMax <= xMin || yMax <= yMin) return false;
+
+            RectTransform stampRect = _stampGraphic.rectTransform;
+            Vector2 localMin;
+            Vector2 localMax;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    stampRect,
+                    new Vector2(xMin, yMin),
+                    eventCamera,
+                    out localMin) ||
+                !RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    stampRect,
+                    new Vector2(xMax, yMax),
+                    eventCamera,
+                    out localMax)) return false;
+
+            Rect localRect = Rect.MinMaxRect(
+                Mathf.Min(localMin.x, localMax.x),
+                Mathf.Min(localMin.y, localMax.y),
+                Mathf.Max(localMin.x, localMax.x),
+                Mathf.Max(localMin.y, localMax.y));
+            if (!_stampGraphic.TryAddStamp(localRect)) return false;
+
+            _viewModel.MarkStamped();
+            return true;
+        }
+
         private void Awake() {
+            _stampGraphic = CreateStampGraphic();
             ServiceLocator.For(this).TryGet(out _audioService);
             _field.OnInput.Subscribe(OnDraw).AddTo(this);
 
@@ -155,6 +223,22 @@ namespace Presentation {
             _viewModel?.Dispose();
             _viewModel = null;
             _presentation = null;
+        }
+
+        private StampGraphic CreateStampGraphic() {
+            var stampObject = new GameObject("Stamp Graphic", typeof(RectTransform));
+            stampObject.transform.SetParent(transform, false);
+            RectTransform rect = (RectTransform)stampObject.transform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            StampGraphic graphic = stampObject.AddComponent<StampGraphic>();
+            graphic.color = new Color(0.72f, 0.08f, 0.08f, 0.42f);
+            graphic.raycastTarget = false;
+            graphic.transform.SetAsLastSibling();
+            return graphic;
         }
     }
 }

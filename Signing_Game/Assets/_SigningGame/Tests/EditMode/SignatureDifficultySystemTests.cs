@@ -327,7 +327,7 @@ namespace Tests.EditMode {
             public FakeSession(IDocumentEvaluationPolicy policy) => EvaluationPolicy = policy;
             public DocumentKind Kind => DocumentKind.Normal;
             public IDocumentEvaluationPolicy EvaluationPolicy { get; }
-            public bool TryProcess(SignatureEvaluationResult result) => true;
+            public bool TryProcess(SignatureEvaluationResult result, bool isStamped = false) => true;
             public void Dispose() { }
         }
 

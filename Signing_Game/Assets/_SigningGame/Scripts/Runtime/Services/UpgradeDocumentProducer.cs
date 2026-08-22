@@ -63,7 +63,7 @@ namespace Services {
                 _claim = claim;
             }
 
-            public bool TryProcess(SignatureEvaluationResult result) {
+            public bool TryProcess(SignatureEvaluationResult result, bool isStamped = false) {
                 if (result == null) throw new ArgumentNullException(nameof(result));
                 if (_finished) return false;
                 bool completed = _upgrades.TryCompletePendingUpgrade(_claim, result);
