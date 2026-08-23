@@ -39,10 +39,8 @@ namespace UI {
                 float length = delta.magnitude;
                 if (length <= Mathf.Epsilon) continue;
 
-                Vector2 perpendicular = new(-delta.y / length, delta.x / length);
-                float bend = Mathf.Min(_curvature, length * 0.2f);
-                Vector2 firstControl = edge.Start + delta / 3f + perpendicular * bend;
-                Vector2 secondControl = edge.Start + delta * (2f / 3f) + perpendicular * bend;
+                CalculateBezierControls(edge.Start, edge.End, _curvature,
+                    out Vector2 firstControl, out Vector2 secondControl);
                 Vector2 previous = edge.Start;
 
                 for (int segment = 1; segment <= _segments; segment++) {
@@ -67,6 +65,31 @@ namespace UI {
             }
 
             return true;
+        }
+
+        internal static void CalculateBezierControls(
+            Vector2 start,
+            Vector2 end,
+            float curvature,
+            out Vector2 firstControl,
+            out Vector2 secondControl) {
+            Vector2 delta = end - start;
+            float horizontalDistance = Mathf.Abs(delta.x);
+            float verticalDistance = Mathf.Abs(delta.y);
+            float maximumHandleLength = Mathf.Max(0f, curvature);
+
+            if (horizontalDistance >= verticalDistance) {
+                float handleLength = Mathf.Min(maximumHandleLength, horizontalDistance * 0.5f);
+                Vector2 tangent = new(Mathf.Sign(delta.x) * handleLength, 0f);
+                firstControl = start + tangent;
+                secondControl = end - tangent;
+                return;
+            }
+
+            float verticalHandleLength = Mathf.Min(maximumHandleLength, verticalDistance * 0.5f);
+            Vector2 verticalTangent = new(0f, Mathf.Sign(delta.y) * verticalHandleLength);
+            firstControl = start + verticalTangent;
+            secondControl = end - verticalTangent;
         }
 
         private static Vector2 EvaluateCubic(Vector2 start, Vector2 firstControl, Vector2 secondControl,

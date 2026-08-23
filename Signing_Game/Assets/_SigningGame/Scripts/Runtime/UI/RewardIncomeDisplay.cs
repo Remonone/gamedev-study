@@ -103,6 +103,36 @@ namespace UI {
                 .OnComplete(Release);
         }
 
+        public void ShowIncome(string incomeText) {
+            EnsureInitialized();
+            KillMotion();
+
+            _canvasGroup.alpha = 1f;
+            _rectTransform.localScale = Vector3.one;
+            _text.color = _acceptedColor;
+            _text.text = incomeText ?? string.Empty;
+
+            Vector2 startPosition = _rectTransform.anchoredPosition;
+            float totalDuration = _visibleDuration + _fadeDuration;
+            _sequence = DOTween.Sequence()
+                .SetTarget(this)
+                .Append(DOTween
+                    .To(
+                        () => _rectTransform.anchoredPosition,
+                        value => _rectTransform.anchoredPosition = value,
+                        startPosition + _drift,
+                        totalDuration)
+                    .SetEase(Ease.OutCubic))
+                .Insert(
+                    _visibleDuration,
+                    DOTween.To(
+                        () => _canvasGroup.alpha,
+                        value => _canvasGroup.alpha = value,
+                        0f,
+                        _fadeDuration))
+                .OnComplete(Release);
+        }
+
         public void ResetForPool() {
             EnsureInitialized();
             KillMotion();

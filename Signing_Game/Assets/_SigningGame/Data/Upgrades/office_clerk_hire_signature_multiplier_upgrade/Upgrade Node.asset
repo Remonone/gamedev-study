@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_clerk_hire_signature_multiplier_upgrade
-  Name: office_clerk_hire_signature_multiplier_upgrade
-  Description: 
+  Name: Exceptional Applicants
+  Description: Raise the maximum signature multiplier a new clerk can bring.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

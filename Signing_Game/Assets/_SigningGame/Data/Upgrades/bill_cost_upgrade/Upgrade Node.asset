@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_cost_upgrade
-  Name: bill_cost_upgrade
-  Description: 
+  Name: Efficient Procurement
+  Description: Reduce the cost to begin a bill.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

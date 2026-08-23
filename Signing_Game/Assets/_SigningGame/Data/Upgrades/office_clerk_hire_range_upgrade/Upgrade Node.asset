@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_clerk_hire_range_upgrade
-  Name: office_clerk_hire_range_upgrade
-  Description: 
+  Name: Wider Talent Pool
+  Description: Widen the range of quality available when hiring a clerk.
   MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:

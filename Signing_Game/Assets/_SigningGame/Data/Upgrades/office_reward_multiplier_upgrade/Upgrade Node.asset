@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_reward_multiplier_upgrade
-  Name: office_reward_multiplier_upgrade
-  Description: 
+  Name: Clerk Incentives
+  Description: Increase the reward multiplier for documents accepted by clerks.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

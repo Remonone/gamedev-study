@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: upgrade_sign_crit_chance
-  Name: upgrade_sign_crit_chance
-  Description: 
+  Name: Authoritative Signature
+  Description: Increase the chance that a manual signature earns a critical payout.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

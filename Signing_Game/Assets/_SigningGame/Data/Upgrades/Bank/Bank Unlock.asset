@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Bank Unlock
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_unlock
-  Name: Bank
-  Description: Unlocks the bank.
+  Name: Municipal Bank
+  Description: Unlock the Municipal Bank for reliable passive income.
   MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:

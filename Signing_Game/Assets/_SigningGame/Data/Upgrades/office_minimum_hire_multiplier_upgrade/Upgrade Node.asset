@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_minimum_hire_multiplier_upgrade
-  Name: office_minimum_hire_multiplier_upgrade
-  Description: 
+  Name: Minimum Qualifications
+  Description: Raise the minimum signature multiplier for newly hired clerks.
   MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:

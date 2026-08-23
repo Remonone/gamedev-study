@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: upgrade_minimum_similarity
-  Name: upgrade_minimum_similarity
-  Description: 
+  Name: Clearer Standards
+  Description: Lower the minimum signature similarity required for acceptance.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

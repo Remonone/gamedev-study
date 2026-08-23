@@ -137,6 +137,27 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void Tick_AggregatesBalanceAndPublishesOneCredit() {
+            BankEntries entries = DefaultEntries();
+            entries.PayoutAmount = new Value(500d);
+            entries.MultiPayChance = 1f;
+            BankHarness harness = CreateHarness(entries);
+            harness.Wallet.Deserialize(new JObject { ["stored"] = 1d, ["degree"] = 4 });
+            harness.UnlockBank();
+
+            var credited = new List<Value>();
+            using IDisposable creditedSubscription = harness.Wallet.Credited.Subscribe(credited.Add);
+            Value before = harness.Wallet.CurrentBalance;
+
+            harness.Bank.Tick(10f);
+
+            Assert.That(credited, Has.Count.EqualTo(1));
+            Assert.That(credited[0].Base.Degree, Is.EqualTo(1));
+            Assert.That(credited[0].Stored, Is.EqualTo(1d).Within(0.0000001d));
+            Assert.That(harness.Wallet.CurrentBalance, Is.EqualTo(before + new Value(1000d)));
+        }
+
+        [Test]
         public void Tick_CapsPayoutsAndRetainsBacklog() {
             BankEntries entries = DefaultEntries();
             entries.PayoutIntervalSeconds = 1f;

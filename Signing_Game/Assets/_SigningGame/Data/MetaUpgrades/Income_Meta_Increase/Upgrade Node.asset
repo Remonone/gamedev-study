@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.MetaUpgradeNodeDefinition
   Id: Income_Meta_Increase
   Name: Effective Management
-  Description: Increase income from signing documents by ${increase_income_meta}%
+  Description: Permanently increase income earned from manual signatures.
   MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:

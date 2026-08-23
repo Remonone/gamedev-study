@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_staff_workflow_income
-  Name: office_staff_workflow_income
-  Description: 
+  Name: Productive Routines
+  Description: Increase document output from each administrative-work payout.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

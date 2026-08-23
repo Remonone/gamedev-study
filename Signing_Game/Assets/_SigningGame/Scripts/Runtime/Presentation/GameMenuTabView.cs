@@ -13,11 +13,11 @@ namespace Presentation {
     public sealed class GameMenuTabView : MonoBehaviour {
         private readonly CompositeDisposable _subscriptions = new();
 
-        private GameplaySettingsPopupView _settingsPopup;
         [SerializeField] private PullTabView _pullTab;
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _guidanceButton;
         [SerializeField] private Button _saveButton;
+        [SerializeField] private GameplaySettingsPopupView _settingsPopup;
         private GameMenuTabViewModel _viewModel;
 
         private async void Start() {
@@ -33,7 +33,12 @@ namespace Presentation {
 
             if (this == null || locator.InitializationException != null) return;
 
-            BuildUi(locator);
+            if (_settingsPopup == null) {
+                Debug.LogError("GameMenuTabView requires a scene-authored settings popup.", this);
+                return;
+            }
+
+            _settingsPopup.Bind(locator.Get<AudioSettingsService>(), CloseSettings);
             _settingsButton.onClick.AddListener(OpenSettings);
             _guidanceButton.onClick.AddListener(RequestGuidance);
             _saveButton.onClick.AddListener(SaveAndExit);
@@ -42,13 +47,6 @@ namespace Presentation {
                 locator.Get<SaveService>(),
                 locator.Get<SceneFlowService>());
             _viewModel.SettingsVisible.Subscribe(_settingsPopup.SetVisible).AddTo(_subscriptions);
-        }
-
-        private void BuildUi(ServiceLocator locator) {
-            var popupObject = new GameObject("Gameplay Settings Popup", typeof(RectTransform));
-            popupObject.transform.SetParent(transform, false);
-            _settingsPopup = popupObject.AddComponent<GameplaySettingsPopupView>();
-            _settingsPopup.Bind(locator.Get<AudioSettingsService>(), CloseSettings);
         }
 
         private void OpenSettings() => _viewModel?.OpenSettings();

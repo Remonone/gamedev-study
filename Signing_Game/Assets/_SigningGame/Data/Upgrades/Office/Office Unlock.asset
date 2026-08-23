@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_unlock
   Name: Administration Office
-  Description: Unlocks the administration office.
+  Description: Open the Administration Office to automate document processing.
   MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:

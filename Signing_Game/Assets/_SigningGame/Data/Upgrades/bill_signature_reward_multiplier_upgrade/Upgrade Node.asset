@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_signature_reward_multiplier_upgrade
-  Name: bill_signature_reward_multiplier_upgrade
-  Description: 
+  Name: Strong Mandate
+  Description: Increase a bill’s reward for an excellent activation signature.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

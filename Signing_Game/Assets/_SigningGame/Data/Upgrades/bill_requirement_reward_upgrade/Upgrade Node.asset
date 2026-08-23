@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_requirement_reward_upgrade
-  Name: bill_requirement_reward_upgrade
-  Description: 
+  Name: Ambitious Mandates
+  Description: Increase the reward granted by each fulfilled bill requirement.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_acceptance_threshold_upgrade
-  Name: office_acceptance_threshold_upgrade
-  Description: 
+  Name: Pragmatic Review
+  Description: Lower the signature threshold clerks need to accept a document.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

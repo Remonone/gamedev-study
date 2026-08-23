@@ -71,7 +71,7 @@ namespace Presentation {
 
             if (comparison > 0) {
                 Value delta = (next - current).Value;
-                return $"{current}({delta})";
+                return $"{current}(+{delta})";
             }
 
             Value decrease = (current - next).Value;

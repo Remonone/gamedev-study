@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_hire_signature_median
-  Name: office_hire_signature_median
-  Description: 
+  Name: Better Candidates
+  Description: Improve the typical signature quality of newly hired clerks.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

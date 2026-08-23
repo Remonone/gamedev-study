@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Bill
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_unlock
-  Name: Bill Unlock
-  Description: Unlocks the bill department for improving quality of living in the
-    city
+  Name: Legislative Office
+  Description: Unlock the Legislative Office and begin funding civic bills.
   MaxLevel: 1
   Icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
   CostFormula:

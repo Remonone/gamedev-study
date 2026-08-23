@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_payment_increase_upgrade
-  Name: bank_payment_increase_upgrade
-  Description: 
+  Name: Capital Reserves
+  Description: Increase each payment from the Municipal Bank.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

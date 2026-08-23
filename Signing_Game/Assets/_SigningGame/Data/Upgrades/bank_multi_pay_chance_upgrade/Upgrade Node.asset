@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_multi_pay_chance_upgrade
   Name: Repeat Interest Payment
-  Description: 
+  Description: Give bank payouts a chance to be paid an additional time.
   MaxLevel: 20
   Icon: {fileID: 0}
   CostFormula:

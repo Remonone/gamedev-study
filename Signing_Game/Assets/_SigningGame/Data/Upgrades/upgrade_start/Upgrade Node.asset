@@ -13,12 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: upgrade_start
-  Name: Taking Office
-  Description: 'Start your journey as a mayor of this small city.
-
-
-    Will unlock
-    upgrades and from now on your work will affect on efficiency of your administration.'
+  Name: Mayoral Oath
+  Description: Formally take office and begin building a more efficient administration.
   MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:

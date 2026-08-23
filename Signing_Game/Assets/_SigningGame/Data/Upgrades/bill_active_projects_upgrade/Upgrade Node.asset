@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_active_projects_upgrade
-  Name: bill_active_projects_upgrade
-  Description: 
+  Name: Parallel Legislation
+  Description: Allow more bills to be worked on at the same time.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

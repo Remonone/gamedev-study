@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: upgrade_income_mult
-  Name: upgrade_income_mult
-  Description: 
+  Name: Revenue Leverage
+  Description: Increase the overall income multiplier from signed documents.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

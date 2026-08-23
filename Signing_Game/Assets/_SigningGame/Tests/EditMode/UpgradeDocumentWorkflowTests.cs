@@ -332,9 +332,9 @@ namespace Tests.EditMode {
             increasing.Modifiers = new[] { CreateModifier("generation", new LevelValueDefinition()) };
 
             Assert.That(UpgradeDescriptionFormatter.Format(increasing, 0),
-                Is.EqualTo("Generation 0(1); unknown ${missing}"));
+                Is.EqualTo("Generation 0(+1); unknown ${missing}"));
             Assert.That(UpgradeDescriptionFormatter.Format(increasing, 2),
-                Is.EqualTo("Generation 2(1); unknown ${missing}"));
+                Is.EqualTo("Generation 2(+1); unknown ${missing}"));
 
             increasing.MaxLevel = 2;
             Assert.That(UpgradeDescriptionFormatter.Format(increasing, 2),

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: document_quality_1
-  Name: document_quality_1
-  Description: 
+  Name: Document Standards I
+  Description: Improve the quality of available documents, raising their reward potential.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

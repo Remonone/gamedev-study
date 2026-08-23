@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: archive_point_document_income_upgrade
-  Name: archive_upgrade
-  Description: 
+  Name: Historical Analysis
+  Description: Earn more research points for each accepted document.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

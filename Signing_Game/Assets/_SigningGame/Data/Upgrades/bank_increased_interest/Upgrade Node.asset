@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_increased_interest
-  Name: bank_increased_interest
-  Description: 
+  Name: Higher Interest Rate
+  Description: Increase the interest earned by the Municipal Bank.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

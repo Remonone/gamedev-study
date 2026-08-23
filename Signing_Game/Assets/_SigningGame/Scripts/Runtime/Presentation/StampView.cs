@@ -93,7 +93,6 @@ namespace Presentation {
             _movement = null;
             _isHeld = true;
             _canvasGroup.blocksRaycasts = false;
-            transform.SetAsLastSibling();
             if (Mouse.current != null) MoveToPointer(Mouse.current.position.ReadValue());
         }
 

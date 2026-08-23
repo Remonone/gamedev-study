@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bill_fine_percent_upgrade
-  Name: bill_fine_percent_upgrade
-  Description: 
+  Name: Public Service Continuity
+  Description: Reduce the income penalty while a bill is active.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

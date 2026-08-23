@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: token_generator_income_upgrade
-  Name: Document Yield
-  Description: Gives additional ${document_per_income} documents count dispenced
-    per once.
+  Name: Document Batch Processing
+  Description: Increase the number of documents released whenever the generator pays out.
   MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:

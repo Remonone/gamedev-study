@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: archive_dobule_point_upgrade
-  Name: archive_dobule_point_upgrade
-  Description: 
+  Name: Insight Threshold
+  Description: Lower the signature-quality threshold required to earn double research points.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

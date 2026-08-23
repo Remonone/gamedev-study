@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: upgrade_sign_multi_pay_chance
   Name: Repeat Signature Reward
-  Description: 
+  Description: Give manual signatures a chance to pay out an additional time.
   MaxLevel: 20
   Icon: {fileID: 0}
   CostFormula:

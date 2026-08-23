@@ -16,6 +16,7 @@ using Presentation;
 using R3;
 using Services;
 using Services.Locator;
+using UI;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.TestTools;
@@ -28,6 +29,36 @@ namespace Tests.EditMode {
         private readonly List<ModifierDefinition> _modifierDefinitions = new();
         private readonly List<IDisposable> _disposables = new();
         private WalletService _lastWallet;
+
+        [Test]
+        public void EdgeGraphic_UsesBezierTangentsForForwardReverseAndVerticalConnections() {
+            UpgradeEdgeGraphic.CalculateBezierControls(
+                Vector2.zero,
+                new Vector2(120f, 60f),
+                80f,
+                out Vector2 forwardFirst,
+                out Vector2 forwardSecond);
+            Assert.That(forwardFirst, Is.EqualTo(new Vector2(60f, 0f)));
+            Assert.That(forwardSecond, Is.EqualTo(new Vector2(60f, 60f)));
+
+            UpgradeEdgeGraphic.CalculateBezierControls(
+                new Vector2(120f, 10f),
+                new Vector2(0f, 50f),
+                80f,
+                out Vector2 reverseFirst,
+                out Vector2 reverseSecond);
+            Assert.That(reverseFirst, Is.EqualTo(new Vector2(60f, 10f)));
+            Assert.That(reverseSecond, Is.EqualTo(new Vector2(60f, 50f)));
+
+            UpgradeEdgeGraphic.CalculateBezierControls(
+                new Vector2(10f, 0f),
+                new Vector2(50f, 200f),
+                120f,
+                out Vector2 verticalFirst,
+                out Vector2 verticalSecond);
+            Assert.That(verticalFirst, Is.EqualTo(new Vector2(10f, 100f)));
+            Assert.That(verticalSecond, Is.EqualTo(new Vector2(50f, 100f)));
+        }
 
         [TearDown]
         public void TearDown() {

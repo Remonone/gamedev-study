@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_work_speed_upgrade
-  Name: bank_work_speed_upgrade
-  Description: 
+  Name: Faster Settlements
+  Description: Shorten the time between Municipal Bank payments.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

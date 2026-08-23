@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: archive_double_point_chance_upgrade
-  Name: archive_double_point_chance_upgrade
-  Description: 
+  Name: Breakthrough Chance
+  Description: Increase the chance to earn double research points from an accepted document.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

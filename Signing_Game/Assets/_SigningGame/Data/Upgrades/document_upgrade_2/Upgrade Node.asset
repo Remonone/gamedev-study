@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: document_upgrade_2
-  Name: document_upgrade_2
-  Description: 
+  Name: Document Standards II
+  Description: Further improve document quality and prepare the city for advanced departments.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: archive_choice_upgrade
-  Name: archive_choice_upgrade
-  Description: 
+  Name: Broader Inquiry
+  Description: Offer more practices whenever the Archive completes research.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

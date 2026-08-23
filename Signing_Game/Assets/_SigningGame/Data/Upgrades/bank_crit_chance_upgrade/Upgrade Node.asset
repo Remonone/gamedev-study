@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: bank_crit_chance_upgrade
-  Name: bank_crit_chance_upgrade
-  Description: 
+  Name: Interest Windfall
+  Description: Increase the chance that a Municipal Bank payment is critical.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:

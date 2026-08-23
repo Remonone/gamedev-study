@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: income_upgrade
   Name: Processing Fee
-  Description: Increase income for processed documents by ${income_addition_upgrade}.
+  Description: Increase the payment earned for each accepted document.
   MaxLevel: 10
   Icon: {fileID: 0}
   CostFormula:

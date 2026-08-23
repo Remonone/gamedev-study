@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: archive_required_points_per_cycle
-  Name: archive_required_points_per_cycle
-  Description: 
+  Name: Sustained Research
+  Description: Reduce how much each completed Archive cycle increases future research costs.
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:
