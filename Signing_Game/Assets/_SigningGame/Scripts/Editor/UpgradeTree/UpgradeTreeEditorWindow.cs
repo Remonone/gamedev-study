@@ -236,7 +236,7 @@ namespace SigningGame.Editor.UpgradeTree {
         }
 
         private void DrawInspector() {
-            if (_selection.Count == 0) return;
+            if (_gesture == Gesture.Select || _selection.Count == 0) return;
             Rect panel = GetInspectorRect();
             Rect splitter = new(panel.x - _SplitterWidth, _ToolbarHeight, _SplitterWidth, position.height - _ToolbarHeight);
             EditorGUIUtility.AddCursorRect(splitter, MouseCursor.ResizeHorizontal);
@@ -482,7 +482,7 @@ namespace SigningGame.Editor.UpgradeTree {
                 CancelGesture();
                 return;
             }
-            Rect inspector = GetInspectorRect();
+            Rect inspector = _gesture == Gesture.Select ? Rect.zero : GetInspectorRect();
             Rect inspectorInput = inspector == Rect.zero
                 ? Rect.zero
                 : new Rect(inspector.x - _SplitterWidth, inspector.y, inspector.width + _SplitterWidth, inspector.height);
@@ -588,6 +588,10 @@ namespace SigningGame.Editor.UpgradeTree {
                 Gesture completed = _gesture;
                 UpgradeNodeDefinition linkTarget = completed == Gesture.Link ? HitTest(evt.mousePosition, canvas) : null;
                 EndGesture();
+                if (completed == Gesture.Select) {
+                    OnSelectionChanged();
+                    Repaint();
+                }
                 if (completed == Gesture.Link && _linkSource != null) CompleteLink(linkTarget, evt.mousePosition, canvas);
                 _linkSource = null;
                 evt.Use();
@@ -900,6 +904,9 @@ namespace SigningGame.Editor.UpgradeTree {
         }
 
         private void OnSelectionChanged() {
+            GUI.FocusControl(null);
+            GUIUtility.keyboardControl = 0;
+            EditorGUIUtility.editingTextField = false;
             if (_selection.Count != 1) {
                 _selectedModifier = null;
                 return;

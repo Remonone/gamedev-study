@@ -61,6 +61,7 @@ InitTestScene*.unity*
 /[Aa]ssets/AddressableAssetsData/link.xml*
 /[Aa]ssets/Addressables_Temp*
 /[Aa]ssets/AddressableAssetsData/*/*.bin*
+/BalanceAnalysis/
 
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db.meta

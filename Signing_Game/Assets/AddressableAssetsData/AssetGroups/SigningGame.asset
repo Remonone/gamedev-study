@@ -106,13 +106,15 @@ MonoBehaviour:
     - tutorial
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28126d903f2eaa2ffdde62f1e416f92b
-    m_Address: Assets/_SigningGame/Data/Upgrades/bank_multi_pay_chance_upgrade/Upgrade Node.asset
+    m_Address: Assets/_SigningGame/Data/Upgrades/bank_multi_pay_chance_upgrade/Upgrade
+      Node.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 29bcbf8f158bb6ff91010b8d46eae252
-    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_sign_multi_pay_chance/Upgrade Node.asset
+    m_Address: Assets/_SigningGame/Data/Upgrades/upgrade_sign_multi_pay_chance/Upgrade
+      Node.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades
@@ -215,7 +217,8 @@ MonoBehaviour:
     - tutorial
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5fac4837bc4810b031c2c7d495faac86
-    m_Address: Assets/_SigningGame/Data/Upgrades/office_multi_pay_chance_upgrade/Upgrade Node.asset
+    m_Address: Assets/_SigningGame/Data/Upgrades/office_multi_pay_chance_upgrade/Upgrade
+      Node.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades
@@ -326,6 +329,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - cache_reference
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1b2c3d4e5f60123456789abcdef0123
+    m_Address: Assets/_SigningGame/Data/Upgrades/Stamp/Stamp Unlock.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a22ab137207953c8e91521127d59a018
     m_Address: Assets/_SigningGame/Data/Upgrades/office_clerk_hire_signature_multiplier_upgrade/Upgrade
@@ -475,6 +484,13 @@ MonoBehaviour:
     m_SerializedLabels:
     - upgrades
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e383bcdeaa5407ab39b4f7aece53fa46
+    m_Address: Assets/_SigningGame/Data/Upgrades/multipay_chance_upgrade/Upgrade
+      Node.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - upgrades
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e43c06818ea522cfd85762b16d11ec67
     m_Address: Assets/_SigningGame/Data/Cache References/Income Reference.asset
     m_ReadOnly: 0
@@ -483,12 +499,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ee8077b5d710293fab66e0c40ecb1179
     m_Address: Assets/_SigningGame/Data/Upgrades/Office/Office Unlock.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - upgrades
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a1b2c3d4e5f60123456789abcdef0123
-    m_Address: Assets/_SigningGame/Data/Upgrades/Stamp/Stamp Unlock.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - upgrades

@@ -15,11 +15,12 @@ MonoBehaviour:
   Id: document_quality_1
   Name: Document Standards I
   Description: Improve the quality of available documents, raising their reward potential.
-  MaxLevel: 0
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080570608353283
-  Modifiers: []
+  Modifiers:
+  - {fileID: 11400000, guid: fc8a4e6733141a201bd46c8d9f074ada, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 1
   TreePosition: {x: 600, y: 80}
@@ -37,6 +38,6 @@ MonoBehaviour:
       type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         Value:
-          _stored: 1
+          _stored: 250
           _base:
             Degree: 0

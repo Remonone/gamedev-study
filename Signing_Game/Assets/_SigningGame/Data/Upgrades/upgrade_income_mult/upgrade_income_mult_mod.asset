@@ -10,36 +10,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b9fd63ba3154426b078a8b0b29dd7cc, type: 3}
-  m_Name: Token generation Upgrade
+  m_Name: upgrade_income_mult_mod
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
   NumericModifiers:
-  - _id: token_generation_upgrade_1
-    _operation: 0
+  - _id: upgrade_income_mult_mod
+    _operation: 1
     _value:
-      rid: 841080815257124938
+      rid: 841080815257124943
     _parameter:
-      _groupId: Generation
-      _parameterId: TokenPerSecond
+      _groupId: Income
+      _parameterId: IncomePerDocument
   references:
     version: 2
     RefIds:
-    - rid: 841080815257124938
+    - rid: 841080815257124943
       type: {class: UpgradeNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
       data:
         _baseValue:
-          _stored: 0.3
+          _stored: 1
           _base:
             Degree: 0
         _formula:
-          rid: 841080815257124939
-    - rid: 841080815257124939
-      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+          rid: 841080815257124945
+    - rid: 841080815257124945
+      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        StartValue:
-          _stored: 0.8
+        BaseValue:
+          _stored: 0
           _base:
             Degree: 0
-        Pattern:
-          _stored: 1.55
+        Slope:
+          _stored: 1.1
           _base:
             Degree: 0

@@ -8,7 +8,7 @@ namespace Data.Cache {
     public struct IncomeEntries {
         [ModifiableParameter("MaxMultiplicationScale", Minimum = 0d)]
         public float MaxMultiplicationScale;
-        [ModifiableParameter("MinMultiplyScale", Minimum = float.Epsilon)]
+        [ModifiableParameter("AddedRewardScale", Minimum = float.Epsilon)]
         public float MinMultiplyScale;
         [ModifiableParameter("IncomePerDocument", Minimum = 0d)]
         public Value IncomePerDocument;

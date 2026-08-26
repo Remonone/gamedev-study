@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_multi_pay_chance_upgrade
   Name: Repeat Clerk Reward
-  Description: Give clerks a chance to receive an additional reward for an accepted document.
+  Description: Give clerks a chance to receive an additional reward for an accepted
+    document.
   MaxLevel: 20
   Icon: {fileID: 0}
   CostFormula:
@@ -23,7 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8a2fffbf75ae66e5521bc3b355e06c5c, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 1360, y: 440}
+  TreePosition: {x: 1400, y: 440}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

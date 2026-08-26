@@ -22,6 +22,17 @@ namespace Services {
         }
     }
 
+    internal static class DocumentQualityRewardMultiplier {
+        public static double Resolve(DocumentEntries documents) {
+            int level = Math.Clamp(documents.SelectedDocumentQualityLevel, 0, 9) + 1;
+            float configured = documents.DocumentQualityIncomeMultiplier;
+            double multiplier = !float.IsNaN(configured) && !float.IsInfinity(configured) && configured >= 0f
+                ? configured
+                : 0d;
+            return level + level * multiplier;
+        }
+    }
+
     public sealed class NormalDocumentProducer : IService, IInitialize, IDocumentProducer, ISaveable {
         private static readonly IDocumentEvaluationPolicy Policy = new PlayerDocumentEvaluationPolicy();
         private static readonly ulong FallbackCriticalRandomSeed =
@@ -372,6 +383,7 @@ namespace Services {
                 baseReward = MultiplyValueSafely(
                     baseReward,
                     DocumentStampRewardMultiplier.Resolve(_requiresStamp, isStamped));
+                baseReward = MultiplyValueSafely(baseReward, DocumentQualityRewardMultiplier.Resolve(_documentData.Value));
                 int guaranteedExtra = MultiPayUtility.SplitChance(
                     income.ManualSignatureMultiPayChance,
                     out float extraChance);

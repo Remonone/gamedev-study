@@ -15,11 +15,12 @@ MonoBehaviour:
   Id: upgrade_income_mult
   Name: Revenue Leverage
   Description: Increase the overall income multiplier from signed documents.
-  MaxLevel: 0
+  MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080565338210379
-  Modifiers: []
+    rid: 841080815257124946
+  Modifiers:
+  - {fileID: 11400000, guid: f1cda4df8a40f1ee194b2ced8157afc2, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
   TreePosition: {x: 360, y: 200}
@@ -30,13 +31,19 @@ MonoBehaviour:
   Children:
   - Child: {fileID: 11400000, guid: 132266efdd3f60c628324309864b7d57, type: 2}
     DrawEdge: 1
+  - Child: {fileID: 11400000, guid: 29bcbf8f158bb6ff91010b8d46eae252, type: 2}
+    DrawEdge: 1
   references:
     version: 2
     RefIds:
-    - rid: 841080565338210379
-      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080815257124946
+      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        Value:
-          _stored: 1
+        StartValue:
+          _stored: 75
+          _base:
+            Degree: 0
+        Pattern:
+          _stored: 1.2
           _base:
             Degree: 0

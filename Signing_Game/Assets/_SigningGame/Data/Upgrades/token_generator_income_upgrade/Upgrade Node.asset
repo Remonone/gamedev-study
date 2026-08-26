@@ -14,17 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: token_generator_income_upgrade
   Name: Document Batch Processing
-  Description: Increase the number of documents released whenever the generator pays out.
-  MaxLevel: 5
+  Description: Increase the number of documents released whenever the generator pays
+    out.
+  MaxLevel: 1
   Icon: {fileID: 0}
   CostFormula:
-    rid: 841080539992817856
+    rid: 841080815257124940
   Modifiers:
   - {fileID: 11400000, guid: ed3af1a1b5e20a532ac38fdd55a00974, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
   TreePosition: {x: 160, y: 280}
-  LockedDisplayMode: 1
+  LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
   StatisticRequirements: []
@@ -32,14 +33,10 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 841080539992817856
-      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080815257124940
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        StartValue:
-          _stored: 150
-          _base:
-            Degree: 0
-        Pattern:
-          _stored: 4
+        Value:
+          _stored: 250
           _base:
             Degree: 0

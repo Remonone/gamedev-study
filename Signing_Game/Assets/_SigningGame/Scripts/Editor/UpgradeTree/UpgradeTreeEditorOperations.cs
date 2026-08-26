@@ -156,7 +156,7 @@ namespace SigningGame.Editor.UpgradeTree {
                 return UpgradeTreeOperationResult<ModifierDefinition>.Fail(error);
             }
 
-            if (!TryRequireCleanEditable(node, out error)) return UpgradeTreeOperationResult<ModifierDefinition>.Fail(error);
+            if (!TrySaveDirtyEditable(node, out error)) return UpgradeTreeOperationResult<ModifierDefinition>.Fail(error);
             string nodePath = AssetDatabase.GetAssetPath(node);
             string folder = GetParentPath(nodePath);
             string modifierPath = $"{folder}/{fileStem}.asset";
@@ -716,6 +716,17 @@ namespace SigningGame.Editor.UpgradeTree {
                 return false;
             }
             return TryRequireEditable(asset, out error);
+        }
+
+        private static bool TrySaveDirtyEditable(UnityEngine.Object asset, out string error) {
+            if (!TryRequireEditable(asset, out error)) return false;
+            if (!EditorUtility.IsDirty(asset)) return true;
+
+            AssetDatabase.SaveAssetIfDirty(asset);
+            if (!EditorUtility.IsDirty(asset)) return true;
+
+            error = $"'{AssetDatabase.GetAssetPath(asset)}' could not be saved.";
+            return false;
         }
 
         private static bool TryRequireEditable(UnityEngine.Object asset, out string error) {

@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: income_upgrade
   Name: Processing Fee
   Description: Increase the payment earned for each accepted document.
-  MaxLevel: 10
+  MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080518039568479
@@ -40,10 +40,10 @@ MonoBehaviour:
       type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         StartValue:
-          _stored: 20
+          _stored: 25
           _base:
             Degree: 0
         Pattern:
-          _stored: 1.2
+          _stored: 1.294
           _base:
             Degree: 0

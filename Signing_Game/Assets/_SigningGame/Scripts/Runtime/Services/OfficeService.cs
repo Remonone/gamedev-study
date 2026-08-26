@@ -751,7 +751,9 @@ namespace Services {
             Value requested = Value.Zero;
             Value credited = Value.Zero;
             if (accepted) {
-                double baseRewardFactor = SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier);
+                double baseRewardFactor = SaturatingMultiply(
+                    SaturatingMultiply(quality * entries.RewardMultiplier, clerk.IncomeMultiplier),
+                    DocumentQualityRewardMultiplier.Resolve(_documentData.Value));
                 int guaranteedExtra = MultiPayUtility.SplitChance(entries.OfficeMultiPayChance, out float extraChance);
                 int paymentCount = 1 + guaranteedExtra;
                 if (extraChance > 0f && _criticalRandom.RollOffice(extraChance)) paymentCount++;

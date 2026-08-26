@@ -7,6 +7,9 @@ namespace Data.Cache {
     public struct DocumentEntries {
         [ModifiableParameter("DocumentQualityLevel", Minimum = 0d, Maximum = 9d)]
         public int DocumentQualityLevel;
+
+        [ModifiableParameter("DocumentQualityIncomeMultiplier", Minimum = 0d)]
+        public float DocumentQualityIncomeMultiplier;
         
         public int SelectedDocumentQualityLevel;
 

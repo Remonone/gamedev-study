@@ -12,18 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a1a54f63f2c443289be0ecf91dbbed4, type: 3}
   m_Name: Upgrade Node
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
-  Id: upgrade_sign_multi_pay_chance
-  Name: Repeat Signature Reward
-  Description: Give manual signatures a chance to pay out an additional time.
-  MaxLevel: 20
+  Id: multipay_chance_upgrade
+  Name: multipay_chance_upgrade
+  Description: 
+  MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:
-    rid: 2001
-  Modifiers:
-  - {fileID: 11400000, guid: ed6fd6d7613aacbabe4a69254b85d47a, type: 2}
+    rid: 841080789877653504
+  Modifiers: []
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 520, y: 280}
+  TreePosition: {x: 3667.1497, y: 563.97577}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0
@@ -32,14 +31,10 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 2001
-      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+    - rid: 841080789877653504
+      type: {class: ConstantValue, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        StartValue:
-          _stored: 75
-          _base:
-            Degree: 0
-        Pattern:
-          _stored: 1.25
+        Value:
+          _stored: 0
           _base:
             Degree: 0

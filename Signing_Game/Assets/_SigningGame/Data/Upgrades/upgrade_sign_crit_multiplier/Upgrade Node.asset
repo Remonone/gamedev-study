@@ -30,8 +30,6 @@ MonoBehaviour:
   Children:
   - Child: {fileID: 11400000, guid: 132266efdd3f60c628324309864b7d57, type: 2}
     DrawEdge: 1
-  - Child: {fileID: 11400000, guid: 29bcbf8f158bb6ff91010b8d46eae252, type: 2}
-    DrawEdge: 1
   references:
     version: 2
     RefIds:

@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: token_generator_upgrade
   Name: Administrative Workflow
   Description: Increase the rate at which administrative work is generated.
-  MaxLevel: 0
+  MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080539992817852
@@ -42,6 +42,6 @@ MonoBehaviour:
           _base:
             Degree: 0
         Pattern:
-          _stored: 2.5
+          _stored: 2.3
           _base:
             Degree: 0

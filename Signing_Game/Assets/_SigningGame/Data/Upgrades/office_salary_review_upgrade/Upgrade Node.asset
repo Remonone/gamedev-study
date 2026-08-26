@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Upgrades.UpgradeNodeDefinition
   Id: office_salary_review_upgrade
   Name: Salary Review
-  Description: Lower the cost of reviewing a clerk’s salary.
+  Description: "Lower the cost of reviewing a clerk\u2019s salary."
   MaxLevel: 0
   Icon: {fileID: 0}
   CostFormula:
@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 1520, y: 440}
+  TreePosition: {x: 1560, y: 440}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

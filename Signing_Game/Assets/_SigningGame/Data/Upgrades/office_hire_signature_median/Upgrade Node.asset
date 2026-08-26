@@ -22,7 +22,7 @@ MonoBehaviour:
   Modifiers: []
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
-  TreePosition: {x: 1400, y: 240}
+  TreePosition: {x: 1440, y: 240}
   LockedDisplayMode: 0
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

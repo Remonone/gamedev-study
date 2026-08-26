@@ -27,19 +27,19 @@ MonoBehaviour:
       type: {class: UpgradeNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
       data:
         _baseValue:
-          _stored: 0
+          _stored: 1
           _base:
             Degree: 0
         _formula:
-          rid: 841080539992817855
-    - rid: 841080539992817855
-      type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
+          rid: 841080789877653579
+    - rid: 841080789877653579
+      type: {class: ExponentialFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
-        BaseValue:
+        StartValue:
           _stored: 0
           _base:
             Degree: 0
-        Slope:
-          _stored: 1
+        Pattern:
+          _stored: 2
           _base:
             Degree: 0

@@ -23,7 +23,7 @@ MonoBehaviour:
   FeatureUnlockIds:
   - stamp
   GrantsMetaCurrencyPoint: 1
-  TreePosition: {x: -120, y: -80}
+  TreePosition: {x: 1600, y: -0}
   LockedDisplayMode: 1
   ParentUnlockMode: 0
   StatisticRequirementMode: 0

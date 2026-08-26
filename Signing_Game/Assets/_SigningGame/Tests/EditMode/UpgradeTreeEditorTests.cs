@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Data.Formulas;
 using Data.Bills;
 using Data.Modifiers;
@@ -16,6 +17,7 @@ using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Utils;
 
 namespace SigningGame.Tests.EditMode {
     public sealed class UpgradeTreeEditorTests {
@@ -66,6 +68,7 @@ namespace SigningGame.Tests.EditMode {
             AssetDatabase.SaveAssetIfDirty(_settings);
             _operations = new UpgradeTreeEditorOperations(_settings, _addressables);
             UpgradeTreeEditorOperations.TestFaultPoint = UpgradeTreeFaultPoint.None;
+            NumericValueDefinitionPropertyDrawer.ClearClipboardForTests();
         }
 
         [Test]
@@ -127,9 +130,83 @@ namespace SigningGame.Tests.EditMode {
             }
         }
 
+        [Test]
+        public void NumericValueDrawer_CopyPaste_ClonesSnapshotAndRestoresUndo() {
+            var modifier = ScriptableObject.CreateInstance<ModifierDefinition>();
+            modifier.NumericModifiers = new List<NumericModifierDefinition> { new(), new(), new() };
+            try {
+                var sourceDefinition = new UpgradeNumericValueDefinition();
+                var sourceFormula = new LinearFormula {
+                    BaseValue = new Value(3d),
+                    Slope = new Value(4d)
+                };
+                SetPrivate(sourceDefinition, "_baseValue", new Value(2d));
+                SetPrivate(sourceDefinition, "_formula", sourceFormula);
+
+                var targetDefinition = new ConstantNumericValueDefinition();
+                SetPrivate(targetDefinition, "_value", new Value(99d));
+
+                var serialized = new SerializedObject(modifier);
+                SerializedProperty modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                SerializedProperty sourceValue = modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value");
+                SerializedProperty targetValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+                SerializedProperty nullTargetValue = modifiers.GetArrayElementAtIndex(2).FindPropertyRelative("_value");
+                sourceValue.managedReferenceValue = sourceDefinition;
+                targetValue.managedReferenceValue = targetDefinition;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                serialized.Update();
+
+                modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                sourceValue = modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value");
+                targetValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+                nullTargetValue = modifiers.GetArrayElementAtIndex(2).FindPropertyRelative("_value");
+                Assert.That(NumericValueDefinitionPropertyDrawer.TryCopyValue(sourceValue), Is.True);
+
+                var liveSource = sourceValue.managedReferenceValue as UpgradeNumericValueDefinition;
+                SetPrivate(liveSource, "_baseValue", new Value(7d));
+                GetPrivate<LinearFormula>(liveSource, "_formula").Slope = new Value(8d);
+
+                Assert.That(NumericValueDefinitionPropertyDrawer.TryPasteValue(serialized, targetValue.propertyPath), Is.True);
+                serialized.Update();
+                modifiers = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers));
+                sourceValue = modifiers.GetArrayElementAtIndex(0).FindPropertyRelative("_value");
+                targetValue = modifiers.GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+
+                var pastedValue = targetValue.managedReferenceValue as UpgradeNumericValueDefinition;
+                Assert.That(pastedValue, Is.Not.Null);
+                Assert.That(targetValue.managedReferenceId, Is.Not.EqualTo(sourceValue.managedReferenceId));
+                Assert.That(GetPrivate<Value>(pastedValue, "_baseValue"), Is.EqualTo(new Value(2d)));
+                var pastedFormula = GetPrivate<LinearFormula>(pastedValue, "_formula");
+                Assert.That(pastedFormula, Is.Not.SameAs(sourceFormula));
+                Assert.That(pastedFormula.BaseValue, Is.EqualTo(new Value(3d)));
+                Assert.That(pastedFormula.Slope, Is.EqualTo(new Value(4d)));
+
+                Undo.FlushUndoRecordObjects();
+                Undo.PerformUndo();
+                serialized.Update();
+                targetValue = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers))
+                    .GetArrayElementAtIndex(1).FindPropertyRelative("_value");
+                var restoredValue = targetValue.managedReferenceValue as ConstantNumericValueDefinition;
+                Assert.That(restoredValue, Is.Not.Null);
+                Assert.That(restoredValue.Evaluate(null), Is.EqualTo(new Value(99d)));
+
+                nullTargetValue = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers))
+                    .GetArrayElementAtIndex(2).FindPropertyRelative("_value");
+                Assert.That(nullTargetValue.managedReferenceValue, Is.Null);
+                Assert.That(NumericValueDefinitionPropertyDrawer.TryPasteValue(serialized, nullTargetValue.propertyPath), Is.True);
+                serialized.Update();
+                nullTargetValue = serialized.FindProperty(nameof(ModifierDefinition.NumericModifiers))
+                    .GetArrayElementAtIndex(2).FindPropertyRelative("_value");
+                Assert.That(nullTargetValue.managedReferenceValue, Is.TypeOf<UpgradeNumericValueDefinition>());
+            } finally {
+                UnityEngine.Object.DestroyImmediate(modifier);
+            }
+        }
+
         [TearDown]
         public void TearDown() {
             UpgradeTreeEditorOperations.TestFaultPoint = UpgradeTreeFaultPoint.None;
+            NumericValueDefinitionPropertyDrawer.ClearClipboardForTests();
             RestoreDefaultAddressablesGroups();
             AssetDatabase.DeleteAsset(_Root);
             Assert.That(AssetDatabase.IsValidFolder(_Root), Is.False);
@@ -184,6 +261,25 @@ namespace SigningGame.Tests.EditMode {
             Assert.That(entry, Is.Not.Null);
             Assert.That(entry.labels, Does.Contain(UpgradeTreeEditorSettings.MandatoryLabel));
             Assert.That(entry.address, Is.EqualTo(path));
+        }
+
+        [Test]
+        public void CreateModifier_SavesDirtyNodeAndPersistsModifierReference() {
+            UpgradeNodeDefinition node = Create("dirty_node");
+            node.Name = "Saved node name";
+            EditorUtility.SetDirty(node);
+
+            UpgradeTreeOperationResult<ModifierDefinition> result = _operations.CreateModifier(node, "effect");
+
+            Assert.That(result.Success, Is.True, result.Error);
+            Assert.That(EditorUtility.IsDirty(node), Is.False);
+            string nodePath = AssetDatabase.GetAssetPath(node);
+            AssetDatabase.ImportAsset(nodePath, ImportAssetOptions.ForceUpdate);
+            UpgradeNodeDefinition reloaded = AssetDatabase.LoadAssetAtPath<UpgradeNodeDefinition>(nodePath);
+            Assert.That(reloaded.Name, Is.EqualTo("Saved node name"));
+            Assert.That(reloaded.Modifiers, Has.Length.EqualTo(1));
+            Assert.That(reloaded.Modifiers[0], Is.Not.Null);
+            Assert.That(AssetDatabase.GetAssetPath(reloaded.Modifiers[0]), Does.EndWith("/effect.asset"));
         }
 
         [Test]
@@ -425,6 +521,20 @@ namespace SigningGame.Tests.EditMode {
             UpgradeTreeOperationResult<UpgradeNodeDefinition> result = _operations.CreateNode(id, Vector2.zero);
             Assert.That(result.Success, Is.True, result.Error);
             return result.Value;
+        }
+
+        private static T GetPrivate<T>(object target, string fieldName) {
+            return (T)GetField(target, fieldName).GetValue(target);
+        }
+
+        private static void SetPrivate(object target, string fieldName, object value) {
+            GetField(target, fieldName).SetValue(target, value);
+        }
+
+        private static FieldInfo GetField(object target, string fieldName) {
+            FieldInfo field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null, $"Missing field '{fieldName}' on {target.GetType().Name}.");
+            return field;
         }
 
         private void RestoreDefaultAddressablesGroups() {

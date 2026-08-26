@@ -13,13 +13,6 @@ MonoBehaviour:
   m_Name: upgrade_start_kickoff
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Modifiers.ModifierDefinition
   NumericModifiers:
-  - _id: upgrade_start_min_multiply_scale
-    _operation: 2
-    _value:
-      rid: 841080518039568481
-    _parameter:
-      _groupId: Income
-      _parameterId: MinMultiplyScale
   - _id: upgrade_start_multiply_scale
     _operation: 3
     _value:
@@ -30,13 +23,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 841080518039568481
-      type: {class: ConstantNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
-      data:
-        _value:
-          _stored: 2.5
-          _base:
-            Degree: 0
     - rid: 841080518039568482
       type: {class: ConstantNumericValueDefinition, ns: Data.Modifiers.Numeric, asm: SigningGame.Scripts.Runtime}
       data:

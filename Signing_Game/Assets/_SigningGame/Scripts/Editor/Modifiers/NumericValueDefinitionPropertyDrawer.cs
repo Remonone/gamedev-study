@@ -17,12 +17,16 @@ namespace SigningGame.Editor.Modifiers {
         private const string _NoCandidatesMessage = "No serializable numeric value implementations are available in player assemblies.";
         private const string _MultiTargetMessage = "Managed-reference type editing is disabled for multiple targets.";
         private const float _HeaderPadding = 3f;
+        private const float _CopyButtonWidth = 42f;
+        private const float _PasteButtonWidth = 46f;
         private const float _ClearButtonWidth = 20f;
         private const float _HelpBoxHeightInLines = 2f;
 
         private static readonly Candidate[] _Candidates = DiscoverCandidates();
         private static readonly string[] _SelectorOptions = BuildSelectorOptions();
         private static readonly GUIContent[] _SelectorGuiOptions = BuildSelectorGuiOptions();
+        private static NumericValueDefinition _clipboardValue;
+        private static event Action ClipboardChanged;
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property) {
             property = PrepareProperty(property);
@@ -33,10 +37,20 @@ namespace SigningGame.Editor.Modifiers {
             var root = new VisualElement();
             var structuralKey = GetStructuralState(property).Key;
             var rebuildQueued = false;
+            var pasteButtons = new List<Button>();
 
             void Rebuild(SerializedProperty liveProperty) {
                 root.Clear();
-                BuildVisualTree(root, liveProperty, fieldLabel, fieldTooltip, RequestRebuild);
+                pasteButtons.Clear();
+                BuildVisualTree(root, liveProperty, fieldLabel, fieldTooltip, RequestRebuild, ForceRebuild,
+                    pasteButton => {
+                        pasteButtons.Add(pasteButton);
+                        pasteButton.SetEnabled(HasClipboardValue);
+                    });
+            }
+
+            void UpdatePasteButtonAvailability() {
+                foreach (Button pasteButton in pasteButtons) pasteButton.SetEnabled(HasClipboardValue);
             }
 
             void RequestRebuild() {
@@ -66,8 +80,26 @@ namespace SigningGame.Editor.Modifiers {
                 });
             }
 
+            void ForceRebuild() {
+                if (rebuildQueued) return;
+
+                rebuildQueued = true;
+                root.schedule.Execute(() => {
+                    rebuildQueued = false;
+                    if (!TryGetLiveProperty(serializedObject, propertyPath, out var liveProperty)) return;
+
+                    structuralKey = GetStructuralState(liveProperty).Key;
+                    Rebuild(liveProperty);
+                });
+            }
+
             Rebuild(property);
             BindingExtensions.TrackPropertyValue(root, property, _ => RequestRebuild());
+            root.RegisterCallback<AttachToPanelEvent>(_ => {
+                ClipboardChanged += UpdatePasteButtonAvailability;
+                UpdatePasteButtonAvailability();
+            });
+            root.RegisterCallback<DetachFromPanelEvent>(_ => ClipboardChanged -= UpdatePasteButtonAvailability);
             return root;
         }
 
@@ -230,7 +262,9 @@ namespace SigningGame.Editor.Modifiers {
             SerializedProperty property,
             string fieldLabel,
             string fieldTooltip,
-            Action requestRebuild
+            Action requestRebuild,
+            Action forceRebuild,
+            Action<Button> registerPasteButton
         ) {
             var state = GetStructuralState(property);
             switch (state.Kind) {
@@ -238,14 +272,16 @@ namespace SigningGame.Editor.Modifiers {
                     BuildMultiTargetVisualTree(root, fieldLabel, fieldTooltip);
                     break;
                 case StructuralKind.Null:
-                    BuildNullVisualTree(root, property, fieldLabel, fieldTooltip, requestRebuild);
+                    BuildNullVisualTree(root, property, fieldLabel, fieldTooltip, requestRebuild, forceRebuild,
+                        registerPasteButton);
                     break;
                 case StructuralKind.Missing:
                     BuildMissingVisualTree(root, property, fieldLabel, fieldTooltip, state.FullTypeName,
                         requestRebuild);
                     break;
                 case StructuralKind.Assigned:
-                    BuildAssignedVisualTree(root, property, fieldLabel, fieldTooltip, requestRebuild);
+                    BuildAssignedVisualTree(root, property, fieldLabel, fieldTooltip, requestRebuild, forceRebuild,
+                        registerPasteButton);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -257,20 +293,32 @@ namespace SigningGame.Editor.Modifiers {
             SerializedProperty property,
             string fieldLabel,
             string fieldTooltip,
-            Action requestRebuild
+            Action requestRebuild,
+            Action forceRebuild,
+            Action<Button> registerPasteButton
         ) {
             var selector = new DropdownField(fieldLabel, new List<string>(_SelectorOptions), 0) {
                 tooltip = fieldTooltip
             };
+            var serializedObject = property.serializedObject;
+            var propertyPath = property.propertyPath;
+            var row = new VisualElement {
+                style = { flexDirection = FlexDirection.Row }
+            };
+            selector.style.flexGrow = 1f;
+            row.Add(selector);
+            var pasteButton = CreatePasteButton(() => {
+                if (TryPasteValue(serializedObject, propertyPath)) forceRebuild();
+            });
+            registerPasteButton(pasteButton);
+            row.Add(pasteButton);
+            root.Add(row);
             if (_Candidates.Length == 0) {
                 selector.SetEnabled(false);
-                root.Add(selector);
                 root.Add(new HelpBox(_NoCandidatesMessage, HelpBoxMessageType.Info));
                 return;
             }
 
-            var serializedObject = property.serializedObject;
-            var propertyPath = property.propertyPath;
             selector.RegisterValueChangedCallback(evt => {
                 var candidate = FindCandidate(evt.newValue);
                 if (candidate == null) return;
@@ -281,7 +329,6 @@ namespace SigningGame.Editor.Modifiers {
                     selector.SetValueWithoutNotify(_SelectorPlaceholder);
                 }
             });
-            root.Add(selector);
         }
 
         private static void BuildAssignedVisualTree(
@@ -289,12 +336,20 @@ namespace SigningGame.Editor.Modifiers {
             SerializedProperty property,
             string fieldLabel,
             string fieldTooltip,
-            Action requestRebuild
+            Action requestRebuild,
+            Action forceRebuild,
+            Action<Button> registerPasteButton
         ) {
             var typeDisplayName = GetTypeDisplayName(property.managedReferenceValue.GetType());
             var header = CreateHeader($"{fieldLabel} — {typeDisplayName}", fieldTooltip, false);
             var serializedObject = property.serializedObject;
             var propertyPath = property.propertyPath;
+            header.Add(CreateCopyButton(() => TryCopyValue(serializedObject, propertyPath)));
+            var pasteButton = CreatePasteButton(() => {
+                if (TryPasteValue(serializedObject, propertyPath)) forceRebuild();
+            });
+            registerPasteButton(pasteButton);
+            header.Add(pasteButton);
             header.Add(CreateClearButton("Clear numeric value.", () => {
                 if (TryClearAssigned(serializedObject, propertyPath)) requestRebuild();
             }));
@@ -371,18 +426,48 @@ namespace SigningGame.Editor.Modifiers {
             };
         }
 
+        private static Button CreateCopyButton(Action onClick) {
+            return new Button(onClick) {
+                text = "Copy",
+                tooltip = "Copy this numeric value definition.",
+                style = {
+                    width = _CopyButtonWidth,
+                    minWidth = _CopyButtonWidth,
+                    marginLeft = 2f
+                }
+            };
+        }
+
+        private static Button CreatePasteButton(Action onClick) {
+            return new Button(onClick) {
+                text = "Paste",
+                tooltip = "Paste the copied numeric value definition.",
+                style = {
+                    width = _PasteButtonWidth,
+                    minWidth = _PasteButtonWidth,
+                    marginLeft = 2f
+                }
+            };
+        }
+
         private static void DrawNull(Rect position, SerializedProperty property, GUIContent label) {
-            var selectorRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+            var selectorRect = new Rect(position.x, position.y,
+                position.width - _PasteButtonWidth - EditorGUIUtility.standardVerticalSpacing,
+                EditorGUIUtility.singleLineHeight);
+            var pasteRect = new Rect(selectorRect.xMax + EditorGUIUtility.standardVerticalSpacing, position.y,
+                _PasteButtonWidth, EditorGUIUtility.singleLineHeight);
             if (_Candidates.Length == 0) {
                 using (new EditorGUI.DisabledScope(true)) {
                     EditorGUI.Popup(selectorRect, label, 0, _SelectorGuiOptions);
                 }
 
+                DrawPasteButton(pasteRect, property);
                 var helpRect = GetHelpBoxRect(position);
                 EditorGUI.HelpBox(helpRect, _NoCandidatesMessage, MessageType.Info);
                 return;
             }
 
+            if (DrawPasteButton(pasteRect, property)) return;
             var selectedIndex = EditorGUI.Popup(selectorRect, label, 0, _SelectorGuiOptions);
             if (selectedIndex <= 0 || selectedIndex > _Candidates.Length) return;
             TryAssignCandidate(property.serializedObject, property.propertyPath, _Candidates[selectedIndex - 1]);
@@ -392,7 +477,14 @@ namespace SigningGame.Editor.Modifiers {
             var headerRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             var typeDisplayName = GetTypeDisplayName(property.managedReferenceValue.GetType());
             DrawHeader(headerRect, new GUIContent($"{label.text} — {typeDisplayName}", label.tooltip), false, false,
-                out var clearRect);
+                true, out var copyRect, out var pasteRect, out var clearRect);
+
+            if (GUI.Button(copyRect, new GUIContent("Copy", "Copy this numeric value definition."),
+                    EditorStyles.miniButton)) {
+                TryCopyValue(property);
+            }
+
+            if (DrawPasteButton(pasteRect, property)) return;
 
             if (GUI.Button(clearRect, new GUIContent("x", "Clear numeric value."), EditorStyles.miniButton)) {
                 TryClearAssigned(property.serializedObject, property.propertyPath);
@@ -413,7 +505,7 @@ namespace SigningGame.Editor.Modifiers {
             var headerRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             var tooltip = string.IsNullOrEmpty(label.tooltip) ? fullTypeName : $"{label.tooltip}\n{fullTypeName}";
             DrawHeader(headerRect, new GUIContent($"{label.text} — Missing: {fullTypeName}", tooltip), true, false,
-                out var clearRect);
+                false, out _, out _, out var clearRect);
 
             if (GUI.Button(clearRect, new GUIContent("x", "Clear this missing managed reference."),
                     EditorStyles.miniButton)) {
@@ -427,7 +519,7 @@ namespace SigningGame.Editor.Modifiers {
         private static void DrawMultiTarget(Rect position, GUIContent label) {
             var headerRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             DrawHeader(headerRect, new GUIContent($"{label.text} — Multiple targets", label.tooltip), false, true,
-                out _);
+                false, out _, out _, out _);
             EditorGUI.HelpBox(GetHelpBoxRect(position), _MultiTargetMessage, MessageType.Info);
         }
 
@@ -436,16 +528,45 @@ namespace SigningGame.Editor.Modifiers {
             GUIContent content,
             bool warning,
             bool disabled,
+            bool showClipboardActions,
+            out Rect copyRect,
+            out Rect pasteRect,
             out Rect clearRect
         ) {
             EditorGUI.DrawRect(rect,
                 warning ? new Color(0.4f, 0.25f, 0f, 0.25f) : new Color(0f, 0f, 0f, 0.14f));
             clearRect = new Rect(rect.xMax - _ClearButtonWidth, rect.y, _ClearButtonWidth, rect.height);
-            var labelRect = new Rect(rect.x + _HeaderPadding, rect.y, rect.width - _ClearButtonWidth - _HeaderPadding * 2f,
+            if (showClipboardActions) {
+                pasteRect = new Rect(clearRect.xMin - EditorGUIUtility.standardVerticalSpacing - _PasteButtonWidth, rect.y,
+                    _PasteButtonWidth, rect.height);
+                copyRect = new Rect(pasteRect.xMin - EditorGUIUtility.standardVerticalSpacing - _CopyButtonWidth, rect.y,
+                    _CopyButtonWidth, rect.height);
+            } else {
+                copyRect = Rect.zero;
+                pasteRect = Rect.zero;
+            }
+
+            float actionsWidth = showClipboardActions
+                ? _CopyButtonWidth + _PasteButtonWidth + _ClearButtonWidth + EditorGUIUtility.standardVerticalSpacing * 2f
+                : _ClearButtonWidth;
+            var labelRect = new Rect(rect.x + _HeaderPadding, rect.y, rect.width - actionsWidth - _HeaderPadding * 2f,
                 rect.height);
             using (new EditorGUI.DisabledScope(disabled)) {
                 EditorGUI.LabelField(labelRect, content, EditorStyles.boldLabel);
             }
+        }
+
+        private static bool DrawPasteButton(Rect position, SerializedProperty property) {
+            using (new EditorGUI.DisabledScope(!HasClipboardValue)) {
+                if (!GUI.Button(position, new GUIContent("Paste", "Paste the copied numeric value definition."),
+                        EditorStyles.miniButton)) {
+                    return false;
+                }
+            }
+
+            if (!TryPasteValue(property.serializedObject, property.propertyPath)) return false;
+            GUI.changed = true;
+            return true;
         }
 
         private static Rect GetHelpBoxRect(Rect position) {
@@ -536,6 +657,87 @@ namespace SigningGame.Editor.Modifiers {
 
         internal static NumericValueDefinition CloneValue(NumericValueDefinition value) {
             return CloneObject(value, new Dictionary<object, object>(ReferenceComparer.Instance)) as NumericValueDefinition;
+        }
+
+        internal static bool HasClipboardValue => _clipboardValue != null;
+
+        private static bool TryCopyValue(SerializedObject serializedObject, string propertyPath) {
+            return TryGetLiveProperty(serializedObject, propertyPath, out var liveProperty) && TryCopyValue(liveProperty);
+        }
+
+        internal static bool TryCopyValue(SerializedProperty property) {
+            if (property == null
+                || property.serializedObject.isEditingMultipleObjects
+                || property.propertyType != SerializedPropertyType.ManagedReference
+                || GetStructuralState(property).Kind != StructuralKind.Assigned
+                || property.managedReferenceValue is not NumericValueDefinition value) {
+                return false;
+            }
+
+            try {
+                NumericValueDefinition snapshot = CloneValue(value);
+                if (snapshot == null) return false;
+
+                _clipboardValue = snapshot;
+                ClipboardChanged?.Invoke();
+                return true;
+            } catch (Exception exception) {
+                Debug.LogException(exception);
+                return false;
+            }
+        }
+
+        internal static bool TryPasteValue(SerializedObject serializedObject, string propertyPath) {
+            if (_clipboardValue == null
+                || !TryGetLiveProperty(serializedObject, propertyPath, out var liveProperty)) {
+                return false;
+            }
+
+            StructuralKind targetKind = GetStructuralState(liveProperty).Kind;
+            if (targetKind is not (StructuralKind.Null or StructuralKind.Assigned)) return false;
+
+            NumericValueDefinition pastedValue;
+            NumericValueDefinition previousValue = null;
+            try {
+                pastedValue = CloneValue(_clipboardValue);
+                if (pastedValue == null) return false;
+
+                if (targetKind == StructuralKind.Assigned) {
+                    previousValue = CloneValue(liveProperty.managedReferenceValue as NumericValueDefinition);
+                    if (previousValue == null) return false;
+                }
+            } catch (Exception exception) {
+                Debug.LogException(exception);
+                return false;
+            }
+
+            try {
+                Undo.RecordObject(liveProperty.serializedObject.targetObject, "Paste Numeric Value Definition");
+                liveProperty.managedReferenceValue = pastedValue;
+                liveProperty.serializedObject.ApplyModifiedProperties();
+                return true;
+            } catch (Exception exception) {
+                RestorePastedValue(serializedObject, propertyPath, previousValue);
+                Debug.LogException(exception);
+                return false;
+            }
+        }
+
+        internal static void ClearClipboardForTests() {
+            _clipboardValue = null;
+            ClipboardChanged?.Invoke();
+        }
+
+        private static void RestorePastedValue(SerializedObject serializedObject, string propertyPath,
+            NumericValueDefinition previousValue) {
+            try {
+                if (!TryGetLiveProperty(serializedObject, propertyPath, out var liveProperty)) return;
+
+                liveProperty.managedReferenceValue = previousValue;
+                liveProperty.serializedObject.ApplyModifiedProperties();
+            } catch (Exception restoreException) {
+                Debug.LogException(restoreException);
+            }
         }
 
         private static bool TryAssignCandidate(SerializedObject serializedObject, string propertyPath,

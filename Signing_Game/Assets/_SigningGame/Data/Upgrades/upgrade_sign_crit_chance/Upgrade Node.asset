@@ -15,11 +15,12 @@ MonoBehaviour:
   Id: upgrade_sign_crit_chance
   Name: Authoritative Signature
   Description: Increase the chance that a manual signature earns a critical payout.
-  MaxLevel: 0
+  MaxLevel: 5
   Icon: {fileID: 0}
   CostFormula:
     rid: 841080570608353280
-  Modifiers: []
+  Modifiers:
+  - {fileID: 11400000, guid: 493ce0def1bed4801b404c94920ecf7e, type: 2}
   FeatureUnlockIds: []
   GrantsMetaCurrencyPoint: 0
   TreePosition: {x: 360, y: -40}

@@ -715,6 +715,46 @@ namespace Tests.EditMode {
         }
 
         [Test]
+        public void DocumentQualityIncomeMultiplier_AppliesToManualAndOfficeDocumentIncome() {
+            var documentEntries = new DocumentEntries {
+                SelectedDocumentQualityLevel = 2,
+                DocumentQualityIncomeMultiplier = 0.2f
+            };
+            OfficeHarness harness = CreateHarness(CreateEntries(), () => 1f, documentEntries: documentEntries);
+            SetDocumentCount(harness.Documents, 1);
+            var producer = new NormalDocumentProducer();
+            producer.InitializeAsync(harness.Scope).GetAwaiter().GetResult();
+            Assert.That(producer.TryProduce(out IDocumentSession session), Is.True);
+            double beforeManual = harness.Wallet.CurrentBalance.ToDouble();
+
+            Assert.That(session.TryProcess(Evaluation(SignatureEvaluationStatus.Accepted, 1f, 0.4f)), Is.True);
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(beforeManual + 3.6d).Within(0.0001d));
+            session.Dispose();
+
+            harness.UnlockOffice();
+            HireClerk(harness);
+            SetDocumentCount(harness.Documents, 1);
+            OfficeDocumentResult result = default;
+            using IDisposable subscription = harness.Office.DocumentProcessed.Subscribe(value => result = value);
+            double beforeOffice = harness.Wallet.CurrentBalance.ToDouble();
+
+            harness.Office.Tick(1f);
+
+            Assert.That(result.RequestedReward.ToDouble(), Is.EqualTo(1.8d).Within(0.0001d));
+            Assert.That(harness.Wallet.CurrentBalance.ToDouble(), Is.EqualTo(beforeOffice + 1.8d).Within(0.0001d));
+        }
+
+        [Test]
+        public void DocumentQualityIncomeMultiplier_IsNotCappedAtOne() {
+            double result = DocumentQualityRewardMultiplier.Resolve(new DocumentEntries {
+                SelectedDocumentQualityLevel = 2,
+                DocumentQualityIncomeMultiplier = 2f
+            });
+
+            Assert.That(result, Is.EqualTo(9d));
+        }
+
+        [Test]
         public void NormalDocumentReward_UsesStampStateForRequiredAndOptionalDocuments() {
             OfficeHarness harness = CreateHarness(
                 CreateEntries(),
@@ -1117,7 +1157,8 @@ namespace Tests.EditMode {
         }
 
         private OfficeHarness CreateHarness(OfficeEntries entries, Func<float> random = null,
-            Observable<float> updates = null, Value? income = null, IncomeEntries? incomeEntries = null) {
+            Observable<float> updates = null, Value? income = null, IncomeEntries? incomeEntries = null,
+            DocumentEntries? documentEntries = null) {
             UpgradeNodeDefinition officeUnlock = CreateUpgrade("office_unlock", FeatureIds.Office);
             UpgradeNodeDefinition documentUpgrade = CreateUpgrade("document_upgrade");
             UpgradeNodeDefinition stampUnlock = CreateUpgrade("stamp_unlock", FeatureIds.Stamp);
@@ -1148,7 +1189,7 @@ namespace Tests.EditMode {
                 .Register<ICacheCalculator<SignatureEntries>>(new StaticCalculator<SignatureEntries>(default))
                 .Register<ICacheCalculator<GenerationEntries>>(new StaticCalculator<GenerationEntries>(default))
                 .Register<ICacheCalculator<OfficeEntries>>(officeCalculator)
-                .Register<ICacheCalculator<DocumentEntries>>(new StaticCalculator<DocumentEntries>(default))
+                .Register<ICacheCalculator<DocumentEntries>>(new StaticCalculator<DocumentEntries>(documentEntries ?? default))
                 .Register(stash)
                 .Register<IMoneyAggregator>(money)
                 .Register(office);

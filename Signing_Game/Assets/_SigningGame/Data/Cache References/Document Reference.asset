@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: SigningGame.Scripts.Runtime::Data.Documents.Cache.DocumentReference
   Value:
     DocumentQualityLevel: 1
+    DocumentQualityIncomeMultiplier: 0.2
     SelectedDocumentQualityLevel: 0
     StampRequiredEveryNthOffer: 2

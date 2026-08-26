@@ -36,7 +36,7 @@ MonoBehaviour:
       type: {class: LinearFormula, ns: Data.Formulas, asm: SigningGame.Scripts.Runtime}
       data:
         BaseValue:
-          _stored: 0
+          _stored: 1
           _base:
             Degree: 0
         Slope:
